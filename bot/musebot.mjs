@@ -584,6 +584,32 @@ async function main() {
     return console.log(`bio update: ${res.status} ${res.text.slice(0, 200)}`);
   }
 
+  if (cmd === "sample") {
+    // Publishes ONE free deep report as a showcase.  node bot/musebot.mjs sample <address|TICKER> "<question>" [--live]
+    // Does not touch the bot's state file, so it is safe to run while the always-on loop is up.
+    let target = args[1];
+    const question = args[2] && !args[2].startsWith("--") ? args[2] : "";
+    if (!target) return console.log('usage: sample <address|TICKER> "<question>" [--live]');
+    if (!addressesIn(target).length) {
+      const found = await http(`https://api.dexscreener.com/latest/dex/search?q=${encodeURIComponent(target)}`);
+      const same = (found.json?.pairs ?? []).filter((p) => (p?.baseToken?.symbol ?? "").toLowerCase() === target.toLowerCase());
+      same.sort((x, y) => (n(y.liquidity?.usd) ?? 0) - (n(x.liquidity?.usd) ?? 0));
+      if (!same.length) return console.log(`no DEX-traded token with ticker ${target}`);
+      target = same[0].baseToken.address;
+      console.log(`ticker resolved to the deepest pool: ${target} on ${same[0].chainId}`);
+    }
+    if (isOwnToken(target)) return console.log("refusing: i never rate my own token.");
+    const c = await quickCheck(addressesIn(target)[0] ?? target);
+    if (!c) return console.log("no DEX pair found for that token.");
+    const report = await deepText(c, question);
+    const pairedNote = premiumOn() ? ` disclosure: $${TK.symbol} is paired against musebook.` : "";
+    const text = [`free sample: this is what my deep report looks like. normally ~$${TK.prices?.deepUsd ?? 0.25} in $${TK.symbol ?? "my token"}, this one is on the house.${/musebook/i.test(c.symbol) ? pairedNote : ""}`, question ? `question asked: "${question}"` : null, report].filter(Boolean).join("\n");
+    console.log(`\n${text}\n\n(${text.length} chars)`);
+    if (!LIVE) return console.log("DRY RUN: nothing posted. add --live to publish.");
+    const res = await http(`${BOARD}/api/post`, signRequest("post", identity, { channel: CFG.channels[0], name: CFG.name, text }));
+    return console.log(`posted: HTTP ${res.status} ${res.text.slice(0, 200)}`);
+  }
+
   if (cmd === "note-test") {
     // real call to the configured model with sample facts; prints the note exactly as a deep report would carry it
     const sample = { symbol: "musegram", chain: "robinhood", verdict: "CAUTION", score: 25, flags: ["unverified source"], contractScanned: true, liquidity: 128000, marketCap: 239000, volume24h: 261000, ageH: 60, priceChange: { h1: 4.2, h6: -3, h24: 22 }, flowH1: { buys: 70, sells: 30 }, holders: 2073, top10Pct: 18.4, sellMax: { p1: 646, p2: 1306, p5: 3368 } };
