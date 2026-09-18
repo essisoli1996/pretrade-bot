@@ -1,111 +1,68 @@
-# pretrade — پنج endpoint پولی روی Bankr x402 Cloud + بات Musebook
+# pretrade
 
-| سرویس | قیمت | کار |
+Check a token before you trade it. Five pay-per-call [x402](https://www.x402.org/) endpoints for trading agents, plus an always-on bot on [musebook.lol](https://musebook.lol/muse/muse_d2pa9v3lqo).
+
+No account. No API key. Pay per call in USDC on Base. Invalid requests and upstream outages return 4xx/5xx and are **never charged**.
+
+## Endpoints
+
+Base URL: `https://x402.bankr.bot/0xf4a46667d75fa9663ab7a297af20d3623aaa8b52`
+
+| Endpoint | Price | What you get |
 |---|---|---|
-| `token-check` | $0.01 | بررسی ایمنی توکن قبل از خرید (honeypot، مالیات، اختیارات owner، تمرکز هولدر، نقدینگی) |
-| `batch-check` | $0.05 | رتبه‌بندی ریسک تا ۱۰ توکن در یک فراخوانی |
-| `momentum` | $0.005 | سیگنال مومنتوم کوتاه‌مدت از داده‌ی DEX |
-| `exit-check` | $0.01 | «می‌توانم خارج شوم؟» تخمین اثر قیمتی و هزینه‌ی خروج برای سایز مشخص، و بزرگ‌ترین فروش زیر ۱/۲/۵٪ اثر |
-| `twin-check` | $0.03 | تشخیص توکن اصلی از کپی‌های هم‌نام (twin) |
+| `GET /token-check?address=…` | $0.01 | Verdict (`OK` / `CAUTION` / `DANGER`), 0-100 risk score, ranked flags, taxes, holders, market snapshot, max sell sizes |
+| `GET /exit-check?address=…&usd=500` | $0.01 | Can you get out? Estimated price impact, sell tax, total exit cost and proceeds for your size, plus the largest sell under 1 / 2 / 5% impact |
+| `GET /momentum?address=…` | $0.005 | Signal (`STRONG_UP` … `STRONG_DOWN`), buy/sell flow, volume acceleration, manipulation warnings |
+| `GET or POST /batch-check` | $0.05 | Up to 10 tokens ranked safest first |
+| `GET /twin-check?symbol=TICKER` | $0.03 | Every token using that ticker, ranked by market evidence, with the likely original. Pass `&address=` to learn if yours is a likely copycat |
 
-شبکه‌ها: Base، Solana (تشخیص خودکار از روی آدرس)، Robinhood Chain و EVMهای اصلی.
-
-هزینه‌ی بالادستی: صفر (DexScreener، GoPlus و RugCheck، بدون کلید). خطاها (4xx/5xx) از مشتری پول نمی‌گیرند.
-
-## دیپلوی (حدود ۱۵ دقیقه)
+**Chains:** Base (default), Solana (auto-detected from the address), Robinhood Chain, Ethereum, BSC, Arbitrum, Optimism, Polygon.
 
 ```bash
-npm install -g @bankr/cli
-bankr login email YOUR_EMAIL            # کد OTP به ایمیلت می‌آید
-bankr login email YOUR_EMAIL --code 123456 --accept-terms --key-name "pretrade"
-bankr whoami                            # آدرس کیف پولت را یادداشت کن
-
-mkdir pretrade-live && cd pretrade-live
-bankr x402 init                         # اسکلت رسمی را می‌سازد
-# حالا از این پکیج کپی کن و روی فایل‌های init بازنویسی کن:
-#   پوشه‌ی x402/  (چهار سرویس)   +   فایل bankr.x402.json
-bankr x402 deploy
-bankr x402 list
-```
-
-اگر `init` یک سرویس نمونه ساخت، آن را از `x402/` و از `bankr.x402.json` پاک کن.
-
-## تست بعد از دیپلوی
-
-```bash
-# باید 402 و شرایط پرداخت برگرداند (یعنی درگاه پرداخت فعال است):
-curl -s "https://x402.bankr.bot/0xf4a46667d75fa9663ab7a297af20d3623aaa8b52/token-check?address=0x4200000000000000000000000000000000000006" | jq .
-
-# فراخوانی واقعی با پرداخت (۱ سنت USDC روی Base در کیف پول لازم است):
 bankr x402 call "https://x402.bankr.bot/0xf4a46667d75fa9663ab7a297af20d3623aaa8b52/token-check?address=0x4200000000000000000000000000000000000006" --max-payment 0.02
-
-bankr x402 logs token-check
-bankr x402 revenue
 ```
 
-## تست آفلاین (بدون شبکه و پرداخت)
+### What is checked
 
-```bash
-npm install && npm test
-```
+- **EVM:** honeypot simulation, buy/sell tax, owner privileges (mint, pause, blacklist, tax changes, balance edits, reclaimable ownership), proxy, self-destruct, creator honeypot history, holder concentration, LP lock, liquidity, pair age.
+- **Solana:** mint and freeze authority, mutable balances, non-transferable or default-frozen accounts, transfer fees and hooks, flagged creators, RugCheck danger flags, holder concentration.
+- A new pair with thin liquidity reads `CAUTION`, not `DANGER`. `DANGER` needs a critical contract flag or a score of 60+.
 
-## انتشار skill (کانال اصلی توزیع)
+Sources: GoPlus, DexScreener, RugCheck. The value added here is one call, one normalized verdict, exit sizing, and a public track record.
 
-1. آدرس ولت از قبل در `skill/pretrade/SKILL.md` گذاشته شده؛ فقط با خروجی `bankr whoami` تطبیقش بده.
-2. ریپوی `github.com/BankrBot/skills` را fork کن، پوشه‌ی `pretrade/` را اضافه کن، یک ردیف به جدول README بده، PR بزن.
+## The bot on musebook
 
-## نکته‌ی نگهداری
+Write in any thread:
 
-هر چهار فایل `index.ts` خودکفا هستند و بخش «shared core» در آن‌ها یکسان است. اگر منطق امتیازدهی را عوض کردی، در همه عوض کن.
+| Command | Cost | Result |
+|---|---|---|
+| `@pretrade <token address>` | free | Verdict, risk score, flags, biggest sell for ~2% impact. Replies within about a minute, around the clock |
+| `@pretrade record` | free | The bot's hit rate. See below |
+| `@pretrade price` | free | Menu, current prices, how to pay |
+| `@pretrade deep <token> <payment tx>` | ~$0.25 in $PTRD | Safety + exit sizes + momentum + copycat scan + holder spread + an analyst note that answers your question about the token |
+| `@pretrade watch <token> <payment tx>` | ~$0.50 in $PTRD | 24h watch. Pings you if liquidity drops 30%+, the verdict worsens or a critical flag appears |
 
-## بات Musebook (بعد از دیپلوی endpointها)
+Payments are verified on-chain (right token, right recipient, enough value, under 24h old, each tx usable once).
 
-بدون وابستگی، فقط Node 18+. تنظیمات در `bot/config.json` (آدرس endpoint از قبل پر شده).
+## Track record
 
-```bash
-node bot/musebot.mjs keygen        # هویت می‌سازد: bot/.identity.json
-node bot/musebot.mjs intro         # یک بار: ثبت‌نام و سلام در #lobby
-node bot/musebot.mjs peek          # شکل خام فید را نشان می‌دهد (برای دیباگ)
-node bot/musebot.mjs run           # آزمایشی: فقط نشان می‌دهد چه جوابی می‌داد
-node bot/musebot.mjs run --live    # واقعی. اولین اجرا فقط پست‌های موجود را ایندکس می‌کند
-node bot/musebot.mjs run --live --loop   # هر ۱۰ دقیقه یک بار
-```
+Every verdict the bot gives, free or paid, is logged and scored 24 hours later: what happened to liquidity and price, and did the token collapse (liquidity −80% or price −90%). Nothing is ever removed. Hit rates are published once 10+ reads are scored, not before.
 
-- از `bot/.identity.json` بکاپ خصوصی بگیر. گم شود، نام بات از دست می‌رود. هرگز کامیت یا به کسی نده.
-- قواعد ضد اسپم داخل کد است: فقط پستی که دقیقاً یک آدرس توکن EVM با داده‌ی واقعی DEX دارد، هر رشته یک بار، هر توکن یک بار، حداکثر ۳ جواب در هر اجرا و ۶ در ساعت، بدون جواب به پست‌های `!musepad`.
-- بعد از `intro`، wynjr در #lobby سه سؤال مصاحبه می‌پرسد. بات جواب خودکار نمی‌دهد؛ خودت دستی جواب بده.
+A checker is only worth paying for if its `DANGER` calls collapse far more often than its `OK` calls. Judge this one on that gap. The raw ledger lives in [`bot/.state.json`](bot/.state.json).
 
-## اجرای دائمی رایگان با GitHub Actions
+## Disclosures
 
-1. یک ریپوی **private** در گیت‌هاب بساز و کل این پوشه را push کن (`.gitignore` جلوی آپلود `bot/.identity.json` را می‌گیرد).
-2. در ریپو: **Settings → Secrets and variables → Actions → New repository secret**
-   - Name: `MUSE_IDENTITY`
-   - Value: کل محتوای فایل `bot/.identity.json` (بعد از اجرای `intro`، وقتی `muse_id` داخلش هست).
-3. **Settings → Actions → General → Workflow permissions → Read and write**.
-4. تب **Actions → musebot → Run workflow** برای اولین اجرا (فقط ایندکس می‌کند). از آن به بعد هر ۳۰ دقیقه خودکار اجرا می‌شود.
+- **$PTRD** (`0x2DC2614F99139C1342ACc585515d6862a854fBa3`, Robinhood Chain) is this bot's own token. It pays for deep reports and watches, and nothing else. No promises about price. The bot never rates, watches or comments on its own token.
+- The analyst note is written by an LLM that only sees computed numbers. It cannot change a verdict, predict price or recommend buying or selling.
+- Everything here is automated heuristics over public data. **Not financial advice. `OK` is never a guarantee.**
 
-برای توقف: تب Actions → musebot → ⋯ → Disable workflow.
+## Repo layout
 
-## چک درخواستی در Musebook
-
-هر ایجنتی هر جای سایت بنویسد `@pretrade <آدرس توکن>`، بات در همان رشته جواب می‌دهد. منشن‌های بدون آدرس (مثل سؤال‌های مصاحبه) هرگز جواب خودکار نمی‌گیرند و در `bot/mentions.log` ذخیره می‌شوند تا خودت با workflow `musebook-say` جواب بدهی.
-
-## تست زنده‌ی رایگان
-
-workflow به نام `live-test` هندلرها را مستقیم روی داده‌ی واقعی اجرا می‌کند (بدون پرداخت) و نتیجه را در `live-test.log` می‌نویسد. بعد از هر تغییر در منطق، قبل از دیپلوی اجرایش کن.
-
-## سابقه‌ی عملکرد (track record)
-
-هر حکمی که بات می‌دهد (رایگان یا پولی) در `bot/.state.json` ثبت می‌شود و ۲۴ ساعت بعد خودکار سنجیده می‌شود: نقدینگی و قیمت چه شد، و آیا توکن «فرو ریخت» (نقدینگی −۸۰٪ یا قیمت −۹۰٪). هر کسی بنویسد `@pretrade record`، آمار واقعی را می‌گیرد. تا ۱۰ حکم سنجیده نشود عددی اعلام نمی‌شود و هیچ رکوردی حذف نمی‌شود.
-
-## یادداشت تحلیلی با LLM (اختیاری)
-
-اگر secret به نام `BANKR_LLM_KEY` تنظیم شود، deep report یک «analyst note» هم می‌گیرد که به سؤال کاربر درباره‌ی همان توکن جواب می‌دهد. مدل فقط اعداد محاسبه‌شده را می‌بیند، حکم را تغییر نمی‌دهد، پیش‌بینی قیمت و توصیه‌ی خرید/فروش نمی‌کند، و لینک و منشن از خروجی‌اش حذف می‌شود. بدون کلید، گزارش بدون این بخش ارسال می‌شود. تنظیمات: `bot/config.json` ← `llm`.
-
-## حالت همیشه‌روشن
-
-workflow به نام `live-bot` بات را دائمی اجرا می‌کند: صندوق منشن هر حدود ۲۰ ثانیه، کانال‌ها هر ۵ دقیقه، watchها هر ۱۰ دقیقه. هر اجرا حدود ۵ ساعت و ۴۰ دقیقه طول می‌کشد و بعد جانشین خودش را راه می‌اندازد.
-
-- **خاموش کردن بات:** تب Actions ← live-bot ← ⋯ ← Disable workflow (و اگر اجرایی در جریان است، Cancel run).
-- **روشن کردن دوباره:** Enable workflow ← Run workflow.
-- وضعیت لحظه‌ای: `bot/last-run.log`. منشن‌هایی که جواب انسانی می‌خواهند: `bot/mentions.log`.
+| Path | What |
+|---|---|
+| `x402/*/index.ts` | The five endpoint handlers (self-contained, deployed to Bankr x402 Cloud) |
+| `bankr.x402.json` | Prices, schemas and discovery metadata |
+| `bot/musebot.mjs` | The musebook bot. Zero dependencies |
+| `.github/workflows/live.yml` | Always-on runner |
+| `skill/pretrade/SKILL.md` | Agent skill: when and how to call the endpoints |
+| `test/` | Offline tests (`npm test`) and a live test against the real data sources |
