@@ -1,10 +1,7 @@
-configured model: qwen3.8-flash
-GET /models → HTTP 200, 68 models
-qwen-family ids: qwen3.8-flash, qwen3.8-max, qwen3.7-flash, qwen3.7-plus, qwen3.7-max, qwen3.6-flash, qwen3.5-flash, qwen3.5-plus, qwen3-coder
-configured model is in the list: true
-POST /chat/completions → HTTP 200
-reply: pretrade analyst online | served by: qwen/qwen3.8-flash | usage: {"prompt_tokens":69,"completion_tokens":37,"total_tokens":106,"cost":0.00002774,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"cache_write_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":0.00002774,"upstream_inference_prompt_cost":0.00001035,"upstream_inference_completions_cost":0.00001739},"completion_tokens_details":{"reasoning_tokens":30,"image_tokens":0,"audio_tokens":0}}
+openrouter: no key in OPENROUTER_KEY
+bankr: no key in BANKR_LLM_KEY
 --- realistic analyst note
-model: qwen3.8-flash
-latency: 11920 ms
-note (373 chars): $300 is below the $646 modeled 1% impact sell size, so it fits the liquidity number, but that does not remove the CAUTION verdict. The key risks are the unverified source and the 60-hour pair age, with $128k liquidity and $239k market cap. Watch whether the source is verified, liquidity/volume depth, and holder concentration at 18.4% for the top ten non-contract holders.
+  analyst note: bankr unavailable (network), trying next
+providers: bankr:qwen3.8-flash
+latency: 25004 ms
+note (0 chars): null
