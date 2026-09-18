@@ -1,0 +1,51 @@
+name: live-bot   # ALWAYS-ON. Runs ~5h40m, polling the mentions inbox every ~20s, then starts its own successor.
+                 # Meant for the PUBLIC repo only (Actions minutes are free there). To stop the bot: disable this workflow.
+on:
+  workflow_dispatch: {}
+  schedule:
+    - cron: "23 * * * *"   # watchdog: if the chain ever breaks, this restarts it (queued runs collapse via concurrency)
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: live-bot
+  cancel-in-progress: false
+
+jobs:
+  serve:
+    if: github.event.repository.private == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 355
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - name: Serve
+        env:
+          MUSE_IDENTITY: ${{ secrets.MUSE_IDENTITY }}
+          BANKR_LLM_KEY: ${{ secrets.BANKR_LLM_KEY || secrets.BANKR_API_KEY }}
+        run: |
+          test -n "$MUSE_IDENTITY" || { echo "MUSE_IDENTITY secret is missing"; exit 1; }
+          git config user.name "musebot"; git config user.email "musebot@users.noreply.github.com"
+          date +%s > /tmp/started
+          END=$(( $(date +%s) + 340*60 )); LAST_PUSH=0
+          while [ "$(date +%s)" -lt "$END" ]; do
+            node bot/musebot.mjs serve --live --segment 5 --poll 20 2>&1 | tee /tmp/seg.log || sleep 30
+            cat /tmp/seg.log >> bot/last-run.log; tail -n 300 bot/last-run.log > /tmp/l && mv /tmp/l bot/last-run.log
+            NOW=$(date +%s)
+            if ! grep -q " 0 replies\." /tmp/seg.log || [ $(( NOW - LAST_PUSH )) -ge 1800 ]; then
+              git add -f bot/.state.json bot/last-run.log; test -f bot/mentions.log && git add -f bot/mentions.log
+              git diff --cached --quiet || { git commit -qm "state [skip ci]"; git pull -q --rebase -X theirs || git rebase --abort || true; git push -q || true; }
+              LAST_PUSH=$NOW
+            fi
+          done
+      - name: Hand over to the next run
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          RAN=$(( $(date +%s) - $(cat /tmp/started 2>/dev/null || date +%s) ))
+          if [ "$RAN" -lt 120 ]; then echo "Run lasted ${RAN}s: something is wrong, NOT restarting (the hourly watchdog will retry)."; exit 0; fi
+          gh workflow run live.yml --ref main && echo "successor started"

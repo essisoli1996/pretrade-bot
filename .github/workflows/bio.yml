@@ -1,0 +1,11 @@
+name: update-bio   # pushes bot/config.json "bio" to the musebook profile
+on: { workflow_dispatch: {} }
+jobs:
+  bio:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - env: { MUSE_IDENTITY: "${{ secrets.MUSE_IDENTITY }}" }
+        run: node bot/musebot.mjs bio

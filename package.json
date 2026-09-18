@@ -1,0 +1,13 @@
+{
+  "name": "pretrade-x402",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "tsx test/mock.test.mts",
+    "typecheck": "tsc -p ."
+  },
+  "devDependencies": {
+    "tsx": "^4.23.13",
+    "typescript": "^5.9.3"
+  }
+}

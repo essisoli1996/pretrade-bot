@@ -1,0 +1,37 @@
+name: llm-test   # checks the LLM key and the configured model. Writes model ids and one short reply to llm-test.log (never the key).
+on: { workflow_dispatch: {} }
+permissions: { contents: write }
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - env:
+          KEY: ${{ secrets.BANKR_LLM_KEY || secrets.BANKR_API_KEY }}
+        run: |
+          cat > /tmp/t.mjs <<'JS'
+          import { readFileSync, writeFileSync } from "node:fs";
+          const cfg = JSON.parse(readFileSync("bot/config.json", "utf8")).llm;
+          const H = { "Content-Type": "application/json", Authorization: `Bearer ${process.env.KEY}` };
+          const out = [`configured model: ${cfg.model}`];
+          const m = await fetch(`${cfg.baseUrl}/models`, { headers: H });
+          const mj = await m.json().catch(() => ({}));
+          const ids = (mj.data ?? mj.models ?? []).map((x) => x.id ?? x.name).filter(Boolean);
+          out.push(`GET /models → HTTP ${m.status}, ${ids.length} models`);
+          if (!m.ok) out.push(JSON.stringify(mj).slice(0, 300));
+          out.push(`qwen-family ids: ${ids.filter((i) => /qwen/i.test(i)).join(", ") || "(none)"}`);
+          out.push(`configured model is in the list: ${ids.includes(cfg.model)}`);
+          const r = await fetch(`${cfg.baseUrl}/chat/completions`, { method: "POST", headers: H, body: JSON.stringify({ model: cfg.model, max_tokens: 60, temperature: 0.2, messages: [{ role: "user", content: "Reply with exactly: pretrade analyst online" }] }) });
+          const rj = await r.json().catch(() => ({}));
+          out.push(`POST /chat/completions → HTTP ${r.status}`);
+          out.push(r.ok ? `reply: ${String(rj.choices?.[0]?.message?.content).slice(0, 200)} | served by: ${rj.model ?? "?"} | usage: ${JSON.stringify(rj.usage ?? {})}` : JSON.stringify(rj).slice(0, 400));
+          writeFileSync("llm-test.log", out.join("\n") + "\n"); console.log(out.join("\n"));
+          JS
+          node /tmp/t.mjs || true
+          echo '--- realistic analyst note' >> llm-test.log
+          MUSE_IDENTITY='{"public_key":"x","secret":"y","muse_id":"muse_x"}' BANKR_LLM_KEY="$KEY" node bot/musebot.mjs note-test >> llm-test.log 2>&1 || true
+          git config user.name musebot; git config user.email musebot@users.noreply.github.com
+          git add -f llm-test.log; git diff --cached --quiet || git commit -qm "llm test [skip ci]"; git push

@@ -1,0 +1,183 @@
+{
+  "network": "base",
+  "services": {
+    "token-check": {
+      "description": "Pre-trade token safety check for Base, Solana, Robinhood Chain and major EVM chains. One call returns a verdict (OK / CAUTION / DANGER), a 0-100 risk score and ranked flags: honeypot, sell/buy tax, owner privileges, mint and freeze authority, creator honeypot history, holder concentration, LP lock, liquidity and pair age, plus the largest sell that stays under 1/2/5% price impact. Call before any swap or buy.",
+      "price": "0.01",
+      "methods": [
+        "GET"
+      ],
+      "schema": {
+        "input": {
+          "address": "string (0x… EVM contract, or base58 Solana mint; Solana is auto-detected)",
+          "chain": "string, optional: base | solana | robinhood | ethereum | bsc | arbitrum | optimism | polygon (default: base, or solana for a base58 mint)"
+        },
+        "output": {
+          "verdict": "OK | CAUTION | DANGER",
+          "riskScore": "number 0-100",
+          "confidence": "high | medium | low",
+          "flags": "array of {code, severity, points, detail}",
+          "taxes": "{buy, sell}",
+          "market": "{symbol, priceUsd, marketCapUsd, liquidityUsd, volume24hUsd, pairAgeHours, topPair}",
+          "creator": "{address, honeypotHistory} (EVM)",
+          "exit": "{impact1pct, impact2pct, impact5pct} max sell size in USD"
+        }
+      },
+      "category": "security",
+      "tags": [
+        "token",
+        "safety",
+        "honeypot",
+        "rug",
+        "scam",
+        "risk",
+        "pre-trade",
+        "base",
+        "security",
+        "due-diligence",
+        "robinhood",
+        "musepad",
+        "solana",
+        "freeze-authority",
+        "mint-authority",
+        "creator"
+      ]
+    },
+    "batch-check": {
+      "description": "Safety-rank up to 10 tokens in one call. Returns each token's verdict, risk score and top flags, sorted safest first. Built for agents screening a watchlist, trending list or new launches before trading.",
+      "price": "0.05",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "schema": {
+        "input": {
+          "addresses": "array of up to 10 token addresses, EVM or Solana (POST JSON), or comma-separated string (GET)",
+          "chain": "string, optional: base | solana | robinhood | ethereum | bsc | arbitrum | optimism | polygon (one chain per call)"
+        },
+        "output": {
+          "count": "number",
+          "safest": "string address",
+          "results": "array of {address, symbol, verdict, riskScore, confidence, topFlags, liquidityUsd, maxSellUsdAt2pctImpact}"
+        }
+      },
+      "category": "security",
+      "tags": [
+        "token",
+        "batch",
+        "screening",
+        "watchlist",
+        "safety",
+        "rug",
+        "risk",
+        "base",
+        "solana"
+      ]
+    },
+    "momentum": {
+      "description": "Short-term momentum read for any DEX-traded token: signal (STRONG_UP … STRONG_DOWN), -100..100 score, price change m5/h1/h6/h24, buy/sell flow ratio, volume acceleration, liquidity-to-market-cap and manipulation warnings. Use for entry and exit timing.",
+      "price": "0.005",
+      "methods": [
+        "GET"
+      ],
+      "schema": {
+        "input": {
+          "address": "string (0x… EVM contract, or base58 Solana mint; Solana is auto-detected)",
+          "chain": "string, optional: base | solana | robinhood | ethereum | bsc | arbitrum | optimism | polygon (default: base, or solana for a base58 mint)"
+        },
+        "output": {
+          "signal": "STRONG_UP | UP | NEUTRAL | DOWN | STRONG_DOWN",
+          "momentumScore": "number -100..100",
+          "priceChangePct": "{m5,h1,h6,h24}",
+          "flow": "{h1,h24: {buys, sells, buyRatio}}",
+          "volumeUsd": "{h1,h24,acceleration}",
+          "warnings": "string[]"
+        }
+      },
+      "category": "data",
+      "tags": [
+        "momentum",
+        "signal",
+        "trading",
+        "dex",
+        "volume",
+        "price",
+        "base",
+        "timing",
+        "solana"
+      ]
+    },
+    "twin-check": {
+      "description": "Copycat / twin token detector. Give a ticker and get every DEX-traded token using it, ranked by liquidity, volume, trades, age and socials, with the likely original and a confidence level. Optionally pass the address you were given to learn if it is the likely original or a likely copycat. Use before buying any token found by ticker, especially fresh launches on Robinhood Chain and Base.",
+      "price": "0.03",
+      "methods": [
+        "GET"
+      ],
+      "schema": {
+        "input": {
+          "symbol": "string (ticker, with or without $)",
+          "chain": "string, optional: base | solana | robinhood | ethereum | bsc | arbitrum | optimism | polygon (omit to search all chains)",
+          "address": "string, optional: the contract address you want to verify"
+        },
+        "output": {
+          "tokensWithThisTicker": "number",
+          "likelyOriginal": "{address, chain, originScore}",
+          "confidence": "high | medium | low",
+          "claim": "{address, verdict: LIKELY_ORIGINAL | LEADING_BUT_CONTESTED | LIKELY_COPYCAT | NOT_FOUND_ON_DEX, rank} or null",
+          "candidates": "array of {address, chain, name, liquidityUsd, volume24hUsd, trades24h, marketCapUsd, firstPairAt, pairs, hasSocials, originScore, url}"
+        }
+      },
+      "category": "security",
+      "tags": [
+        "twin",
+        "copycat",
+        "fake",
+        "impersonation",
+        "ticker",
+        "contract-address",
+        "verification",
+        "robinhood",
+        "musepad",
+        "base",
+        "scam"
+      ]
+    },
+    "exit-check": {
+      "description": "Can I get out? Position-sizing and exit check for any DEX-traded token on Base, Solana, Robinhood Chain and major EVM chains. Give a token and a USD size and get estimated price impact, sell tax, total exit cost, expected proceeds, share of 24h volume, an exitability rating (EASY / OK / COSTLY / HARD / TRAPPED) and the largest single sell that stays under 1, 2 and 5% impact. Flags tokens whose contract blocks selling. Use before entering a position or when planning an exit.",
+      "price": "0.01",
+      "methods": [
+        "GET"
+      ],
+      "schema": {
+        "input": {
+          "address": "string (0x… EVM contract, or base58 Solana mint; Solana is auto-detected)",
+          "usd": "number, optional: position size in USD you would sell",
+          "chain": "string, optional: base | solana | robinhood | ethereum | bsc | arbitrum | optimism | polygon"
+        },
+        "output": {
+          "exitability": "EASY | OK | COSTLY | HARD | TRAPPED | THIN | UNSIZED",
+          "advice": "string",
+          "position": "{usd, estPriceImpactPct, sellTaxPct, estTotalExitCostPct, estProceedsUsd, shareOf24hVolumePct} or null",
+          "maxSellUsd": "{impact1pct, impact2pct, impact5pct}",
+          "sellBlockedByContract": "boolean",
+          "pool": "{deepestPoolUsd, totalLiquidityUsd, volume24hUsd, dex, url}",
+          "contractVerdict": "{verdict, riskScore, topFlags}"
+        }
+      },
+      "category": "trading",
+      "tags": [
+        "exit",
+        "slippage",
+        "price-impact",
+        "position-sizing",
+        "liquidity",
+        "sell",
+        "risk",
+        "solana",
+        "base",
+        "robinhood",
+        "trading"
+      ]
+    }
+  }
+}

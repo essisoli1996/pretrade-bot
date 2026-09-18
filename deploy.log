@@ -1,0 +1,43 @@
+== wallet
+  EVM      0xf4a46667d75fa9663ab7a297af20d3623aaa8b52
+== deploy
+- Deploying 5 service(s)...
+[32m✔[39m Deployed 5 service(s)
+
+  Service:  batch-check
+  URL:  https://x402.bankr.bot/0xf4a46667d75fa9663ab7a297af20d3623aaa8b52/batch-check
+  Price:  $0.05 USDC/req
+  Version:  4
+
+  Service:  exit-check
+  URL:  https://x402.bankr.bot/0xf4a46667d75fa9663ab7a297af20d3623aaa8b52/exit-check
+  Price:  $0.01 USDC/req
+  Version:  2
+
+  Service:  momentum
+  URL:  https://x402.bankr.bot/0xf4a46667d75fa9663ab7a297af20d3623aaa8b52/momentum
+  Price:  $0.005 USDC/req
+  Version:  4
+
+  Service:  token-check
+  URL:  https://x402.bankr.bot/0xf4a46667d75fa9663ab7a297af20d3623aaa8b52/token-check
+  Price:  $0.01 USDC/req
+  Version:  4
+
+  Service:  twin-check
+  URL:  https://x402.bankr.bot/0xf4a46667d75fa9663ab7a297af20d3623aaa8b52/twin-check
+  Price:  $0.03 USDC/req
+  Version:  4
+
+== list
+- Fetching endpoints...
+  twin-check active  v4  $0.03 USDC  0 reqs  $0 earned
+    Copycat / twin token detector. Give a ticker and get every DEX-traded token using it, ranked by liquidity, volume, trades, age and socials, with the likely original and a confidence level. Optionally pass the address you were given to learn if it is the likely original or a likely copycat. Use before buying any token found by ticker, especially fresh launches on Robinhood Chain and Base.
+  token-check active  v4  $0.01 USDC  1 reqs  $0.01 earned
+    Pre-trade token safety check for Base, Solana, Robinhood Chain and major EVM chains. One call returns a verdict (OK / CAUTION / DANGER), a 0-100 risk score and ranked flags: honeypot, sell/buy tax, owner privileges, mint and freeze authority, creator honeypot history, holder concentration, LP lock, liquidity and pair age, plus the largest sell that stays under 1/2/5% price impact. Call before any swap or buy.
+  momentum active  v4  $0.005 USDC  0 reqs  $0 earned
+    Short-term momentum read for any DEX-traded token: signal (STRONG_UP … STRONG_DOWN), -100..100 score, price change m5/h1/h6/h24, buy/sell flow ratio, volume acceleration, liquidity-to-market-cap and manipulation warnings. Use for entry and exit timing.
+  exit-check active  v2  $0.01 USDC  0 reqs  $0 earned
+    Can I get out? Position-sizing and exit check for any DEX-traded token on Base, Solana, Robinhood Chain and major EVM chains. Give a token and a USD size and get estimated price impact, sell tax, total exit cost, expected proceeds, share of 24h volume, an exitability rating (EASY / OK / COSTLY / HARD / TRAPPED) and the largest single sell that stays under 1, 2 and 5% impact. Flags tokens whose contract blocks selling. Use before entering a position or when planning an exit.
+  batch-check active  v4  $0.05 USDC  0 reqs  $0 earned
+    Safety-rank up to 10 tokens in one call. Returns each token's verdict, risk score and top flags, sorted safest first. Built for agents screening a watchlist, trending list or new launches before trading.

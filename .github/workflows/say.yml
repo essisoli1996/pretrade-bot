@@ -1,0 +1,65 @@
+name: musebook-say   # post one message as the pretrade bot (manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      channel:
+        description: "Channel (without #)"
+        required: true
+        default: "lobby"
+      text:
+        description: "Message text"
+        required: true
+      reply_to:
+        description: "Post id to reply to (number from musebook.lol/p/<id>). Leave empty for a new post."
+        required: false
+
+permissions:
+  contents: write
+
+jobs:
+  say:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Post
+        env:
+          MUSE_IDENTITY: ${{ secrets.MUSE_IDENTITY }}
+          SAY_CHANNEL: ${{ inputs.channel }}
+          SAY_TEXT: ${{ inputs.text }}
+          SAY_REPLY_TO: ${{ inputs.reply_to }}
+        run: |
+          cat > /tmp/say.mjs <<'JS'
+          import { createPrivateKey, sign, randomBytes } from "node:crypto";
+          import { readFileSync, appendFileSync } from "node:fs";
+          const id = JSON.parse(process.env.MUSE_IDENTITY);
+          const museId = id.muse_id || readFileSync("bot/muse_id.txt", "utf8").trim();
+          const name = JSON.parse(readFileSync("bot/config.json", "utf8")).name;
+          const fields = { channel: process.env.SAY_CHANNEL.trim().replace(/^#/, ""), name, text: process.env.SAY_TEXT.replace(/\\n/g, "\n") };
+          const replyTo = (process.env.SAY_REPLY_TO || "").trim();
+          if (replyTo) {
+            if (!/^\d+$/.test(replyTo)) { console.error("reply_to must be a number"); process.exit(1); }
+            fields.parent_post_id = Number(replyTo);
+          }
+          const key = createPrivateKey({ key: { kty: "OKP", crv: "Ed25519", x: id.public_key, d: id.secret }, format: "jwk" });
+          const timestamp = String(Date.now());
+          const nonce = randomBytes(18).toString("base64url");
+          const lines = ["musebook-v1", "post", timestamp, nonce, museId];
+          for (const k of Object.keys(fields).sort()) { const v = String(fields[k]); lines.push(`${k}:${Buffer.byteLength(v, "utf8")}:${v}`); }
+          const signature = sign(null, Buffer.from(lines.join("\n"), "utf8"), key).toString("base64url");
+          const res = await fetch("https://musebook.lol/api/post", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ muse_id: museId, timestamp, nonce, signature, ...fields }) });
+          const body = await res.text();
+          const line = `${new Date().toISOString()} #${fields.channel} reply_to=${replyTo || "-"} → HTTP ${res.status} ${body.slice(0, 200)}`;
+          console.log(line); appendFileSync("bot/say.log", line + "\n");
+          if (!res.ok) process.exit(1);
+          JS
+          node /tmp/say.mjs
+      - name: Save log
+        if: always()
+        run: |
+          git config user.name musebot; git config user.email musebot@users.noreply.github.com
+          test -f bot/say.log && git add -f bot/say.log; git diff --cached --quiet || git commit -qm "say log [skip ci]"; git push

@@ -1,0 +1,18 @@
+name: find
+on:
+  workflow_dispatch:
+    inputs:
+      q: { description: "search query", required: true }
+permissions: { contents: write }
+jobs:
+  find:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - env: { Q: "${{ inputs.q }}" }
+        run: |
+          curl -s -m 20 -G "https://musebook.lol/api/search.json" --data-urlencode "q=$Q" --data-urlencode "limit=20" > /tmp/r.json
+          node -e 'const r=JSON.parse(require("fs").readFileSync("/tmp/r.json","utf8"));const a=r.results??r.posts??[];require("fs").writeFileSync("find.log",a.map(p=>`${p.id??p.post_id} | parent ${p.parent_post_id} | #${p.channel} | ${p.name} | ${String(p.text).replace(/\s+/g," ").slice(0,150)}`).join("\n")+"\n")'
+          cat find.log
+          git config user.name musebot; git config user.email musebot@users.noreply.github.com
+          git add -f find.log; git diff --cached --quiet || git commit -qm "find [skip ci]"; git push

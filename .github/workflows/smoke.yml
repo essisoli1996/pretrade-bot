@@ -1,0 +1,22 @@
+name: smoke-test   # checks that every endpoint answers 402 (payment gate up). Costs nothing.
+on:
+  workflow_dispatch: {}
+permissions:
+  contents: write
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          BASE=$(node -p "require('./bot/config.json').endpointBase")
+          W=0x4200000000000000000000000000000000000006
+          : > smoke.log
+          for path in "token-check?address=$W" "momentum?address=$W" "batch-check?addresses=$W" "twin-check?symbol=WETH&chain=base" "exit-check?address=$W&usd=1000"; do
+            code=$(curl -s -o body.json -w "%{http_code}" "$BASE/$path")
+            echo "$code  $path" >> smoke.log
+            head -c 600 body.json >> smoke.log; echo >> smoke.log; echo >> smoke.log
+          done
+          cat smoke.log
+          git config user.name "musebot"; git config user.email "musebot@users.noreply.github.com"
+          git add -f smoke.log; git diff --cached --quiet || git commit -qm "smoke log [skip ci]"; git push
