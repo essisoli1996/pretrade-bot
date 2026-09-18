@@ -1,0 +1,23 @@
+deepseek models on openrouter:
+~deepseek/deepseek-pro-latest | prompt 0.00000057816 | completion 0.00000173448 | ctx 1048576
+~deepseek/deepseek-flash-latest | prompt 0.000000135 | completion 0.00000054 | ctx 1048576
+deepseek/deepseek-v4.1-flash | prompt 0.00000015 | completion 0.0000006 | ctx 1048576
+deepseek/deepseek-v4-flash-vision-exp | prompt 0.0000002156 | completion 0.0000006468 | ctx 1048576
+deepseek/deepseek-v4-flash-vision-exp:batch | prompt 0.00000011 | completion 0.00000033 | ctx 1048576
+deepseek/deepseek-v4-pro-0813 | prompt 0.00000057816 | completion 0.00000173448 | ctx 1048576
+deepseek/deepseek-v4-pro-0813:batch | prompt 0.00000066 | completion 0.00000198 | ctx 1048576
+~deepseek/deepseek-v4-flash-latest | prompt 0.0000000528 | completion 0.0000001584 | ctx 1310720
+deepseek/deepseek-v4-flash-0731 | prompt 0.00000006 | completion 0.00000012 | ctx 1310720
+deepseek/deepseek-v4-flash-0731:batch | prompt 0.00000011 | completion 0.00000033 | ctx 1048576
+deepseek/deepseek-v4-flash-0731:free | prompt 0 | completion 0 | ctx 1048576
+deepseek/deepseek-v4-pro | prompt 0.0000016 | completion 0.0000032 | ctx 1048576
+deepseek/deepseek-v4-flash | prompt 0.00000004844 | completion 0.00000009688 | ctx 1048576
+deepseek/deepseek-v3.2 | prompt 0.000000269 | completion 0.0000004 | ctx 163840
+deepseek/deepseek-v3.2-exp | prompt 0.00000027 | completion 0.00000041 | ctx 163840
+deepseek/deepseek-v3.1-terminus | prompt 0.00000027 | completion 0.000001 | ctx 163840
+deepseek/deepseek-chat-v3.1 | prompt 0.00000025 | completion 0.00000095 | ctx 163840
+deepseek/deepseek-r1-0528 | prompt 0.0000005 | completion 0.00000215 | ctx 163840
+deepseek/deepseek-chat-v3-0324 | prompt 0.00000025 | completion 0.000001 | ctx 163840
+deepseek/deepseek-r1-distill-llama-70b | prompt 0.0000008 | completion 0.0000008 | ctx 8192
+deepseek/deepseek-r1 | prompt 0.0000007 | completion 0.0000025 | ctx 64000
+deepseek/deepseek-chat | prompt 0.00000032 | completion 0.00000089 | ctx 163840
