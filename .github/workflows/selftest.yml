@@ -1,0 +1,19 @@
+name: self-test   # answers "would pretrade reply correctly right now?" Runs real paths, posts nothing.
+on: { workflow_dispatch: {} }
+permissions: { contents: write }
+jobs:
+  t:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - env:
+          MUSE_IDENTITY: ${{ secrets.MUSE_IDENTITY }}
+          BANKR_LLM_KEY: ${{ secrets.BANKR_LLM_KEY || secrets.BANKR_API_KEY }}
+          OPENROUTER_KEY: ${{ secrets.OPENROUTER_KEY }}
+        run: |
+          node bot/musebot.mjs selftest 2>&1 | tee self-test.log
+          git config user.name musebot; git config user.email musebot@users.noreply.github.com
+          git add -f self-test.log; git diff --cached --quiet || git commit -qm "self test [skip ci]"; git pull -q --rebase || true; git push -q || true

@@ -611,6 +611,53 @@ async function main() {
     return console.log(`${cmd} update: ${res.status} ${res.text.slice(0, 300)}`);
   }
 
+  if (cmd === "selftest") {
+    // Answers the question "if someone asks pretrade something right now, does it reply correctly?"
+    // Runs the real reply paths against the real APIs. Posts nothing.
+    const state = loadJson(STATE_FILE, { seen: [], threads: [], tokens: [], replyTimes: [] });
+    const line = (t) => console.log("\n" + "─".repeat(60) + "\n" + t);
+    let bad = 0;
+    const check = (ok, label) => { console.log(`${ok ? "PASS" : "FAIL"}  ${label}`); if (!ok) bad++; };
+
+    const inbox = await http(`${BOARD}/api/mentions.json?${signedQuery("mentions", identity, false)}`);
+    const inbox2 = inbox.status === 401 ? await http(`${BOARD}/api/mentions.json?${signedQuery("mentions", identity, true)}`) : inbox;
+    check(inbox2.ok, `mentions inbox reachable and signature accepted (HTTP ${inbox2.status}, ${inbox2.json?.mentions?.length ?? "?"} waiting)`);
+
+    for (const [label, addr] of [["EVM / Base", "0x4200000000000000000000000000000000000006"], ["Solana", "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263"], ["Robinhood Chain", "0x9cb595fbb3601dc0ef80e87921dc4ffd9307aba3"]]) {
+      const c = await quickCheck(addr);
+      check(!!c && !!c.symbol && c.liquidity > 0, `free check, ${label}`);
+      if (c) line(replyText(c));
+    }
+
+    const unknown = await quickCheck("0x000000000000000000000000000000000000dEaD");
+    check(unknown === null, "unknown token returns nothing to say (no invented reply)");
+
+    const menu = await premiumCommand({ channel: "memecoins" }, `@${CFG.name} price`, "tester", 1, state);
+    check(typeof menu === "string" && menu.includes(TK.symbol), "price menu");
+    line(menu);
+
+    const rec = await premiumCommand({ channel: "memecoins" }, `@${CFG.name} record`, "tester", 2, state);
+    check(typeof rec === "string", "record command");
+    line(rec);
+
+    const own = await premiumCommand({ channel: "memecoins" }, `@${CFG.name} deep ${TK.address}`, "tester", 3, state);
+    check(/own token/i.test(own ?? ""), "refuses to rate its own token");
+
+    const noPay = await premiumCommand({ channel: "memecoins" }, `@${CFG.name} deep 0x9cb595fbb3601dc0ef80e87921dc4ffd9307aba3`, "tester", 4, state);
+    check(/send it on|costs about/i.test(noPay ?? ""), "deep without payment asks for payment instead of delivering");
+    line(noPay);
+
+    const fakeTx = await premiumCommand({ channel: "memecoins" }, `@${CFG.name} deep 0x9cb595fbb3601dc0ef80e87921dc4ffd9307aba3 0x${"11".repeat(32)}`, "tester", 5, state);
+    check(/can't accept that payment/i.test(fakeTx ?? ""), "fake payment tx rejected");
+    line(fakeTx);
+
+    const note = await analystNote({ symbol: "TEST", chain: "base", verdict: "CAUTION", score: 25, flags: ["unverified source"], contractScanned: true, liquidity: 100000, marketCap: 200000, volume24h: 50000, ageH: 30, priceChange: { h1: 1, h6: 2, h24: 3 }, flowH1: { buys: 10, sells: 5 }, holders: 100, top10Pct: 12, sellMax: { p1: 500, p2: 1000, p5: 2600 } }, "is this a good entry?");
+    check(!!note, "analyst note (paid reports include reasoning)");
+
+    console.log(`\n${bad ? `${bad} CHECK(S) FAILED` : "ALL CHECKS PASSED"} — nothing was posted.`);
+    return;
+  }
+
   if (cmd === "sample") {
     // Publishes ONE free deep report as a showcase.  node bot/musebot.mjs sample <address|TICKER> "<question>" [--live]
     // Does not touch the bot's state file, so it is safe to run while the always-on loop is up.
