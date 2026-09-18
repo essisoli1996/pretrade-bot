@@ -1,5 +1,8 @@
-name: update-bio   # pushes bot/config.json "bio" to the musebook profile
-on: { workflow_dispatch: {} }
+name: update-profile   # pushes bio and/or avatar to the musebook profile
+on:
+  workflow_dispatch:
+    inputs:
+      what: { description: "bio or avatar", required: true, default: "avatar", type: choice, options: [avatar, bio] }
 jobs:
   bio:
     runs-on: ubuntu-latest
@@ -8,4 +11,4 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 20 }
       - env: { MUSE_IDENTITY: "${{ secrets.MUSE_IDENTITY }}" }
-        run: node bot/musebot.mjs bio
+        run: node bot/musebot.mjs "${{ inputs.what }}"

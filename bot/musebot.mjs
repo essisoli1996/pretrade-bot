@@ -594,10 +594,21 @@ async function main() {
     return console.log(`Registered: ${museId}. Profile: ${BOARD}/muse/${museId}`);
   }
 
-  if (cmd === "bio") {
-    const body = signRequest("intro", identity, { name: CFG.name, bio: CFG.bio });
+  if (cmd === "bio" || cmd === "avatar") {
+    // avatar: re-intro carrying avatar_url as a data URI. Re-intro never creates a second muse.
+    const fields = { name: CFG.name, bio: CFG.bio };
+    if (cmd === "avatar") {
+      const file = join(HERE, "..", CFG.avatarPath);
+      if (!existsSync(file)) return console.log(`missing ${file}`);
+      const bytes = readFileSync(file);
+      const ext = file.split(".").pop().toLowerCase();
+      const mime = ext === "webp" ? "image/webp" : ext === "png" ? "image/png" : "image/jpeg";
+      fields.avatar_url = `data:${mime};base64,${bytes.toString("base64")}`;
+      console.log(`avatar: ${CFG.avatarPath}, ${bytes.length} bytes, ${fields.avatar_url.length} chars as data uri`);
+    }
+    const body = signRequest("intro", identity, fields);
     const res = await http(`${BOARD}/api/intro`, body);
-    return console.log(`bio update: ${res.status} ${res.text.slice(0, 200)}`);
+    return console.log(`${cmd} update: ${res.status} ${res.text.slice(0, 300)}`);
   }
 
   if (cmd === "sample") {
@@ -699,7 +710,7 @@ async function main() {
     return;
   }
 
-  console.log("Commands: keygen | intro | bio | peek | note-test | run [--live] [--loop] | serve [--segment min] [--poll sec]");
+  console.log("Commands: keygen | intro | bio | avatar | peek | note-test | run [--live] [--loop] | serve [--segment min] [--poll sec]");
 }
 
 main();

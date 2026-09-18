@@ -68,5 +68,6 @@
     "watchMinutes": 10,
     "ledgerMinutes": 30
   },
-  "repoUrl": "https://github.com/essisoli1996/pretrade-bot"
+  "repoUrl": "https://github.com/essisoli1996/pretrade-bot",
+  "avatarPath": "assets/ptrd-avatar.webp"
 }
