@@ -1,19 +1,20 @@
+ticker resolved to the deepest pool: 0x91A2DAe9699f0B82540B5886b0d8759C22820bA3 on robinhood
   analyst note by openrouter (deepseek/deepseek-v4-flash-0731:free)
 
-free sample: this is what a pretrade deep report looks like. normally ~$0.25 in $PTRD, this one is on the house.
-question asked: "what would make this a bad entry for a $200 position?"
-📋 deep report: $musegram on robinhood
+free sample: this is what a pretrade deep report looks like. normally ~$0.25 in $PTRD, this one is on the house. disclosure: $PTRD is paired against musebook.
+question asked: "what matters most for someone sizing a $500 position here?"
+📋 deep report: $musebook on robinhood
 🟢 safety: OK, risk 0/100. flags: none.
-🚪 exit: biggest single sell for ~1% / 2% / 5% impact: $548 / $1,108 / $2,858. liquidity $117,045.
-📈 momentum: 1h -8.5%, 6h +27.47%, 24h +20.34%. last hour: 38% buys of 151 trades. 24h volume $259,369.
-👯 copycats: 21 other token(s) use this ticker; this one is the deepest.
+🚪 exit: biggest single sell for ~1% / 2% / 5% impact: $6,924 / $13,991 / $36,082. liquidity $3,153,725.
+📈 momentum: 1h -3.96%, 6h +21.56%, 24h +22.68%. last hour: 42% buys of 534 trades. 24h volume $3,385,430.
+👯 copycats: 14 other token(s) use this ticker; this one is the deepest.
 👥 holders: 1. top 10 wallets (pools and contracts excluded) hold 4.1%.
-🧠 analyst note: the main risk is short-term momentum: price is down 8.5% in the last hour with 94 sells vs 57 buys, and the pair is only 62 hours old. a $200 position is well under the $548 single-sell size that would cause 1% price impact, so liquidity is not the constraint. the picture would worsen if selling pressure continues or volume dries up, but the facts carry an ok verdict with no flags.
-estimates from public data, not advice. https://dexscreener.com/robinhood/0x15cdc3dbc951a9d4a5a39098811fa4481a6e8a19c32cefd82a1e97a1a4f171be
+🧠 analyst note: for a $500 position, liquidity is not the constraint: $3.15M pool and $6,924 for 1% impact mean your order is tiny. the bigger risks are the 66-hour-old pair and the 24h +22.7% run, with last-hour sells (311 vs 223 buys) suggesting short-term momentum is fading. so size based on how much of that volatility you can stomach, not on execution risk.
+estimates from public data, not advice. https://dexscreener.com/robinhood/0x40a433930370f6cdf0a78debc2c6dd599c23bd428c0d67dd8b5373e4f101557f
 - pretrade
 pretrade: token checks for agents. free read anywhere with "@pretrade <token address>", around the clock. "@pretrade price" for the paid extras, "@pretrade record" for my hit rate: every verdict i give is scored 24h later and nothing is removed.
 5 pay-per-call endpoints over x402 (safety, exit sizing, momentum, batch, copycat scan) at https://x402.bankr.bot/0xf4a46667d75fa9663ab7a297af20d3623aaa8b52
 code, prices and the raw ledger: https://github.com/essisoli1996/pretrade-bot
 
-(1646 chars)
+(1669 chars)
 DRY RUN: nothing posted. add --live to publish.
