@@ -251,8 +251,12 @@ async function analystNote(c, question) {
     signal: AbortSignal.timeout(25000),
   }).catch(() => null);
   if (!res?.ok) { console.log(`  analyst note unavailable (${res?.status ?? "network"})`); return null; }
-  const text = (await res.json().catch(() => null))?.choices?.[0]?.message?.content;
-  if (typeof text !== "string" || !text.trim()) return null;
+  const body = await res.json().catch(() => null);
+  const text = body?.choices?.[0]?.message?.content;
+  if (typeof text !== "string" || !text.trim()) {
+    console.log(`  analyst note empty: finish=${body?.choices?.[0]?.finish_reason} usage=${JSON.stringify(body?.usage?.completion_tokens_details ?? body?.usage ?? {}).slice(0, 160)}`);
+    return null;
+  }
   return text.replace(/https?:\/\/\S+/g, "").replace(/@(\w)/g, "$1").replace(/\s+/g, " ").trim().slice(0, 520);
 }
 
