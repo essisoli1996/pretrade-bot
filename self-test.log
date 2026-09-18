@@ -1,0 +1,56 @@
+PASS  mentions inbox reachable and signature accepted (HTTP 200, 0 waiting)
+PASS  free check, EVM / Base
+
+────────────────────────────────────────────────────────────
+🟢 $WETH on base: OK, risk 0/100
+flags: nothing flagged. liquidity $175,121,706, biggest sell for ~2% impact: $1,322,111.
+free read from public data, not advice, and OK is never a guarantee.
+full json for your own loop (x402, $0.01): https://x402.bankr.bot/0xf4a46667d75fa9663ab7a297af20d3623aaa8b52/token-check?address=0x4200000000000000000000000000000000000006&chain=base
+- pretrade
+PASS  free check, Solana
+
+────────────────────────────────────────────────────────────
+🟢 $Bonk on solana: OK, risk 0/100
+flags: nothing flagged. liquidity $1,090,785, biggest sell for ~2% impact: $3,032.
+free read from public data, not advice, and OK is never a guarantee.
+full json for your own loop (x402, $0.01): https://x402.bankr.bot/0xf4a46667d75fa9663ab7a297af20d3623aaa8b52/token-check?address=DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263
+- pretrade
+PASS  free check, Robinhood Chain
+
+────────────────────────────────────────────────────────────
+🟢 $musegram on robinhood: OK, risk 0/100
+flags: nothing flagged. liquidity $118,271, biggest sell for ~2% impact: $1,120.
+free read from public data, not advice, and OK is never a guarantee.
+full json for your own loop (x402, $0.01): https://x402.bankr.bot/0xf4a46667d75fa9663ab7a297af20d3623aaa8b52/token-check?address=0x9cb595fbb3601dc0ef80e87921dc4ffd9307aba3&chain=robinhood
+- pretrade
+PASS  unknown token returns nothing to say (no invented reply)
+PASS  price menu
+
+────────────────────────────────────────────────────────────
+free: "@pretrade <token address>" → verdict, risk score, flags, max sell size.
+deep report ≈ 1,000,000 $PTRD (~$0.25): safety + exit sizes + momentum + copycat scan + holder concentration + an analyst note that answers your question about the token, in one reply.
+my hit rate, free: "@pretrade record". every read is logged and scored 24h later.
+24h watch ≈ 2,000,000 $PTRD (~$0.5): i ping you here if liquidity drops 30%+, the verdict worsens or a critical flag appears.
+how: send $PTRD on Robinhood Chain to 0xf4a46667d75fa9663ab7a297af20d3623aaa8b52, then write "@pretrade deep <token> <tx hash>" or "@pretrade watch <token> <tx hash>".
+$PTRD (0x2DC2614F99139C1342ACc585515d6862a854fBa3) is my own token. it pays for these two services and nothing else: no promises about price. i never rate it.
+- pretrade
+PASS  record command
+
+────────────────────────────────────────────────────────────
+track record: 0 reads logged, 0 old enough to score (i score each one 24h later). i publish hit rates once 10+ are scored, not before. numbers over vibes.
+- pretrade
+PASS  refuses to rate its own token
+PASS  deep without payment asks for payment instead of delivering
+
+────────────────────────────────────────────────────────────
+deep costs about 1,000,000 $PTRD (~$0.25). send it on Robinhood Chain to 0xf4a46667d75fa9663ab7a297af20d3623aaa8b52, then write "@pretrade deep 0x9cb595fbb3601dc0ef80e87921dc4ffd9307aba3 <tx hash>".
+- pretrade
+PASS  fake payment tx rejected
+
+────────────────────────────────────────────────────────────
+can't accept that payment: i can't find that tx on Robinhood Chain yet. if it is fresh, mention me again in a minute.
+- pretrade
+  analyst note by openrouter (deepseek/deepseek-v4-flash-0731:free)
+PASS  analyst note (paid reports include reasoning)
+
+ALL CHECKS PASSED — nothing was posted.
