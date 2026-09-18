@@ -15,23 +15,16 @@ jobs:
           cat > /tmp/t.mjs <<'JS'
           import { readFileSync, writeFileSync } from "node:fs";
           const cfg = JSON.parse(readFileSync("bot/config.json", "utf8")).llm;
-          const H = { "Content-Type": "application/json", Authorization: `Bearer ${process.env.KEY}` };
-          const out = [`configured model: ${cfg.model}`];
-          const m = await fetch(`${cfg.baseUrl}/models`, { headers: H });
-          const mj = await m.json().catch(() => ({}));
-          const ids = (mj.data ?? mj.models ?? []).map((x) => x.id ?? x.name).filter(Boolean);
-          out.push(`GET /models → HTTP ${m.status}, ${ids.length} models`);
-          if (!m.ok) out.push(JSON.stringify(mj).slice(0, 300));
-          out.push(`qwen ids: ${ids.filter((i) => /qwen/i.test(i)).join(", ") || "(none)"}`);
-          out.push(`deepseek ids: ${ids.filter((i) => /deepseek/i.test(i)).join(", ") || "(none)"}`);
-          out.push(`free-looking ids: ${ids.filter((i) => /free/i.test(i)).join(", ") || "(none)"}`);
-          const meta = (mj.data ?? mj.models ?? []).filter((x) => /deepseek/i.test(x.id ?? x.name ?? ""));
-          for (const m of meta) out.push(`  ${m.id}: pricing=${JSON.stringify(m.pricing ?? m.cost ?? {})} ctx=${m.context_length ?? "?"}`);
-          out.push(`configured model is in the list: ${ids.includes(cfg.model)}`);
-          const r = await fetch(`${cfg.baseUrl}/chat/completions`, { method: "POST", headers: H, body: JSON.stringify({ model: cfg.model, max_tokens: 60, temperature: 0.2, messages: [{ role: "user", content: "Reply with exactly: pretrade analyst online" }] }) });
-          const rj = await r.json().catch(() => ({}));
-          out.push(`POST /chat/completions → HTTP ${r.status}`);
-          out.push(r.ok ? `reply: ${String(rj.choices?.[0]?.message?.content).slice(0, 200)} | served by: ${rj.model ?? "?"} | usage: ${JSON.stringify(rj.usage ?? {})}` : JSON.stringify(rj).slice(0, 400));
+          const out = [];
+          for (const p of cfg.providers) {
+            const key = process.env[p.keyEnv];
+            if (!key) { out.push(`${p.name}: no key in ${p.keyEnv}`); continue; }
+            const H = { "Content-Type": "application/json", Authorization: `Bearer ${key}`, ...(p.referer ? { "HTTP-Referer": p.referer, "X-Title": "pretrade" } : {}) };
+            const t0 = Date.now();
+            const r = await fetch(`${p.baseUrl}/chat/completions`, { method: "POST", headers: H, body: JSON.stringify({ model: p.model, max_tokens: cfg.maxTokens, temperature: 0.2, messages: [{ role: "user", content: "Reply with exactly: pretrade analyst online" }] }) });
+            const j = await r.json().catch(() => ({}));
+            out.push(`${p.name} (${p.model}) → HTTP ${r.status} in ${Date.now() - t0}ms | reply: ${String(j.choices?.[0]?.message?.content ?? JSON.stringify(j).slice(0, 200)).slice(0, 120)} | served: ${j.model ?? "?"} | cost: ${j.usage?.cost ?? "n/a"}`);
+          }
           writeFileSync("llm-test.log", out.join("\n") + "\n"); console.log(out.join("\n"));
           JS
           node /tmp/t.mjs || true

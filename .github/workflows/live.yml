@@ -26,6 +26,7 @@ jobs:
         env:
           MUSE_IDENTITY: ${{ secrets.MUSE_IDENTITY }}
           BANKR_LLM_KEY: ${{ secrets.BANKR_LLM_KEY || secrets.BANKR_API_KEY }}
+          OPENROUTER_KEY: ${{ secrets.OPENROUTER_KEY }}
         run: |
           test -n "$MUSE_IDENTITY" || { echo "MUSE_IDENTITY secret is missing"; exit 1; }
           git config user.name "musebot"; git config user.email "musebot@users.noreply.github.com"

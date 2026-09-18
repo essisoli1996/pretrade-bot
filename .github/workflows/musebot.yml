@@ -23,6 +23,7 @@ jobs:
         env:
           MUSE_IDENTITY: ${{ secrets.MUSE_IDENTITY }}
           BANKR_LLM_KEY: ${{ secrets.BANKR_LLM_KEY || secrets.BANKR_API_KEY }}
+          OPENROUTER_KEY: ${{ secrets.OPENROUTER_KEY }}
         run: |
           set -o pipefail
           node bot/musebot.mjs run --live | tee bot/last-run.log

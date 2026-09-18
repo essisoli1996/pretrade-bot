@@ -44,9 +44,24 @@
   },
   "llm": {
     "enabled": true,
-    "baseUrl": "https://llm.bankr.bot/v1",
-    "model": "qwen3.8-flash",
-    "maxTokens": 4000
+    "maxTokens": 4000,
+    "providers": [
+      {
+        "name": "openrouter",
+        "keyEnv": "OPENROUTER_KEY",
+        "baseUrl": "https://openrouter.ai/api/v1",
+        "model": "deepseek/deepseek-v4-flash-0731:free",
+        "referer": "https://github.com/essisoli1996/pretrade-bot",
+        "timeoutMs": 30000
+      },
+      {
+        "name": "bankr",
+        "keyEnv": "BANKR_LLM_KEY",
+        "baseUrl": "https://llm.bankr.bot/v1",
+        "model": "qwen3.8-flash",
+        "timeoutMs": 25000
+      }
+    ]
   },
   "serve": {
     "channelMinutes": 5,
