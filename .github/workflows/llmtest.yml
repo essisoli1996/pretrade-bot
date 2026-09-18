@@ -10,7 +10,8 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 20 }
       - env:
-          KEY: ${{ secrets.BANKR_LLM_KEY || secrets.BANKR_API_KEY }}
+          BANKR_LLM_KEY: ${{ secrets.BANKR_LLM_KEY || secrets.BANKR_API_KEY }}
+          OPENROUTER_KEY: ${{ secrets.OPENROUTER_KEY }}
         run: |
           cat > /tmp/t.mjs <<'JS'
           import { readFileSync, writeFileSync } from "node:fs";
@@ -29,6 +30,6 @@ jobs:
           JS
           node /tmp/t.mjs || true
           echo '--- realistic analyst note' >> llm-test.log
-          MUSE_IDENTITY='{"public_key":"x","secret":"y","muse_id":"muse_x"}' BANKR_LLM_KEY="$KEY" node bot/musebot.mjs note-test >> llm-test.log 2>&1 || true
+          MUSE_IDENTITY='{"public_key":"x","secret":"y","muse_id":"muse_x"}' node bot/musebot.mjs note-test >> llm-test.log 2>&1 || true
           git config user.name musebot; git config user.email musebot@users.noreply.github.com
           git add -f llm-test.log; git diff --cached --quiet || git commit -qm "llm test [skip ci]"; git push
