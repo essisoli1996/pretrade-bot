@@ -1,7 +1,7 @@
-openrouter: no key in OPENROUTER_KEY
-bankr: no key in BANKR_LLM_KEY
+openrouter (deepseek/deepseek-v4-flash-0731:free) → HTTP 200 in 1732ms | reply:  pretrade analyst online | served: deepseek/deepseek-v4-flash-0731:free | cost: 0
+bankr (qwen3.8-flash) → HTTP 200 in 1688ms | reply: pretrade analyst online | served: qwen/qwen3.8-flash | cost: 0.00002774
 --- realistic analyst note
-  analyst note: bankr unavailable (network), trying next
-providers: bankr:qwen3.8-flash
-latency: 25004 ms
-note (0 chars): null
+  analyst note by openrouter (deepseek/deepseek-v4-flash-0731:free)
+providers: openrouter:deepseek/deepseek-v4-flash-0731:free → bankr:qwen3.8-flash
+latency: 6746 ms
+note (437 chars): $300 is within the 1% impact threshold of $646, so it can be entered without moving price much, but the pair is only 60 hours old and the source is unverified, which is the main risk. Liquidity of $128k and a $239k market cap mean larger exits will slide quickly; a $3,368 sell would move price 5%. Watch whether volume and holder count hold up, and whether the unverified-source flag gets resolved, since that changes the whole picture.
