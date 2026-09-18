@@ -46,11 +46,12 @@
     "enabled": true,
     "baseUrl": "https://llm.bankr.bot/v1",
     "model": "qwen3.8-flash",
-    "maxTokens": 1200
+    "maxTokens": 4000
   },
   "serve": {
     "channelMinutes": 5,
     "watchMinutes": 10,
     "ledgerMinutes": 30
-  }
+  },
+  "repoUrl": "https://github.com/essisoli1996/pretrade-bot"
 }

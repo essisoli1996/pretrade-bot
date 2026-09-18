@@ -227,7 +227,7 @@ function recordText(state) {
 
 // ───────────────────────── analyst note via the Bankr LLM Gateway (optional: needs the BANKR_LLM_KEY secret) ─────────────────────────
 // The model never sets the verdict and never sees raw board text except the asker's question, which is treated as untrusted.
-async function analystNote(c, question) {
+async function analystNote(c, question, retried = false) {
   const key = process.env.BANKR_LLM_KEY;
   if (!key || !CFG.llm?.enabled) return null;
   const facts = {
@@ -247,7 +247,7 @@ async function analystNote(c, question) {
   ].join(" ");
   const res = await fetch(`${CFG.llm.baseUrl}/chat/completions`, {
     method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
-    body: JSON.stringify({ model: CFG.llm.model, max_tokens: CFG.llm.maxTokens, temperature: 0.2, messages: [{ role: "system", content: system }, { role: "user", content: `FACTS: ${JSON.stringify(facts)}\nQUESTION: ${q || "(none)"}` }] }),
+    body: JSON.stringify({ model: CFG.llm.model, max_tokens: retried ? CFG.llm.maxTokens * 2 : CFG.llm.maxTokens, temperature: 0.2, messages: [{ role: "system", content: system }, { role: "user", content: `FACTS: ${JSON.stringify(facts)}\nQUESTION: ${q || "(none)"}` }] }),
     signal: AbortSignal.timeout(25000),
   }).catch(() => null);
   if (!res?.ok) { console.log(`  analyst note unavailable (${res?.status ?? "network"})`); return null; }
@@ -255,6 +255,7 @@ async function analystNote(c, question) {
   const text = body?.choices?.[0]?.message?.content;
   if (typeof text !== "string" || !text.trim()) {
     console.log(`  analyst note empty: finish=${body?.choices?.[0]?.finish_reason} usage=${JSON.stringify(body?.usage?.completion_tokens_details ?? body?.usage ?? {}).slice(0, 160)}`);
+    if (body?.choices?.[0]?.finish_reason === "length" && !retried) return analystNote(c, question, true); // reasoning ate the budget
     return null;
   }
   return text.replace(/https?:\/\/\S+/g, "").replace(/@(\w)/g, "$1").replace(/\s+/g, " ").trim().slice(0, 520);
@@ -607,7 +608,15 @@ async function main() {
     if (!c) return console.log("no DEX pair found for that token.");
     const report = await deepText(c, question);
     const pairedNote = premiumOn() ? ` disclosure: $${TK.symbol} is paired against musebook.` : "";
-    const text = [`free sample: this is what my deep report looks like. normally ~$${TK.prices?.deepUsd ?? 0.25} in $${TK.symbol ?? "my token"}, this one is on the house.${/musebook/i.test(c.symbol) ? pairedNote : ""}`, question ? `question asked: "${question}"` : null, report].filter(Boolean).join("\n");
+    const text = [
+      `free sample: this is what a pretrade deep report looks like. normally ~$${TK.prices?.deepUsd ?? 0.25} in $${TK.symbol ?? "my token"}, this one is on the house.${/musebook/i.test(c.symbol) ? pairedNote : ""}`,
+      question ? `question asked: "${question}"` : null,
+      report,
+      "",
+      `pretrade: token checks for agents. free read anywhere with "@${CFG.name} <token address>", around the clock. "@${CFG.name} price" for the paid extras, "@${CFG.name} record" for my hit rate: every verdict i give is scored 24h later and nothing is removed.`,
+      `5 pay-per-call endpoints over x402 (safety, exit sizing, momentum, batch, copycat scan) at ${CFG.endpointBase}`,
+      `code, prices and the raw ledger: ${CFG.repoUrl}`,
+    ].filter(Boolean).join("\n");
     console.log(`\n${text}\n\n(${text.length} chars)`);
     if (!LIVE) return console.log("DRY RUN: nothing posted. add --live to publish.");
     const res = await http(`${BOARD}/api/post`, signRequest("post", identity, { channel: CFG.channels[0], name: CFG.name, text }));
