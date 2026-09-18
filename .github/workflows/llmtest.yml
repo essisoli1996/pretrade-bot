@@ -22,7 +22,11 @@ jobs:
           const ids = (mj.data ?? mj.models ?? []).map((x) => x.id ?? x.name).filter(Boolean);
           out.push(`GET /models → HTTP ${m.status}, ${ids.length} models`);
           if (!m.ok) out.push(JSON.stringify(mj).slice(0, 300));
-          out.push(`qwen-family ids: ${ids.filter((i) => /qwen/i.test(i)).join(", ") || "(none)"}`);
+          out.push(`qwen ids: ${ids.filter((i) => /qwen/i.test(i)).join(", ") || "(none)"}`);
+          out.push(`deepseek ids: ${ids.filter((i) => /deepseek/i.test(i)).join(", ") || "(none)"}`);
+          out.push(`free-looking ids: ${ids.filter((i) => /free/i.test(i)).join(", ") || "(none)"}`);
+          const meta = (mj.data ?? mj.models ?? []).filter((x) => /deepseek/i.test(x.id ?? x.name ?? ""));
+          for (const m of meta) out.push(`  ${m.id}: pricing=${JSON.stringify(m.pricing ?? m.cost ?? {})} ctx=${m.context_length ?? "?"}`);
           out.push(`configured model is in the list: ${ids.includes(cfg.model)}`);
           const r = await fetch(`${cfg.baseUrl}/chat/completions`, { method: "POST", headers: H, body: JSON.stringify({ model: cfg.model, max_tokens: 60, temperature: 0.2, messages: [{ role: "user", content: "Reply with exactly: pretrade analyst online" }] }) });
           const rj = await r.json().catch(() => ({}));
