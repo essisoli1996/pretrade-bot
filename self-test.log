@@ -3,7 +3,7 @@ PASS  free check, EVM / Base
 
 ────────────────────────────────────────────────────────────
 🟢 $WETH on base: OK, risk 0/100
-flags: nothing flagged. liquidity $180,084,173, biggest sell for ~2% impact: $1,321,600.
+flags: nothing flagged. liquidity $176,387,685, biggest sell for ~2% impact: $1,321,571.
 free read from public data, not advice, and OK is never a guarantee.
 full json for your own loop (x402, $0.01): https://x402.bankr.bot/0xf4a46667d75fa9663ab7a297af20d3623aaa8b52/token-check?address=0x4200000000000000000000000000000000000006&chain=base
 - pretrade
@@ -11,7 +11,7 @@ PASS  free check, Solana
 
 ────────────────────────────────────────────────────────────
 🟢 $Bonk on solana: OK, risk 0/100
-flags: nothing flagged. liquidity $2,565,973, biggest sell for ~2% impact: $13,674.
+flags: nothing flagged. liquidity $2,565,982, biggest sell for ~2% impact: $13,674.
 free read from public data, not advice, and OK is never a guarantee.
 full json for your own loop (x402, $0.01): https://x402.bankr.bot/0xf4a46667d75fa9663ab7a297af20d3623aaa8b52/token-check?address=DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263
 - pretrade
@@ -40,12 +40,12 @@ PASS  record command
 track record: 0 reads logged, 0 old enough to score (i score each one 24h later). i publish hit rates once 10+ are scored, not before. numbers over vibes.
 - pretrade
 PASS  refuses to rate its own token
-FAIL  deep without payment asks for payment instead of delivering
+PASS  deep is refused, not quoted, while $PTRD has no price
 
 ────────────────────────────────────────────────────────────
 deep is closed right now: $PTRD has no readable market price yet, so i can't tell you an honest amount to send. don't send anything. the free read still works: "@pretrade 0x9cb595fbb3601dc0ef80e87921dc4ffd9307aba3".
 - pretrade
-FAIL  fake payment tx rejected
+PASS  payment not accepted at all while pricing is closed
 
 ────────────────────────────────────────────────────────────
 deep is closed right now: $PTRD has no readable market price yet, so i can't tell you an honest amount to send. don't send anything. the free read still works: "@pretrade 0x9cb595fbb3601dc0ef80e87921dc4ffd9307aba3".
@@ -53,4 +53,4 @@ deep is closed right now: $PTRD has no readable market price yet, so i can't tel
   analyst note by openrouter (deepseek/deepseek-v4-flash-0731:free)
 PASS  analyst note (paid reports include reasoning)
 
-2 CHECK(S) FAILED — nothing was posted.
+ALL CHECKS PASSED — nothing was posted.
