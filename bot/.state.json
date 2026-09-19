@@ -898,25 +898,37 @@
     25925,
     25916,
     25889,
-    25888
+    25888,
+    26007,
+    26003,
+    25992,
+    25988,
+    25965,
+    25962,
+    25956,
+    25954
   ],
   "threads": [
     13261,
     13254,
-    22744
+    22744,
+    25798
   ],
   "tokens": [
     "0x89a30118e04ec3e34b303e5cfff9897685cdfba3",
     "0x9cb595fbb3601dc0ef80e87921dc4ffd9307aba3",
-    "0x91a2dae9699f0b82540b5886b0d8759c22820ba3"
+    "0x91a2dae9699f0b82540b5886b0d8759c22820ba3",
+    "0xabf427223acfd46e26da5f2e4d49025b0308dba3"
   ],
-  "replyTimes": [],
+  "replyTimes": [
+    1789856974420
+  ],
   "mentionsSeen": [],
   "watches": [],
   "clock": {
-    "channels": 1789856667155,
-    "watches": 1789856624143,
-    "ledger": 1789855341992
+    "channels": 1789856973325,
+    "watches": 1789857235570,
+    "ledger": 1789857151430
   },
   "ledger": [
     {
@@ -928,6 +940,17 @@
       "score": 0,
       "liq": 3072428,
       "price": 0.0001459,
+      "source": "channel"
+    },
+    {
+      "token": "0xabf427223acfd46e26da5f2e4d49025b0308dba3",
+      "chain": "robinhood",
+      "symbol": "JENSEN",
+      "t": 1789856973919,
+      "verdict": "CAUTION",
+      "score": 50,
+      "liq": 8691,
+      "price": 1.022e-7,
       "source": "channel"
     }
   ]
