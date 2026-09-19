@@ -675,22 +675,45 @@
     22528,
     22516,
     22564,
-    22596
+    22596,
+    22652,
+    22690,
+    22689,
+    22703,
+    22756,
+    22744
   ],
   "threads": [
     13261,
-    13254
+    13254,
+    22744
   ],
   "tokens": [
     "0x89a30118e04ec3e34b303e5cfff9897685cdfba3",
-    "0x9cb595fbb3601dc0ef80e87921dc4ffd9307aba3"
+    "0x9cb595fbb3601dc0ef80e87921dc4ffd9307aba3",
+    "0x91a2dae9699f0b82540b5886b0d8759c22820ba3"
   ],
-  "replyTimes": [],
+  "replyTimes": [
+    1789833777950
+  ],
   "mentionsSeen": [],
   "watches": [],
   "clock": {
-    "channels": 1789832532675,
-    "watches": 1789832712820,
-    "ledger": 1789831805700
-  }
+    "channels": 1789833775990,
+    "watches": 1789833932042,
+    "ledger": 1789833620688
+  },
+  "ledger": [
+    {
+      "token": "0x91a2dae9699f0b82540b5886b0d8759c22820ba3",
+      "chain": "robinhood",
+      "symbol": "musebook",
+      "t": 1789833777005,
+      "verdict": "OK",
+      "score": 0,
+      "liq": 3072428,
+      "price": 0.0001459,
+      "source": "channel"
+    }
+  ]
 }
