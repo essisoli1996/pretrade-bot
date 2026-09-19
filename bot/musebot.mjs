@@ -300,12 +300,16 @@ async function ownTokenPriceUsd() {
   return n(pairs[0]?.priceUsd);
 }
 
+/** Priced only when $PTRD has a readable market price. Until then the bot says so instead of quoting a made-up amount. */
 async function requiredTokens(kind) {
   const usd = kind === "watch" ? TK.prices.watchUsd : TK.prices.deepUsd;
   const price = await ownTokenPriceUsd();
-  const tokens = price && price > 0 ? usd / price : TK.fallbackTokens[kind];
-  return { usd, tokens: Math.ceil(tokens), priced: !!price };
+  if (!price || price <= 0) return { usd, tokens: null, priced: false };
+  return { usd, tokens: Math.ceil(usd / price), priced: true };
 }
+
+const priceLine = (kind, q) =>
+  q.priced ? `${q.tokens.toLocaleString("en-US")} $${TK.symbol} (~$${q.usd})` : `not priced yet: $${TK.symbol} has no readable market price, so i won't quote an amount i can't stand behind`;
 
 async function verifyPayment(txHash, minTokens, state) {
   const h = txHash.toLowerCase();
@@ -334,15 +338,19 @@ async function verifyPayment(txHash, minTokens, state) {
 
 function menuText(deep, watch) {
   if (!premiumOn()) return `free: write "@${CFG.name} <token address>" anywhere and i read it in your thread (EVM + Solana). my hit rate: "@${CFG.name} record".\npaid extras (deep report, 24h watch) open once $${TK.symbol ?? "my token"} is live.\n- ${CFG.name}`;
+  const llmOn = llmProviders().length > 0 && CFG.llm?.enabled;
+  const open = deep.priced;
   return [
-    `free: "@${CFG.name} <token address>" → verdict, risk score, flags, max sell size.`,
-    `deep report ≈ ${deep.tokens.toLocaleString("en-US")} $${TK.symbol} (~$${deep.usd}): safety + exit sizes + momentum + copycat scan + holder concentration${process.env.BANKR_LLM_KEY && CFG.llm?.enabled ? " + an analyst note that answers your question about the token" : ""}, in one reply.`,
-    `my hit rate, free: "@${CFG.name} record". every read is logged and scored 24h later.`,
+    `free, and always will be: "@${CFG.name} <token address>" → verdict, risk score, flags, max sell size. EVM + solana.`,
+    `my hit rate, also free: "@${CFG.name} record". every read is logged and scored 24h later, nothing removed.`,
+    `deep report (safety + exit sizes + momentum + copycat scan + holder concentration${llmOn ? " + an analyst note that answers your question about the token" : ""}): ${priceLine("deep", deep)}.`,
     TK.watchEnabled
-      ? `${TK.watchHours}h watch ≈ ${watch.tokens.toLocaleString("en-US")} $${TK.symbol} (~$${watch.usd}): i ping you here if liquidity drops 30%+, the verdict worsens or a critical flag appears.`
-      : `${TK.watchHours}h watch: not open yet. i only sell it once my checks run on a reliable clock.`,
-    `how: send $${TK.symbol} on Robinhood Chain to ${TK.payTo}, then write "@${CFG.name} deep <token> <tx hash>"${TK.watchEnabled ? ` or "@${CFG.name} watch <token> <tx hash>"` : ""}.`,
-    `$${TK.symbol} (${TK.address}) is my own token. it pays for these two services and nothing else: no promises about price. i never rate it.`,
+      ? `${TK.watchHours}h watch (i ping you if liquidity drops 30%+, the verdict worsens or a critical flag appears): ${priceLine("watch", watch)}.`
+      : `${TK.watchHours}h watch: not open yet.`,
+    open
+      ? `how: send $${TK.symbol} on Robinhood Chain to ${TK.payTo}, then write "@${CFG.name} deep <token> <tx hash>"${TK.watchEnabled ? ` or "@${CFG.name} watch <token> <tx hash>"` : ""}.`
+      : `so the paid extras are closed until then. don't send me anything: i'd rather turn away a sale than take a payment i can't size honestly. the free checks cover most of what you need anyway.`,
+    `$${TK.symbol} (${TK.address}) is my own token. it pays for these services and nothing else: no promises about price. i never rate it.`,
     `- ${CFG.name}`,
   ].join("\n");
 }
@@ -417,6 +425,7 @@ async function premiumCommand(m, text, who, id, state) {
   if (!premiumOn()) return `${cmd} opens once $${TK.symbol ?? "my token"} is live. the free read still works: "@${CFG.name} ${addr}".\n- ${CFG.name}`;
   if (cmd === "watch" && !TK.watchEnabled) return `watch is not open yet: i only sell it once my checks run on a reliable clock. don't pay for it. deep reports are open: "@${CFG.name} deep ${addr} <tx hash>".\n- ${CFG.name}`;
   const need = await requiredTokens(cmd);
+  if (!need.priced) return `${cmd} is closed right now: $${TK.symbol} has no readable market price yet, so i can't tell you an honest amount to send. don't send anything. the free read still works: "@${CFG.name} ${addr}".\n- ${CFG.name}`;
   const tx = text.match(TX_RE)?.[0];
   if (!tx) return `${cmd} costs about ${need.tokens.toLocaleString("en-US")} $${TK.symbol} (~$${need.usd}). send it on Robinhood Chain to ${TK.payTo}, then write "@${CFG.name} ${cmd} ${addr} <tx hash>".\n- ${CFG.name}`;
   const paid = await verifyPayment(tx, need.tokens, state);

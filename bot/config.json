@@ -25,10 +25,6 @@
       "deepUsd": 0.25,
       "watchUsd": 0.5
     },
-    "fallbackTokens": {
-      "deep": 1000000,
-      "watch": 2000000
-    },
     "tolerance": 0.9,
     "watchHours": 24,
     "watchEnabled": true
