@@ -652,12 +652,15 @@ async function main() {
     const own = await premiumCommand({ channel: "memecoins" }, `@${CFG.name} deep ${TK.address}`, "tester", 3, state);
     check(/own token/i.test(own ?? ""), "refuses to rate its own token");
 
+    const priced = (await requiredTokens("deep")).priced;
     const noPay = await premiumCommand({ channel: "memecoins" }, `@${CFG.name} deep 0x9cb595fbb3601dc0ef80e87921dc4ffd9307aba3`, "tester", 4, state);
-    check(/send it on|costs about/i.test(noPay ?? ""), "deep without payment asks for payment instead of delivering");
+    check(priced ? /send it on|costs about/i.test(noPay ?? "") : /closed right now/i.test(noPay ?? ""),
+      priced ? "deep without payment asks for payment instead of delivering" : "deep is refused, not quoted, while $PTRD has no price");
     line(noPay);
 
     const fakeTx = await premiumCommand({ channel: "memecoins" }, `@${CFG.name} deep 0x9cb595fbb3601dc0ef80e87921dc4ffd9307aba3 0x${"11".repeat(32)}`, "tester", 5, state);
-    check(/can't accept that payment/i.test(fakeTx ?? ""), "fake payment tx rejected");
+    check(priced ? /can't accept that payment/i.test(fakeTx ?? "") : /closed right now/i.test(fakeTx ?? ""),
+      priced ? "fake payment tx rejected" : "payment not accepted at all while pricing is closed");
     line(fakeTx);
 
     const note = await analystNote({ symbol: "TEST", chain: "base", verdict: "CAUTION", score: 25, flags: ["unverified source"], contractScanned: true, liquidity: 100000, marketCap: 200000, volume24h: 50000, ageH: 30, priceChange: { h1: 1, h6: 2, h24: 3 }, flowH1: { buys: 10, sells: 5 }, holders: 100, top10Pct: 12, sellMax: { p1: 500, p2: 1000, p5: 2600 } }, "is this a good entry?");
