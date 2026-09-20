@@ -1516,7 +1516,11 @@
     34048,
     34047,
     34042,
-    34040
+    34040,
+    34208,
+    34264,
+    34263,
+    34247
   ],
   "threads": [
     13261,
@@ -1525,7 +1529,10 @@
     25798,
     26706,
     24065,
-    30822
+    30822,
+    34264,
+    34263,
+    34247
   ],
   "tokens": [
     "0x89a30118e04ec3e34b303e5cfff9897685cdfba3",
@@ -1534,15 +1541,22 @@
     "0xabf427223acfd46e26da5f2e4d49025b0308dba3",
     "0xff82e1d47d11dc51d55442eee9b0b44f599c5ba3",
     "0x3247eb7f374c57ef267c12f4abc3f31c2a907777",
-    "0xe84549f2f157a0f405fa8b58b1d437a784597ba3"
+    "0xe84549f2f157a0f405fa8b58b1d437a784597ba3",
+    "0x85a574f2ff0795685f58d1d7b0d4b51f148ac489",
+    "0x6245e67affa44a23077f0ea7f981a8dc743a0c47",
+    "0x998f3244fbf39152f2128aed5f4e7926b9954c68"
   ],
-  "replyTimes": [],
+  "replyTimes": [
+    1789917631280,
+    1789917632036,
+    1789917632934
+  ],
   "mentionsSeen": [],
   "watches": [],
   "clock": {
-    "channels": 1789916387923,
-    "watches": 1789916604849,
-    "ledger": 1789915256384
+    "channels": 1789917630098,
+    "watches": 1789917830310,
+    "ledger": 1789917057785
   },
   "ledger": [
     {
@@ -1598,6 +1612,39 @@
       "score": 50,
       "liq": 9520,
       "price": 1.12e-7,
+      "source": "channel"
+    },
+    {
+      "token": "0x85a574f2ff0795685f58d1d7b0d4b51f148ac489",
+      "chain": "robinhood",
+      "symbol": "PRINTER",
+      "t": 1789917630828,
+      "verdict": "OK",
+      "score": 0,
+      "liq": 241133,
+      "price": 0.00375,
+      "source": "channel"
+    },
+    {
+      "token": "0x6245e67affa44a23077f0ea7f981a8dc743a0c47",
+      "chain": "robinhood",
+      "symbol": "FRONG",
+      "t": 1789917631550,
+      "verdict": "OK",
+      "score": 0,
+      "liq": 901806,
+      "price": 0.005743,
+      "source": "channel"
+    },
+    {
+      "token": "0x998f3244fbf39152f2128aed5f4e7926b9954c68",
+      "chain": "robinhood",
+      "symbol": "0XBOT",
+      "t": 1789917632415,
+      "verdict": "OK",
+      "score": 15,
+      "liq": 64071,
+      "price": 0.00007796,
       "source": "channel"
     }
   ]
