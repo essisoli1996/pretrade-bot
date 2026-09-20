@@ -1593,7 +1593,12 @@
     35819,
     35812,
     35942,
-    35856
+    35856,
+    35985,
+    35984,
+    35982,
+    35977,
+    35975
   ],
   "threads": [
     13261,
@@ -1605,7 +1610,8 @@
     30822,
     34264,
     34263,
-    34247
+    34247,
+    35975
   ],
   "tokens": [
     "0x89a30118e04ec3e34b303e5cfff9897685cdfba3",
@@ -1617,14 +1623,17 @@
     "0xe84549f2f157a0f405fa8b58b1d437a784597ba3",
     "0x85a574f2ff0795685f58d1d7b0d4b51f148ac489",
     "0x6245e67affa44a23077f0ea7f981a8dc743a0c47",
-    "0x998f3244fbf39152f2128aed5f4e7926b9954c68"
+    "0x998f3244fbf39152f2128aed5f4e7926b9954c68",
+    "0xd17c81cb01d44cc6e822936e8f098960001b47d2"
   ],
-  "replyTimes": [],
+  "replyTimes": [
+    1789933621312
+  ],
   "mentionsSeen": [],
   "watches": [],
   "clock": {
-    "channels": 1789933306238,
-    "watches": 1789933306628,
+    "channels": 1789933619663,
+    "watches": 1789933908701,
     "ledger": 1789933371219
   },
   "ledger": [
@@ -1720,6 +1729,17 @@
       "score": 15,
       "liq": 64071,
       "price": 0.00007796,
+      "source": "channel"
+    },
+    {
+      "token": "0xd17c81cb01d44cc6e822936e8f098960001b47d2",
+      "chain": "robinhood",
+      "symbol": "HOODCATS",
+      "t": 1789933620692,
+      "verdict": "OK",
+      "score": 0,
+      "liq": 33562,
+      "price": 0.0001677,
       "source": "channel"
     }
   ]
