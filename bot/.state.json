@@ -1024,28 +1024,41 @@
     27610,
     27609,
     27594,
-    27591
+    27591,
+    27653,
+    27674,
+    27671,
+    27659,
+    27723,
+    27761,
+    27748,
+    27746,
+    27745
   ],
   "threads": [
     13261,
     13254,
     22744,
     25798,
-    26706
+    26706,
+    24065
   ],
   "tokens": [
     "0x89a30118e04ec3e34b303e5cfff9897685cdfba3",
     "0x9cb595fbb3601dc0ef80e87921dc4ffd9307aba3",
     "0x91a2dae9699f0b82540b5886b0d8759c22820ba3",
     "0xabf427223acfd46e26da5f2e4d49025b0308dba3",
-    "0xff82e1d47d11dc51d55442eee9b0b44f599c5ba3"
+    "0xff82e1d47d11dc51d55442eee9b0b44f599c5ba3",
+    "0x3247eb7f374c57ef267c12f4abc3f31c2a907777"
   ],
-  "replyTimes": [],
+  "replyTimes": [
+    1789868970060
+  ],
   "mentionsSeen": [],
   "watches": [],
   "clock": {
-    "channels": 1789867744948,
-    "watches": 1789867635939,
+    "channels": 1789868968570,
+    "watches": 1789868860794,
     "ledger": 1789868009192
   },
   "ledger": [
@@ -1080,6 +1093,17 @@
       "score": 25,
       "liq": 8859,
       "price": 1.042e-7,
+      "source": "channel"
+    },
+    {
+      "token": "0x3247eb7f374c57ef267c12f4abc3f31c2a907777",
+      "chain": "bsc",
+      "symbol": "DEBTCATS",
+      "t": 1789868969560,
+      "verdict": "CAUTION",
+      "score": 20,
+      "liq": 21434,
+      "price": 0.00005662,
       "source": "channel"
     }
   ]
