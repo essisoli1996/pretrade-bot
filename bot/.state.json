@@ -939,26 +939,47 @@
     26594,
     26592,
     26587,
-    26557
+    26557,
+    26632,
+    26653,
+    26713,
+    26711,
+    26706,
+    26698,
+    26692,
+    26691,
+    26767,
+    26759,
+    26749,
+    26744,
+    26729,
+    26818,
+    26815,
+    26772,
+    26769
   ],
   "threads": [
     13261,
     13254,
     22744,
-    25798
+    25798,
+    26706
   ],
   "tokens": [
     "0x89a30118e04ec3e34b303e5cfff9897685cdfba3",
     "0x9cb595fbb3601dc0ef80e87921dc4ffd9307aba3",
     "0x91a2dae9699f0b82540b5886b0d8759c22820ba3",
-    "0xabf427223acfd46e26da5f2e4d49025b0308dba3"
+    "0xabf427223acfd46e26da5f2e4d49025b0308dba3",
+    "0xff82e1d47d11dc51d55442eee9b0b44f599c5ba3"
   ],
-  "replyTimes": [],
+  "replyTimes": [
+    1789862199873
+  ],
   "mentionsSeen": [],
   "watches": [],
   "clock": {
-    "channels": 1789860660194,
-    "watches": 1789860900956,
+    "channels": 1789862198578,
+    "watches": 1789862130199,
     "ledger": 1789860770318
   },
   "ledger": [
@@ -982,6 +1003,17 @@
       "score": 50,
       "liq": 8691,
       "price": 1.022e-7,
+      "source": "channel"
+    },
+    {
+      "token": "0xff82e1d47d11dc51d55442eee9b0b44f599c5ba3",
+      "chain": "robinhood",
+      "symbol": "MOOSEBOOK",
+      "t": 1789862199356,
+      "verdict": "CAUTION",
+      "score": 25,
+      "liq": 8859,
+      "price": 1.042e-7,
       "source": "channel"
     }
   ]
