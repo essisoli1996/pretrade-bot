@@ -145,5 +145,21 @@
       "thread": 14814,
       "everyDays": 7
     }
+  },
+  "security": {
+    "rpc": {
+      "base": "https://mainnet.base.org",
+      "ethereum": "https://ethereum-rpc.publicnode.com"
+    },
+    "reputationChains": [
+      "1",
+      "8453"
+    ],
+    "delegationChains": [
+      "ethereum",
+      "base",
+      "robinhood"
+    ],
+    "trusted": {}
   }
 }

@@ -15,8 +15,8 @@
 // On demand: anyone can write "@pretrade <address>" anywhere on the board and gets a check in that thread.
 // Mentions without an address are never auto-answered: they are saved to bot/mentions.log for the human.
 
-import { generateKeyPairSync, createPrivateKey, sign, randomBytes, randomUUID } from "node:crypto";
-import { readFileSync, writeFileSync, existsSync } from "node:fs";
+import { generateKeyPairSync, createPrivateKey, sign, randomBytes, randomUUID, createHash } from "node:crypto";
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -222,7 +222,11 @@ function recordText(state) {
     const med = pcs.length ? `${Math.round(pcs[Math.floor(pcs.length / 2)] * 100)}%` : "n/a";
     return `${v}: ${g.length} reads, ${Math.round((rug / g.length) * 100)}% collapsed within 24h (liquidity −80% or price −90%), median price move ${med}`;
   };
-  return [`track record, all ${done.length} scored reads (nothing removed):`, line("DANGER"), line("CAUTION"), line("OK"), `a good checker shows DANGER collapsing far more often than OK. judge me on that gap.`, `- ${CFG.name}`].join("\n");
+  const misses = done.filter((e) => (e.verdict === "OK" && e.out.rugged) || (e.verdict === "DANGER" && e.out.priceChg !== null && e.out.priceChg >= 0.5 && !e.out.rugged));
+  const ls = misses.slice(-3).map((e) => `$${e.symbol}: said ${e.verdict}, then ${e.out.rugged ? "it collapsed" : `it rose ${Math.round(e.out.priceChg * 100)}%`}`);
+  return [`track record, all ${done.length} scored reads (nothing removed):`, line("DANGER"), line("CAUTION"), line("OK"),
+    `my Ls: ${misses.length} miss(es)${ls.length ? ` — latest: ${ls.join("; ")}` : ""}. losses count more than wins, so they go first on the scoreboard.`,
+    `a good checker shows DANGER collapsing far more often than OK. judge me on that gap.`, `- ${CFG.name}`].join("\n");
 }
 
 // ───────────────────────── analyst note via the Bankr LLM Gateway (optional: needs the BANKR_LLM_KEY secret) ─────────────────────────
@@ -334,7 +338,7 @@ function canonicalFor(state, ticker, tokens) {
   // and require a clear leader. A wrong canonical would accuse the real token, so when in doubt, don't guard that ticker.
   const home = tokens.filter((t) => t.chain === (G.homeChain ?? "robinhood"));
   const [top, second] = home;
-  if (top && top.liq >= (G.seedMinLiquidityUsd ?? 20000) && (!second || top.liq >= second.liq * (G.seedDominance ?? 5))) { state.guard.canonical[ticker] = top.address; return top; }
+  if (top && top.liq >= (G.seedMinLiquidityUsd ?? 20000) && (!second || top.liq >= second.liq * (G.seedDominance ?? 5))) { state.guard.canonical[ticker] = top.address; top.seeded = true; return top; }
   return null;
 }
 
@@ -345,6 +349,13 @@ async function guardScan(identity, state, dry = false) {
     const tokens = await tickerTokens(ticker);
     const canon = canonicalFor(state, ticker, tokens);
     if (!canon) continue;
+    // identity before depth: pin the canonical deployer once, and refuse to guard a canonical whose source is unverified
+    state.guard.deployer = state.guard.deployer ?? {};
+    if (!state.guard.deployer[ticker] && canon.chain && canon.chain !== "?") {
+      const idn = await tokenIdentity(canon.address, canon.chain);
+      if (idn.verified === false && canon.seeded) { delete state.guard.canonical[ticker]; console.log(`guard: not guarding $${ticker}: the leading contract's source is unverified`); continue; }
+      state.guard.deployer[ticker] = idn.deployer ?? "unknown";
+    }
     const firstScan = !state.guard.known[ticker];
     state.guard.known[ticker] = state.guard.known[ticker] ?? [];
     for (const t of tokens) {
@@ -354,8 +365,17 @@ async function guardScan(identity, state, dry = false) {
       const ageH = t.created ? (Date.now() - t.created) / 36e5 : null;
       const live = t.liq >= (G.minLiquidityUsd ?? 1000) || t.trades >= (G.minTrades24h ?? 20);
       if (!live || (ageH !== null && ageH > (G.maxAgeHours ?? 72))) continue;
+      const idn = await tokenIdentity(t.address, t.chain);
+      const canonDep = state.guard.deployer?.[ticker];
+      const sameTailor = idn.deployer && canonDep && canonDep !== "unknown" && idn.deployer === canonDep;
+      if (sameTailor) continue; // same deployer as the original: likely the project's own migration or second pool, not a copycat
+      const evidence = [
+        idn.deployer ? `deployed by ${idn.deployer.slice(0, 10)}…${canonDep && canonDep !== "unknown" ? `, not the original deployer ${canonDep.slice(0, 10)}…` : ""}` : "deployer unknown",
+        idn.verified === false ? "source unverified" : idn.verified ? "source verified" : null,
+      ].filter(Boolean).join(", ");
       const text = [
         `⚠️ copycat alert: a new token is using the ticker $${ticker}.`,
+        `method, in the town's order (costume, tailor, cloth, crowd, then depth): ticker collision → ${evidence} → liquidity only as confirmation.`,
         `copy: ${t.address} on ${t.chain}${ageH !== null ? `, ${ageH < 1 ? "under 1h" : Math.round(ageH) + "h"} old` : ""}, $${Math.round(t.liq).toLocaleString("en-US")} liquidity, ${t.trades} trades in 24h.`,
         `the one the town knows as $${ticker}: ${canon.address}${canon.liq ? `, $${Math.round(canon.liq).toLocaleString("en-US")} liquidity` : ""}.`,
         `if someone handed you the first address as $${ticker}, check it against the project's own announcement before buying. same name is not same token.`,
@@ -402,6 +422,214 @@ async function launchWatch(identity, state, dry = false) {
   return warned;
 }
 
+// ───────────────────────── signing forensics: decode what someone is being asked to sign ─────────────────────────
+// Covers the 2025-26 drain vectors: ERC-20 approve / increaseAllowance, NFT setApprovalForAll, EIP-2612 permit,
+// Permit2 (allowance + signature-transfer), Seaport orders, and EIP-7702 delegation authorizations.
+const S = CFG.security ?? {};
+const UNLIMITED = 2n ** 255n;
+const PERMIT2 = "0x000000000022d473030f116ddee9f6b43ac78ba3";
+const RPC = S.rpc ?? {};
+const CHAIN_BY_ID = { 1: "ethereum", 8453: "base", 4663: "robinhood", 10: "optimism", 42161: "arbitrum", 137: "polygon", 56: "bsc" };
+const SELECTORS = {
+  "095ea7b3": "approve", "39509351": "increaseAllowance", a22cb465: "setApprovalForAll", d505accf: "permit",
+  "87517c45": "permit2.approve", "2b67b570": "permit2.permit", a9059cbb: "transfer", "23b872dd": "transferFrom",
+  ac9650d8: "multicall", "5ae401dc": "multicall", "3593564c": "universalRouter.execute",
+};
+const word = (data, i) => data.slice(10 + 64 * i, 10 + 64 * (i + 1));
+const wAddr = (w) => "0x" + (w ?? "").slice(24).toLowerCase();
+const wInt = (w) => { try { return BigInt("0x" + (w || "0")); } catch { return 0n; } };
+const fmtAmt = (v) => (BigInt(v) >= UNLIMITED ? "UNLIMITED" : BigInt(v).toString());
+
+async function rpcCall(chain, method, params) {
+  const url = chain === "robinhood" ? TK.rpc : RPC[chain];
+  if (!url) return null;
+  const r = await http(url, { jsonrpc: "2.0", id: 1, method, params });
+  return r.json?.result ?? null;
+}
+
+/** EIP-7702: a delegated EOA has code 0xef0100 || delegate address. */
+async function delegationOf(addr, chain) {
+  const code = await rpcCall(chain, "eth_getCode", [addr, "latest"]);
+  if (typeof code !== "string") return { chain, known: false };
+  if (code.toLowerCase().startsWith("0xef0100")) return { chain, known: true, delegatedTo: "0x" + code.slice(8, 48).toLowerCase() };
+  return { chain, known: true, isContract: code !== "0x" && code.length > 2, delegatedTo: null };
+}
+
+async function reputation(addr, chainIds = S.reputationChains ?? ["1", "8453"]) {
+  for (const id of chainIds) {
+    const r = await http(`https://api.gopluslabs.io/api/v1/address_security/${addr}?chain_id=${id}`);
+    const x = r.json?.result ?? {};
+    const bad = ["phishing_activities", "stealing_attack", "blacklist_doubt", "cybercrime", "money_laundering", "honeypot_related_address", "fake_kyc", "sanctioned", "blackmail_activities", "financial_crime", "fake_token", "darkweb_transactions"].filter((k) => yes(x[k]));
+    if (bad.length) return bad.map((b) => b.replace(/_/g, " "));
+  }
+  return [];
+}
+
+/** The addresses the town trusts, used to catch lookalikes (address poisoning). */
+function trustedBook(state) {
+  const book = { ...(S.trusted ?? {}) };
+  for (const [t, a] of Object.entries(state.guard?.canonical ?? {})) book[a.toLowerCase()] = `canonical $${t}`;
+  if (TK.address) book[TK.address.toLowerCase()] = `$${TK.symbol}`;
+  if (TK.payTo) book[TK.payTo.toLowerCase()] = "pretrade's payment wallet";
+  book[PERMIT2] = "Permit2";
+  return book;
+}
+
+function poisoningHits(addrs, state) {
+  const book = trustedBook(state);
+  const hits = [];
+  const evm = [...new Set(addrs.filter((a) => /^0x[0-9a-f]{40}$/i.test(a)).map((a) => a.toLowerCase()))];
+  for (const a of evm) {
+    for (const [t, label] of Object.entries(book)) {
+      if (a === t) continue;
+      const sameHead = a.slice(2, 5) === t.slice(2, 5) || a.slice(2, 6) === t.slice(2, 6);
+      if (sameHead && a.slice(-4) === t.slice(-4)) hits.push(`${a.slice(0, 6)}…${a.slice(-4)} imitates ${label} (${t.slice(0, 6)}…${t.slice(-4)}): same start and end, different middle — the address-poisoning pattern`);
+    }
+  }
+  for (let i = 0; i < evm.length; i++) for (let j = i + 1; j < evm.length; j++) {
+    const [a, b] = [evm[i], evm[j]];
+    if (a.slice(2, 5) === b.slice(2, 5) && a.slice(-4) === b.slice(-4)) hits.push(`two addresses in this message share start and end but differ in the middle (${a.slice(0, 6)}…${a.slice(-4)}): one is likely a poisoned copy`);
+  }
+  return hits;
+}
+
+function extractJson(text) {
+  const start = text.indexOf("{"), end = text.lastIndexOf("}");
+  if (start < 0 || end <= start) return null;
+  try { return JSON.parse(text.slice(start, end + 1)); } catch { return null; }
+}
+
+/** Returns { kind, summary[], risks[{why,pts,crit}], counterparties[{addr,role,chain}] } or null if nothing decodable. */
+function decodeSignable(text) {
+  const out = { kind: null, summary: [], risks: [], counterparties: [] };
+  const risk = (why, pts, crit = false) => out.risks.push({ why, pts, crit });
+  const hex = text.match(/0x[0-9a-fA-F]{8,}/g)?.find((h) => h.length >= 10 && (h.length - 10) % 64 === 0 && SELECTORS[h.slice(2, 10).toLowerCase()]);
+  if (hex) {
+    const d = hex.toLowerCase(); const fn = SELECTORS[d.slice(2, 10)]; out.kind = `calldata: ${fn}`;
+    if (fn === "approve" || fn === "increaseAllowance") {
+      const spender = wAddr(word(d, 0)), amt = wInt(word(d, 1));
+      out.summary.push(`${fn}(spender ${spender}, amount ${fmtAmt(amt)})`); out.counterparties.push({ addr: spender, role: "spender" });
+      if (amt >= UNLIMITED) risk("unlimited token approval: the spender can take the full balance, now or later", 40);
+    } else if (fn === "setApprovalForAll") {
+      const op = wAddr(word(d, 0)), on = wInt(word(d, 1)) === 1n;
+      out.summary.push(`setApprovalForAll(operator ${op}, ${on})`); out.counterparties.push({ addr: op, role: "operator" });
+      if (on) risk("hands one address control of every NFT in this collection", 60, true);
+    } else if (fn === "permit") {
+      const owner = wAddr(word(d, 0)), spender = wAddr(word(d, 1)), amt = wInt(word(d, 2));
+      out.summary.push(`EIP-2612 permit(owner ${owner}, spender ${spender}, amount ${fmtAmt(amt)})`); out.counterparties.push({ addr: spender, role: "spender" });
+      if (amt >= UNLIMITED) risk("unlimited permit", 40);
+    } else if (fn === "transfer" || fn === "transferFrom") {
+      const to = wAddr(word(d, fn === "transfer" ? 0 : 1)); out.summary.push(`${fn} to ${to}`); out.counterparties.push({ addr: to, role: "recipient" });
+    } else {
+      out.summary.push(`${fn}: a batch call that can bundle approvals and transfers. ask for the decoded steps, never sign it blind`);
+      risk("opaque batch call (multicall / router execute)", 20);
+    }
+  }
+  const j = extractJson(text);
+  if (j && typeof j === "object") {
+    const auths = Array.isArray(j.authorizationList) ? j.authorizationList : (j.address && j.chainId !== undefined && j.nonce !== undefined && !j.primaryType ? [j] : []);
+    for (const a of auths) {
+      out.kind = "EIP-7702 delegation";
+      const target = String(a.address ?? a.contractAddress ?? "").toLowerCase(); const cid = Number(a.chainId);
+      out.summary.push(`delegate this wallet's code to ${target} on ${cid === 0 ? "EVERY chain" : CHAIN_BY_ID[cid] ?? "chain " + cid}`);
+      out.counterparties.push({ addr: target, role: "delegate", chain: CHAIN_BY_ID[cid] });
+      risk("EIP-7702 delegation: the delegate contract gets to act as your wallet. most delegations seen in the wild pointed at sweeper contracts", 70, true);
+      if (cid === 0) risk("chainId 0: the delegation is valid on every EVM chain at once", 30, true);
+    }
+    const pt = String(j.primaryType ?? ""); const m = j.message ?? {}; const dom = j.domain ?? {};
+    const chain = CHAIN_BY_ID[Number(dom.chainId)];
+    if (/^Permit$/i.test(pt)) {
+      out.kind = "EIP-712 permit"; out.summary.push(`permit on token ${dom.verifyingContract}: spender ${m.spender}, value ${fmtAmt(m.value ?? 0)}, deadline ${m.deadline}`);
+      out.counterparties.push({ addr: String(m.spender).toLowerCase(), role: "spender", chain });
+      if (BigInt(m.value ?? 0) >= UNLIMITED) risk("unlimited off-chain permit: no gas, no transaction, still a full approval", 45);
+      if (Number(m.deadline) > Date.now() / 1000 + 365 * 864e2) risk("permit valid for more than a year", 10);
+    } else if (/^PermitSingle$|^PermitBatch$/i.test(pt)) {
+      out.kind = "Permit2 allowance"; const det = Array.isArray(m.details) ? m.details : [m.details ?? {}];
+      out.summary.push(`Permit2 allowance to ${m.spender} for ${det.length} token(s): ${det.map((x) => `${x.token} amount ${fmtAmt(x.amount ?? 0)}`).join("; ")}`);
+      out.counterparties.push({ addr: String(m.spender).toLowerCase(), role: "spender", chain });
+      if (det.some((x) => BigInt(x.amount ?? 0) >= 2n ** 159n)) risk("max-amount Permit2 allowance", 35);
+      if (det.length > 1) risk("batch Permit2 across several tokens at once: a common drainer shape", 25);
+    } else if (/PermitTransferFrom|PermitBatchTransferFrom|PermitWitnessTransferFrom/i.test(pt)) {
+      out.kind = "Permit2 signature transfer"; out.summary.push(`Permit2 signature transfer: spender ${m.spender} can pull ${JSON.stringify(m.permitted ?? {}).slice(0, 160)} immediately`);
+      out.counterparties.push({ addr: String(m.spender).toLowerCase(), role: "spender", chain });
+      risk("signature transfer: the spender can move the tokens right away, no further step from you", 55, true);
+    } else if (/OrderComponents|Order$/i.test(pt) && (m.offer || m.consideration)) {
+      out.kind = "Seaport order"; const offerer = String(m.offerer ?? "").toLowerCase();
+      const others = (m.consideration ?? []).filter((c) => String(c.recipient ?? "").toLowerCase() !== offerer);
+      out.summary.push(`marketplace order: you offer ${(m.offer ?? []).length} item(s); ${(m.consideration ?? []).length} payout(s), ${others.length} to other addresses`);
+      const toYou = (m.consideration ?? []).filter((c) => String(c.recipient ?? "").toLowerCase() === offerer).reduce((t, c) => t + BigInt(c.startAmount ?? 0), 0n);
+      if ((m.offer ?? []).length && toYou === 0n) risk("you give items and receive nothing back: the free-listing drain", 70, true);
+    }
+  }
+  if (!out.kind) return null;
+  return out;
+}
+
+async function explainSignable(dec, state) {
+  const findings = dec.risks.map((r) => ({ ...r }));
+  for (const c of dec.counterparties.slice(0, 3)) {
+    if (!/^0x[0-9a-f]{40}$/.test(c.addr)) continue;
+    if (c.addr === PERMIT2) { findings.push({ why: "spender is the real Permit2 contract (check who Permit2 is then asked to pay)", pts: 0 }); continue; }
+    const bad = await reputation(c.addr);
+    if (bad.length) findings.push({ why: `${c.role} ${c.addr.slice(0, 8)}… is flagged for ${bad.join(", ")}`, pts: 100, crit: true });
+    const chain = c.chain ?? "base";
+    const d = await delegationOf(c.addr, chain);
+    if (d.known && c.role !== "recipient" && c.role !== "delegate" && !d.isContract && !d.delegatedTo) findings.push({ why: `${c.role} ${c.addr.slice(0, 8)}… is a plain wallet, not a protocol contract: approvals to wallets are how drains are collected`, pts: 45, crit: true });
+    if (c.role === "delegate" && d.known && !d.isContract) findings.push({ why: `delegate ${c.addr.slice(0, 8)}… has no code on ${chain}: nothing legitimate to delegate to`, pts: 30 });
+  }
+  for (const h of poisoningHits(dec.counterparties.map((c) => c.addr), state)) findings.push({ why: h, pts: 60, crit: true });
+  return findings;
+}
+
+async function walletCheck(addr, state) {
+  const lines = []; let score = 0; let crit = false;
+  const flag = (why, pts, c = false) => { lines.push(why); score += pts; crit ||= c; };
+  const bad = await reputation(addr);
+  if (bad.length) flag(`flagged for ${bad.join(", ")}`, 100, true);
+  for (const chain of S.delegationChains ?? ["ethereum", "base", "robinhood"]) {
+    const d = await delegationOf(addr, chain);
+    if (!d.known) continue;
+    if (d.delegatedTo) {
+      const dbad = await reputation(d.delegatedTo);
+      flag(`EIP-7702: on ${chain} this wallet runs the code of ${d.delegatedTo.slice(0, 10)}…${dbad.length ? ` (flagged: ${dbad.join(", ")})` : ""}. if you didn't set that up on purpose, revoke it now`, dbad.length ? 100 : 40, true);
+    }
+  }
+  for (const h of poisoningHits([addr], state)) flag(h, 60, true);
+  return { lines, verdict: crit || score >= 60 ? "DANGER" : score >= 25 ? "CAUTION" : "OK" };
+}
+
+// ───────────────────────── deployer-first identity ("costume, tailor, cloth, crowd, then depth") ─────────────────────────
+async function tokenIdentity(address, chain) {
+  if (chain === "solana") {
+    const g = await http(`https://api.gopluslabs.io/api/v1/solana/token_security?contract_addresses=${address}`);
+    const gp = g.json?.result?.[address] ?? null;
+    return { deployer: gp?.creators?.[0]?.address ?? null, verified: null };
+  }
+  const id = { base: "8453", ethereum: "1", bsc: "56", arbitrum: "42161", optimism: "10", polygon: "137", robinhood: "4663" }[chain];
+  if (!id) return { deployer: null, verified: null };
+  const g = await http(`https://api.gopluslabs.io/api/v1/token_security/${id}?contract_addresses=${address}`);
+  const x = g.json?.result?.[address.toLowerCase()] ?? null;
+  return { deployer: x?.creator_address?.toLowerCase() ?? null, verified: x ? yes(x.is_open_source) : null };
+}
+
+// ───────────────────────── tamper-evident receipts: weekly snapshot + public fingerprint ─────────────────────────
+function snapshotWeek(state) {
+  const since = state.runner?.lastSnapshot ?? 0;
+  const snap = {
+    period: { from: new Date(since || Date.now() - 7 * 864e5).toISOString(), to: new Date().toISOString() },
+    receipts: (state.receipts ?? []).filter((r) => r.t > since),
+    verdicts: (state.ledger ?? []).filter((e) => e.t > since),
+    previous: state.runner?.lastFingerprint ?? null,
+  };
+  const body = JSON.stringify(snap, null, 1);
+  const fp = createHash("sha256").update(body).digest("hex");
+  const dir = join(HERE, "ledger"); if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
+  const file = `ledger/${new Date().toISOString().slice(0, 10)}.json`;
+  writeFileSync(join(HERE, file), body);
+  state.runner = state.runner ?? {}; state.runner.lastSnapshot = Date.now(); state.runner.lastFingerprint = fp;
+  return { fp, file, n: snap.receipts.length + snap.verdicts.length };
+}
+
 // ───────────────────────── council runner: vet inbound crypto offers before they reach anyone's DMs ─────────────────────────
 // "@pretrade vet <paste the offer: text, links, addresses, handles>". Everything pasted is untrusted input:
 // it is parsed with fixed rules, never followed, and links are defanged in the reply so the bot never spreads them.
@@ -437,7 +665,9 @@ async function domainAgeDays(dom) {
   return Number.isFinite(t) ? Math.floor((Date.now() - t) / 864e5) : null;
 }
 
-async function vetOffer(raw) {
+let VET_STATE = {};
+async function vetOffer(raw, state = {}) {
+  VET_STATE = state;
   const text = String(raw).slice(0, 4000);
   const scored = []; let score = 0; let critical = false; const checked = { links: 0, addresses: 0, handles: 0 };
   const findings = { push: (why) => scored.push({ why, pts: 0 }) };
@@ -472,6 +702,9 @@ async function vetOffer(raw) {
       continue;
     }
     if (isSol(a)) continue;
+    const w = await walletCheck(a, VET_STATE);
+    for (const l of w.lines) add(`wallet ${a.slice(0, 8)}…: ${l}`, w.verdict === "DANGER" ? 60 : 20, w.verdict === "DANGER");
+    if (w.lines.length) continue;
     for (const chainId of R.walletChains ?? ["1", "8453"]) {
       const r = await http(`https://api.gopluslabs.io/api/v1/address_security/${a}?chain_id=${chainId}`);
       const x = r.json?.result ?? {};
@@ -479,6 +712,11 @@ async function vetOffer(raw) {
       if (bad.length) { add(`wallet ${a.slice(0, 8)}… is flagged for ${bad.map((b) => b.replace(/_/g, " ")).join(", ")}`, 100, true); break; }
     }
   }
+
+  // signing forensics: calldata, EIP-712 typed data, EIP-7702 authorizations pasted into the offer
+  const dec = decodeSignable(text);
+  if (dec) { checked.signable = dec.kind; for (const f of await explainSignable(dec, VET_STATE)) add(f.why, f.pts, f.crit); }
+  for (const h of poisoningHits(addressesIn(text), VET_STATE)) add(h, 60, true);
 
   // handles impersonating people the town trusts
   for (const h of [...new Set((text.match(/@([A-Za-z0-9_]{3,20})/g) ?? []).map((x) => x.slice(1).toLowerCase()))]) {
@@ -525,7 +763,7 @@ function vetText(v, note, receiptNo) {
   return [
     `🧾 runner vet: ${head}`,
     v.findings.length ? `why: ${v.findings.slice(0, 5).join("; ")}.` : `why: none of my rules fired on the text, links, addresses or handles.`,
-    `checked: ${v.checked.links} link(s), ${v.checked.addresses} address(es), ${v.checked.handles} handle(s). links are defanged on purpose.`,
+    `checked: ${v.checked.links} link(s), ${v.checked.addresses} address(es), ${v.checked.handles} handle(s)${v.checked.signable ? `, and decoded a ${v.checked.signable}` : ""}. links are defanged on purpose.`,
     ...(note ? [`plain read: ${note}`] : []),
     `next step: ${next}`,
     `logged as receipt #${receiptNo}. "@${CFG.name} receipts" to see them all.`,
@@ -557,7 +795,8 @@ async function councilDigest(identity, state) {
   state.runner = state.runner ?? {};
   if (Date.now() - (state.runner.lastDigest ?? 0) < (d.everyDays ?? 7) * 864e5) return 0;
   if (!state.runner.lastDigest) { state.runner.lastDigest = Date.now(); return 0; } // first digest a full period after launch
-  const text = councilText(state);
+  const snap = snapshotWeek(state);
+  const text = councilText(state).replace(`\n- ${CFG.name}`, `\nweek fingerprint: sha256 ${snap.fp.slice(0, 16)}… of ${snap.file} in my public repo (${snap.n} entries, chained to last week). recompute it yourself: if a single entry changed, it won't match.\n- ${CFG.name}`);
   const res = LIVE ? await postReply(identity, d.channel, d.thread, text) : { ok: true };
   console.log(`\n→ council digest (HTTP ${res.status ?? "dry"}):\n${text}`);
   if (res.ok) state.runner.lastDigest = Date.now();
@@ -629,6 +868,7 @@ function menuText(deep, watch) {
   return [
     `free, and always will be: "@${CFG.name} <token address>" → verdict, risk score, flags, max sell size. EVM + solana.`,
     `my hit rate, also free: "@${CFG.name} record". every read is logged and scored 24h later, nothing removed.`,
+    `signing forensics, free: "@${CFG.name} sign <calldata, EIP-712 json or 7702 request>" decodes what you'd be authorising and checks every counterparty. "@${CFG.name} wallet <address>" checks reputation, 7702 delegations and lookalikes.`,
     `council runner, free: "@${CFG.name} vet <paste an offer>" → i check its links, addresses and handles for scam patterns and answer in the open. "@${CFG.name} council" for the weekly runner log.`,
     `town guard, free: i watch for copycats of the town's tokens and for launches that reuse an existing ticker, and flag them in the open. "@${CFG.name} receipts" lists every catch.`,
     `deep report (safety + exit sizes + momentum + copycat scan + holder concentration${llmOn ? " + an analyst note that answers your question about the token" : ""}): ${priceLine("deep", deep)}.`,
@@ -701,9 +941,27 @@ async function runWatches(identity, state) {
 
 /** Returns reply text for a premium command, or null if the mention is not one. */
 async function premiumCommand(m, text, who, id, state) {
-  const cmd = text.match(new RegExp(`@${CFG.name}\\s+(price|prices|menu|help|deep|watch|record|stats|receipts|vet|council)\\b`, "i"))?.[1]?.toLowerCase();
+  const cmd = text.match(new RegExp(`@${CFG.name}\\s+(price|prices|menu|help|deep|watch|record|stats|receipts|vet|council|sign|wallet)\\b`, "i"))?.[1]?.toLowerCase();
   if (!cmd) return null;
   if (cmd === "council") return councilText(state);
+  if (cmd === "sign") {
+    const full = (await fullPostText(id, text)).replace(new RegExp(`@${CFG.name}\\s+sign:?`, "i"), " ");
+    const dec = decodeSignable(full);
+    if (!dec) return `paste exactly what you're being asked to sign: the calldata (0x…), the EIP-712 json, or the delegation request. i decode it and check every counterparty. "@${CFG.name} sign <paste>"\n- ${CFG.name}`;
+    const f = (await explainSignable(dec, state)).sort((a, b) => (b.crit ? 1000 : 0) + b.pts - (a.crit ? 1000 : 0) - a.pts);
+    const score = Math.min(100, f.reduce((t, x) => t + x.pts, 0)); const crit = f.some((x) => x.crit);
+    const head = crit || score >= 60 ? "🔴 don't sign this." : score >= 25 ? "🟡 understand this before signing." : "⚪ nothing alarming decoded. still confirm the site is the real one.";
+    addReceipt(state, { kind: "signature decoded", ticker: "-", verdict: crit || score >= 60 ? "NO" : score >= 25 ? "CAUTION" : "CLEAR", postId: id });
+    return [`✍️ signing check (${dec.kind}): ${head}`, `what it does: ${dec.summary.join("; ")}.`, ...(f.length ? [`why: ${f.slice(0, 5).map((x) => x.why).join("; ")}.`] : []), `if you already signed an approval you regret, revoke it (revoke.cash or your wallet's approvals page). a 7702 delegation is undone by delegating to the zero address.`, `- ${CFG.name}`].join("\n");
+  }
+  if (cmd === "wallet") {
+    const a = addressesIn(text).find((x) => /^0x/i.test(x));
+    if (!a) return `"@${CFG.name} wallet <0x address>": i check its reputation, whether it has an EIP-7702 delegation on ethereum, base or robinhood, and whether it imitates an address the town trusts.\n- ${CFG.name}`;
+    const w = await walletCheck(a, state);
+    const icon = { OK: "🟢", CAUTION: "🟡", DANGER: "🔴" }[w.verdict];
+    if (w.verdict !== "OK") addReceipt(state, { kind: "wallet flagged", ticker: "-", verdict: w.verdict, address: a.toLowerCase(), postId: id });
+    return [`${icon} wallet ${a.slice(0, 6)}…${a.slice(-4)}: ${w.verdict}`, w.lines.length ? `found: ${w.lines.join("; ")}.` : `no reputation flags, no 7702 delegation on the chains i checked, not a lookalike of anything in my trusted book.`, `- ${CFG.name}`].join("\n");
+  }
   if (cmd === "vet") {
     state.runner = state.runner ?? {}; state.runner.byAuthor = state.runner.byAuthor ?? {};
     const today = new Date().toISOString().slice(0, 10);
@@ -714,7 +972,7 @@ async function premiumCommand(m, text, who, id, state) {
     const full = await fullPostText(id, text);
     const offer = full.replace(new RegExp(`@${CFG.name}\\s+vet:?`, "i"), " ").trim();
     if (offer.length < 12) return `paste the offer after the command: "@${CFG.name} vet <the message you got, with its links, addresses and handles>". i'll read it here, in the open.\n- ${CFG.name}`;
-    const v = await vetOffer(offer);
+    const v = await vetOffer(offer, state);
     const note = await runnerNote(v, offer);
     const receiptNo = (state.receipts ?? []).length + 1;
     addReceipt(state, { kind: "vet", ticker: "-", verdict: v.verdict, postId: id, findings: v.findings.slice(0, 3) });
@@ -989,6 +1247,22 @@ async function main() {
     console.log(vetText(scam, await runnerNote(scam, ""), 0).split("\n").map((l) => "    " + l).join("\n"));
     const fine = await vetOffer("gm, would you be open to a joint AMA next week in the musebook townhall? no payment either way, just want to talk about agent tooling.");
     check(fine.verdict === "CLEAR", `vet: harmless collaboration ask → ${fine.verdict}`);
+    const sp = "0x" + "ab".repeat(20);
+    const appr = decodeSignable("please sign 0x095ea7b3" + "0".repeat(24) + sp.slice(2) + "f".repeat(64));
+    check(appr?.risks.some((r) => /unlimited/.test(r.why)), "sign: decodes an unlimited ERC-20 approve");
+    const p2 = decodeSignable(JSON.stringify({ primaryType: "PermitBatch", domain: { chainId: 8453, verifyingContract: PERMIT2 }, message: { spender: sp, details: [{ token: "0x1", amount: "1461501637330902918203684832716283019655932542975" }, { token: "0x2", amount: "1461501637330902918203684832716283019655932542975" }] } }));
+    check(p2?.kind === "Permit2 allowance" && p2.risks.length >= 2, "sign: flags a max-amount multi-token Permit2 batch");
+    const d7702 = decodeSignable(JSON.stringify({ chainId: 0, address: sp, nonce: 0 }));
+    check(d7702?.risks.some((r) => /every EVM chain/.test(r.why)), "sign: flags an EIP-7702 delegation valid on every chain");
+    const sea = decodeSignable(JSON.stringify({ primaryType: "OrderComponents", message: { offerer: "0xaa", offer: [{ token: "0xnft" }], consideration: [{ recipient: "0xbb", startAmount: "1" }] } }));
+    check(sea?.risks.some((r) => /receive nothing/.test(r.why)), "sign: flags a free-listing Seaport order");
+    const canonAddr = Object.values(gstate.guard.canonical ?? {})[0] ?? "0x91a2dae9699f0b82540b5886b0d8759c22820ba3";
+    const fake = canonAddr.slice(0, 6) + "0".repeat(30) + canonAddr.slice(-4);
+    check(poisoningHits([fake], gstate).length > 0, `poisoning: catches ${fake.slice(0, 6)}…${fake.slice(-4)} imitating a canonical address`);
+    const dl = await delegationOf("0x4200000000000000000000000000000000000006", "base");
+    check(dl.known && dl.isContract && !dl.delegatedTo, "7702 probe reads live code on base (WETH is a contract, not delegated)");
+    const wc = await walletCheck("0x000000000000000000000000000000000000dEaD", gstate);
+    check(!!wc.verdict, `wallet check runs end to end (${wc.verdict})`);
     const rc = receiptsText(state);
     check(/receipts/i.test(rc), "receipts command");
 
