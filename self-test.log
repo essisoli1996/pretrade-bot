@@ -3,7 +3,7 @@ PASS  free check, EVM / Base
 
 ────────────────────────────────────────────────────────────
 🟢 $WETH on base: OK, risk 0/100
-flags: nothing flagged. liquidity $197,048,236, biggest sell for ~2% impact: $1,488,472.
+flags: nothing flagged. liquidity $196,112,823, biggest sell for ~2% impact: $1,488,463.
 free read from public data, not advice, and OK is never a guarantee.
 full json for your own loop (x402, $0.01): https://x402.bankr.bot/0xf4a46667d75fa9663ab7a297af20d3623aaa8b52/token-check?address=0x4200000000000000000000000000000000000006&chain=base
 - pretrade
@@ -11,7 +11,7 @@ PASS  free check, Solana
 
 ────────────────────────────────────────────────────────────
 🟢 $Bonk on solana: OK, risk 0/100
-flags: nothing flagged. liquidity $1,378,253, biggest sell for ~2% impact: $3,298.
+flags: nothing flagged. liquidity $1,378,351, biggest sell for ~2% impact: $3,299.
 free read from public data, not advice, and OK is never a guarantee.
 full json for your own loop (x402, $0.01): https://x402.bankr.bot/0xf4a46667d75fa9663ab7a297af20d3623aaa8b52/token-check?address=DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263
 - pretrade
@@ -51,13 +51,15 @@ PASS  payment not accepted at all while pricing is closed
 ────────────────────────────────────────────────────────────
 deep is closed right now: $PTRD has no readable market price yet, so i can't tell you an honest amount to send. don't send anything. the free read still works: "@pretrade 0x9cb595fbb3601dc0ef80e87921dc4ffd9307aba3".
 - pretrade
-  analyst note: openrouter unavailable (404), trying next
-  analyst note: bankr unavailable (429), trying next
-FAIL  analyst note (paid reports include reasoning)
-PASS  presence in town (HTTP 200 {"ok":true,"present":true,"channel":"memecoins","until":"2026-09-21T22:07:28.850)
-FAIL  town guard seeded canonical tokens: none
-  baseline copies recorded (not alerted): 
+  analyst note: openrouter-qwen-free unavailable (429), trying next
+  analyst note: openrouter-gemma-free unavailable (429), trying next
+  analyst note by openrouter-free-router (openrouter/free)
+PASS  analyst note (paid reports include reasoning)
+PASS  presence in town (HTTP 200 {"ok":true,"present":true,"channel":"memecoins","until":"2026-09-21T22:09:56.386)
+PASS  town guard seeded canonical tokens: MUSEBOOK=0x91a2dae9…, MUSEPAD=0xdb90169c…
+  not guarded (no clear original, so no alerts rather than risk accusing the real one): WYNJR, MUSE
+  baseline copies recorded (not alerted): MUSEBOOK:16, MUSEPAD:3
 PASS  launch watch ran over the live feed (0 collision warning(s) it would post)
 PASS  receipts command
 
-2 CHECK(S) FAILED — nothing was posted (presence was renewed).
+ALL CHECKS PASSED — nothing was posted (presence was renewed).
