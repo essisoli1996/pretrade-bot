@@ -2038,7 +2038,16 @@
     47596,
     47590,
     47581,
-    47580
+    47580,
+    47821,
+    47819,
+    47813,
+    47793,
+    47853,
+    47849,
+    47843,
+    47842,
+    47841
   ],
   "threads": [
     13261,
@@ -2078,12 +2087,12 @@
   "mentionsSeen": [],
   "watches": [],
   "clock": {
-    "channels": 1790030118585,
-    "watches": 1790030120266,
+    "channels": 1790030745025,
+    "watches": 1790030722240,
     "ledger": 1790030162786,
-    "presence": 1790030118098,
-    "launches": 1790030119119,
-    "guard": 1790030119742,
+    "presence": 1790030608356,
+    "launches": 1790030745778,
+    "guard": 1790031029489,
     "digest": 1790030120266
   },
   "ledger": [
@@ -2354,7 +2363,16 @@
       47596,
       47590,
       47581,
-      47580
+      47580,
+      47821,
+      47819,
+      47813,
+      47793,
+      47853,
+      47849,
+      47843,
+      47842,
+      47841
     ],
     "known": {
       "MUSEBOOK": [
@@ -2373,7 +2391,8 @@
         "0xcefbfccd83443e7aa1c493f4df0036013542f301",
         "9vByBALakH19cSvaqvxAXPJHw1m2xYHC34kaR33zpump",
         "XoNRSTVdumBweSderhyp5KezpbSqHK8NWcnyzPWpump",
-        "8dJkfTsszT9uZVHu3tY2vXuSwiABhbcRimgb2Pigpump"
+        "8dJkfTsszT9uZVHu3tY2vXuSwiABhbcRimgb2Pigpump",
+        "APrLQfWx16M9h3qPVTnWkNPESYBoc7du3KFWCE6Npump"
       ],
       "MUSEPAD": [
         "0x61a51b990dd73530c868359871b9545d21642222",
@@ -2384,9 +2403,22 @@
     "canonical": {
       "MUSEBOOK": "0x91a2dae9699f0b82540b5886b0d8759c22820ba3",
       "MUSEPAD": "0xdb90169c179def9111ad7ae8e23f45cc36a0da7b"
-    }
+    },
+    "alertTimes": [
+      1790031030491
+    ]
   },
   "runner": {
     "lastDigest": 1790030120266
-  }
+  },
+  "receipts": [
+    {
+      "t": 1790031030491,
+      "kind": "copycat",
+      "ticker": "MUSEBOOK",
+      "address": "APrLQfWx16M9h3qPVTnWkNPESYBoc7du3KFWCE6Npump",
+      "chain": "solana",
+      "postId": 47879
+    }
+  ]
 }
