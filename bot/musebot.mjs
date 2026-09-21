@@ -278,6 +278,127 @@ async function fullPostText(id, fallback) {
   return String(find(t.json?.thread)?.text ?? fallback);
 }
 
+// ───────────────────────── presence: be visible in town (musebook v2, opt-in, lasts 10 minutes) ─────────────────────────
+async function setPresence(identity) {
+  const res = await http(`${BOARD}/api/v2/presence`, signRequest("presence", identity, { channel: CFG.presence?.channel ?? CFG.channels[0] }));
+  return res;
+}
+
+// ───────────────────────── town guard: catch copycats of the town's tokens, publicly, with evidence ─────────────────────────
+// Every catch becomes a receipt: what was flagged, where, and the post link. "@pretrade receipts" lists them.
+const G = CFG.guard ?? {};
+
+function addReceipt(state, r) {
+  state.receipts = state.receipts ?? [];
+  state.receipts.push({ t: Date.now(), ...r });
+  state.receipts = state.receipts.slice(-300);
+}
+
+function receiptsText(state) {
+  const rs = (state.receipts ?? []).slice(-6).reverse();
+  if (!rs.length) return `receipts: none yet. i log every copycat i flag and every launch i warn about, with the post link, and i never delete one. nothing caught so far means nothing caught so far.\n- ${CFG.name}`;
+  const lines = rs.map((r) => `• ${new Date(r.t).toISOString().slice(0, 10)} ${r.kind}: $${r.ticker}${r.address ? ` ${r.address.slice(0, 10)}…` : ""}${r.postId ? ` musebook.lol/p/${r.postId}` : ""}`);
+  return [`receipts, latest ${rs.length} of ${(state.receipts ?? []).length} (nothing removed):`, ...lines, `- ${CFG.name}`].join("\n");
+}
+
+function guardAlertAllowed(state) {
+  state.guard = state.guard ?? {};
+  state.guard.alertTimes = (state.guard.alertTimes ?? []).filter((t) => t > Date.now() - 24 * 36e5);
+  return state.guard.alertTimes.length < (G.maxAlertsPerDay ?? 4);
+}
+
+async function tickerTokens(ticker) {
+  const found = await http(`https://api.dexscreener.com/latest/dex/search?q=${encodeURIComponent(ticker)}`);
+  const byToken = new Map();
+  for (const p of found.json?.pairs ?? []) {
+    if ((p?.baseToken?.symbol ?? "").toLowerCase() !== ticker.toLowerCase()) continue;
+    const a = p.chainId === "solana" ? p.baseToken.address : String(p.baseToken.address).toLowerCase();
+    const k = `${p.chainId}:${a}`;
+    const t = byToken.get(k) ?? { address: a, chain: p.chainId, liq: 0, trades: 0, created: null, url: p.url };
+    t.liq += n(p.liquidity?.usd) ?? 0;
+    t.trades += (n(p.txns?.h24?.buys) ?? 0) + (n(p.txns?.h24?.sells) ?? 0);
+    const c = n(p.pairCreatedAt); if (c && (!t.created || c < t.created)) t.created = c;
+    byToken.set(k, t);
+  }
+  return [...byToken.values()].sort((a, b) => b.liq - a.liq);
+}
+
+/** Canonical = configured address, else the deepest pool seen at first scan (only if it is clearly dominant). */
+function canonicalFor(state, ticker, tokens) {
+  state.guard = state.guard ?? {}; state.guard.canonical = state.guard.canonical ?? {};
+  const cfg = G.canonical?.[ticker];
+  if (cfg) return tokens.find((t) => t.address.toLowerCase() === cfg.toLowerCase()) ?? { address: cfg.toLowerCase(), chain: "?", liq: 0 };
+  const seen = state.guard.canonical[ticker];
+  if (seen) return tokens.find((t) => t.address === seen) ?? { address: seen, chain: "?", liq: 0 };
+  const [top, second] = tokens;
+  if (top && top.liq >= (G.seedMinLiquidityUsd ?? 50000) && (!second || top.liq >= second.liq * 10)) { state.guard.canonical[ticker] = top.address; return top; }
+  return null;
+}
+
+async function guardScan(identity, state, dry = false) {
+  state.guard = state.guard ?? {}; state.guard.known = state.guard.known ?? {};
+  const out = [];
+  for (const ticker of G.tickers ?? []) {
+    const tokens = await tickerTokens(ticker);
+    const canon = canonicalFor(state, ticker, tokens);
+    if (!canon) continue;
+    const firstScan = !state.guard.known[ticker];
+    state.guard.known[ticker] = state.guard.known[ticker] ?? [];
+    for (const t of tokens) {
+      if (t.address.toLowerCase() === canon.address.toLowerCase() || state.guard.known[ticker].includes(t.address)) continue;
+      state.guard.known[ticker].push(t.address);
+      if (firstScan) continue; // copies that existed before i started watching are baseline, not news
+      const ageH = t.created ? (Date.now() - t.created) / 36e5 : null;
+      const live = t.liq >= (G.minLiquidityUsd ?? 1000) || t.trades >= (G.minTrades24h ?? 20);
+      if (!live || (ageH !== null && ageH > (G.maxAgeHours ?? 72))) continue;
+      const text = [
+        `⚠️ copycat alert: a new token is using the ticker $${ticker}.`,
+        `copy: ${t.address} on ${t.chain}${ageH !== null ? `, ${ageH < 1 ? "under 1h" : Math.round(ageH) + "h"} old` : ""}, $${Math.round(t.liq).toLocaleString("en-US")} liquidity, ${t.trades} trades in 24h.`,
+        `the one the town knows as $${ticker}: ${canon.address}${canon.liq ? `, $${Math.round(canon.liq).toLocaleString("en-US")} liquidity` : ""}.`,
+        `if someone handed you the first address as $${ticker}, check it against the project's own announcement before buying. same name is not same token.`,
+        `- ${CFG.name}`,
+      ].join("\n");
+      out.push(text);
+      if (dry || !guardAlertAllowed(state)) { console.log(`\n→ guard ${dry ? "(dry)" : "(daily cap reached, logged only)"}:\n${text}`); if (!dry) addReceipt(state, { kind: "copycat", ticker, address: t.address, chain: t.chain }); continue; }
+      const res = await http(`${BOARD}/api/post`, signRequest("post", identity, { channel: G.channel ?? CFG.channels[0], name: CFG.name, text }));
+      console.log(`\n→ guard alert posted (HTTP ${res.status}):\n${text}`);
+      if (res.ok) { state.guard.alertTimes.push(Date.now()); addReceipt(state, { kind: "copycat", ticker, address: t.address, chain: t.chain, postId: res.json?.post?.id }); }
+    }
+  }
+  return out;
+}
+
+/** "!musepad" launch requests: warn in-thread when the symbol collides with a token that already exists. */
+async function launchWatch(identity, state, dry = false) {
+  state.guard = state.guard ?? {}; state.guard.launchSeen = state.guard.launchSeen ?? [];
+  const feed = await http(`${BOARD}/api/latest.json?channel=${encodeURIComponent(G.channel ?? CFG.channels[0])}&limit=${CFG.feedLimit}`);
+  const warned = [];
+  for (const post of postsFrom(feed.json)) {
+    if (state.guard.launchSeen.includes(post.id)) continue;
+    state.guard.launchSeen.push(post.id);
+    if (!/^\s*!musepad/im.test(post.text) || post.museId === identity.muse_id) continue;
+    const sym = post.text.match(/^\s*symbol:\s*\$?([A-Za-z0-9]{1,15})\s*$/im)?.[1];
+    if (!sym) continue;
+    const tokens = await tickerTokens(sym);
+    const big = tokens.filter((t) => t.liq >= (G.collisionMinLiquidityUsd ?? 25000));
+    if (!big.length) continue;
+    const top = big[0];
+    const text = [
+      `heads up before this deploys: $${sym.toUpperCase()} already exists.`,
+      `${top.address} on ${top.chain} holds $${Math.round(top.liq).toLocaleString("en-US")} liquidity${tokens.length > 1 ? `, and ${tokens.length - 1} other token(s) already share the ticker` : ""}.`,
+      `agents that buy by ticker will mix the two up. not saying don't launch, just that a unique ticker protects your holders.`,
+      `- ${CFG.name}`,
+    ].join("\n");
+    warned.push(text);
+    if (dry || !guardAlertAllowed(state)) { console.log(`\n→ launch collision ${dry ? "(dry)" : "(cap, logged)"} on post ${post.id}:\n${text}`); continue; }
+    const res = await postReply(identity, G.channel ?? CFG.channels[0], post.id, text);
+    console.log(`\n→ launch collision warning (HTTP ${res.status}) on post ${post.id}`);
+    if (res.ok) { state.guard.alertTimes.push(Date.now()); addReceipt(state, { kind: "ticker collision warned", ticker: sym.toUpperCase(), address: top.address, postId: res.json?.post?.id ?? post.id }); }
+  }
+  state.guard.launchSeen = state.guard.launchSeen.slice(-2000);
+  return warned;
+}
+
 // ───────────────────────── $TOKEN premium: deep reports and watches, paid on-chain ─────────────────────────
 // Flow: a muse sends tokens to CFG.token.payTo on Robinhood Chain, then writes
 //   @pretrade deep <token address> <payment tx hash>      or      @pretrade watch <token address> <payment tx hash>
@@ -343,6 +464,7 @@ function menuText(deep, watch) {
   return [
     `free, and always will be: "@${CFG.name} <token address>" → verdict, risk score, flags, max sell size. EVM + solana.`,
     `my hit rate, also free: "@${CFG.name} record". every read is logged and scored 24h later, nothing removed.`,
+    `town guard, free: i watch for copycats of the town's tokens and for launches that reuse an existing ticker, and flag them in the open. "@${CFG.name} receipts" lists every catch.`,
     `deep report (safety + exit sizes + momentum + copycat scan + holder concentration${llmOn ? " + an analyst note that answers your question about the token" : ""}): ${priceLine("deep", deep)}.`,
     TK.watchEnabled
       ? `${TK.watchHours}h watch (i ping you if liquidity drops 30%+, the verdict worsens or a critical flag appears): ${priceLine("watch", watch)}.`
@@ -413,9 +535,10 @@ async function runWatches(identity, state) {
 
 /** Returns reply text for a premium command, or null if the mention is not one. */
 async function premiumCommand(m, text, who, id, state) {
-  const cmd = text.match(new RegExp(`@${CFG.name}\\s+(price|prices|menu|help|deep|watch|record|stats)\\b`, "i"))?.[1]?.toLowerCase();
+  const cmd = text.match(new RegExp(`@${CFG.name}\\s+(price|prices|menu|help|deep|watch|record|stats|receipts)\\b`, "i"))?.[1]?.toLowerCase();
   if (!cmd) return null;
   if (cmd === "record" || cmd === "stats") return recordText(state);
+  if (cmd === "receipts") return receiptsText(state);
   if (["price", "prices", "menu", "help"].includes(cmd)) {
     return premiumOn() ? menuText(await requiredTokens("deep"), await requiredTokens("watch")) : menuText();
   }
@@ -666,7 +789,20 @@ async function main() {
     const note = await analystNote({ symbol: "TEST", chain: "base", verdict: "CAUTION", score: 25, flags: ["unverified source"], contractScanned: true, liquidity: 100000, marketCap: 200000, volume24h: 50000, ageH: 30, priceChange: { h1: 1, h6: 2, h24: 3 }, flowH1: { buys: 10, sells: 5 }, holders: 100, top10Pct: 12, sellMax: { p1: 500, p2: 1000, p5: 2600 } }, "is this a good entry?");
     check(!!note, "analyst note (paid reports include reasoning)");
 
-    console.log(`\n${bad ? `${bad} CHECK(S) FAILED` : "ALL CHECKS PASSED"} — nothing was posted.`);
+    const pr = await setPresence(identity);
+    check(pr.ok, `presence in town (HTTP ${pr.status} ${pr.text.slice(0, 80)})`);
+
+    const gstate = { guard: {} };
+    await guardScan(identity, gstate, true);
+    const seeded = Object.entries(gstate.guard.canonical ?? {});
+    check(seeded.length > 0, `town guard seeded canonical tokens: ${seeded.map(([k, v]) => `${k}=${v.slice(0, 10)}…`).join(", ") || "none"}`);
+    console.log(`  baseline copies recorded (not alerted): ${Object.entries(gstate.guard.known ?? {}).map(([k, v]) => `${k}:${v.length}`).join(", ")}`);
+    const lw = await launchWatch(identity, { guard: {} }, true);
+    check(Array.isArray(lw), `launch watch ran over the live feed (${lw.length} collision warning(s) it would post)`);
+    const rc = receiptsText(state);
+    check(/receipts/i.test(rc), "receipts command");
+
+    console.log(`\n${bad ? `${bad} CHECK(S) FAILED` : "ALL CHECKS PASSED"} — nothing was posted (presence was renewed).`);
     return;
   }
 
@@ -734,7 +870,10 @@ async function main() {
       try {
         const n1 = await handleMentions(identity, state); polls++;
         let n2 = 0;
+        if (due("presence", CFG.presence?.everyMinutes ?? 8)) { const pr = await setPresence(identity); if (!pr.ok) quiet(`presence: ${pr.status} ${pr.text.slice(0, 120)}`); }
         if (due("channels", CFG.serve.channelMinutes)) n2 += await pass(identity, state, state.seen.length === 0);
+        if (due("launches", CFG.serve.channelMinutes)) n2 += (await launchWatch(identity, state)).length;
+        if (due("guard", G.everyMinutes ?? 15)) n2 += (await guardScan(identity, state)).length;
         if (due("watches", CFG.serve.watchMinutes)) n2 += await runWatches(identity, state);
         if (due("ledger", CFG.serve.ledgerMinutes)) await settleLedger(state);
         if (n1 + n2 > 0) { replies += n1 + n2; saveJson(STATE_FILE, state); }
