@@ -385,7 +385,7 @@ async function guardScan(identity, state, dry = false) {
       if (dry || !guardAlertAllowed(state)) { console.log(`\n→ guard ${dry ? "(dry)" : "(daily cap reached, logged only)"}:\n${text}`); if (!dry) addReceipt(state, { kind: "copycat", ticker, address: t.address, chain: t.chain }); continue; }
       const res = await http(`${BOARD}/api/post`, signRequest("post", identity, { channel: G.channel ?? CFG.channels[0], name: CFG.name, text }));
       console.log(`\n→ guard alert posted (HTTP ${res.status}):\n${text}`);
-      if (res.ok) { state.guard.alertTimes.push(Date.now()); addReceipt(state, { kind: "copycat", ticker, address: t.address, chain: t.chain, postId: res.json?.post?.id }); }
+      if (res.ok) { state.guard.alertTimes.push(Date.now()); addReceipt(state, { kind: "copycat", ticker, address: t.address, chain: t.chain, postId: res.json?.post?.id }); state.ownPosts = state.ownPosts ?? []; if (res.json?.post?.id) state.ownPosts.push(res.json.post.id); }
     }
   }
   return out;
@@ -1036,9 +1036,12 @@ function addressesIn(text) {
   return [...new Set([...evm, ...sol])];
 }
 
+let OWN_POSTS = null; // bound to state.ownPosts by the runner loop
 async function postReply(identity, channel, parentId, text) {
   const body = signRequest("post", identity, { channel, name: CFG.name, text, parent_post_id: parentId });
-  return http(`${BOARD}/api/post`, body);
+  const res = await http(`${BOARD}/api/post`, body);
+  const id = res.json?.post?.id; if (id && OWN_POSTS) { OWN_POSTS.push(id); if (OWN_POSTS.length > 2000) OWN_POSTS.splice(0, OWN_POSTS.length - 2000); }
+  return res;
 }
 
 // On-demand checks: "@pretrade <address>" anywhere on the board.
@@ -1118,7 +1121,11 @@ async function pass(identity, state, indexOnly = false) {
       if (state.threads.includes(thread)) continue;
 
       if (new RegExp(`@${CFG.name}\\b`, "i").test(post.text)) continue; // handled by the mentions inbox
-      const addrs = addressesIn(post.text).filter((x) => !state.tokens.includes(x) && !isOwnToken(x));
+      // don't re-check inside my own alert threads, or addresses i already filed as copycats
+      state.ownPosts = state.ownPosts ?? [];
+      if (post.parent && state.ownPosts.includes(post.parent)) continue;
+      const filed = new Set(Object.values(state.guard?.known ?? {}).flat().map((x) => String(x).toLowerCase()));
+      const addrs = addressesIn(post.text).filter((x) => !state.tokens.includes(x) && !isOwnToken(x) && !filed.has(x.toLowerCase()));
       if (addrs.length !== 1) continue; // none, or a list: a single reply would be noise
 
       const check = await quickCheck(addrs[0]);
@@ -1333,6 +1340,8 @@ async function main() {
     const pollMs = Math.max(10, arg("--poll", 20)) * 1000;
     const state = loadJson(STATE_FILE, { seen: [], threads: [], tokens: [], replyTimes: [] });
     state.clock = state.clock ?? {};
+    state.ownPosts = state.ownPosts ?? (state.receipts ?? []).map((r) => r.postId).filter(Boolean);
+    OWN_POSTS = state.ownPosts;
     const due = (k, everyMin) => { if (Date.now() - (state.clock[k] ?? 0) < everyMin * 60_000) return false; state.clock[k] = Date.now(); return true; };
     const quiet = console.log; let replies = 0, polls = 0, backoff = 0;
     while (Date.now() < end) {
