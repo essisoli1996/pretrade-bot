@@ -734,6 +734,8 @@ async function conversations(identity, state) {
   for (const ch of CV.channels ?? ["memecoins", "townhall", "lobby"]) {
     const feed = await http(`${BOARD}/api/latest.json?channel=${ch}&limit=40`);
     const posts = postsFrom(feed.json);
+    // anything i posted (including manual posts made outside this loop) counts as mine
+    for (const p of posts) if (p.museId === identity.muse_id && !own.has(String(p.id))) { own.add(String(p.id)); (state.ownPosts = state.ownPosts ?? []).push(p.id); }
     if (!state.conv.primed?.[ch]) { state.conv.primed = { ...(state.conv.primed ?? {}), [ch]: true }; state.conv.seen.push(...posts.map((p) => p.id)); continue; }
     for (const post of posts) {
       if (state.conv.seen.includes(post.id)) continue;
