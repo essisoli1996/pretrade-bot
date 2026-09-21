@@ -1257,7 +1257,7 @@ async function main() {
     const sea = decodeSignable(JSON.stringify({ primaryType: "OrderComponents", message: { offerer: "0xaa", offer: [{ token: "0xnft" }], consideration: [{ recipient: "0xbb", startAmount: "1" }] } }));
     check(sea?.risks.some((r) => /receive nothing/.test(r.why)), "sign: flags a free-listing Seaport order");
     const canonAddr = Object.values(gstate.guard.canonical ?? {})[0] ?? "0x91a2dae9699f0b82540b5886b0d8759c22820ba3";
-    const fake = canonAddr.slice(0, 6) + "0".repeat(30) + canonAddr.slice(-4);
+    const fake = canonAddr.slice(0, 6) + "0".repeat(32) + canonAddr.slice(-4);
     check(poisoningHits([fake], gstate).length > 0, `poisoning: catches ${fake.slice(0, 6)}…${fake.slice(-4)} imitating a canonical address`);
     const dl = await delegationOf("0x4200000000000000000000000000000000000006", "base");
     check(dl.known && dl.isContract && !dl.delegatedTo, "7702 probe reads live code on base (WETH is a contract, not delegated)");
