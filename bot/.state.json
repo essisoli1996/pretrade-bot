@@ -2047,7 +2047,23 @@
     47849,
     47843,
     47842,
-    47841
+    47841,
+    47880,
+    47879,
+    47877,
+    47870,
+    47868,
+    47866,
+    47862,
+    47861,
+    47858,
+    47854,
+    47901,
+    47898,
+    47885,
+    47884,
+    47947,
+    47945
   ],
   "threads": [
     13261,
@@ -2064,7 +2080,8 @@
     38311,
     38467,
     40142,
-    47410
+    47410,
+    47879
   ],
   "tokens": [
     "0x89a30118e04ec3e34b303e5cfff9897685cdfba3",
@@ -2081,18 +2098,21 @@
     "27pbcjz2K3u1HKcoaigftSJNEga8w5zxDvmQNK46YnkP",
     "A9AVBXj8C7aNdbTqrGfUTqGTmagA8cRxo4PrgC796cV5",
     "0xffdb767ffe602d5bc8c06952f67056f113a87777",
-    "0x93f79007c51c40d3b756c1c65e104017cdb52c97"
+    "0x93f79007c51c40d3b756c1c65e104017cdb52c97",
+    "APrLQfWx16M9h3qPVTnWkNPESYBoc7du3KFWCE6Npump"
   ],
-  "replyTimes": [],
+  "replyTimes": [
+    1790031673104
+  ],
   "mentionsSeen": [],
   "watches": [],
   "clock": {
-    "channels": 1790030745025,
-    "watches": 1790030722240,
-    "ledger": 1790030162786,
-    "presence": 1790030608356,
-    "launches": 1790030745778,
-    "guard": 1790031029489,
+    "channels": 1790031668335,
+    "watches": 1790031942791,
+    "ledger": 1790031963673,
+    "presence": 1790031602472,
+    "launches": 1790031673105,
+    "guard": 1790031942289,
     "digest": 1790030120266
   },
   "ledger": [
@@ -2303,6 +2323,17 @@
       "liq": 18877,
       "price": 0.00001632,
       "source": "channel"
+    },
+    {
+      "token": "APrLQfWx16M9h3qPVTnWkNPESYBoc7du3KFWCE6Npump",
+      "chain": "solana",
+      "symbol": "musebook",
+      "t": 1790031669883,
+      "verdict": "CAUTION",
+      "score": 35,
+      "liq": 0,
+      "price": 0.000003461,
+      "source": "channel"
     }
   ],
   "guard": {
@@ -2372,7 +2403,24 @@
       47849,
       47843,
       47842,
-      47841
+      47841,
+      47880,
+      47879,
+      47877,
+      47870,
+      47868,
+      47866,
+      47862,
+      47861,
+      47858,
+      47854,
+      47901,
+      47898,
+      47885,
+      47884,
+      47953,
+      47947,
+      47945
     ],
     "known": {
       "MUSEBOOK": [
