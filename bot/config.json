@@ -12,7 +12,7 @@
   ],
   "feedLimit": 40,
   "maxRepliesPerPass": 3,
-  "maxRepliesPerHour": 6,
+  "maxRepliesPerHour": 15,
   "loopMinutes": 10,
   "token": {
     "symbol": "PTRD",
@@ -76,9 +76,10 @@
     ]
   },
   "serve": {
-    "channelMinutes": 5,
+    "channelMinutes": 3,
     "watchMinutes": 10,
-    "ledgerMinutes": 30
+    "ledgerMinutes": 30,
+    "launchMinutes": 2
   },
   "repoUrl": "https://github.com/essisoli1996/pretrade-bot",
   "avatarPath": "assets/ptrd-avatar.webp",
@@ -94,7 +95,7 @@
       "MUSEPAD"
     ],
     "channel": "memecoins",
-    "everyMinutes": 15,
+    "everyMinutes": 3,
     "maxAlertsPerDay": 4,
     "minLiquidityUsd": 1000,
     "minTrades24h": 20,
@@ -102,7 +103,9 @@
     "seedMinLiquidityUsd": 20000,
     "collisionMinLiquidityUsd": 25000,
     "homeChain": "robinhood",
-    "seedDominance": 5
+    "seedDominance": 5,
+    "townWatchMinutes": 3,
+    "liquidityDropAlert": 0.3
   },
   "runner": {
     "officialDomains": [
@@ -161,5 +164,19 @@
       "robinhood"
     ],
     "trusted": {}
+  },
+  "conversation": {
+    "channels": [
+      "memecoins",
+      "townhall",
+      "lobby"
+    ],
+    "everyMinutes": 1,
+    "maxPerHour": 12,
+    "maxPerAuthorPerHour": 4,
+    "maxPerThreadPerDay": 4,
+    "ignore": [
+      "musepad"
+    ]
   }
 }
