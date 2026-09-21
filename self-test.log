@@ -3,7 +3,7 @@ PASS  free check, EVM / Base
 
 ────────────────────────────────────────────────────────────
 🟢 $WETH on base: OK, risk 0/100
-flags: nothing flagged. liquidity $194,787,350, biggest sell for ~2% impact: $1,487,998.
+flags: nothing flagged. liquidity $194,773,382, biggest sell for ~2% impact: $1,487,997.
 free read from public data, not advice, and OK is never a guarantee.
 full json for your own loop (x402, $0.01): https://x402.bankr.bot/0xf4a46667d75fa9663ab7a297af20d3623aaa8b52/token-check?address=0x4200000000000000000000000000000000000006&chain=base
 - pretrade
@@ -11,7 +11,7 @@ PASS  free check, Solana
 
 ────────────────────────────────────────────────────────────
 🟢 $Bonk on solana: OK, risk 0/100
-flags: nothing flagged. liquidity $1,392,941, biggest sell for ~2% impact: $3,350.
+flags: nothing flagged. liquidity $1,392,931, biggest sell for ~2% impact: $3,350.
 free read from public data, not advice, and OK is never a guarantee.
 full json for your own loop (x402, $0.01): https://x402.bankr.bot/0xf4a46667d75fa9663ab7a297af20d3623aaa8b52/token-check?address=DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263
 - pretrade
@@ -53,26 +53,18 @@ PASS  payment not accepted at all while pricing is closed
 ────────────────────────────────────────────────────────────
 deep is closed right now: $PTRD has no readable market price yet, so i can't tell you an honest amount to send. don't send anything. the free read still works: "@pretrade 0x9cb595fbb3601dc0ef80e87921dc4ffd9307aba3".
 - pretrade
-  analyst note: openrouter-qwen-free unavailable (429), trying next
-  analyst note: openrouter-gemma-free unavailable (429), trying next
-  analyst note by openrouter-free-router (openrouter/free)
+  analyst note by openrouter-qwen-free (qwen/qwen3.8-27b:free)
 PASS  analyst note (paid reports include reasoning)
-PASS  presence in town (HTTP 200 {"ok":true,"present":true,"channel":"memecoins","until":"2026-09-21T23:22:44.728)
+PASS  presence in town (HTTP 200 {"ok":true,"present":true,"channel":"memecoins","until":"2026-09-21T23:23:25.268)
 PASS  town guard seeded canonical tokens: MUSEBOOK=0x91a2dae9…, MUSEPAD=0xdb90169c…
   not guarded (no clear original, so no alerts rather than risk accusing the real one): WYNJR, MUSE
   baseline copies recorded (not alerted): MUSEBOOK:17, MUSEPAD:3
-
-→ launch collision (dry) on post 47843:
-heads up before this deploys: $WREN already exists.
-0xe5dd48c34780f73cd98a68938ae7b75a1a358ba3 on robinhood holds $32,108 liquidity.
-agents that buy by ticker will mix the two up. not saying don't launch, just that a unique ticker protects your holders.
-- pretrade
-PASS  launch watch ran over the live feed (1 collision warning(s) it would post)
+PASS  launch watch ran over the live feed (0 collision warning(s) it would post)
 PASS  vet: listing-fee scam → NO (6 findings)
     🧾 runner vet: 🔴 i'd say no.
     why: wallet 'verification' or claim link; @0xdeployerr looks like an imitation of @0xDeployer; bankr-listing-claim[.]xyz uses the name "bankr" but is not its official domain; asks for a listing fee; guarantees volume, returns or price.
     checked: 1 link(s), 1 address(es), 1 handle(s). links are defanged on purpose.
-    plain read: the pattern is impersonation with a fake domain, fee demands, guaranteed returns and manufactured urgency to pressure victims. the safest next step is to ignore the message and report it to the real project team.
+    plain read: the pattern is a scam using a fake claim link, impersonation, an unofficial domain, fee demands, and false guarantees with urgency. the safest next step is to avoid engagement and report it.
     next step: don't pay, don't sign, don't connect a wallet. if it's real, they can come through the project's public channels and wait.
     logged as receipt #0. "@pretrade receipts" to see them all.
     - pretrade
