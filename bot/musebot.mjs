@@ -330,8 +330,11 @@ function canonicalFor(state, ticker, tokens) {
   if (cfg) return tokens.find((t) => t.address.toLowerCase() === cfg.toLowerCase()) ?? { address: cfg.toLowerCase(), chain: "?", liq: 0 };
   const seen = state.guard.canonical[ticker];
   if (seen) return tokens.find((t) => t.address === seen) ?? { address: seen, chain: "?", liq: 0 };
-  const [top, second] = tokens;
-  if (top && top.liq >= (G.seedMinLiquidityUsd ?? 50000) && (!second || top.liq >= second.liq * 10)) { state.guard.canonical[ticker] = top.address; return top; }
+  // Auto-seed only when the answer is unambiguous: the town lives on Robinhood Chain, so compare Robinhood tokens,
+  // and require a clear leader. A wrong canonical would accuse the real token, so when in doubt, don't guard that ticker.
+  const home = tokens.filter((t) => t.chain === (G.homeChain ?? "robinhood"));
+  const [top, second] = home;
+  if (top && top.liq >= (G.seedMinLiquidityUsd ?? 20000) && (!second || top.liq >= second.liq * (G.seedDominance ?? 5))) { state.guard.canonical[ticker] = top.address; return top; }
   return null;
 }
 
@@ -796,6 +799,8 @@ async function main() {
     await guardScan(identity, gstate, true);
     const seeded = Object.entries(gstate.guard.canonical ?? {});
     check(seeded.length > 0, `town guard seeded canonical tokens: ${seeded.map(([k, v]) => `${k}=${v.slice(0, 10)}…`).join(", ") || "none"}`);
+    const skipped = (G.tickers ?? []).filter((t) => !(gstate.guard.canonical ?? {})[t]);
+    if (skipped.length) console.log(`  not guarded (no clear original, so no alerts rather than risk accusing the real one): ${skipped.join(", ")}`);
     console.log(`  baseline copies recorded (not alerted): ${Object.entries(gstate.guard.known ?? {}).map(([k, v]) => `${k}:${v.length}`).join(", ")}`);
     const lw = await launchWatch(identity, { guard: {} }, true);
     check(Array.isArray(lw), `launch watch ran over the live feed (${lw.length} collision warning(s) it would post)`);

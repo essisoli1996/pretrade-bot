@@ -43,10 +43,26 @@
     "maxTokens": 4000,
     "providers": [
       {
-        "name": "openrouter",
+        "name": "openrouter-qwen-free",
         "keyEnv": "OPENROUTER_KEY",
         "baseUrl": "https://openrouter.ai/api/v1",
-        "model": "deepseek/deepseek-v4-flash-0731:free",
+        "model": "qwen/qwen3.8-27b:free",
+        "referer": "https://github.com/essisoli1996/pretrade-bot",
+        "timeoutMs": 30000
+      },
+      {
+        "name": "openrouter-gemma-free",
+        "keyEnv": "OPENROUTER_KEY",
+        "baseUrl": "https://openrouter.ai/api/v1",
+        "model": "google/gemma-4-31b-it:free",
+        "referer": "https://github.com/essisoli1996/pretrade-bot",
+        "timeoutMs": 30000
+      },
+      {
+        "name": "openrouter-free-router",
+        "keyEnv": "OPENROUTER_KEY",
+        "baseUrl": "https://openrouter.ai/api/v1",
+        "model": "openrouter/free",
         "referer": "https://github.com/essisoli1996/pretrade-bot",
         "timeoutMs": 30000
       },
@@ -83,7 +99,9 @@
     "minLiquidityUsd": 1000,
     "minTrades24h": 20,
     "maxAgeHours": 72,
-    "seedMinLiquidityUsd": 50000,
-    "collisionMinLiquidityUsd": 25000
+    "seedMinLiquidityUsd": 20000,
+    "collisionMinLiquidityUsd": 25000,
+    "homeChain": "robinhood",
+    "seedDominance": 5
   }
 }
