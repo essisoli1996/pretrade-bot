@@ -3,7 +3,7 @@ PASS  free check, EVM / Base
 
 ────────────────────────────────────────────────────────────
 🟢 $WETH on base: OK, risk 0/100
-flags: nothing flagged. liquidity $194,934,235, biggest sell for ~2% impact: $1,485,421.
+flags: nothing flagged. liquidity $194,787,350, biggest sell for ~2% impact: $1,487,998.
 free read from public data, not advice, and OK is never a guarantee.
 full json for your own loop (x402, $0.01): https://x402.bankr.bot/0xf4a46667d75fa9663ab7a297af20d3623aaa8b52/token-check?address=0x4200000000000000000000000000000000000006&chain=base
 - pretrade
@@ -11,7 +11,7 @@ PASS  free check, Solana
 
 ────────────────────────────────────────────────────────────
 🟢 $Bonk on solana: OK, risk 0/100
-flags: nothing flagged. liquidity $1,393,165, biggest sell for ~2% impact: $3,346.
+flags: nothing flagged. liquidity $1,392,941, biggest sell for ~2% impact: $3,350.
 free read from public data, not advice, and OK is never a guarantee.
 full json for your own loop (x402, $0.01): https://x402.bankr.bot/0xf4a46667d75fa9663ab7a297af20d3623aaa8b52/token-check?address=DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263
 - pretrade
@@ -19,7 +19,7 @@ PASS  free check, Robinhood Chain
 
 ────────────────────────────────────────────────────────────
 🟢 $musegram on robinhood: OK, risk 0/100
-flags: nothing flagged. liquidity $100,602, biggest sell for ~2% impact: $1,024.
+flags: nothing flagged. liquidity $101,336, biggest sell for ~2% impact: $1,031.
 free read from public data, not advice, and OK is never a guarantee.
 full json for your own loop (x402, $0.01): https://x402.bankr.bot/0xf4a46667d75fa9663ab7a297af20d3623aaa8b52/token-check?address=0x9cb595fbb3601dc0ef80e87921dc4ffd9307aba3&chain=robinhood
 - pretrade
@@ -57,7 +57,7 @@ deep is closed right now: $PTRD has no readable market price yet, so i can't tel
   analyst note: openrouter-gemma-free unavailable (429), trying next
   analyst note by openrouter-free-router (openrouter/free)
 PASS  analyst note (paid reports include reasoning)
-PASS  presence in town (HTTP 200 {"ok":true,"present":true,"channel":"memecoins","until":"2026-09-21T23:19:19.204)
+PASS  presence in town (HTTP 200 {"ok":true,"present":true,"channel":"memecoins","until":"2026-09-21T23:22:44.728)
 PASS  town guard seeded canonical tokens: MUSEBOOK=0x91a2dae9…, MUSEPAD=0xdb90169c…
   not guarded (no clear original, so no alerts rather than risk accusing the real one): WYNJR, MUSE
   baseline copies recorded (not alerted): MUSEBOOK:17, MUSEPAD:3
@@ -72,7 +72,7 @@ PASS  vet: listing-fee scam → NO (6 findings)
     🧾 runner vet: 🔴 i'd say no.
     why: wallet 'verification' or claim link; @0xdeployerr looks like an imitation of @0xDeployer; bankr-listing-claim[.]xyz uses the name "bankr" but is not its official domain; asks for a listing fee; guarantees volume, returns or price.
     checked: 1 link(s), 1 address(es), 1 handle(s). links are defanged on purpose.
-    plain read: impersonation of a known deployer with a fake bankr domain demands a listing fee and promises guaranteed returns under pressure. do not connect your wallet or pay any fees; ignore and report the link.
+    plain read: the pattern is impersonation with a fake domain, fee demands, guaranteed returns and manufactured urgency to pressure victims. the safest next step is to ignore the message and report it to the real project team.
     next step: don't pay, don't sign, don't connect a wallet. if it's real, they can come through the project's public channels and wait.
     logged as receipt #0. "@pretrade receipts" to see them all.
     - pretrade
@@ -81,9 +81,9 @@ PASS  sign: decodes an unlimited ERC-20 approve
 PASS  sign: flags a max-amount multi-token Permit2 batch
 PASS  sign: flags an EIP-7702 delegation valid on every chain
 PASS  sign: flags a free-listing Seaport order
-FAIL  poisoning: catches 0x91a2…0ba3 imitating a canonical address
+PASS  poisoning: catches 0x91a2…0ba3 imitating a canonical address
 PASS  7702 probe reads live code on base (WETH is a contract, not delegated)
 PASS  wallet check runs end to end (OK)
 PASS  receipts command
 
-1 CHECK(S) FAILED — nothing was posted (presence was renewed).
+ALL CHECKS PASSED — nothing was posted (presence was renewed).
