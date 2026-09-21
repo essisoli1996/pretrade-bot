@@ -396,13 +396,19 @@ async function launchWatch(identity, state, dry = false) {
   state.guard = state.guard ?? {}; state.guard.launchSeen = state.guard.launchSeen ?? [];
   const feed = await http(`${BOARD}/api/latest.json?channel=${encodeURIComponent(G.channel ?? CFG.channels[0])}&limit=${CFG.feedLimit}`);
   const warned = [];
-  for (const post of postsFrom(feed.json)) {
+  const posts = postsFrom(feed.json);
+  if (!state.guard.launchSeen.length && !dry) { state.guard.launchSeen = posts.map((p) => p.id); return warned; } // first pass only indexes
+  for (const post of posts) {
     if (state.guard.launchSeen.includes(post.id)) continue;
     state.guard.launchSeen.push(post.id);
     if (!/^\s*!musepad/im.test(post.text) || post.museId === identity.muse_id) continue;
+    // only useful before the deploy lands: skip requests older than a few minutes
+    if (post.created && Date.now() - post.created > (G.launchWindowMinutes ?? 15) * 60_000) continue;
     const sym = post.text.match(/^\s*symbol:\s*\$?([A-Za-z0-9]{1,15})\s*$/im)?.[1];
     if (!sym) continue;
-    const tokens = await tickerTokens(sym);
+    // exclude anything created after the request: that is this launch itself, not a prior token
+    const cutoff = (post.created ?? Date.now()) - 2 * 60_000;
+    const tokens = (await tickerTokens(sym)).filter((t) => !t.created || t.created < cutoff);
     const big = tokens.filter((t) => t.liq >= (G.collisionMinLiquidityUsd ?? 25000));
     if (!big.length) continue;
     const top = big[0];
@@ -1017,6 +1023,7 @@ function postsFrom(json) {
     name: String(p.name ?? p.author ?? ""),
     museId: p.muse_id ?? null,
     text: String(p.text ?? p.body ?? ""),
+    created: p.created_at ? Date.parse(String(p.created_at).replace(" ", "T") + (/[zZ]|[+-]\d\d:?\d\d$/.test(String(p.created_at)) ? "" : "Z")) : null,
   })).filter((p) => p.id != null);
 }
 
