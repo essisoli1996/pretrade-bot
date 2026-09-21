@@ -2012,7 +2012,16 @@
     47334,
     47382,
     47410,
-    47399
+    47399,
+    47573,
+    47548,
+    47537,
+    47513,
+    47502,
+    47476,
+    47475,
+    47471,
+    47423
   ],
   "threads": [
     13261,
@@ -2054,9 +2063,12 @@
   "mentionsSeen": [],
   "watches": [],
   "clock": {
-    "channels": 1790026798458,
-    "watches": 1790026690178,
-    "ledger": 1790026553868
+    "channels": 1790028070073,
+    "watches": 1790028071700,
+    "ledger": 1790028360307,
+    "presence": 1790028069695,
+    "launches": 1790028070654,
+    "guard": 1790028070957
   },
   "ledger": [
     {
@@ -2267,5 +2279,78 @@
       "price": 0.00001632,
       "source": "channel"
     }
-  ]
+  ],
+  "guard": {
+    "launchSeen": [
+      47573,
+      47548,
+      47537,
+      47513,
+      47502,
+      47476,
+      47475,
+      47471,
+      47423,
+      47410,
+      47399,
+      47382,
+      47334,
+      47299,
+      47295,
+      47281,
+      47265,
+      47258,
+      47249,
+      47245,
+      47194,
+      47167,
+      47165,
+      47134,
+      47112,
+      47100,
+      47098,
+      47095,
+      47079,
+      47046,
+      47045,
+      47037,
+      47035,
+      47027,
+      47023,
+      47022,
+      47015,
+      47013,
+      46961,
+      46959
+    ],
+    "known": {
+      "MUSEBOOK": [
+        "0xdd82404d9618c3a3d2f76f406ecbb727119ae78d",
+        "DSyg2Pp4HRuQ73Q27WNkeG4mfyio8i7tPxi6WH5rfBWk",
+        "0xa2960cd584251fec1365304a4336e2295ef6a9c7",
+        "4ieeycmchBMiubgJouuk82V16YK7rfCwd3PXEcZUD8yt",
+        "0x786d42bc32fcea61e75c87128ed4ac144133bba3",
+        "0xdec78530bfc10d958c7b3d4de539e7656f22e0e6",
+        "0x667f5be66c0ad32da1470966c884f645ccc23ba3",
+        "0x4945d85fab4b80d42a6a3a8fa855214071372db3",
+        "0xf64d167e85f79171b9a81bb0172dab77faa3c4af",
+        "0x2770d923eb08078b791a76fa1581fbd4115f817a",
+        "0x95cb1b1742e0fd4733430d0428d7c41fe0e186b2",
+        "ER5Mk4jK2gpLSTneD14hHczodi3rsVU4mEGFaa9rQMjw",
+        "0xcefbfccd83443e7aa1c493f4df0036013542f301",
+        "9vByBALakH19cSvaqvxAXPJHw1m2xYHC34kaR33zpump",
+        "XoNRSTVdumBweSderhyp5KezpbSqHK8NWcnyzPWpump",
+        "8dJkfTsszT9uZVHu3tY2vXuSwiABhbcRimgb2Pigpump"
+      ],
+      "MUSEPAD": [
+        "0x61a51b990dd73530c868359871b9545d21642222",
+        "4py6PPJAzEg2cMrsTfVSjx9FHyKM5TrZcPu2kKJBJGne",
+        "B6s9UETuayMGVspnuKm3nMCkLKtLB671MxrSZTgxPqP"
+      ]
+    },
+    "canonical": {
+      "MUSEBOOK": "0x91a2dae9699f0b82540b5886b0d8759c22820ba3",
+      "MUSEPAD": "0xdb90169c179def9111ad7ae8e23f45cc36a0da7b"
+    }
+  }
 }
