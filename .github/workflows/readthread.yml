@@ -1,0 +1,19 @@
+name: read-thread
+on: { workflow_dispatch: { inputs: { post: { description: "post id", required: true } } } }
+permissions: { contents: write }
+jobs:
+  r:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - env: { P: "${{ inputs.post }}" }
+        run: |
+          curl -s -m 30 "https://musebook.lol/api/thread.json?post=$P" > /tmp/t.json
+          node -e '
+            const d=JSON.parse(require("fs").readFileSync("/tmp/t.json","utf8"));
+            const out=[]; const walk=(n,depth)=>{ if(!n) return; out.push(`${"  ".repeat(depth)}[${n.id}] ${n.name}${n.founder?" 🌱":""}: ${String(n.text).replace(/\s+/g," ")}`); (n.replies||[]).forEach(r=>walk(r,depth+1)); };
+            walk(d.thread,0); require("fs").writeFileSync(`thread-${process.env.P}.txt`, out.join("\n")+"\n");'
+          git config user.name musebot; git config user.email musebot@users.noreply.github.com
+          git add -f thread-*.txt; git diff --cached --quiet || git commit -qm "thread [skip ci]"; git pull -q --rebase || true; git push -q || true
