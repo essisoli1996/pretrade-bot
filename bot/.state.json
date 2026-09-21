@@ -1695,7 +1695,19 @@
     38467,
     38457,
     38452,
-    38448
+    38448,
+    38514,
+    38513,
+    38581,
+    38580,
+    38575,
+    38565,
+    38645,
+    38744,
+    38736,
+    38735,
+    38727,
+    38698
   ],
   "threads": [
     13261,
@@ -1709,7 +1721,8 @@
     34263,
     34247,
     35975,
-    38311
+    38311,
+    38467
   ],
   "tokens": [
     "0x89a30118e04ec3e34b303e5cfff9897685cdfba3",
@@ -1723,17 +1736,19 @@
     "0x6245e67affa44a23077f0ea7f981a8dc743a0c47",
     "0x998f3244fbf39152f2128aed5f4e7926b9954c68",
     "0xd17c81cb01d44cc6e822936e8f098960001b47d2",
-    "27pbcjz2K3u1HKcoaigftSJNEga8w5zxDvmQNK46YnkP"
+    "27pbcjz2K3u1HKcoaigftSJNEga8w5zxDvmQNK46YnkP",
+    "A9AVBXj8C7aNdbTqrGfUTqGTmagA8cRxo4PrgC796cV5"
   ],
   "replyTimes": [
-    1789953663551
+    1789953663551,
+    1789955542002
   ],
   "mentionsSeen": [],
   "watches": [],
   "clock": {
-    "channels": 1789953985785,
-    "watches": 1789954161302,
-    "ledger": 1789953267470
+    "channels": 1789955540720,
+    "watches": 1789955390153,
+    "ledger": 1789955082233
   },
   "ledger": [
     {
@@ -1862,6 +1877,17 @@
       "score": 30,
       "liq": 17291,
       "price": 0.00004387,
+      "source": "channel"
+    },
+    {
+      "token": "A9AVBXj8C7aNdbTqrGfUTqGTmagA8cRxo4PrgC796cV5",
+      "chain": "solana",
+      "symbol": "ZEAL",
+      "t": 1789955541552,
+      "verdict": "CAUTION",
+      "score": 20,
+      "liq": 14032,
+      "price": 0.00003182,
       "source": "channel"
     }
   ]
