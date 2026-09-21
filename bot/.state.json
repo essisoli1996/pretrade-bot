@@ -1810,7 +1810,9 @@
     41526,
     41525,
     41653,
-    41651
+    41651,
+    41779,
+    41794
   ],
   "threads": [
     13261,
@@ -1848,9 +1850,9 @@
   "mentionsSeen": [],
   "watches": [],
   "clock": {
-    "channels": 1789978280314,
-    "watches": 1789978216796,
-    "ledger": 1789976802247
+    "channels": 1789980143685,
+    "watches": 1789980054493,
+    "ledger": 1789980428906
   },
   "ledger": [
     {
@@ -1930,7 +1932,13 @@
       "score": 50,
       "liq": 9520,
       "price": 1.12e-7,
-      "source": "channel"
+      "source": "channel",
+      "out": {
+        "t": 1789978617199,
+        "liqChg": -1,
+        "priceChg": null,
+        "rugged": true
+      }
     },
     {
       "token": "0x85a574f2ff0795685f58d1d7b0d4b51f148ac489",
