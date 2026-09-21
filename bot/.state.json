@@ -1961,7 +1961,18 @@
     46417,
     46476,
     46470,
-    46503
+    46503,
+    46544,
+    46619,
+    46616,
+    46589,
+    46569,
+    46657,
+    46627,
+    46621,
+    46620,
+    46724,
+    46735
   ],
   "threads": [
     13261,
@@ -1999,9 +2010,9 @@
   "mentionsSeen": [],
   "watches": [],
   "clock": {
-    "channels": 1790019387476,
-    "watches": 1790019342416,
-    "ledger": 1790019298697
+    "channels": 1790021245719,
+    "watches": 1790021157984,
+    "ledger": 1790021115034
   },
   "ledger": [
     {
@@ -2149,7 +2160,13 @@
       "score": 0,
       "liq": 33562,
       "price": 0.0001677,
-      "source": "channel"
+      "source": "channel",
+      "out": {
+        "t": 1790021115737,
+        "liqChg": 0.65,
+        "priceChg": 1.63,
+        "rugged": false
+      }
     },
     {
       "token": "27pbcjz2K3u1HKcoaigftSJNEga8w5zxDvmQNK46YnkP",
@@ -2182,6 +2199,17 @@
       "score": 20,
       "liq": 23026,
       "price": 0.00005051,
+      "source": "channel"
+    },
+    {
+      "token": "0xea835c017ef7b53439fe2f871cccdf0038206d3e",
+      "chain": "robinhood",
+      "symbol": "PERPS",
+      "t": 1790019702604,
+      "verdict": "CAUTION",
+      "score": 50,
+      "liq": 18722,
+      "price": 0.0000317,
       "source": "channel"
     }
   ]
