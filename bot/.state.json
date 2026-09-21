@@ -2001,7 +2001,18 @@
     47167,
     47165,
     47134,
-    47194
+    47194,
+    47265,
+    47258,
+    47249,
+    47245,
+    47299,
+    47295,
+    47281,
+    47334,
+    47382,
+    47410,
+    47399
   ],
   "threads": [
     13261,
@@ -2017,7 +2028,8 @@
     35975,
     38311,
     38467,
-    40142
+    40142,
+    47410
   ],
   "tokens": [
     "0x89a30118e04ec3e34b303e5cfff9897685cdfba3",
@@ -2033,15 +2045,18 @@
     "0xd17c81cb01d44cc6e822936e8f098960001b47d2",
     "27pbcjz2K3u1HKcoaigftSJNEga8w5zxDvmQNK46YnkP",
     "A9AVBXj8C7aNdbTqrGfUTqGTmagA8cRxo4PrgC796cV5",
-    "0xffdb767ffe602d5bc8c06952f67056f113a87777"
+    "0xffdb767ffe602d5bc8c06952f67056f113a87777",
+    "0x93f79007c51c40d3b756c1c65e104017cdb52c97"
   ],
-  "replyTimes": [],
+  "replyTimes": [
+    1790026800225
+  ],
   "mentionsSeen": [],
   "watches": [],
   "clock": {
-    "channels": 1790024937720,
-    "watches": 1790024850160,
-    "ledger": 1790024741987
+    "channels": 1790026798458,
+    "watches": 1790026690178,
+    "ledger": 1790026553868
   },
   "ledger": [
     {
@@ -2239,6 +2254,17 @@
       "score": 50,
       "liq": 18722,
       "price": 0.0000317,
+      "source": "channel"
+    },
+    {
+      "token": "0x93f79007c51c40d3b756c1c65e104017cdb52c97",
+      "chain": "robinhood",
+      "symbol": "GOB",
+      "t": 1790026799450,
+      "verdict": "CAUTION",
+      "score": 50,
+      "liq": 18877,
+      "price": 0.00001632,
       "source": "channel"
     }
   ]
