@@ -1758,7 +1758,13 @@
     39673,
     39703,
     39913,
-    39901
+    39901,
+    40165,
+    40160,
+    40153,
+    40148,
+    40142,
+    40141
   ],
   "threads": [
     13261,
@@ -1773,7 +1779,8 @@
     34247,
     35975,
     38311,
-    38467
+    38467,
+    40142
   ],
   "tokens": [
     "0x89a30118e04ec3e34b303e5cfff9897685cdfba3",
@@ -1788,15 +1795,18 @@
     "0x998f3244fbf39152f2128aed5f4e7926b9954c68",
     "0xd17c81cb01d44cc6e822936e8f098960001b47d2",
     "27pbcjz2K3u1HKcoaigftSJNEga8w5zxDvmQNK46YnkP",
-    "A9AVBXj8C7aNdbTqrGfUTqGTmagA8cRxo4PrgC796cV5"
+    "A9AVBXj8C7aNdbTqrGfUTqGTmagA8cRxo4PrgC796cV5",
+    "0xffdb767ffe602d5bc8c06952f67056f113a87777"
   ],
-  "replyTimes": [],
+  "replyTimes": [
+    1789966254720
+  ],
   "mentionsSeen": [],
   "watches": [],
   "clock": {
-    "channels": 1789964734029,
-    "watches": 1789964558926,
-    "ledger": 1789964144552
+    "channels": 1789966253226,
+    "watches": 1789966383238,
+    "ledger": 1789965951425
   },
   "ledger": [
     {
@@ -1942,6 +1952,17 @@
       "score": 20,
       "liq": 14032,
       "price": 0.00003182,
+      "source": "channel"
+    },
+    {
+      "token": "0xffdb767ffe602d5bc8c06952f67056f113a87777",
+      "chain": "bsc",
+      "symbol": "Olympus",
+      "t": 1789966254085,
+      "verdict": "CAUTION",
+      "score": 20,
+      "liq": 23026,
+      "price": 0.00005051,
       "source": "channel"
     }
   ]
