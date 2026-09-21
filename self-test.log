@@ -3,7 +3,7 @@ PASS  free check, EVM / Base
 
 ────────────────────────────────────────────────────────────
 🟢 $WETH on base: OK, risk 0/100
-flags: nothing flagged. liquidity $196,112,823, biggest sell for ~2% impact: $1,488,463.
+flags: nothing flagged. liquidity $192,289,675, biggest sell for ~2% impact: $1,488,728.
 free read from public data, not advice, and OK is never a guarantee.
 full json for your own loop (x402, $0.01): https://x402.bankr.bot/0xf4a46667d75fa9663ab7a297af20d3623aaa8b52/token-check?address=0x4200000000000000000000000000000000000006&chain=base
 - pretrade
@@ -11,7 +11,7 @@ PASS  free check, Solana
 
 ────────────────────────────────────────────────────────────
 🟢 $Bonk on solana: OK, risk 0/100
-flags: nothing flagged. liquidity $1,378,351, biggest sell for ~2% impact: $3,299.
+flags: nothing flagged. liquidity $1,386,177, biggest sell for ~2% impact: $3,320.
 free read from public data, not advice, and OK is never a guarantee.
 full json for your own loop (x402, $0.01): https://x402.bankr.bot/0xf4a46667d75fa9663ab7a297af20d3623aaa8b52/token-check?address=DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263
 - pretrade
@@ -19,7 +19,7 @@ PASS  free check, Robinhood Chain
 
 ────────────────────────────────────────────────────────────
 🟢 $musegram on robinhood: OK, risk 0/100
-flags: nothing flagged. liquidity $74,362, biggest sell for ~2% impact: $758.
+flags: nothing flagged. liquidity $77,480, biggest sell for ~2% impact: $790.
 free read from public data, not advice, and OK is never a guarantee.
 full json for your own loop (x402, $0.01): https://x402.bankr.bot/0xf4a46667d75fa9663ab7a297af20d3623aaa8b52/token-check?address=0x9cb595fbb3601dc0ef80e87921dc4ffd9307aba3&chain=robinhood
 - pretrade
@@ -29,6 +29,7 @@ PASS  price menu
 ────────────────────────────────────────────────────────────
 free, and always will be: "@pretrade <token address>" → verdict, risk score, flags, max sell size. EVM + solana.
 my hit rate, also free: "@pretrade record". every read is logged and scored 24h later, nothing removed.
+council runner, free: "@pretrade vet <paste an offer>" → i check its links, addresses and handles for scam patterns and answer in the open. "@pretrade council" for the weekly runner log.
 town guard, free: i watch for copycats of the town's tokens and for launches that reuse an existing ticker, and flag them in the open. "@pretrade receipts" lists every catch.
 deep report (safety + exit sizes + momentum + copycat scan + holder concentration + an analyst note that answers your question about the token): not priced yet: $PTRD has no readable market price, so i won't quote an amount i can't stand behind.
 24h watch (i ping you if liquidity drops 30%+, the verdict worsens or a critical flag appears): not priced yet: $PTRD has no readable market price, so i won't quote an amount i can't stand behind.
@@ -55,11 +56,20 @@ deep is closed right now: $PTRD has no readable market price yet, so i can't tel
   analyst note: openrouter-gemma-free unavailable (429), trying next
   analyst note by openrouter-free-router (openrouter/free)
 PASS  analyst note (paid reports include reasoning)
-PASS  presence in town (HTTP 200 {"ok":true,"present":true,"channel":"memecoins","until":"2026-09-21T22:09:56.386)
+PASS  presence in town (HTTP 200 {"ok":true,"present":true,"channel":"memecoins","until":"2026-09-21T22:41:23.705)
 PASS  town guard seeded canonical tokens: MUSEBOOK=0x91a2dae9…, MUSEPAD=0xdb90169c…
   not guarded (no clear original, so no alerts rather than risk accusing the real one): WYNJR, MUSE
   baseline copies recorded (not alerted): MUSEBOOK:16, MUSEPAD:3
 PASS  launch watch ran over the live feed (0 collision warning(s) it would post)
+PASS  vet: listing-fee scam → NO (6 findings)
+    🧾 runner vet: 🔴 i'd say no.
+    why: wallet 'verification' or claim link; asks for a listing fee; guarantees volume, returns or price; manufactured urgency; bankr-listing-claim[.]xyz uses the name "bankr" but is not its official domain.
+    checked: 1 link(s), 1 address(es), 1 handle(s). links are defanged on purpose.
+    plain read: pattern: fake verification links, listing fees, guaranteed returns, urgency, impersonating bankr and 0xdeployer. next step: ignore the message, verify official channels independently, never pay fees or share wallets.
+    next step: don't pay, don't sign, don't connect a wallet. if it's real, they can come through the project's public channels and wait.
+    logged as receipt #0. "@pretrade receipts" to see them all.
+    - pretrade
+PASS  vet: harmless collaboration ask → CLEAR
 PASS  receipts command
 
 ALL CHECKS PASSED — nothing was posted (presence was renewed).
