@@ -1889,7 +1889,17 @@
     44394,
     44392,
     44579,
-    44575
+    44575,
+    44705,
+    44692,
+    44690,
+    44718,
+    44757,
+    44750,
+    44749,
+    44807,
+    44794,
+    44780
   ],
   "threads": [
     13261,
@@ -1927,9 +1937,9 @@
   "mentionsSeen": [],
   "watches": [],
   "clock": {
-    "channels": 1790002497227,
-    "watches": 1790002387046,
-    "ledger": 1790002296867
+    "channels": 1790004388640,
+    "watches": 1790004232959,
+    "ledger": 1790004096877
   },
   "ledger": [
     {
@@ -2026,7 +2036,13 @@
       "score": 0,
       "liq": 241133,
       "price": 0.00375,
-      "source": "channel"
+      "source": "channel",
+      "out": {
+        "t": 1790004097285,
+        "liqChg": 0.27,
+        "priceChg": 0.48,
+        "rugged": false
+      }
     },
     {
       "token": "0x6245e67affa44a23077f0ea7f981a8dc743a0c47",
@@ -2037,7 +2053,13 @@
       "score": 0,
       "liq": 901806,
       "price": 0.005743,
-      "source": "channel"
+      "source": "channel",
+      "out": {
+        "t": 1790004097533,
+        "liqChg": 0.03,
+        "priceChg": 0.07,
+        "rugged": false
+      }
     },
     {
       "token": "0x998f3244fbf39152f2128aed5f4e7926b9954c68",
@@ -2048,7 +2070,13 @@
       "score": 15,
       "liq": 64071,
       "price": 0.00007796,
-      "source": "channel"
+      "source": "channel",
+      "out": {
+        "t": 1790004098090,
+        "liqChg": -1,
+        "priceChg": 0.28,
+        "rugged": true
+      }
     },
     {
       "token": "0xd17c81cb01d44cc6e822936e8f098960001b47d2",
