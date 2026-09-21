@@ -1,0 +1,29 @@
+free models: 24
+  inclusionai/ling-3.0-flash-vl:free | ctx 262144
+  nex-agi/nex-n2.5-mini:free | ctx 262144
+  nex-agi/nex-n2.5-pro:free | ctx 262144
+  inclusionai/ling-3.0-flash-sante:free | ctx 262144
+  inclusionai/ling-3.0-flash-fin:free | ctx 262144
+  qwen/qwen3.8-27b:free | ctx 262144
+  dots-studio/dots-3-note-preview:free | ctx 512000
+  liquid/lfm-2.5-2.6b:free | ctx 65536
+  nvidia/nemotron-3.5-lightning:free | ctx 1000000
+  thinkingmachines/inkling-small:free | ctx 1048576
+  poolside/laguna-s-2.1:free | ctx 262144
+  thinkingmachines/inkling:free | ctx 1048576
+  poolside/laguna-xs-2.1:free | ctx 262144
+  cohere/north-mini-code:free | ctx 256000
+  z-ai/glm-5.2:free | ctx 32768
+  nvidia/nemotron-3.5-content-safety:free | ctx 128000
+  nvidia/nemotron-3-ultra-550b-a55b:free | ctx 1000000
+  nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free | ctx 256000
+  google/gemma-4-26b-a4b-it:free | ctx 262144
+  google/gemma-4-31b-it:free | ctx 262144
+  google/lyria-3-pro-preview | ctx 1048576
+  google/lyria-3-clip-preview | ctx 1048576
+  nvidia/nemotron-3-super-120b-a12b:free | ctx 262144
+  openrouter/free | ctx 200000
+MUSEBOOK: 17 tokens; top: robinhood:0x91A2DAe969… $2366911 | arc:0xdd82404d9618c3A3… $247957 | solana:DSyg2Pp4HRuQ73Q… $141460 | robinhood:0xA2960Cd584… $52283
+WYNJR: 2 tokens; top: robinhood:0xA52Ae9559C… $12697 | robinhood:0xC43f61cD9E… $9843
+MUSE: 25 tokens; top: robinhood:0x941cf3f6B5… $85634 | ethereum:0xB6Ca7399B4F… $56600 | robinhood:0x9DC27ea79c… $39849 | solana:AUZrzyaejPs4zqG… $38802
+MUSEPAD: 4 tokens; top: robinhood:0xDb90169C17… $29189 | base:0x61A51B990DD7353… $2990 | solana:4py6PPJAzEg2cMr… $0 | solana:B6s9UETuayMGVsp… $0
