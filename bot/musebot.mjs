@@ -439,8 +439,9 @@ async function domainAgeDays(dom) {
 
 async function vetOffer(raw) {
   const text = String(raw).slice(0, 4000);
-  const findings = []; let score = 0; let critical = false; const checked = { links: 0, addresses: 0, handles: 0 };
-  const add = (why, pts, crit = false) => { findings.push(why); score += pts; critical ||= crit; };
+  const scored = []; let score = 0; let critical = false; const checked = { links: 0, addresses: 0, handles: 0 };
+  const findings = { push: (why) => scored.push({ why, pts: 0 }) };
+  const add = (why, pts, crit = false) => { scored.push({ why, pts: pts + (crit ? 1000 : 0) }); score += pts; critical ||= crit; };
 
   for (const [re, why, pts, crit] of OFFER_RULES) if (re.test(text)) add(why, pts, crit);
 
@@ -491,7 +492,8 @@ async function vetOffer(raw) {
 
   score = Math.min(100, score);
   const verdict = critical || score >= 60 ? "NO" : score >= 25 ? "CAUTION" : "CLEAR";
-  return { verdict, score, findings, checked, urls: urls.map((u) => u.replace(/^https?:\/\//i, "").split(/[/?#]/)[0]) };
+  const ordered = scored.sort((a, b) => b.pts - a.pts).map((f) => f.why); // most serious first
+  return { verdict, score, findings: ordered, checked, urls: urls.map((u) => u.replace(/^https?:\/\//i, "").split(/[/?#]/)[0]) };
 }
 
 async function runnerNote(v, offer) {
