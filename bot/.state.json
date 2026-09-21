@@ -1682,7 +1682,16 @@
     38178,
     38176,
     38174,
-    38211
+    38211,
+    38311,
+    38289,
+    38347,
+    38340,
+    38381,
+    38380,
+    38440,
+    38434,
+    38397
   ],
   "threads": [
     13261,
@@ -1695,7 +1704,8 @@
     34264,
     34263,
     34247,
-    35975
+    35975,
+    38311
   ],
   "tokens": [
     "0x89a30118e04ec3e34b303e5cfff9897685cdfba3",
@@ -1708,15 +1718,18 @@
     "0x85a574f2ff0795685f58d1d7b0d4b51f148ac489",
     "0x6245e67affa44a23077f0ea7f981a8dc743a0c47",
     "0x998f3244fbf39152f2128aed5f4e7926b9954c68",
-    "0xd17c81cb01d44cc6e822936e8f098960001b47d2"
+    "0xd17c81cb01d44cc6e822936e8f098960001b47d2",
+    "27pbcjz2K3u1HKcoaigftSJNEga8w5zxDvmQNK46YnkP"
   ],
-  "replyTimes": [],
+  "replyTimes": [
+    1789953663551
+  ],
   "mentionsSeen": [],
   "watches": [],
   "clock": {
-    "channels": 1789952127512,
-    "watches": 1789952328349,
-    "ledger": 1789951458547
+    "channels": 1789953661869,
+    "watches": 1789953553225,
+    "ledger": 1789953267470
   },
   "ledger": [
     {
@@ -1834,6 +1847,17 @@
       "score": 0,
       "liq": 33562,
       "price": 0.0001677,
+      "source": "channel"
+    },
+    {
+      "token": "27pbcjz2K3u1HKcoaigftSJNEga8w5zxDvmQNK46YnkP",
+      "chain": "solana",
+      "symbol": "ZCOIN",
+      "t": 1789953662950,
+      "verdict": "CAUTION",
+      "score": 30,
+      "liq": 17291,
+      "price": 0.00004387,
       "source": "channel"
     }
   ]
