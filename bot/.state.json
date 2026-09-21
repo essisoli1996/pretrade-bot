@@ -2063,7 +2063,14 @@
     47885,
     47884,
     47947,
-    47945
+    47945,
+    48051,
+    48043,
+    48006,
+    47971,
+    47963,
+    47961,
+    47953
   ],
   "threads": [
     13261,
@@ -2107,12 +2114,12 @@
   "mentionsSeen": [],
   "watches": [],
   "clock": {
-    "channels": 1790031668335,
-    "watches": 1790031942791,
+    "channels": 1790032795988,
+    "watches": 1790032797095,
     "ledger": 1790031963673,
-    "presence": 1790031602472,
-    "launches": 1790031673105,
-    "guard": 1790031942289,
+    "presence": 1790032795599,
+    "launches": 1790032796532,
+    "guard": 1790032862083,
     "digest": 1790030120266
   },
   "ledger": [
@@ -2420,7 +2427,13 @@
       47884,
       47953,
       47947,
-      47945
+      47945,
+      48051,
+      48043,
+      48006,
+      47971,
+      47963,
+      47961
     ],
     "known": {
       "MUSEBOOK": [
@@ -2440,7 +2453,8 @@
         "9vByBALakH19cSvaqvxAXPJHw1m2xYHC34kaR33zpump",
         "XoNRSTVdumBweSderhyp5KezpbSqHK8NWcnyzPWpump",
         "8dJkfTsszT9uZVHu3tY2vXuSwiABhbcRimgb2Pigpump",
-        "APrLQfWx16M9h3qPVTnWkNPESYBoc7du3KFWCE6Npump"
+        "APrLQfWx16M9h3qPVTnWkNPESYBoc7du3KFWCE6Npump",
+        "7P6VL1cpLZM6w1jGPHmfwxkgDAf2CPnh8oP6Q3sJXXWi"
       ],
       "MUSEPAD": [
         "0x61a51b990dd73530c868359871b9545d21642222",
@@ -2453,8 +2467,13 @@
       "MUSEPAD": "0xdb90169c179def9111ad7ae8e23f45cc36a0da7b"
     },
     "alertTimes": [
-      1790031030491
-    ]
+      1790031030491,
+      1790032863379
+    ],
+    "deployer": {
+      "MUSEBOOK": "0x1b37d3a72082029c44b35b604ea473617580b69a",
+      "MUSEPAD": "0x3711cea4feade896c913c68f01eda97cb06d1a42"
+    }
   },
   "runner": {
     "lastDigest": 1790030120266
@@ -2467,6 +2486,18 @@
       "address": "APrLQfWx16M9h3qPVTnWkNPESYBoc7du3KFWCE6Npump",
       "chain": "solana",
       "postId": 47879
+    },
+    {
+      "t": 1790032863379,
+      "kind": "copycat",
+      "ticker": "MUSEBOOK",
+      "address": "7P6VL1cpLZM6w1jGPHmfwxkgDAf2CPnh8oP6Q3sJXXWi",
+      "chain": "solana",
+      "postId": 48079
     }
+  ],
+  "ownPosts": [
+    47879,
+    48079
   ]
 }
