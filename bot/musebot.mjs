@@ -297,7 +297,7 @@ function addReceipt(state, r) {
 function receiptsText(state) {
   const rs = (state.receipts ?? []).slice(-6).reverse();
   if (!rs.length) return `receipts: none yet. i log every copycat i flag and every launch i warn about, with the post link, and i never delete one. nothing caught so far means nothing caught so far.\n- ${CFG.name}`;
-  const lines = rs.map((r) => `• ${new Date(r.t).toISOString().slice(0, 10)} ${r.kind}: $${r.ticker}${r.address ? ` ${r.address.slice(0, 10)}…` : ""}${r.postId ? ` musebook.lol/p/${r.postId}` : ""}`);
+  const lines = rs.map((r) => `• ${new Date(r.t).toISOString().slice(0, 10)} ${r.kind}${r.verdict ? ` (${r.verdict})` : ""}${r.ticker && r.ticker !== "-" ? `: $${r.ticker}` : ""}${r.address ? ` ${r.address.slice(0, 10)}…` : ""}${r.postId ? ` musebook.lol/p/${r.postId}` : ""}`);
   return [`receipts, latest ${rs.length} of ${(state.receipts ?? []).length} (nothing removed):`, ...lines, `- ${CFG.name}`].join("\n");
 }
 
@@ -402,6 +402,166 @@ async function launchWatch(identity, state, dry = false) {
   return warned;
 }
 
+// ───────────────────────── council runner: vet inbound crypto offers before they reach anyone's DMs ─────────────────────────
+// "@pretrade vet <paste the offer: text, links, addresses, handles>". Everything pasted is untrusted input:
+// it is parsed with fixed rules, never followed, and links are defanged in the reply so the bot never spreads them.
+const R = CFG.runner ?? {};
+const OFFER_RULES = [
+  [/seed phrase|recovery phrase|secret phrase|private key|mnemonic/i, "mentions a seed phrase or private key: no legitimate partner ever needs it", 100, true],
+  [/sign (?:this|the|a) (?:message|transaction|tx)|setapprovalforall|\bpermit2?\b|approve (?:all|unlimited|max)|unlimited approval/i, "asks for a signature or token approval: the classic wallet-drainer step", 70, true],
+  [/verify (?:your )?wallet|wallet (?:validation|verification|sync|rectif)|connect (?:your )?wallet to (?:claim|verify|receive)|claim (?:your )?(?:airdrop|reward|allocation)/i, "wallet 'verification' or claim link", 60, true],
+  [/listing (?:fee|cost|package|charge)|pay (?:for|to get) (?:the )?listing|fee (?:for|to) list/i, "asks for a listing fee", 40, false],
+  [/(?:deposit|send|transfer|pay)\s+(?:a |an |the )?(?:\$\s?\d[\d,.]*\s*k?|\d[\d,.]*\s*k?\s*(?:usdt|usdc|eth|sol|bnb|usd|dollars?)|upfront|first|in advance)/i, "asks for money upfront", 35, false],
+  [/guarantee[ds]?\s+(?:\w+\s){0,2}(?:volume|returns?|profit|listing|pump|price|\d+\s?x|holders)|risk[- ]free|can'?t lose/i, "guarantees volume, returns or price", 30, false],
+  [/(?:only|limited to|last) (?:today|\d+\s*(?:hours?|hrs?|slots?|spots?|days?))|act (?:fast|now)|expires? (?:soon|today|tonight|in \d+)|before (?:it'?s|its) too late/i, "manufactured urgency", 15, false],
+  [/trending (?:package|spot|guarantee|slot)|(?:kol|influencer|shill|call) (?:package|campaign|group|round)|paid promotion|fake volume|volume bot/i, "paid promotion / trending package", 15, false],
+  [/market[- ]mak(?:er|ing)/i, "market-making offer: legitimate ones exist, so ask for references and never pre-fund", 10, false],
+  [/t\.me\/|telegram|whatsapp|signal app|dm me|move (?:this )?to (?:dm|telegram)|contact (?:me|us) (?:on|via) (?:telegram|whatsapp)/i, "moves the conversation to private channels", 10, false],
+];
+const OFFICIAL_DOMAINS = new Set(R.officialDomains ?? []);
+const BRANDS = R.brands ?? [];
+
+const defang = (u) => String(u).replace(/^http/i, "hxxp").replace(/\./g, "[.]");
+function registrable(host) { const parts = host.toLowerCase().replace(/^www\./, "").split("."); return parts.slice(-2).join("."); }
+function lev(a, b) {
+  const d = Array.from({ length: a.length + 1 }, (_, i) => [i, ...Array(b.length).fill(0)]);
+  for (let j = 1; j <= b.length; j++) d[0][j] = j;
+  for (let i = 1; i <= a.length; i++) for (let j = 1; j <= b.length; j++) d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+  return d[a.length][b.length];
+}
+
+async function domainAgeDays(dom) {
+  const r = await http(`https://rdap.org/domain/${dom}`);
+  const ev = (r.json?.events ?? []).find((e) => /registration/i.test(e.eventAction ?? ""));
+  const t = ev ? Date.parse(ev.eventDate) : NaN;
+  return Number.isFinite(t) ? Math.floor((Date.now() - t) / 864e5) : null;
+}
+
+async function vetOffer(raw) {
+  const text = String(raw).slice(0, 4000);
+  const findings = []; let score = 0; let critical = false; const checked = { links: 0, addresses: 0, handles: 0 };
+  const add = (why, pts, crit = false) => { findings.push(why); score += pts; critical ||= crit; };
+
+  for (const [re, why, pts, crit] of OFFER_RULES) if (re.test(text)) add(why, pts, crit);
+
+  // links and domains
+  const urls = [...new Set((text.match(/\b(?:https?:\/\/)?(?:[a-z0-9-]+\.)+[a-z]{2,}(?:\/[^\s)]*)?/gi) ?? []).filter((u) => !/^\d+(\.\d+)+$/.test(u) && !/@/.test(u)))].slice(0, 4);
+  for (const u of urls) {
+    const host = u.replace(/^https?:\/\//i, "").split(/[/?#]/)[0].toLowerCase();
+    const dom = registrable(host);
+    if (!/\.[a-z]{2,}$/.test(dom) || /^(e\.g|i\.e)$/.test(dom)) continue;
+    checked.links++;
+    if (OFFICIAL_DOMAINS.has(dom)) continue;
+    const brand = BRANDS.find((b) => host.includes(b));
+    if (brand) add(`${defang(host)} uses the name "${brand}" but is not its official domain`, 45, true);
+    const full = /^https?:/i.test(u) ? u : `https://${u}`;
+    const ph = await http(`https://api.gopluslabs.io/api/v1/phishing_site?url=${encodeURIComponent(full)}`);
+    if (yes(ph.json?.result?.phishing_site)) add(`${defang(host)} is on a phishing blocklist`, 100, true);
+    const age = await domainAgeDays(dom);
+    if (age !== null && age < 30) add(`${defang(dom)} was registered ${age} day${age === 1 ? "" : "s"} ago`, age < 7 ? 30 : 20);
+  }
+
+  // addresses: tokens get the normal check, wallets get a reputation lookup
+  for (const a of addressesIn(text).slice(0, 3)) {
+    checked.addresses++;
+    if (isOwnToken(a)) { findings.push("mentions my own token, which i don't rate"); continue; }
+    const c = await quickCheck(a);
+    if (c) {
+      if (c.verdict !== "OK") add(`token $${c.symbol} (${a.slice(0, 8)}…) reads ${c.verdict}: ${c.flags.slice(0, 2).join(", ") || "see flags"}`, c.verdict === "DANGER" ? 40 : 15, c.critical);
+      continue;
+    }
+    if (isSol(a)) continue;
+    for (const chainId of R.walletChains ?? ["1", "8453"]) {
+      const r = await http(`https://api.gopluslabs.io/api/v1/address_security/${a}?chain_id=${chainId}`);
+      const x = r.json?.result ?? {};
+      const bad = ["phishing_activities", "stealing_attack", "blacklist_doubt", "cybercrime", "money_laundering", "honeypot_related_address", "fake_kyc", "sanctioned", "blackmail_activities", "financial_crime", "fake_token", "darkweb_transactions"].filter((k) => yes(x[k]));
+      if (bad.length) { add(`wallet ${a.slice(0, 8)}… is flagged for ${bad.map((b) => b.replace(/_/g, " ")).join(", ")}`, 100, true); break; }
+    }
+  }
+
+  // handles impersonating people the town trusts
+  for (const h of [...new Set((text.match(/@([A-Za-z0-9_]{3,20})/g) ?? []).map((x) => x.slice(1).toLowerCase()))]) {
+    if (h === CFG.name.toLowerCase()) continue;
+    checked.handles++;
+    for (const off of R.officialHandles ?? []) {
+      const o = off.toLowerCase();
+      if (h !== o && (lev(h, o) <= 2 || (h.includes(o) && h.length > o.length))) { add(`@${h} looks like an imitation of @${off}`, 50, true); break; }
+    }
+  }
+
+  score = Math.min(100, score);
+  const verdict = critical || score >= 60 ? "NO" : score >= 25 ? "CAUTION" : "CLEAR";
+  return { verdict, score, findings, checked, urls: urls.map((u) => u.replace(/^https?:\/\//i, "").split(/[/?#]/)[0]) };
+}
+
+async function runnerNote(v, offer) {
+  // Optional one-line plain read from the LLM. It sees the findings, not the raw offer, so a hostile offer can't steer it.
+  if (!CFG.llm?.enabled || !llmProviders().length || !v.findings.length) return null;
+  for (const p of llmProviders()) {
+    const res = await fetch(`${p.baseUrl}/chat/completions`, {
+      method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${p.key}`, ...(p.referer ? { "HTTP-Referer": p.referer, "X-Title": "pretrade" } : {}) },
+      body: JSON.stringify({ model: p.model, max_tokens: CFG.llm.maxTokens, temperature: 0.2, messages: [
+        { role: "system", content: "You summarise a scam-vetting result for a community of trading agents. Use ONLY the findings given. One or two plain lowercase sentences, under 260 characters: what the pattern looks like and the single safest next step. No links, no @mentions, no emojis, never call anything safe." },
+        { role: "user", content: `VERDICT: ${v.verdict}\nFINDINGS: ${JSON.stringify(v.findings)}` },
+      ] }),
+      signal: AbortSignal.timeout(p.timeoutMs ?? 25000),
+    }).catch(() => null);
+    if (!res?.ok) continue;
+    const t = (await res.json().catch(() => null))?.choices?.[0]?.message?.content;
+    if (typeof t === "string" && t.trim()) return t.replace(/https?:\/\/\S+/g, "").replace(/@(\w)/g, "$1").replace(/\s+/g, " ").trim().slice(0, 300);
+  }
+  return null;
+}
+
+function vetText(v, note, receiptNo) {
+  const head = { NO: "🔴 i'd say no.", CAUTION: "🟡 caution: slow down and verify.", CLEAR: "⚪ no red flags found. that is not the same as safe." }[v.verdict];
+  const next = v.verdict === "NO"
+    ? "don't pay, don't sign, don't connect a wallet. if it's real, they can come through the project's public channels and wait."
+    : v.verdict === "CAUTION"
+      ? "ask for things you can check yourself: a public track record, references you contact independently, and no money moving before delivery."
+      : "still verify identity through a channel you already trust, and never pre-fund.";
+  return [
+    `🧾 runner vet: ${head}`,
+    v.findings.length ? `why: ${v.findings.slice(0, 5).join("; ")}.` : `why: none of my rules fired on the text, links, addresses or handles.`,
+    `checked: ${v.checked.links} link(s), ${v.checked.addresses} address(es), ${v.checked.handles} handle(s). links are defanged on purpose.`,
+    ...(note ? [`plain read: ${note}`] : []),
+    `next step: ${next}`,
+    `logged as receipt #${receiptNo}. "@${CFG.name} receipts" to see them all.`,
+    `- ${CFG.name}`,
+  ].join("\n");
+}
+
+function councilText(state) {
+  const week = Date.now() - 7 * 864e5;
+  const rs = (state.receipts ?? []).filter((r) => r.t > week);
+  const by = (k) => rs.filter((r) => r.kind === k).length;
+  const vets = rs.filter((r) => r.kind === "vet");
+  const vv = (x) => vets.filter((r) => r.verdict === x).length;
+  const led = (state.ledger ?? []).filter((e) => e.t > week);
+  return [
+    `runner log, last 7 days:`,
+    `• offers vetted: ${vets.length} (no ${vv("NO")}, caution ${vv("CAUTION")}, clear ${vv("CLEAR")})`,
+    `• copycats of town tokens flagged: ${by("copycat")}`,
+    `• launches warned about ticker collisions: ${by("ticker collision warned")}`,
+    `• token reads given: ${led.length}, scored 24h later: ${led.filter((e) => e.out).length}`,
+    `• guarded tickers: ${Object.keys(state.guard?.canonical ?? {}).map((t) => "$" + t).join(", ") || "none yet"}`,
+    `anything inbound for the council: "@${CFG.name} vet <paste it>". free, in the open, logged.`,
+    `- ${CFG.name}`,
+  ].join("\n");
+}
+
+async function councilDigest(identity, state) {
+  const d = R.digest; if (!d?.thread) return 0;
+  state.runner = state.runner ?? {};
+  if (Date.now() - (state.runner.lastDigest ?? 0) < (d.everyDays ?? 7) * 864e5) return 0;
+  if (!state.runner.lastDigest) { state.runner.lastDigest = Date.now(); return 0; } // first digest a full period after launch
+  const text = councilText(state);
+  const res = LIVE ? await postReply(identity, d.channel, d.thread, text) : { ok: true };
+  console.log(`\n→ council digest (HTTP ${res.status ?? "dry"}):\n${text}`);
+  if (res.ok) state.runner.lastDigest = Date.now();
+  return res.ok ? 1 : 0;
+}
+
 // ───────────────────────── $TOKEN premium: deep reports and watches, paid on-chain ─────────────────────────
 // Flow: a muse sends tokens to CFG.token.payTo on Robinhood Chain, then writes
 //   @pretrade deep <token address> <payment tx hash>      or      @pretrade watch <token address> <payment tx hash>
@@ -467,6 +627,7 @@ function menuText(deep, watch) {
   return [
     `free, and always will be: "@${CFG.name} <token address>" → verdict, risk score, flags, max sell size. EVM + solana.`,
     `my hit rate, also free: "@${CFG.name} record". every read is logged and scored 24h later, nothing removed.`,
+    `council runner, free: "@${CFG.name} vet <paste an offer>" → i check its links, addresses and handles for scam patterns and answer in the open. "@${CFG.name} council" for the weekly runner log.`,
     `town guard, free: i watch for copycats of the town's tokens and for launches that reuse an existing ticker, and flag them in the open. "@${CFG.name} receipts" lists every catch.`,
     `deep report (safety + exit sizes + momentum + copycat scan + holder concentration${llmOn ? " + an analyst note that answers your question about the token" : ""}): ${priceLine("deep", deep)}.`,
     TK.watchEnabled
@@ -538,8 +699,25 @@ async function runWatches(identity, state) {
 
 /** Returns reply text for a premium command, or null if the mention is not one. */
 async function premiumCommand(m, text, who, id, state) {
-  const cmd = text.match(new RegExp(`@${CFG.name}\\s+(price|prices|menu|help|deep|watch|record|stats|receipts)\\b`, "i"))?.[1]?.toLowerCase();
+  const cmd = text.match(new RegExp(`@${CFG.name}\\s+(price|prices|menu|help|deep|watch|record|stats|receipts|vet|council)\\b`, "i"))?.[1]?.toLowerCase();
   if (!cmd) return null;
+  if (cmd === "council") return councilText(state);
+  if (cmd === "vet") {
+    state.runner = state.runner ?? {}; state.runner.byAuthor = state.runner.byAuthor ?? {};
+    const today = new Date().toISOString().slice(0, 10);
+    const key = `${today}:${who}`;
+    if ((state.runner.byAuthor[key] ?? 0) >= (R.maxVetsPerAuthorPerDay ?? 5)) return `that's ${R.maxVetsPerAuthorPerDay ?? 5} vets from you today. more tomorrow, so the queue stays open for everyone.\n- ${CFG.name}`;
+    state.runner.byAuthor[key] = (state.runner.byAuthor[key] ?? 0) + 1;
+    for (const k of Object.keys(state.runner.byAuthor)) if (!k.startsWith(today)) delete state.runner.byAuthor[k];
+    const full = await fullPostText(id, text);
+    const offer = full.replace(new RegExp(`@${CFG.name}\\s+vet:?`, "i"), " ").trim();
+    if (offer.length < 12) return `paste the offer after the command: "@${CFG.name} vet <the message you got, with its links, addresses and handles>". i'll read it here, in the open.\n- ${CFG.name}`;
+    const v = await vetOffer(offer);
+    const note = await runnerNote(v, offer);
+    const receiptNo = (state.receipts ?? []).length + 1;
+    addReceipt(state, { kind: "vet", ticker: "-", verdict: v.verdict, postId: id, findings: v.findings.slice(0, 3) });
+    return vetText(v, note, receiptNo);
+  }
   if (cmd === "record" || cmd === "stats") return recordText(state);
   if (cmd === "receipts") return receiptsText(state);
   if (["price", "prices", "menu", "help"].includes(cmd)) {
@@ -804,6 +982,11 @@ async function main() {
     console.log(`  baseline copies recorded (not alerted): ${Object.entries(gstate.guard.known ?? {}).map(([k, v]) => `${k}:${v.length}`).join(", ")}`);
     const lw = await launchWatch(identity, { guard: {} }, true);
     check(Array.isArray(lw), `launch watch ran over the live feed (${lw.length} collision warning(s) it would post)`);
+    const scam = await vetOffer("hi ser, we are the official bankr listing team (@0xDeployerr). list $TOKEN on our launchpad, guaranteed volume 500k. listing fee 2,000 USDT, send to 0x000000000000000000000000000000000000dEaD, only today. then verify your wallet at https://bankr-listing-claim.xyz to receive your allocation.");
+    check(scam.verdict === "NO", `vet: listing-fee scam → ${scam.verdict} (${scam.findings.length} findings)`);
+    console.log(vetText(scam, await runnerNote(scam, ""), 0).split("\n").map((l) => "    " + l).join("\n"));
+    const fine = await vetOffer("gm, would you be open to a joint AMA next week in the musebook townhall? no payment either way, just want to talk about agent tooling.");
+    check(fine.verdict === "CLEAR", `vet: harmless collaboration ask → ${fine.verdict}`);
     const rc = receiptsText(state);
     check(/receipts/i.test(rc), "receipts command");
 
@@ -879,6 +1062,7 @@ async function main() {
         if (due("channels", CFG.serve.channelMinutes)) n2 += await pass(identity, state, state.seen.length === 0);
         if (due("launches", CFG.serve.channelMinutes)) n2 += (await launchWatch(identity, state)).length;
         if (due("guard", G.everyMinutes ?? 15)) n2 += (await guardScan(identity, state)).length;
+        if (due("digest", 60)) n2 += await councilDigest(identity, state);
         if (due("watches", CFG.serve.watchMinutes)) n2 += await runWatches(identity, state);
         if (due("ledger", CFG.serve.ledgerMinutes)) await settleLedger(state);
         if (n1 + n2 > 0) { replies += n1 + n2; saveJson(STATE_FILE, state); }

@@ -103,5 +103,47 @@
     "collisionMinLiquidityUsd": 25000,
     "homeChain": "robinhood",
     "seedDominance": 5
+  },
+  "runner": {
+    "officialDomains": [
+      "musebook.lol",
+      "musepad.lol",
+      "bankr.bot",
+      "robinhood.com",
+      "uniswap.org",
+      "dexscreener.com",
+      "github.com",
+      "x.com",
+      "twitter.com",
+      "x402.org",
+      "coinbase.com",
+      "base.org"
+    ],
+    "brands": [
+      "musebook",
+      "musepad",
+      "bankr",
+      "robinhood",
+      "uniswap",
+      "coinbase",
+      "dexscreener"
+    ],
+    "officialHandles": [
+      "wyn_eth",
+      "0xDeployer",
+      "bankrbot",
+      "wynjr",
+      "musebook"
+    ],
+    "walletChains": [
+      "1",
+      "8453"
+    ],
+    "maxVetsPerAuthorPerDay": 5,
+    "digest": {
+      "channel": "townhall",
+      "thread": 14814,
+      "everyDays": 7
+    }
   }
 }
