@@ -19,7 +19,27 @@ export function makeRadar({ CFG, http, HERE }) {
   const load = (f, d) => (existsSync(f) ? JSON.parse(readFileSync(f, "utf8")) : d);
   const save = (f, v) => { if (!existsSync(DIR)) mkdirSync(DIR, { recursive: true }); writeFileSync(f, JSON.stringify(v, null, 1)); };
 
-  async function rpc(method, params) { const r = await http(RPC, { jsonrpc: "2.0", id: 1, method, params }); return r.json ?? {}; }
+  let lastCall = 0;
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  async function rpc(method, params) {
+    for (let attempt = 0; attempt < 7; attempt++) {
+      const wait = lastCall + (RD.rpcGapMs ?? 150) - Date.now(); if (wait > 0) await sleep(wait);
+      lastCall = Date.now();
+      const r = await http(RPC, { jsonrpc: "2.0", id: 1, method, params });
+      const j = r.json ?? {};
+      const limited = r.status === 429 || j.error?.code === 429 || /too many requests|rate limit/i.test(j.error?.message ?? "");
+      if (!limited) return j;
+      await sleep(Math.min(20000, 1500 * 2 ** attempt)); // back off and retry: a 429 is not "no data"
+    }
+    return { error: { code: 429, message: "rate limited after retries" } };
+  }
+  async function rpcBatch(calls) {
+    const wait = lastCall + (RD.rpcGapMs ?? 150) - Date.now(); if (wait > 0) await sleep(wait);
+    lastCall = Date.now();
+    const r = await http(RPC, calls.map((c, i) => ({ jsonrpc: "2.0", id: i, method: c.method, params: c.params })));
+    if (Array.isArray(r.json)) { const byId = {}; for (const x of r.json) byId[x.id] = x.result; return calls.map((_, i) => byId[i] ?? null); }
+    const out = []; for (const c of calls.slice(0, 30)) out.push((await rpc(c.method, c.params)).result ?? null); return out;
+  }
   async function blockTs(num) { const b = (await rpc("eth_getBlockByNumber", ["0x" + num.toString(16), false])).result; return b ? parseInt(b.timestamp, 16) : null; }
 
   async function tradingYoung(maxAgeDays = 7) {
@@ -59,25 +79,31 @@ export function makeRadar({ CFG, http, HERE }) {
     try { return BigInt(r.result); } catch { return 0n; }
   }
 
+  async function logsRange(token, from, to) {
+    const logs = []; let step = Math.max(1, to - from + 1), start = from, calls = 0, partial = false;
+    while (start <= to && calls < (RD.maxLogCalls ?? 120)) {
+      const end = Math.min(to, start + step - 1);
+      const r = await rpc("eth_getLogs", [{ address: token, topics: [TRANSFER], fromBlock: "0x" + start.toString(16), toBlock: "0x" + end.toString(16) }]);
+      calls++;
+      if (r.error) { if (step > 500) { step = Math.floor(step / 3); continue; } partial = true; break; }
+      logs.push(...(r.result ?? [])); start = end + 1;
+      if ((r.result ?? []).length < 3000) step = Math.min(step * 2, 400000);
+    }
+    return { logs, partial: partial || start <= to };
+  }
+
+  /** Launch window (first 3h) for launch behaviour, plus the last 6h for current activity. */
   async function transferLogs(token, launchedAtMs) {
     const head = parseInt((await rpc("eth_blockNumber", [])).result, 16);
     const t1 = await blockTs(head), t0 = await blockTs(head - 200000);
     const bt = t1 && t0 ? (t1 - t0) / 200000 : 0.1;
     const startBlock = await blockAt(Math.floor(launchedAtMs / 1000) - 900);
-    const back = head - startBlock;
-    // most launches are small: one query over the whole range usually works; big ones time out and fall back to chunks
-    const whole = await rpc("eth_getLogs", [{ address: token, topics: [TRANSFER], fromBlock: "0x" + Math.max(0, head - back).toString(16), toBlock: "0x" + head.toString(16) }]);
-    if (!whole.error && Array.isArray(whole.result)) return { logs: whole.result, head, bt, partial: false };
-    let from = Math.max(0, head - back), step = 60000, calls = 0; const logs = [];
-    while (from <= head && calls < 80) {
-      const to = Math.min(head, from + step - 1);
-      const r = await rpc("eth_getLogs", [{ address: token, topics: [TRANSFER], fromBlock: "0x" + from.toString(16), toBlock: "0x" + to.toString(16) }]);
-      calls++;
-      if (r.error) { if (step > 3000) { step = Math.floor(step / 2); continue; } return { logs, head, bt, partial: true }; }
-      logs.push(...(r.result ?? []));
-      from = to + 1;
-    }
-    return { logs, head, bt, partial: from <= head };
+    const launchEnd = Math.min(head, startBlock + Math.round((3 * 3600 + 900) / bt));
+    const a = await logsRange(token, startBlock, launchEnd);
+    const full = launchEnd >= head;
+    let recent = { logs: [], partial: false };
+    if (!full) recent = await logsRange(token, Math.max(launchEnd + 1, head - Math.round(6 * 3600 / bt)), head);
+    return { logs: a.logs, recent: recent.logs, full, head, bt, partial: a.partial || recent.partial };
   }
 
   async function isContract(addr) {
@@ -86,7 +112,7 @@ export function makeRadar({ CFG, http, HERE }) {
   }
 
   async function onchain(token, launchedAtMs) {
-    const { logs, bt, partial } = await transferLogs(token, launchedAtMs);
+    const { logs, recent, full, bt, partial } = await transferLogs(token, launchedAtMs);
     if (!logs.length) return null;
     const tx = logs.map((l) => ({ from: "0x" + l.topics[1].slice(26), to: "0x" + l.topics[2].slice(26), v: BigInt(l.data && l.data !== "0x" ? l.data : "0x0"), b: parseInt(l.blockNumber, 16), i: parseInt(l.logIndex, 16) }))
       .sort((a, c) => a.b - c.b || a.i - c.i);
@@ -117,13 +143,19 @@ export function makeRadar({ CFG, http, HERE }) {
     const identicalBuys = Object.values(amounts).filter((c) => c >= 3).reduce((s, c) => s + c, 0);
     const early = [...buyers.keys()].slice(0, 70);
     const earlyBought = early.reduce((s, a) => s + buyers.get(a), 0n);
+    if (!full && early.length) {
+      // the launch window doesn't show what they hold now: ask the token directly
+      const res = await rpcBatch(early.map((a) => ({ method: "eth_call", params: [{ to: token, data: "0x70a08231" + a.slice(2).padStart(64, "0") }, "latest"] })));
+      early.forEach((a, i) => { try { if (res[i]) bal[a] = BigInt(res[i]); } catch {} });
+    }
     const retention = { hold: 0, partial: 0, soldAll: 0, more: 0 };
     for (const a of early) { const b = bal[a] ?? 0n, got = buyers.get(a); if (b <= 0n) retention.soldAll++; else if (b > got) retention.more++; else if (b * 10n >= got * 9n) retention.hold++; else retention.partial++; }
     const buySizes = buys.map((t) => share(t.v)).sort((a, c) => a - c);
-    const holders = Object.entries(bal).filter(([a, v]) => v > 0n && a !== pm && !DEAD.has(a)).sort((a, c) => (c[1] > a[1] ? 1 : -1));
+    const holders = full ? Object.entries(bal).filter(([a, v]) => v > 0n && a !== pm && !DEAD.has(a)).sort((a, c) => (c[1] > a[1] ? 1 : -1)) : [];
     const top = [];
     for (const [a, v] of holders.slice(0, 14)) { if (top.length >= 10) break; if (await isContract(a)) continue; top.push({ a, pct: share(v) }); }
     const last6hBlocks = Math.round(6 * 3600 / bt), headB = tx[tx.length - 1].b;
+    const recentTx = full ? tx.filter((t) => t.b > headB - last6hBlocks) : recent.map((l) => ({ from: "0x" + l.topics[1].slice(26), to: "0x" + l.topics[2].slice(26) }));
     return {
       partial, buys: buys.length, sells: sells.length, uniqueBuyers: buyers.size, uniqueSellers: new Set(sells.map((t) => t.from)).size,
       firstHourBuyers: new Set(firstHour.map((t) => t.to)).size, firstHourBuys: firstHour.length,
@@ -131,8 +163,8 @@ export function makeRadar({ CFG, http, HERE }) {
       bundleLikeShare: bundleShare, bundleLikeWallets: bundleAddrs.size, identicalBuys,
       earlyBuyersShare: share(earlyBought), earlyRetention: retention,
       medianBuyPct: buySizes[Math.floor(buySizes.length / 2)] ?? null, maxBuyPct: buySizes[buySizes.length - 1] ?? null,
-      holders: holders.length, top10Pct: Math.round(top.reduce((s, x) => s + x.pct, 0) * 100) / 100, topHolderPct: top[0]?.pct ?? 0,
-      recentTrades6h: tx.filter((t) => t.b > headB - last6hBlocks && (t.from === pm || t.to === pm)).length,
+      holders: full ? holders.length : null, top10Pct: full ? Math.round(top.reduce((s, x) => s + x.pct, 0) * 100) / 100 : null, topHolderPct: full ? top[0]?.pct ?? 0 : 0,
+      recentTrades6h: recentTx.filter((t) => t.from === pm || t.to === pm).length, historyComplete: full,
     };
   }
 
@@ -199,7 +231,8 @@ export function makeRadar({ CFG, http, HERE }) {
     else if (col) notes.push(`shares its ticker with a token on ${col.chain}`);
     if (enough && o.bundleLikeShare >= 30) gates.push(`bundle-like buying took ${o.bundleLikeShare}% of supply in the opening blocks`);
     if (o.topHolderPct >= 20) gates.push(`one wallet holds ${o.topHolderPct}% of supply`);
-    const dist = 30 * conf * (0.5 * lin(o.top10Pct, 50, 15) + 0.3 * lin(o.bundleLikeShare, 20, 3) + 0.2 * lin(o.firstBlockShare, 15, 2));
+    const topPart = o.top10Pct === null ? 0.5 : lin(o.top10Pct, 50, 15); // unknown concentration scores neutral, not good
+    const dist = 30 * conf * (0.5 * topPart + 0.3 * lin(o.bundleLikeShare, 20, 3) + 0.2 * lin(o.firstBlockShare, 15, 2));
     const traction = 30 * (0.5 * lin(o.firstHourBuyers, 5, 60) + 0.3 * lin(o.uniqueBuyers, 10, 150) + 0.2 * lin(o.uniqueBuyers / Math.max(1, o.uniqueSellers), 0.8, 2.5));
     const kept = o.earlyRetention.hold + o.earlyRetention.more + 0.5 * o.earlyRetention.partial;
     const earlyN = Math.max(1, o.earlyRetention.hold + o.earlyRetention.more + o.earlyRetention.partial + o.earlyRetention.soldAll);
@@ -225,8 +258,8 @@ export function makeRadar({ CFG, http, HERE }) {
       token, symbol: item.symbol, name: item.name, cohort: item.cohort ?? "fresh", launchedAt: item.launchedAt, launcher, thread: item.sourceThreadUrl,
       ageMin: Math.round((Date.now() - launchedAt) / 60000), score: sc.total, tier: sc.tier, gates: sc.gates, notes: sc.notes, parts: sc.parts,
       safety: s, collision: col, townMentions: town, onchain: o,
-      entry: { t: Date.now(), mcap: n(item.marketCapUsd), vol24: n(item.volume24hUsd), holders: o.holders, uniqueBuyers: o.uniqueBuyers },
-      killLine: `this read fails if, within 24h, holders fall below ${Math.max(1, Math.floor(o.holders * 0.7))}, or top-10 concentration rises above ${Math.min(60, Math.round(o.top10Pct + 15))}%, or trading goes silent (under 5 trades in 6h)${n(item.marketCapUsd) ? `, or market cap drops below $${Math.round(n(item.marketCapUsd) * 0.4).toLocaleString("en-US")}` : ""}.`,
+      entry: { t: Date.now(), mcap: n(item.marketCapUsd), vol24: n(item.volume24hUsd), holders: o.holders, uniqueBuyers: o.uniqueBuyers, recentTrades6h: o.recentTrades6h },
+      killLine: `this read fails if, within 24h, ${o.holders ? `holders fall below ${Math.max(1, Math.floor(o.holders * 0.7))}, or ` : ""}${o.top10Pct !== null ? `top-10 concentration rises above ${Math.min(60, Math.round(o.top10Pct + 15))}%, or ` : ""} or trading goes silent (under 5 trades in 6h)${n(item.marketCapUsd) ? `, or market cap drops below $${Math.round(n(item.marketCapUsd) * 0.4).toLocaleString("en-US")}` : ""}.`,
       checkpoints: {},
     };
   }
@@ -235,7 +268,7 @@ export function makeRadar({ CFG, http, HERE }) {
     if (e.skipped) return `• $${e.symbol}: skipped (${e.skipped})`;
     const icon = { STRONG_START: "🟢", WATCH: "🟡", WEAK: "⚪", NO_TRACTION: "⚫", AVOID: "🔴" }[e.tier];
     const o = e.onchain;
-    return `${icon} $${e.symbol} ${e.score}/100 ${e.tier} [${e.cohort}] (${e.ageMin < 180 ? e.ageMin + "m" : Math.round(e.ageMin / 60) + "h"} old, by ${e.launcher.handle}${e.launcher.founder ? " 🌱" : ""}) — buyers ${o.uniqueBuyers} (${o.firstHourBuyers} in 1st hour), holders ${o.holders}, top10 ${o.top10Pct}%, bundle-like ${o.bundleLikeShare}%, first-block ${o.firstBlockShare}%, early buyers holding ${o.earlyRetention.hold + o.earlyRetention.more}/${o.earlyRetention.hold + o.earlyRetention.more + o.earlyRetention.partial + o.earlyRetention.soldAll}, town mentions ${e.townMentions}${e.gates.length ? ` | gates: ${e.gates.join("; ")}` : ""}${e.notes?.length ? ` | notes: ${e.notes.join("; ")}` : ""}`;
+    return `${icon} $${e.symbol} ${e.score}/100 ${e.tier} [${e.cohort}] (${e.ageMin < 180 ? e.ageMin + "m" : Math.round(e.ageMin / 60) + "h"} old, by ${e.launcher.handle}${e.launcher.founder ? " 🌱" : ""}) — buyers ${o.uniqueBuyers} (${o.firstHourBuyers} in 1st hour), holders ${o.holders ?? "?"}, top10 ${o.top10Pct ?? "?"}%, bundle-like ${o.bundleLikeShare}%, first-block ${o.firstBlockShare}%, early buyers holding ${o.earlyRetention.hold + o.earlyRetention.more}/${o.earlyRetention.hold + o.earlyRetention.more + o.earlyRetention.partial + o.earlyRetention.soldAll}, town mentions ${e.townMentions}${e.gates.length ? ` | gates: ${e.gates.join("; ")}` : ""}${e.notes?.length ? ` | notes: ${e.notes.join("; ")}` : ""}`;
   }
 
   async function runTest(testNo, { dry = false } = {}) {

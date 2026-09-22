@@ -1,9 +1,0 @@
-head 69705711
-block head-1000: ts 2026-09-22T13:52:17.000Z
-block head-1000000: ts 2026-09-21T09:55:33.000Z
-block head-5000000: ts 2026-09-16T17:59:08.000Z
-block head-20000000: ts 2026-08-30T03:56:45.000Z
-launch block ~65136511 after 26 steps (head-4569200)
-whole range: ERR {"code":-32000,"message":"logs matched by query exceeds limit of 10000"}
-first 60k after launch: 9007 logs
-totalSupply {"code":429,"message":"Too Many Requests"}
