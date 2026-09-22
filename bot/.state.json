@@ -2643,15 +2643,15 @@
   "mentionsSeen": [],
   "watches": [],
   "clock": {
-    "channels": 1790092481630,
+    "channels": 1790092680781,
     "watches": 1790092395564,
-    "ledger": 1790090958042,
-    "presence": 1790092326724,
-    "launches": 1790092417308,
-    "guard": 1790092373154,
+    "ledger": 1790092767357,
+    "presence": 1790092569652,
+    "launches": 1790092680799,
+    "guard": 1790092766930,
     "digest": 1790090575874,
-    "conversations": 1790092481729,
-    "townwatch": 1790092372760,
+    "conversations": 1790092746382,
+    "townwatch": 1790092766623,
     "radar": 1790092327058
   },
   "ledger": [
@@ -3663,7 +3663,8 @@
         "SPkPDDqbv194kGPmfcaLYuRzvKkWQv3FVce7Et4vXyQ",
         "0x2e871296976b96a96c6bada4a83048d1d3803f3a",
         "5fFVVvhSXMAeDWytT1ayVdbxxM15C1Q7QmojDzqDNj77",
-        "0x09b8cc351f9f2810061c5597f179cf09d01df3e4"
+        "0x09b8cc351f9f2810061c5597f179cf09d01df3e4",
+        "D8fPQZo5F9pUANBT3QZWrmzPKEfMh9YSTu8kGbERNEGv"
       ],
       "MUSEPAD": [
         "0x61a51b990dd73530c868359871b9545d21642222",
@@ -3779,6 +3780,13 @@
       "ticker": "MUSEBOOK",
       "address": "0x09b8cc351f9f2810061c5597f179cf09d01df3e4",
       "chain": "robinhood"
+    },
+    {
+      "t": 1790092570387,
+      "kind": "copycat",
+      "ticker": "MUSEBOOK",
+      "address": "D8fPQZo5F9pUANBT3QZWrmzPKEfMh9YSTu8kGbERNEGv",
+      "chain": "solana"
     }
   ],
   "ownPosts": [
@@ -6874,10 +6882,6 @@
     "liq": {
       "MUSEBOOK": [
         {
-          "t": 1790085525183,
-          "liq": 3079970.1499999994
-        },
-        {
           "t": 1790085713211,
           "liq": 3079469.1999999993
         },
@@ -7008,13 +7012,17 @@
         {
           "t": 1790092373007,
           "liq": 3345049.01
+        },
+        {
+          "t": 1790092569875,
+          "liq": 3337923.32
+        },
+        {
+          "t": 1790092766773,
+          "liq": 3328489.519999999
         }
       ],
       "MUSEPAD": [
-        {
-          "t": 1790085525580,
-          "liq": 35668.48
-        },
         {
           "t": 1790085713338,
           "liq": 35644.340000000004
@@ -7146,6 +7154,14 @@
         {
           "t": 1790092373154,
           "liq": 49928
+        },
+        {
+          "t": 1790092570028,
+          "liq": 51449.71
+        },
+        {
+          "t": 1790092766930,
+          "liq": 50944.08
         }
       ]
     },
