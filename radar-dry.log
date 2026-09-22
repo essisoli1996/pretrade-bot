@@ -1,0 +1,150 @@
+launch radar test #0 — 2026-09-22T11:29:31.311Z — 6 launches scored
+🟡 $AZUKI 58/100 WATCH (530m old, by Azuki) — buyers 4 (4 in 1st hour), holders 1, top10 0%, bundle-like 0.6566%, first-block 0.6566%, early buyers holding 1/4, town mentions 19
+🔴 $TEST 53/100 AVOID (1024m old, by Edifier) — buyers 1 (1 in 1st hour), holders 1, top10 0%, bundle-like 0%, first-block 100%, early buyers holding 1/1, town mentions 24 | gates: ticker collision with an established token (0x45720B9E… on base, $284,251 liquidity)
+🔴 $BUTTHOLE 36/100 AVOID (326m old, by Museoh) — buyers 1 (1 in 1st hour), holders 2, top10 0%, bundle-like 0%, first-block 85%, early buyers holding 0/1, town mentions 1 | gates: ticker collision with an established token (CboMcTUYUc… on solana, $284,789 liquidity)
+• $FLIK: skipped (no trades yet)
+• $GIUSEPPE: skipped (no trades yet)
+• $WREN: skipped (no trades yet)
+
+[
+ {
+  "test": 0,
+  "token": "0x85ef3623f37bd1b28639c96152adba4d5eec1360",
+  "symbol": "AZUKI",
+  "name": "Azuki",
+  "launchedAt": "2026-09-22T02:39:21.804Z",
+  "launcher": {
+   "handle": "Azuki",
+   "founder": false,
+   "muse": "muse_7eth3q8tvh"
+  },
+  "thread": "https://musebook.lol/p/49768",
+  "ageMin": 530,
+  "score": 58,
+  "tier": "WATCH",
+  "gates": [],
+  "parts": {
+   "distribution": 30,
+   "traction": 1,
+   "holderQuality": 7,
+   "townSignal": 10,
+   "sanity": 10
+  },
+  "safety": {
+   "known": true,
+   "flags": [],
+   "critical": false
+  },
+  "collision": null,
+  "townMentions": 19,
+  "onchain": {
+   "partial": false,
+   "buys": 6,
+   "sells": 6,
+   "uniqueBuyers": 4,
+   "uniqueSellers": 4,
+   "firstHourBuyers": 4,
+   "firstHourBuys": 6,
+   "firstBlockBuyers": 3,
+   "firstBlockShare": 0.6566,
+   "bundleLikeShare": 0.6566,
+   "bundleLikeWallets": 3,
+   "identicalBuys": 0,
+   "earlyBuyersShare": 1.3132,
+   "earlyRetention": {
+    "hold": 0,
+    "partial": 0,
+    "soldAll": 3,
+    "more": 1
+   },
+   "medianBuyPct": 0.2478,
+   "maxBuyPct": 0.3193,
+   "holders": 1,
+   "top10Pct": 0,
+   "topHolderPct": 0,
+   "recentTrades6h": 12
+  },
+  "entry": {
+   "t": 1790076567432,
+   "mcap": 3997.094131021827,
+   "vol24": 52.84891274117052,
+   "holders": 1,
+   "uniqueBuyers": 4
+  },
+  "killLine": "this read fails if, within 24h, holders fall below 0, or top-10 concentration rises above 15%, or trading goes silent (under 5 trades in 6h), or market cap drops below $1,599.",
+  "checkpoints": {}
+ },
+ {
+  "test": 0,
+  "token": "0x57ba3adf1f397f458c0ad56ccf8d29296bf4efb0",
+  "symbol": "TEST",
+  "name": "TEST",
+  "launchedAt": "2026-09-21T18:25:23.401Z",
+  "launcher": {
+   "handle": "Edifier",
+   "founder": false,
+   "muse": "muse_cbzxxfiak9"
+  },
+  "thread": "https://musebook.lol/p/45994",
+  "ageMin": 1024,
+  "score": 53,
+  "tier": "AVOID",
+  "gates": [
+   "ticker collision with an established token (0x45720B9E… on base, $284,251 liquidity)"
+  ],
+  "parts": {
+   "distribution": 24,
+   "traction": 1,
+   "holderQuality": 9,
+   "townSignal": 9,
+   "sanity": 10
+  },
+  "safety": {
+   "known": true,
+   "flags": [],
+   "critical": false
+  },
+  "collision": {
+   "with": "0x45720B9E75675695E9D61108f8c10676175449cB",
+   "chain": "base",
+   "liq": 284251
+  },
+  "townMentions": 24,
+  "onchain": {
+   "partial": false,
+   "buys": 1,
+   "sells": 0,
+   "uniqueBuyers": 1,
+   "uniqueSellers": 0,
+   "firstHourBuyers": 1,
+   "firstHourBuys": 1,
+   "firstBlockBuyers": 1,
+   "firstBlockShare": 100,
+   "bundleLikeShare": 0,
+   "bundleLikeWallets": 0,
+   "identicalBuys": 0,
+   "earlyBuyersShare": 100,
+   "earlyRetention": {
+    "hold": 1,
+    "partial": 0,
+    "soldAll": 0,
+    "more": 0
+   },
+   "medianBuyPct": 100,
+   "maxBuyPct": 100,
+   "holders": 1,
+   "top10Pct": 0,
+   "topHolderPct": 0,
+   "recentTrades6h": 2
+  },
+  "entry": {
+   "t": 1790076571311,
+   "mcap": 6649.300211832031,
+   "vol24": 0,
+   "holders": 1,
+   "uniqueBuyers": 1
+  },
+  "killLine": "this read fails if, within 24h, holders fall below 0, or top-10 concentration rises above 15%, or trading goes silent (under 5 trades in 6h), or market cap drops below $2,660.",
+  "checkpoints": {}
+ }
+]
