@@ -76,6 +76,14 @@
     "top10Pct": null,
     "recentTrades6h": 0,
     "mcap": null
+   },
+   "6h": {
+    "t": 1790099664658,
+    "holders": 0,
+    "uniqueBuyers": 0,
+    "top10Pct": null,
+    "recentTrades6h": 0,
+    "mcap": null
    }
   }
  },
@@ -163,6 +171,14 @@
     "top10Pct": null,
     "recentTrades6h": 0,
     "mcap": null
+   },
+   "6h": {
+    "t": 1790099669693,
+    "holders": 0,
+    "uniqueBuyers": 0,
+    "top10Pct": null,
+    "recentTrades6h": 0,
+    "mcap": null
    }
   }
  },
@@ -243,6 +259,14 @@
     "top10Pct": 0,
     "recentTrades6h": 12,
     "mcap": 4004.5333634080516
+   },
+   "6h": {
+    "t": 1790099675303,
+    "holders": 0,
+    "uniqueBuyers": 4,
+    "top10Pct": null,
+    "recentTrades6h": 4,
+    "mcap": 4032.5798125137812
    }
   }
  },
@@ -330,6 +354,14 @@
     "top10Pct": null,
     "recentTrades6h": 0,
     "mcap": 6366.908768795088
+   },
+   "6h": {
+    "t": 1790099680749,
+    "holders": 0,
+    "uniqueBuyers": 0,
+    "top10Pct": null,
+    "recentTrades6h": 0,
+    "mcap": 8948.1459758587
    }
   }
  },
@@ -417,6 +449,14 @@
     "top10Pct": null,
     "recentTrades6h": 0,
     "mcap": null
+   },
+   "6h": {
+    "t": 1790099686736,
+    "holders": 0,
+    "uniqueBuyers": 0,
+    "top10Pct": null,
+    "recentTrades6h": 0,
+    "mcap": null
    }
   }
  },
@@ -497,6 +537,14 @@
     "top10Pct": null,
     "recentTrades6h": 0,
     "mcap": 4285.05707145588
+   },
+   "6h": {
+    "t": 1790099692511,
+    "holders": 0,
+    "uniqueBuyers": 0,
+    "top10Pct": null,
+    "recentTrades6h": 0,
+    "mcap": 6022.28139002047
    }
   }
  },
