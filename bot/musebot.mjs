@@ -1416,6 +1416,12 @@ async function main() {
     return console.log(`${cmd} update: ${res.status} ${res.text.slice(0, 300)}`);
   }
 
+  if (cmd === "presence") {
+    const ch = args[1] && !args[1].startsWith("--") ? args[1] : (CFG.presence?.channel ?? CFG.channels[0]);
+    const res = await http(`${BOARD}/api/v2/presence`, signRequest("presence", identity, { channel: ch }));
+    return console.log(`presence ${ch}: ${res.status} ${res.text.slice(0, 300)}`);
+  }
+
   if (cmd === "selftest") {
     // Answers the question "if someone asks pretrade something right now, does it reply correctly?"
     // Runs the real reply paths against the real APIs. Posts nothing.
