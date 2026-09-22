@@ -1,0 +1,39 @@
+name: diag2
+on: { workflow_dispatch: {} }
+permissions: { contents: write }
+jobs:
+  d:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: |
+          cat > /tmp/d.mjs <<'JS'
+          import { writeFileSync } from "node:fs";
+          const out = []; const j = async (u, b) => { const r = await fetch(u, b ? { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(b) } : {}); return r.json().catch(() => ({})); };
+          const MB = "0x91a2dae9699f0b82540b5886b0d8759c22820ba3";
+          const tp = await j(`https://api.dexscreener.com/token-pairs/v1/robinhood/${MB}`);
+          const arr = Array.isArray(tp) ? tp : [];
+          arr.sort((a, b) => (b.pairCreatedAt ?? 0) - (a.pairCreatedAt ?? 0));
+          out.push(`token-pairs with MUSEBOOK: ${arr.length}`);
+          for (const p of arr.slice(0, 12)) out.push(`  ${new Date(p.pairCreatedAt ?? 0).toISOString().slice(5,16)} ${p.baseToken?.symbol}/${p.quoteToken?.symbol} base=${p.baseToken?.address?.slice(0,10)} liq=$${Math.round(p.liquidity?.usd ?? 0)} vol24=$${Math.round(p.volume?.h24 ?? 0)} tx24=${(p.txns?.h24?.buys??0)+(p.txns?.h24?.sells??0)} dex=${p.dexId} labels=${(p.labels??[]).join("/")} pair=${p.pairAddress?.slice(0,14)}`);
+          const RPC = "https://rpc.mainnet.chain.robinhood.com";
+          const bn = await j(RPC, { jsonrpc: "2.0", id: 1, method: "eth_blockNumber", params: [] });
+          const head = parseInt(bn.result, 16); out.push(`head block ${head}`);
+          const blk = await j(RPC, { jsonrpc: "2.0", id: 1, method: "eth_getBlockByNumber", params: ["0x" + (head - 1000).toString(16), false] });
+          out.push(`block time: 1000 blocks ≈ ${Math.round((Date.now()/1000 - parseInt(blk.result?.timestamp ?? "0x0",16)))}s`);
+          const T = arr[0]?.baseToken?.address?.toLowerCase() === MB ? arr[0]?.quoteToken?.address : arr[0]?.baseToken?.address;
+          const TRANSFER = "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef";
+          for (const span of [20000, 100000]) {
+            const lg = await j(RPC, { jsonrpc: "2.0", id: 1, method: "eth_getLogs", params: [{ address: T, topics: [TRANSFER], fromBlock: "0x" + Math.max(0, head - span).toString(16), toBlock: "latest" }] });
+            out.push(`getLogs ${T?.slice(0,10)} span ${span}: ${lg.error ? "ERR " + JSON.stringify(lg.error).slice(0,160) : (lg.result?.length ?? "?") + " transfers"}`);
+            if (lg.result?.length) { const cp = {}; for (const l of lg.result) { const f = "0x" + l.topics[1].slice(26), t = "0x" + l.topics[2].slice(26); cp[f] = (cp[f] ?? 0) + 1; cp[t] = (cp[t] ?? 0) + 1; } out.push("  top counterparties: " + Object.entries(cp).sort((a,b)=>b[1]-a[1]).slice(0,4).map(([a,n])=>a.slice(0,10)+":"+n).join(" ")); break; }
+          }
+          const mp = await j("https://musepad.lol/api/tokens");
+          out.push(`musepad /api/tokens: ${JSON.stringify(mp).slice(0, 400)}`);
+          writeFileSync("diag2.log", out.join("\n") + "\n"); console.log(out.join("\n"));
+          JS
+          node /tmp/d.mjs
+          git config user.name musebot; git config user.email musebot@users.noreply.github.com
+          git add -f diag2.log; git diff --cached --quiet || git commit -qm "diag2 [skip ci]"; git pull -q --rebase || true; git push -q || true
