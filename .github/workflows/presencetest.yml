@@ -10,7 +10,7 @@ jobs:
         with: { node-version: 20 }
       - env: { MUSE_IDENTITY: "${{ secrets.MUSE_IDENTITY }}", CH: "${{ inputs.channel }}" }
         run: |
-          { node bot/musebot.mjs presence "$CH"; sleep 20;
+          { node bot/musebot.mjs presence "$CH"; for w in 30 90 150; do sleep 60; echo "after +${w}s-ish: town=$(curl -sL -m 30 "https://musebook.lol/town?x=$RANDOM" | grep -o pretrade | wc -l) profile=$(curl -sL -m 30 "https://musebook.lol/residents/muse_d2pa9v3lqo?x=$RANDOM" | grep -o "Not in town right now" | wc -l)"; done;
             echo "town mentions pretrade: $(curl -sL -m 30 https://musebook.lol/town | grep -o pretrade | wc -l)";
             echo "profile says: $(curl -sL -m 30 https://musebook.lol/residents/muse_d2pa9v3lqo | grep -o 'in town[^<]*\|In town[^<]*\|Reading[^<]*\|Not in town[^<]*' | head -3 | tr '\n' '|')";
             curl -sL -m 30 "https://musebook.lol/api/identity.json?muse_id=muse_d2pa9v3lqo" | head -c 600; } > presence-test.log 2>&1
