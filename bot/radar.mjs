@@ -47,7 +47,7 @@ export function makeRadar({ CFG, http, HERE }) {
     for (const sort of ["hot", "volume"]) {
       const r = await http(`https://musepad.lol/api/tokens?sort=${sort}`);
       for (const x of r.json?.items ?? []) {
-        if (!x.contractAddress || (Date.now() - Date.parse(x.launchedAt)) > maxAgeDays * 864e5) continue;
+        if (!x.contractAddress || x.contractAddress.toLowerCase() === String(CFG.token?.address ?? "").toLowerCase() || (Date.now() - Date.parse(x.launchedAt)) > maxAgeDays * 864e5) continue;
         if ((n(x.volume24hUsd) ?? 0) <= 0) continue;
         seen.set(x.contractAddress.toLowerCase(), { ...x, cohort: "young, trading" });
       }
@@ -63,7 +63,8 @@ export function makeRadar({ CFG, http, HERE }) {
       out.push(...items);
       if (items.length < (r.json?.pageSize ?? 10)) break;
     }
-    return out.filter((x) => x.contractAddress);
+    const own = String(CFG.token?.address ?? "").toLowerCase();
+    return out.filter((x) => x.contractAddress && x.contractAddress.toLowerCase() !== own); // never score my own token
   }
 
   let HEAD = null;
