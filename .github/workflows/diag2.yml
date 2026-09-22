@@ -12,26 +12,24 @@ jobs:
           cat > /tmp/d.mjs <<'JS'
           import { writeFileSync } from "node:fs";
           const out = []; const j = async (u, b) => { const r = await fetch(u, b ? { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(b) } : {}); return r.json().catch(() => ({})); };
-          const MB = "0x91a2dae9699f0b82540b5886b0d8759c22820ba3";
-          const tp = await j(`https://api.dexscreener.com/token-pairs/v1/robinhood/${MB}`);
-          const arr = Array.isArray(tp) ? tp : [];
-          arr.sort((a, b) => (b.pairCreatedAt ?? 0) - (a.pairCreatedAt ?? 0));
-          out.push(`token-pairs with MUSEBOOK: ${arr.length}`);
-          for (const p of arr.slice(0, 12)) out.push(`  ${new Date(p.pairCreatedAt ?? 0).toISOString().slice(5,16)} ${p.baseToken?.symbol}/${p.quoteToken?.symbol} base=${p.baseToken?.address?.slice(0,10)} liq=$${Math.round(p.liquidity?.usd ?? 0)} vol24=$${Math.round(p.volume?.h24 ?? 0)} tx24=${(p.txns?.h24?.buys??0)+(p.txns?.h24?.sells??0)} dex=${p.dexId} labels=${(p.labels??[]).join("/")} pair=${p.pairAddress?.slice(0,14)}`);
-          const RPC = "https://rpc.mainnet.chain.robinhood.com";
-          const bn = await j(RPC, { jsonrpc: "2.0", id: 1, method: "eth_blockNumber", params: [] });
-          const head = parseInt(bn.result, 16); out.push(`head block ${head}`);
-          const blk = await j(RPC, { jsonrpc: "2.0", id: 1, method: "eth_getBlockByNumber", params: ["0x" + (head - 1000).toString(16), false] });
-          out.push(`block time: 1000 blocks ≈ ${Math.round((Date.now()/1000 - parseInt(blk.result?.timestamp ?? "0x0",16)))}s`);
-          const T = arr[0]?.baseToken?.address?.toLowerCase() === MB ? arr[0]?.quoteToken?.address : arr[0]?.baseToken?.address;
-          const TRANSFER = "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef";
-          for (const span of [20000, 100000]) {
-            const lg = await j(RPC, { jsonrpc: "2.0", id: 1, method: "eth_getLogs", params: [{ address: T, topics: [TRANSFER], fromBlock: "0x" + Math.max(0, head - span).toString(16), toBlock: "latest" }] });
-            out.push(`getLogs ${T?.slice(0,10)} span ${span}: ${lg.error ? "ERR " + JSON.stringify(lg.error).slice(0,160) : (lg.result?.length ?? "?") + " transfers"}`);
-            if (lg.result?.length) { const cp = {}; for (const l of lg.result) { const f = "0x" + l.topics[1].slice(26), t = "0x" + l.topics[2].slice(26); cp[f] = (cp[f] ?? 0) + 1; cp[t] = (cp[t] ?? 0) + 1; } out.push("  top counterparties: " + Object.entries(cp).sort((a,b)=>b[1]-a[1]).slice(0,4).map(([a,n])=>a.slice(0,10)+":"+n).join(" ")); break; }
+          const mp = await j("https://musepad.lol/api/tokens?sort=new");
+          const list = mp.tokens ?? mp.data ?? mp.items ?? (Array.isArray(mp) ? mp : []);
+          out.push(`musepad new: ${list.length} | top-level keys: ${Object.keys(mp).join(",")}`);
+          out.push(`first item: ${JSON.stringify(list[0] ?? {}).slice(0, 1500)}`);
+          out.push(`second item keys: ${Object.keys(list[1] ?? {}).join(",")}`);
+          const t = list[0]?.address ?? list[0]?.token_address ?? list[0]?.tokenAddress ?? list[0]?.contract;
+          if (t) {
+            const one = await j(`https://musepad.lol/api/token/${t}`); out.push(`token detail: ${JSON.stringify(one).slice(0, 1200)}`);
+            const RPC = "https://rpc.mainnet.chain.robinhood.com"; const TRANSFER = "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef";
+            const head = parseInt((await j(RPC, { jsonrpc: "2.0", id: 1, method: "eth_blockNumber", params: [] })).result, 16);
+            for (const span of [30000, 200000, 900000]) {
+              const lg = await j(RPC, { jsonrpc: "2.0", id: 1, method: "eth_getLogs", params: [{ address: t, topics: [TRANSFER], fromBlock: "0x" + Math.max(0, head - span).toString(16), toBlock: "latest" }] });
+              out.push(`getLogs span ${span}: ${lg.error ? "ERR " + JSON.stringify(lg.error).slice(0,200) : lg.result.length + " transfers"}`);
+              if (lg.result?.length) { const cp = {}; for (const l of lg.result) { const f = "0x" + l.topics[1].slice(26), to = "0x" + l.topics[2].slice(26); cp[f] = (cp[f] ?? 0) + 1; cp[to] = (cp[to] ?? 0) + 1; } out.push("  top counterparties: " + Object.entries(cp).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([a,n])=>a+":"+n).join(" ")); out.push("  first log block " + parseInt(lg.result[0].blockNumber,16) + " tx " + lg.result[0].transactionHash.slice(0,12)); }
+            }
+            const ds = await j(`https://api.dexscreener.com/tokens/v1/robinhood/${t}`);
+            out.push(`dexscreener pairs: ${Array.isArray(ds) ? ds.length : "?"} ${JSON.stringify((ds??[])[0]?.quoteToken ?? {})} liq ${(ds??[])[0]?.liquidity?.usd}`);
           }
-          const mp = await j("https://musepad.lol/api/tokens");
-          out.push(`musepad /api/tokens: ${JSON.stringify(mp).slice(0, 400)}`);
           writeFileSync("diag2.log", out.join("\n") + "\n"); console.log(out.join("\n"));
           JS
           node /tmp/d.mjs
