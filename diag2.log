@@ -1,0 +1,18 @@
+token-pairs with MUSEBOOK: 30
+  09-22T06:19 musebook/ETH base=0x91A2DAe9 liq=$40402 vol24=$53059 tx24=259 dex=uniswap labels=v4 pair=0x2c8676e5c22c
+  09-22T04:21 musebook/USDG base=0x91A2DAe9 liq=$25 vol24=$11 tx24=8 dex=uniswap labels=v4 pair=0x260e1d7a9dab
+  09-21T23:34 musebook/ETH base=0x91A2DAe9 liq=$6766 vol24=$188247 tx24=763 dex=uniswap labels=v4 pair=0xda6863e84a27
+  09-21T22:57 musebook/ETH base=0x91A2DAe9 liq=$134 vol24=$12548 tx24=101 dex=uniswap labels=v4 pair=0x97f7be89e7ea
+  09-21T22:44 musebook/ETH base=0x91A2DAe9 liq=$20715 vol24=$11 tx24=2 dex=uniswap labels=v4 pair=0xc01b27e60cde
+  09-21T19:12 musebook/ETH base=0x91A2DAe9 liq=$20653 vol24=$140233 tx24=495 dex=uniswap labels=v4 pair=0xcbdbe2d2c4bd
+  09-21T18:32 musebook/ETH base=0x91A2DAe9 liq=$20579 vol24=$28900 tx24=113 dex=uniswap labels=v4 pair=0x4d195429c4f0
+  09-21T18:06 musebook/ETH base=0x91A2DAe9 liq=$0 vol24=$15868 tx24=53 dex=uniswap labels=v4 pair=0x3d8bd81515bb
+  09-21T10:17 musebook/ETH base=0x91A2DAe9 liq=$0 vol24=$137703 tx24=435 dex=uniswap labels=v4 pair=0x9fb2073d7411
+  09-21T01:34 musebook/USDG base=0x91A2DAe9 liq=$2 vol24=$2 tx24=5 dex=uniswap labels=v4 pair=0xe56b11083bf5
+  09-20T16:01 musebook/ETH base=0x91A2DAe9 liq=$7784 vol24=$88147 tx24=1886 dex=uniswap labels=v4 pair=0xfdb3e58046a5
+  09-20T13:44 musebook/ETH base=0x91A2DAe9 liq=$400 vol24=$7523 tx24=704 dex=uniswap labels=v4 pair=0x31790dfd6140
+head block 69616285
+block time: 1000 blocks ≈ 102s
+getLogs 0x00000000 span 20000: 0 transfers
+getLogs 0x00000000 span 100000: 0 transfers
+musepad /api/tokens: {"error":"sort must be one of hot, new, mcap, volume"}
