@@ -19,6 +19,7 @@ import { generateKeyPairSync, createPrivateKey, sign, randomBytes, randomUUID, c
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { makeRadar } from "./radar.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const CFG = JSON.parse(readFileSync(join(HERE, "config.json"), "utf8"));
@@ -1261,7 +1262,8 @@ function addressesIn(text) {
   return [...new Set([...evm, ...sol])];
 }
 
-let OWN_POSTS = null; // bound to state.ownPosts by the runner loop
+let OWN_POSTS = null;
+let RADAR = null; // bound to state.ownPosts by the runner loop
 async function postReply(identity, channel, parentId, text) {
   const body = signRequest("post", identity, { channel, name: CFG.name, text, parent_post_id: parentId });
   const res = await http(`${BOARD}/api/post`, body);
@@ -1429,6 +1431,14 @@ async function main() {
     const body = signRequest("intro", identity, fields);
     const res = await http(`${BOARD}/api/intro`, body);
     return console.log(`${cmd} update: ${res.status} ${res.text.slice(0, 300)}`);
+  }
+
+  if (cmd === "radar") {
+    // node bot/musebot.mjs radar [--dry] [--test N]
+    const radar = makeRadar({ CFG, http, HERE });
+    const i = args.indexOf("--test"); const no = i >= 0 ? Number(args[i + 1]) : 0;
+    const r = await radar.runTest(no, { dry: args.includes("--dry") });
+    return console.log(r.summary + "\n\n" + JSON.stringify(r.results.slice(0, 2), null, 1).slice(0, 4000));
   }
 
   if (cmd === "presence") {
@@ -1611,6 +1621,7 @@ async function main() {
         if (due("townwatch", G.townWatchMinutes ?? 3)) n2 += await townTokenWatch(identity, state);
         if (due("guard", G.everyMinutes ?? 15)) n2 += (await guardScan(identity, state)).length;
         if (due("digest", 60)) n2 += await councilDigest(identity, state);
+        if (due("radar", CFG.radar?.everyMinutes ?? 10)) { RADAR = RADAR ?? makeRadar({ CFG, http, HERE }); n2 += await RADAR.tick(); }
         if (due("watches", CFG.serve.watchMinutes)) n2 += await runWatches(identity, state);
         if (due("ledger", CFG.serve.ledgerMinutes)) await settleLedger(state);
         if (n1 + n2 > 0) { replies += n1 + n2; saveJson(STATE_FILE, state); }
