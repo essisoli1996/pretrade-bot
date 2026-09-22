@@ -161,7 +161,7 @@ export function makeRadar({ CFG, http, HERE }) {
       firstHourBuyers: new Set(firstHour.map((t) => t.to)).size, firstHourBuys: firstHour.length,
       firstBlockBuyers: new Set(firstBlockBuys.map((t) => t.to)).size, firstBlockShare: share(firstBlockBuys.reduce((s, t) => s + t.v, 0n)),
       bundleLikeShare: bundleShare, bundleLikeWallets: bundleAddrs.size, identicalBuys,
-      earlyBuyersShare: share(earlyBought), earlyRetention: retention,
+      earlyBuyersShare: Math.min(100, share(earlyBought)), earlyRetention: retention,
       medianBuyPct: buySizes[Math.floor(buySizes.length / 2)] ?? null, maxBuyPct: buySizes[buySizes.length - 1] ?? null,
       holders: full ? holders.length : null, top10Pct: full ? Math.round(top.reduce((s, x) => s + x.pct, 0) * 100) / 100 : null, topHolderPct: full ? top[0]?.pct ?? 0 : 0,
       recentTrades6h: recentTx.filter((t) => t.from === pm || t.to === pm).length, historyComplete: full,
