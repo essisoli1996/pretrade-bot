@@ -22,6 +22,19 @@ export function makeRadar({ CFG, http, HERE }) {
   async function rpc(method, params) { const r = await http(RPC, { jsonrpc: "2.0", id: 1, method, params }); return r.json ?? {}; }
   async function blockTs(num) { const b = (await rpc("eth_getBlockByNumber", ["0x" + num.toString(16), false])).result; return b ? parseInt(b.timestamp, 16) : null; }
 
+  async function tradingYoung(maxAgeDays = 7) {
+    const seen = new Map();
+    for (const sort of ["hot", "volume"]) {
+      const r = await http(`https://musepad.lol/api/tokens?sort=${sort}`);
+      for (const x of r.json?.items ?? []) {
+        if (!x.contractAddress || (Date.now() - Date.parse(x.launchedAt)) > maxAgeDays * 864e5) continue;
+        if ((n(x.volume24hUsd) ?? 0) <= 0) continue;
+        seen.set(x.contractAddress.toLowerCase(), { ...x, cohort: "young, trading" });
+      }
+    }
+    return [...seen.values()];
+  }
+
   async function launches(maxPages = 3) {
     const out = [];
     for (let page = 1; page <= maxPages; page++) {
@@ -74,7 +87,8 @@ export function makeRadar({ CFG, http, HERE }) {
     if (supply <= 0n) return null;
     const pm = Object.entries(touches).sort((a, c) => c[1] - a[1])[0]?.[0]; // the pool (Uniswap v4 PoolManager) is the busiest counterparty
     const share = (v) => Number((v * 1000000n) / supply) / 10000; // percent, 4 decimals
-    const buys = tx.filter((t) => t.from === pm && t.to !== pm && !DEAD.has(t.to));
+    let buys = tx.filter((t) => t.from === pm && t.to !== pm && !DEAD.has(t.to));
+    if (buys.length && share(buys[0].v) > 50) buys = buys.slice(1); // pool seeding / vesting move, not a buyer
     const sells = tx.filter((t) => t.to === pm && t.from !== pm && t.from !== ZERO);
     if (!buys.length) return { supplyOk: true, buys: 0, partial };
     const firstBlock = buys[0].b;
@@ -194,7 +208,7 @@ export function makeRadar({ CFG, http, HERE }) {
     if (s.top10Pct !== null && s.top10Pct !== undefined) { o.top10Pct = s.top10Pct; o.topHolderPct = s.topHolderPct ?? o.topHolderPct; }
     const sc = score(o, s, town, launcher, col);
     return {
-      token, symbol: item.symbol, name: item.name, launchedAt: item.launchedAt, launcher, thread: item.sourceThreadUrl,
+      token, symbol: item.symbol, name: item.name, cohort: item.cohort ?? "fresh", launchedAt: item.launchedAt, launcher, thread: item.sourceThreadUrl,
       ageMin: Math.round((Date.now() - launchedAt) / 60000), score: sc.total, tier: sc.tier, gates: sc.gates, notes: sc.notes, parts: sc.parts,
       safety: s, collision: col, townMentions: town, onchain: o,
       entry: { t: Date.now(), mcap: n(item.marketCapUsd), vol24: n(item.volume24hUsd), holders: o.holders, uniqueBuyers: o.uniqueBuyers },
@@ -207,7 +221,7 @@ export function makeRadar({ CFG, http, HERE }) {
     if (e.skipped) return `• $${e.symbol}: skipped (${e.skipped})`;
     const icon = { STRONG_START: "🟢", WATCH: "🟡", WEAK: "⚪", NO_TRACTION: "⚫", AVOID: "🔴" }[e.tier];
     const o = e.onchain;
-    return `${icon} $${e.symbol} ${e.score}/100 ${e.tier} (${e.ageMin}m old, by ${e.launcher.handle}${e.launcher.founder ? " 🌱" : ""}) — buyers ${o.uniqueBuyers} (${o.firstHourBuyers} in 1st hour), holders ${o.holders}, top10 ${o.top10Pct}%, bundle-like ${o.bundleLikeShare}%, first-block ${o.firstBlockShare}%, early buyers holding ${o.earlyRetention.hold + o.earlyRetention.more}/${o.earlyRetention.hold + o.earlyRetention.more + o.earlyRetention.partial + o.earlyRetention.soldAll}, town mentions ${e.townMentions}${e.gates.length ? ` | gates: ${e.gates.join("; ")}` : ""}${e.notes?.length ? ` | notes: ${e.notes.join("; ")}` : ""}`;
+    return `${icon} $${e.symbol} ${e.score}/100 ${e.tier} [${e.cohort}] (${e.ageMin < 180 ? e.ageMin + "m" : Math.round(e.ageMin / 60) + "h"} old, by ${e.launcher.handle}${e.launcher.founder ? " 🌱" : ""}) — buyers ${o.uniqueBuyers} (${o.firstHourBuyers} in 1st hour), holders ${o.holders}, top10 ${o.top10Pct}%, bundle-like ${o.bundleLikeShare}%, first-block ${o.firstBlockShare}%, early buyers holding ${o.earlyRetention.hold + o.earlyRetention.more}/${o.earlyRetention.hold + o.earlyRetention.more + o.earlyRetention.partial + o.earlyRetention.soldAll}, town mentions ${e.townMentions}${e.gates.length ? ` | gates: ${e.gates.join("; ")}` : ""}${e.notes?.length ? ` | notes: ${e.notes.join("; ")}` : ""}`;
   }
 
   async function runTest(testNo, { dry = false } = {}) {
@@ -215,7 +229,11 @@ export function makeRadar({ CFG, http, HERE }) {
     const now = Date.now();
     let pick = all.filter((x) => { const age = (now - Date.parse(x.launchedAt)) / 60000; return age >= (RD.minAgeMin ?? 20) && age <= (RD.windowHours ?? 6) * 60; });
     if (pick.length < (RD.minBatch ?? 5)) pick = all.filter((x) => (now - Date.parse(x.launchedAt)) / 60000 >= (RD.minAgeMin ?? 20)).slice(0, RD.minBatch ?? 5);
-    pick = pick.sort((a, c) => Date.parse(c.launchedAt) - Date.parse(a.launchedAt)).slice(0, RD.maxBatch ?? 15);
+    pick = pick.map((x) => ({ ...x, cohort: "fresh" })).sort((a, c) => Date.parse(c.launchedAt) - Date.parse(a.launchedAt)).slice(0, RD.freshMax ?? 12);
+    // fresh launches alone are mostly empty right now, so every test also scores young tokens that are actually trading
+    const have = new Set(pick.map((x) => x.contractAddress.toLowerCase()));
+    for (const x of await tradingYoung(RD.youngMaxDays ?? 7)) if (!have.has(x.contractAddress.toLowerCase())) pick.push(x);
+    pick = pick.slice(0, RD.maxBatch ?? 25);
     const results = [];
     for (const item of pick) { try { results.push({ test: testNo, ...(await assess(item)) }); } catch (e) { results.push({ test: testNo, token: item.contractAddress, symbol: item.symbol, skipped: `error ${String(e).slice(0, 80)}` }); } }
     results.sort((a, c) => (c.score ?? -1) - (a.score ?? -1));
