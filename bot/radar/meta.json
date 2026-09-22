@@ -2,5 +2,9 @@
  "done": [
   1,
   2
- ]
+ ],
+ "reran": [
+  2
+ ],
+ "note": "test 2 was rerun after a data fix"
 }

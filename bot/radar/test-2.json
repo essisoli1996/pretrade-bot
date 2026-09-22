@@ -1,6 +1,444 @@
 [
  {
   "test": 2,
+  "token": "0x320bac255b0a42753fcd711bd8895b92ccd290ae",
+  "symbol": "MDOG",
+  "name": "Muse Dog",
+  "cohort": "young, trading",
+  "launchedAt": "2026-09-17T07:00:10.511Z",
+  "launcher": {
+   "handle": "Kettle",
+   "founder": false,
+   "muse": "muse_71g2c4b4e1"
+  },
+  "thread": "https://musegram.lol/p/64",
+  "ageMin": 7564,
+  "score": 72,
+  "tier": "AVOID",
+  "gates": [
+   "reuses the ticker of an established Robinhood token (0x4CAF2e6e…, $27,696 liquidity)"
+  ],
+  "notes": [],
+  "parts": {
+   "distribution": 30,
+   "traction": 17,
+   "holderQuality": 5,
+   "townSignal": 9,
+   "sanity": 10
+  },
+  "safety": {
+   "known": false,
+   "flags": []
+  },
+  "collision": {
+   "with": "0x4CAF2e6eC0fCBef77314566A9884643512EF8bfC",
+   "chain": "robinhood",
+   "liq": 27696,
+   "sameChain": true
+  },
+  "townMentions": 7,
+  "onchain": {
+   "partial": false,
+   "buys": 561,
+   "sells": 481,
+   "uniqueBuyers": 66,
+   "uniqueSellers": 32,
+   "firstHourBuyers": 39,
+   "firstHourBuys": 182,
+   "firstBlockBuyers": 1,
+   "firstBlockShare": 1.2604,
+   "bundleLikeShare": 0,
+   "bundleLikeWallets": 0,
+   "identicalBuys": 0,
+   "earlyBuyersShare": 339.0545,
+   "earlyRetention": {
+    "hold": 2,
+    "partial": 3,
+    "soldAll": 61,
+    "more": 0
+   },
+   "medianBuyPct": 0.3162,
+   "maxBuyPct": 4.6474,
+   "holders": 32,
+   "top10Pct": 5.26,
+   "topHolderPct": 2.3805,
+   "recentTrades6h": 3
+  },
+  "entry": {
+   "t": 1790082224051,
+   "mcap": 4472.390587883358,
+   "vol24": 363.88869939415673,
+   "holders": 32,
+   "uniqueBuyers": 66
+  },
+  "killLine": "this read fails if, within 24h, holders fall below 22, or top-10 concentration rises above 20%, or trading goes silent (under 5 trades in 6h), or market cap drops below $1,789.",
+  "checkpoints": {}
+ },
+ {
+  "test": 2,
+  "token": "0xa3f2b4e29c3197c9fc64f8003b0e891518fbdf19",
+  "symbol": "MCAT",
+  "name": "MUSECAT",
+  "cohort": "young, trading",
+  "launchedAt": "2026-09-16T16:43:16.421Z",
+  "launcher": {
+   "handle": "Musepad",
+   "founder": false,
+   "muse": "muse_5f175k6e36"
+  },
+  "thread": "https://musebook.lol/p/1419",
+  "ageMin": 8420,
+  "score": 50,
+  "tier": "WATCH",
+  "gates": [],
+  "notes": [
+   "shares its ticker with a token on solana"
+  ],
+  "parts": {
+   "distribution": 30,
+   "traction": 10,
+   "holderQuality": 4,
+   "townSignal": 0,
+   "sanity": 6
+  },
+  "safety": {
+   "known": false,
+   "flags": []
+  },
+  "collision": {
+   "with": "7yriu74isMaa5QCoAoU1F8BbUSEBvQvwev4xP2fchUbd",
+   "chain": "solana",
+   "liq": 1465783,
+   "sameChain": false
+  },
+  "townMentions": 0,
+  "onchain": {
+   "partial": false,
+   "buys": 408,
+   "sells": 364,
+   "uniqueBuyers": 67,
+   "uniqueSellers": 27,
+   "firstHourBuyers": 1,
+   "firstHourBuys": 1,
+   "firstBlockBuyers": 1,
+   "firstBlockShare": 0.6278,
+   "bundleLikeShare": 0,
+   "bundleLikeWallets": 0,
+   "identicalBuys": 0,
+   "earlyBuyersShare": 356.5526,
+   "earlyRetention": {
+    "hold": 2,
+    "partial": 2,
+    "soldAll": 63,
+    "more": 0
+   },
+   "medianBuyPct": 0.5531,
+   "maxBuyPct": 4.7315,
+   "holders": 15,
+   "top10Pct": 7.37,
+   "topHolderPct": 2.8316,
+   "recentTrades6h": 2
+  },
+  "entry": {
+   "t": 1790082221436,
+   "mcap": 4656.492283315424,
+   "vol24": 853.9547409270831,
+   "holders": 15,
+   "uniqueBuyers": 67
+  },
+  "killLine": "this read fails if, within 24h, holders fall below 10, or top-10 concentration rises above 22%, or trading goes silent (under 5 trades in 6h), or market cap drops below $1,863.",
+  "checkpoints": {}
+ },
+ {
+  "test": 2,
+  "token": "0xc43f61cd9e694990436564fc3648e48f89abacf0",
+  "symbol": "WYNJR",
+  "name": "WYNJR",
+  "cohort": "young, trading",
+  "launchedAt": "2026-09-17T06:02:00.154Z",
+  "launcher": {
+   "handle": "Ember",
+   "founder": false,
+   "muse": "muse_1p4x6i5k3z"
+  },
+  "thread": "https://musebook.lol/p/3225",
+  "ageMin": 7622,
+  "score": 43,
+  "tier": "WEAK",
+  "gates": [],
+  "notes": [],
+  "parts": {
+   "distribution": 17,
+   "traction": 10,
+   "holderQuality": 8,
+   "townSignal": 2,
+   "sanity": 6
+  },
+  "safety": {
+   "known": false,
+   "flags": []
+  },
+  "collision": null,
+  "townMentions": 0,
+  "onchain": {
+   "partial": true,
+   "buys": 66,
+   "sells": 66,
+   "uniqueBuyers": 31,
+   "uniqueSellers": 26,
+   "firstHourBuyers": 31,
+   "firstHourBuys": 66,
+   "firstBlockBuyers": 2,
+   "firstBlockShare": 0.6963,
+   "bundleLikeShare": 0,
+   "bundleLikeWallets": 0,
+   "identicalBuys": 3,
+   "earlyBuyersShare": 47.9627,
+   "earlyRetention": {
+    "hold": 9,
+    "partial": 7,
+    "soldAll": 14,
+    "more": 1
+   },
+   "medianBuyPct": 0.2768,
+   "maxBuyPct": 5.7127,
+   "holders": 40,
+   "top10Pct": 27.48,
+   "topHolderPct": 3.6332,
+   "recentTrades6h": 132
+  },
+  "entry": {
+   "t": 1790082212269,
+   "mcap": 11639.470901991648,
+   "vol24": 160802.3306560411,
+   "holders": 40,
+   "uniqueBuyers": 31
+  },
+  "killLine": "this read fails if, within 24h, holders fall below 28, or top-10 concentration rises above 42%, or trading goes silent (under 5 trades in 6h), or market cap drops below $4,656.",
+  "checkpoints": {}
+ },
+ {
+  "test": 2,
+  "token": "0xabef3e982ff4814fc07b022efe9562f29fe12313",
+  "symbol": "test",
+  "name": "test",
+  "cohort": "young, trading",
+  "launchedAt": "2026-09-16T14:45:48.330Z",
+  "launcher": {
+   "handle": "Claude",
+   "founder": false,
+   "muse": "muse_41x2s684w6"
+  },
+  "thread": "https://musebook.lol/p/1086",
+  "ageMin": 8538,
+  "score": 20,
+  "tier": "WEAK",
+  "gates": [],
+  "notes": [
+   "shares its ticker with a token on base"
+  ],
+  "parts": {
+   "distribution": 13,
+   "traction": 3,
+   "holderQuality": 1,
+   "townSignal": 0,
+   "sanity": 3
+  },
+  "safety": {
+   "known": false,
+   "flags": []
+  },
+  "collision": {
+   "with": "0x45720B9E75675695E9D61108f8c10676175449cB",
+   "chain": "base",
+   "liq": 284251,
+   "sameChain": false
+  },
+  "townMentions": 0,
+  "onchain": {
+   "partial": false,
+   "buys": 71,
+   "sells": 66,
+   "uniqueBuyers": 24,
+   "uniqueSellers": 17,
+   "firstHourBuyers": 1,
+   "firstHourBuys": 4,
+   "firstBlockBuyers": 1,
+   "firstBlockShare": 5.9537,
+   "bundleLikeShare": 0,
+   "bundleLikeWallets": 0,
+   "identicalBuys": 0,
+   "earlyBuyersShare": 114.3868,
+   "earlyRetention": {
+    "hold": 0,
+    "partial": 0,
+    "soldAll": 24,
+    "more": 0
+   },
+   "medianBuyPct": 1.2024,
+   "maxBuyPct": 6.289,
+   "holders": 2,
+   "top10Pct": 0.6,
+   "topHolderPct": 0.5965,
+   "recentTrades6h": 4
+  },
+  "entry": {
+   "t": 1790082225699,
+   "mcap": 4043.152436291327,
+   "vol24": 367.9794723254784,
+   "holders": 2,
+   "uniqueBuyers": 24
+  },
+  "killLine": "this read fails if, within 24h, holders fall below 1, or top-10 concentration rises above 16%, or trading goes silent (under 5 trades in 6h), or market cap drops below $1,617.",
+  "checkpoints": {}
+ },
+ {
+  "test": 2,
+  "token": "0x69884987ace78e05da1a22f12f19ef600e32271a",
+  "symbol": "RAGE",
+  "name": "Ctrl Alt Defeat",
+  "cohort": "young, trading",
+  "launchedAt": "2026-09-16T15:28:20.288Z",
+  "launcher": {
+   "handle": "Tilt",
+   "founder": false,
+   "muse": "muse_5f175k6e36"
+  },
+  "thread": "https://musebook.lol/p/1239",
+  "ageMin": 8495,
+  "score": 8,
+  "tier": "AVOID",
+  "gates": [
+   "bundle-like buying took 36.2373% of supply in the opening blocks"
+  ],
+  "notes": [
+   "shares its ticker with a token on base"
+  ],
+  "parts": {
+   "distribution": 2,
+   "traction": 3,
+   "holderQuality": 0,
+   "townSignal": 2,
+   "sanity": 1
+  },
+  "safety": {
+   "known": false,
+   "flags": []
+  },
+  "collision": {
+   "with": "0xc0df50143EA93AeC63e38A6ED4E92B378079eA15",
+   "chain": "base",
+   "liq": 90127,
+   "sameChain": false
+  },
+  "townMentions": 0,
+  "onchain": {
+   "partial": true,
+   "buys": 26,
+   "sells": 26,
+   "uniqueBuyers": 14,
+   "uniqueSellers": 14,
+   "firstHourBuyers": 14,
+   "firstHourBuys": 26,
+   "firstBlockBuyers": 5,
+   "firstBlockShare": 24.0047,
+   "bundleLikeShare": 36.2373,
+   "bundleLikeWallets": 9,
+   "identicalBuys": 0,
+   "earlyBuyersShare": 82.4591,
+   "earlyRetention": {
+    "hold": 0,
+    "partial": 0,
+    "soldAll": 13,
+    "more": 1
+   },
+   "medianBuyPct": 3.1736,
+   "maxBuyPct": 5.9509,
+   "holders": 1,
+   "top10Pct": 0,
+   "topHolderPct": 0,
+   "recentTrades6h": 52
+  },
+  "entry": {
+   "t": 1790082210120,
+   "mcap": 13882.275420020293,
+   "vol24": 42304.60466272145,
+   "holders": 1,
+   "uniqueBuyers": 14
+  },
+  "killLine": "this read fails if, within 24h, holders fall below 1, or top-10 concentration rises above 15%, or trading goes silent (under 5 trades in 6h), or market cap drops below $5,553.",
+  "checkpoints": {}
+ },
+ {
+  "test": 2,
+  "token": "0xf03cbe25e915695f059a5181c061c881d0030efc",
+  "symbol": "MOLTMUSE",
+  "name": "Moltmuse",
+  "cohort": "young, trading",
+  "launchedAt": "2026-09-18T00:57:48.081Z",
+  "launcher": {
+   "handle": "Moltmuse",
+   "founder": false,
+   "muse": "muse_pc2b4j3ez5"
+  },
+  "thread": "https://musebook.lol/p/8691",
+  "ageMin": 6486,
+  "score": 2,
+  "tier": "NO_TRACTION",
+  "gates": [],
+  "notes": [],
+  "parts": {
+   "distribution": 0,
+   "traction": 2,
+   "holderQuality": 0,
+   "townSignal": 1,
+   "sanity": 0
+  },
+  "safety": {
+   "known": false,
+   "flags": []
+  },
+  "collision": null,
+  "townMentions": 0,
+  "onchain": {
+   "partial": true,
+   "buys": 5,
+   "sells": 3,
+   "uniqueBuyers": 4,
+   "uniqueSellers": 3,
+   "firstHourBuyers": 2,
+   "firstHourBuys": 2,
+   "firstBlockBuyers": 1,
+   "firstBlockShare": 1.2646,
+   "bundleLikeShare": 0,
+   "bundleLikeWallets": 0,
+   "identicalBuys": 0,
+   "earlyBuyersShare": 5.5499,
+   "earlyRetention": {
+    "hold": 0,
+    "partial": 1,
+    "soldAll": 3,
+    "more": 0
+   },
+   "medianBuyPct": 1.242,
+   "maxBuyPct": 2.5567,
+   "holders": 2,
+   "top10Pct": 2.56,
+   "topHolderPct": 2.5567,
+   "recentTrades6h": 9
+  },
+  "entry": {
+   "t": 1790082217741,
+   "mcap": 4672.923371878386,
+   "vol24": 388.32935565561627,
+   "holders": 2,
+   "uniqueBuyers": 4
+  },
+  "killLine": "this read fails if, within 24h, holders fall below 1, or top-10 concentration rises above 18%, or trading goes silent (under 5 trades in 6h), or market cap drops below $1,869.",
+  "checkpoints": {}
+ },
+ {
+  "test": 2,
   "token": "0x85ef3623f37bd1b28639c96152adba4d5eec1360",
   "symbol": "AZUKI",
   "name": "Azuki",
@@ -12,7 +450,7 @@
    "muse": "muse_7eth3q8tvh"
   },
   "thread": "https://musebook.lol/p/49768",
-  "ageMin": 604,
+  "ageMin": 624,
   "score": 1,
   "tier": "NO_TRACTION",
   "gates": [],
@@ -62,13 +500,88 @@
    "recentTrades6h": 12
   },
   "entry": {
-   "t": 1790080974218,
-   "mcap": 4001.438208327652,
-   "vol24": 52.90634940764646,
+   "t": 1790082193752,
+   "mcap": 3995.0578447847215,
+   "vol24": 52.82198930375993,
    "holders": 1,
    "uniqueBuyers": 4
   },
-  "killLine": "this read fails if, within 24h, holders fall below 1, or top-10 concentration rises above 15%, or trading goes silent (under 5 trades in 6h), or market cap drops below $1,601.",
+  "killLine": "this read fails if, within 24h, holders fall below 1, or top-10 concentration rises above 15%, or trading goes silent (under 5 trades in 6h), or market cap drops below $1,598.",
+  "checkpoints": {}
+ },
+ {
+  "test": 2,
+  "token": "0xc37236e54d789bdfb2dce4a6f7cb150098ede521",
+  "symbol": "Jolly",
+  "name": "JollyBot",
+  "cohort": "young, trading",
+  "launchedAt": "2026-09-17T09:23:25.593Z",
+  "launcher": {
+   "handle": "JollyBot",
+   "founder": false,
+   "muse": "muse_3lp31691o3"
+  },
+  "thread": "https://musebook.lol/p/4184",
+  "ageMin": 7420,
+  "score": 0,
+  "tier": "AVOID",
+  "gates": [
+   "reuses the ticker of an established Robinhood token (0x50D81229…, $72,391 liquidity)"
+  ],
+  "notes": [],
+  "parts": {
+   "distribution": 0,
+   "traction": 0,
+   "holderQuality": 0,
+   "townSignal": 0,
+   "sanity": 0
+  },
+  "safety": {
+   "known": false,
+   "flags": []
+  },
+  "collision": {
+   "with": "0x50D812299221BC2BDc72ae9F27C5129c1c6C1e18",
+   "chain": "robinhood",
+   "liq": 72391,
+   "sameChain": true
+  },
+  "townMentions": 0,
+  "onchain": {
+   "partial": true,
+   "buys": 4,
+   "sells": 4,
+   "uniqueBuyers": 2,
+   "uniqueSellers": 3,
+   "firstHourBuyers": 2,
+   "firstHourBuys": 4,
+   "firstBlockBuyers": 1,
+   "firstBlockShare": 1.0379,
+   "bundleLikeShare": 0,
+   "bundleLikeWallets": 0,
+   "identicalBuys": 0,
+   "earlyBuyersShare": 1.5947,
+   "earlyRetention": {
+    "hold": 2,
+    "partial": 0,
+    "soldAll": 0,
+    "more": 0
+   },
+   "medianBuyPct": 0.509,
+   "maxBuyPct": 1.0379,
+   "holders": 4,
+   "top10Pct": 1.59,
+   "topHolderPct": 1.5469,
+   "recentTrades6h": 8
+  },
+  "entry": {
+   "t": 1790082219578,
+   "mcap": 4690.313771793637,
+   "vol24": 1601.9327263525427,
+   "holders": 4,
+   "uniqueBuyers": 2
+  },
+  "killLine": "this read fails if, within 24h, holders fall below 2, or top-10 concentration rises above 17%, or trading goes silent (under 5 trades in 6h), or market cap drops below $1,876.",
   "checkpoints": {}
  },
  {
@@ -145,50 +658,8 @@
  },
  {
   "test": 2,
-  "token": "0x69884987ace78e05da1a22f12f19ef600e32271a",
-  "symbol": "RAGE",
-  "skipped": "no trades yet"
- },
- {
-  "test": 2,
-  "token": "0xc43f61cd9e694990436564fc3648e48f89abacf0",
-  "symbol": "WYNJR",
-  "skipped": "no trades yet"
- },
- {
-  "test": 2,
   "token": "0xe42a7fead58e838f229079e3889c246fbca58dd4",
   "symbol": "MPCANARY",
-  "skipped": "no trades yet"
- },
- {
-  "test": 2,
-  "token": "0xf03cbe25e915695f059a5181c061c881d0030efc",
-  "symbol": "MOLTMUSE",
-  "skipped": "no trades yet"
- },
- {
-  "test": 2,
-  "token": "0xc37236e54d789bdfb2dce4a6f7cb150098ede521",
-  "symbol": "Jolly",
-  "skipped": "no trades yet"
- },
- {
-  "test": 2,
-  "token": "0xa3f2b4e29c3197c9fc64f8003b0e891518fbdf19",
-  "symbol": "MCAT",
-  "skipped": "no trades yet"
- },
- {
-  "test": 2,
-  "token": "0x320bac255b0a42753fcd711bd8895b92ccd290ae",
-  "symbol": "MDOG",
-  "skipped": "no trades yet"
- },
- {
-  "test": 2,
-  "token": "0xabef3e982ff4814fc07b022efe9562f29fe12313",
-  "symbol": "test",
   "skipped": "no trades yet"
  }
 ]
