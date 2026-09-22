@@ -4,7 +4,8 @@
   2
  ],
  "reran": [
-  2
+  2,
+  "2@2"
  ],
- "note": "test 2 was rerun after a data fix"
+ "note": "test 2 was rerun after data fixes (rate-limit backoff, exact launch block)"
 }
