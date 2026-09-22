@@ -190,6 +190,9 @@
     "settlePerRun": 6,
     "minBuyers": 10,
     "freshMax": 12,
-    "youngMaxDays": 7
+    "youngMaxDays": 7,
+    "rerun": [
+      2
+    ]
   }
 }

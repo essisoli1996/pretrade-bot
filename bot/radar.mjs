@@ -46,11 +46,25 @@ export function makeRadar({ CFG, http, HERE }) {
     return out.filter((x) => x.contractAddress);
   }
 
+  let HEAD = null;
+  async function blockAt(tsSec) {
+    // binary search: first block at or after tsSec (block time drifts, so estimating from recent blocks misses old launches)
+    if (!HEAD || Date.now() - HEAD.t > 60000) HEAD = { n: parseInt((await rpc("eth_blockNumber", [])).result, 16), t: Date.now() };
+    let lo = 0, hi = HEAD.n;
+    for (let i = 0; i < 40 && lo < hi; i++) { const mid = Math.floor((lo + hi) / 2); const ts = await blockTs(mid); if (ts === null) break; if (ts < tsSec) lo = mid + 1; else hi = mid; }
+    return lo;
+  }
+  async function totalSupply(token) {
+    const r = await rpc("eth_call", [{ to: token, data: "0x18160ddd" }, "latest"]);
+    try { return BigInt(r.result); } catch { return 0n; }
+  }
+
   async function transferLogs(token, launchedAtMs) {
     const head = parseInt((await rpc("eth_blockNumber", [])).result, 16);
     const t1 = await blockTs(head), t0 = await blockTs(head - 200000);
     const bt = t1 && t0 ? (t1 - t0) / 200000 : 0.1;
-    const back = Math.ceil((Date.now() / 1000 - launchedAtMs / 1000 + 900) / bt);
+    const startBlock = await blockAt(Math.floor(launchedAtMs / 1000) - 900);
+    const back = head - startBlock;
     // most launches are small: one query over the whole range usually works; big ones time out and fall back to chunks
     const whole = await rpc("eth_getLogs", [{ address: token, topics: [TRANSFER], fromBlock: "0x" + Math.max(0, head - back).toString(16), toBlock: "0x" + head.toString(16) }]);
     if (!whole.error && Array.isArray(whole.result)) return { logs: whole.result, head, bt, partial: false };
@@ -76,10 +90,10 @@ export function makeRadar({ CFG, http, HERE }) {
     if (!logs.length) return null;
     const tx = logs.map((l) => ({ from: "0x" + l.topics[1].slice(26), to: "0x" + l.topics[2].slice(26), v: BigInt(l.data && l.data !== "0x" ? l.data : "0x0"), b: parseInt(l.blockNumber, 16), i: parseInt(l.logIndex, 16) }))
       .sort((a, c) => a.b - c.b || a.i - c.i);
-    let supply = 0n; const touches = {}; const bal = {};
+    let supply = await totalSupply(token); const mintsSeen = supply === 0n; const touches = {}; const bal = {};
     for (const t of tx) {
-      if (t.from === ZERO) supply += t.v;
-      if (DEAD.has(t.to)) supply -= t.to === ZERO ? t.v : 0n;
+      if (mintsSeen && t.from === ZERO) supply += t.v;
+      if (mintsSeen && t.to === ZERO) supply -= t.v;
       for (const a of [t.from, t.to]) if (!DEAD.has(a)) touches[a] = (touches[a] ?? 0) + 1;
       if (t.from !== ZERO) bal[t.from] = (bal[t.from] ?? 0n) - t.v;
       bal[t.to] = (bal[t.to] ?? 0n) + t.v;
@@ -242,7 +256,7 @@ export function makeRadar({ CFG, http, HERE }) {
       const entries = load(ENTRIES, []); entries.push(...results.filter((r) => !r.skipped)); save(ENTRIES, entries);
       save(join(DIR, `test-${testNo}.json`), results);
       const log = join(DIR, "radar.log"); writeFileSync(log, (existsSync(log) ? readFileSync(log, "utf8") : "") + summary + "\n\n");
-      const meta = load(META, { done: [] }); meta.done.push(testNo); save(META, meta);
+      const meta = load(META, { done: [] }); meta.done.push(testNo); if (RD.rerun?.includes(testNo)) meta.note = `test ${testNo} was rerun after a data fix`; save(META, meta);
     }
     return { results, summary };
   }
@@ -276,6 +290,14 @@ export function makeRadar({ CFG, http, HERE }) {
   async function tick() {
     const meta = load(META, { done: [] });
     let ran = 0;
+    meta.reran = meta.reran ?? [];
+    for (const no of RD.rerun ?? []) {
+      if (meta.reran.includes(no) || !meta.done.includes(no)) continue;
+      save(ENTRIES, load(ENTRIES, []).filter((e) => e.test !== no));
+      meta.done = meta.done.filter((x) => x !== no); meta.reran.push(no); save(META, meta);
+      console.log(`radar: test #${no} discarded for a rerun (data bug fixed), running it again now`);
+    }
+    Object.assign(meta, load(META, meta));
     for (const [i, iso] of (RD.schedule ?? []).entries()) {
       const no = i + 1;
       if (meta.done.includes(no) || Date.now() < Date.parse(iso)) continue;

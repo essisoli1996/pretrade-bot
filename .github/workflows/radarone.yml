@@ -1,0 +1,31 @@
+name: radar-one
+on: { workflow_dispatch: { inputs: { symbol: { description: "symbol", required: true, default: "WYNJR" } } } }
+permissions: { contents: write }
+jobs:
+  r:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - env: { SYM: "${{ inputs.symbol }}" }
+        run: |
+          cat > /tmp/o.mjs <<'JS'
+          import { makeRadar } from "../home/runner/work/pretrade-bot/pretrade-bot/bot/radar.mjs";
+          JS
+          cat > bot/one.mjs <<'JS'
+          import { readFileSync, writeFileSync } from "node:fs";
+          import { makeRadar } from "./radar.mjs";
+          const CFG = JSON.parse(readFileSync("bot/config.json", "utf8"));
+          const http = async (url, body) => { try { const r = await fetch(url, body ? { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) } : {}); const t = await r.text(); let j = null; try { j = JSON.parse(t); } catch {} return { ok: r.ok, status: r.status, json: j, text: t }; } catch (e) { return { ok: false, status: 0, json: null, text: String(e) }; } };
+          const R = makeRadar({ CFG, http, HERE: "bot" });
+          const items = [];
+          for (const sort of ["volume", "hot", "new"]) { const r = await http(`https://musepad.lol/api/tokens?sort=${sort}`); items.push(...(r.json?.items ?? [])); }
+          const it = items.find((x) => x.symbol === process.env.SYM);
+          const t0 = Date.now(); const e = await R.assess({ ...it, cohort: "manual" });
+          writeFileSync("radar-one.log", `${Date.now() - t0}ms\n` + JSON.stringify(e, null, 1).slice(0, 3500)); console.log("done");
+          JS
+          node bot/one.mjs || true
+          git config user.name musebot; git config user.email musebot@users.noreply.github.com
+          git add -f radar-one.log; git diff --cached --quiet || git commit -qm "radar one [skip ci]"; git pull -q --rebase || true; git push -q || true
