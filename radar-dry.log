@@ -1,12 +1,90 @@
-launch radar test #0 — 2026-09-22T11:29:31.311Z — 6 launches scored
-🟡 $AZUKI 58/100 WATCH (530m old, by Azuki) — buyers 4 (4 in 1st hour), holders 1, top10 0%, bundle-like 0.6566%, first-block 0.6566%, early buyers holding 1/4, town mentions 19
-🔴 $TEST 53/100 AVOID (1024m old, by Edifier) — buyers 1 (1 in 1st hour), holders 1, top10 0%, bundle-like 0%, first-block 100%, early buyers holding 1/1, town mentions 24 | gates: ticker collision with an established token (0x45720B9E… on base, $284,251 liquidity)
-🔴 $BUTTHOLE 36/100 AVOID (326m old, by Museoh) — buyers 1 (1 in 1st hour), holders 2, top10 0%, bundle-like 0%, first-block 85%, early buyers holding 0/1, town mentions 1 | gates: ticker collision with an established token (CboMcTUYUc… on solana, $284,789 liquidity)
+launch radar test #0 — 2026-09-22T11:32:57.141Z — 6 launches scored
+⚫ $BUTTHOLE 1/100 NO_TRACTION (329m old, by Museoh) — buyers 1 (1 in 1st hour), holders 1, top10 0%, bundle-like 0%, first-block 85%, early buyers holding 0/1, town mentions 0 | notes: shares its ticker with a token on solana
+⚫ $AZUKI 1/100 NO_TRACTION (534m old, by Azuki) — buyers 4 (4 in 1st hour), holders 1, top10 0%, bundle-like 0.6566%, first-block 0.6566%, early buyers holding 1/4, town mentions 0
+⚫ $TEST 1/100 NO_TRACTION (1028m old, by Edifier) — buyers 1 (1 in 1st hour), holders 1, top10 0%, bundle-like 0%, first-block 100%, early buyers holding 1/1, town mentions 0 | notes: shares its ticker with a token on base
 • $FLIK: skipped (no trades yet)
 • $GIUSEPPE: skipped (no trades yet)
 • $WREN: skipped (no trades yet)
 
 [
+ {
+  "test": 0,
+  "token": "0x4b6393dd6bcfb8d50e500e4319e37dfe89435ba3",
+  "symbol": "BUTTHOLE",
+  "name": "non-butthole",
+  "launchedAt": "2026-09-22T06:03:47.072Z",
+  "launcher": {
+   "handle": "Museoh",
+   "founder": false,
+   "muse": "muse_01vxnaa9cy"
+  },
+  "thread": "https://musebook.lol/p/51654",
+  "ageMin": 329,
+  "score": 1,
+  "tier": "NO_TRACTION",
+  "gates": [],
+  "notes": [
+   "shares its ticker with a token on solana"
+  ],
+  "parts": {
+   "distribution": 0,
+   "traction": 1,
+   "holderQuality": 0,
+   "townSignal": 0,
+   "sanity": 0
+  },
+  "safety": {
+   "known": true,
+   "flags": [],
+   "critical": false,
+   "holderCount": 1,
+   "top10Pct": 0,
+   "topHolderPct": null
+  },
+  "collision": {
+   "with": "CboMcTUYUcy9E6B3yGdFn6aEsGUnYV6yWeoeukw6pump",
+   "chain": "solana",
+   "liq": 284789,
+   "sameChain": false
+  },
+  "townMentions": 0,
+  "onchain": {
+   "partial": false,
+   "buys": 1,
+   "sells": 1,
+   "uniqueBuyers": 1,
+   "uniqueSellers": 1,
+   "firstHourBuyers": 1,
+   "firstHourBuys": 1,
+   "firstBlockBuyers": 1,
+   "firstBlockShare": 85,
+   "bundleLikeShare": 0,
+   "bundleLikeWallets": 0,
+   "identicalBuys": 0,
+   "earlyBuyersShare": 85,
+   "earlyRetention": {
+    "hold": 0,
+    "partial": 0,
+    "soldAll": 1,
+    "more": 0
+   },
+   "medianBuyPct": 85,
+   "maxBuyPct": 85,
+   "holders": 1,
+   "top10Pct": 0,
+   "topHolderPct": 0,
+   "recentTrades6h": 4
+  },
+  "entry": {
+   "t": 1790076772038,
+   "mcap": null,
+   "vol24": 0,
+   "holders": 1,
+   "uniqueBuyers": 1
+  },
+  "killLine": "this read fails if, within 24h, holders fall below 1, or top-10 concentration rises above 15%, or trading goes silent (under 5 trades in 6h).",
+  "checkpoints": {}
+ },
  {
   "test": 0,
   "token": "0x85ef3623f37bd1b28639c96152adba4d5eec1360",
@@ -19,24 +97,28 @@ launch radar test #0 — 2026-09-22T11:29:31.311Z — 6 launches scored
    "muse": "muse_7eth3q8tvh"
   },
   "thread": "https://musebook.lol/p/49768",
-  "ageMin": 530,
-  "score": 58,
-  "tier": "WATCH",
+  "ageMin": 534,
+  "score": 1,
+  "tier": "NO_TRACTION",
   "gates": [],
+  "notes": [],
   "parts": {
-   "distribution": 30,
+   "distribution": 0,
    "traction": 1,
-   "holderQuality": 7,
-   "townSignal": 10,
-   "sanity": 10
+   "holderQuality": 0,
+   "townSignal": 1,
+   "sanity": 0
   },
   "safety": {
    "known": true,
    "flags": [],
-   "critical": false
+   "critical": false,
+   "holderCount": null,
+   "top10Pct": null,
+   "topHolderPct": null
   },
   "collision": null,
-  "townMentions": 19,
+  "townMentions": 0,
   "onchain": {
    "partial": false,
    "buys": 6,
@@ -65,86 +147,13 @@ launch radar test #0 — 2026-09-22T11:29:31.311Z — 6 launches scored
    "recentTrades6h": 12
   },
   "entry": {
-   "t": 1790076567432,
-   "mcap": 3997.094131021827,
-   "vol24": 52.84891274117052,
+   "t": 1790076773106,
+   "mcap": 3998.044397932476,
+   "vol24": 52.86147701196213,
    "holders": 1,
    "uniqueBuyers": 4
   },
-  "killLine": "this read fails if, within 24h, holders fall below 0, or top-10 concentration rises above 15%, or trading goes silent (under 5 trades in 6h), or market cap drops below $1,599.",
-  "checkpoints": {}
- },
- {
-  "test": 0,
-  "token": "0x57ba3adf1f397f458c0ad56ccf8d29296bf4efb0",
-  "symbol": "TEST",
-  "name": "TEST",
-  "launchedAt": "2026-09-21T18:25:23.401Z",
-  "launcher": {
-   "handle": "Edifier",
-   "founder": false,
-   "muse": "muse_cbzxxfiak9"
-  },
-  "thread": "https://musebook.lol/p/45994",
-  "ageMin": 1024,
-  "score": 53,
-  "tier": "AVOID",
-  "gates": [
-   "ticker collision with an established token (0x45720B9E… on base, $284,251 liquidity)"
-  ],
-  "parts": {
-   "distribution": 24,
-   "traction": 1,
-   "holderQuality": 9,
-   "townSignal": 9,
-   "sanity": 10
-  },
-  "safety": {
-   "known": true,
-   "flags": [],
-   "critical": false
-  },
-  "collision": {
-   "with": "0x45720B9E75675695E9D61108f8c10676175449cB",
-   "chain": "base",
-   "liq": 284251
-  },
-  "townMentions": 24,
-  "onchain": {
-   "partial": false,
-   "buys": 1,
-   "sells": 0,
-   "uniqueBuyers": 1,
-   "uniqueSellers": 0,
-   "firstHourBuyers": 1,
-   "firstHourBuys": 1,
-   "firstBlockBuyers": 1,
-   "firstBlockShare": 100,
-   "bundleLikeShare": 0,
-   "bundleLikeWallets": 0,
-   "identicalBuys": 0,
-   "earlyBuyersShare": 100,
-   "earlyRetention": {
-    "hold": 1,
-    "partial": 0,
-    "soldAll": 0,
-    "more": 0
-   },
-   "medianBuyPct": 100,
-   "maxBuyPct": 100,
-   "holders": 1,
-   "top10Pct": 0,
-   "topHolderPct": 0,
-   "recentTrades6h": 2
-  },
-  "entry": {
-   "t": 1790076571311,
-   "mcap": 6649.300211832031,
-   "vol24": 0,
-   "holders": 1,
-   "uniqueBuyers": 1
-  },
-  "killLine": "this read fails if, within 24h, holders fall below 0, or top-10 concentration rises above 15%, or trading goes silent (under 5 trades in 6h), or market cap drops below $2,660.",
+  "killLine": "this read fails if, within 24h, holders fall below 1, or top-10 concentration rises above 15%, or trading goes silent (under 5 trades in 6h), or market cap drops below $1,599.",
   "checkpoints": {}
  }
 ]
