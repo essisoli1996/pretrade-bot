@@ -178,15 +178,15 @@
     "public": false,
     "everyMinutes": 10,
     "schedule": [
-      "2026-09-22T11:38:24Z",
-      "2026-09-22T15:38:24Z",
-      "2026-09-22T19:38:24Z"
+      "2026-09-22T11:46:54Z",
+      "2026-09-22T15:46:54Z",
+      "2026-09-22T19:46:54Z"
     ],
-    "windowHours": 12,
+    "windowHours": 48,
     "minAgeMin": 20,
     "minBatch": 6,
-    "maxBatch": 20,
-    "pages": 5,
+    "maxBatch": 25,
+    "pages": 6,
     "settlePerRun": 6,
     "minBuyers": 10
   }

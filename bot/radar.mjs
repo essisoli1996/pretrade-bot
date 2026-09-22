@@ -38,6 +38,9 @@ export function makeRadar({ CFG, http, HERE }) {
     const t1 = await blockTs(head), t0 = await blockTs(head - 200000);
     const bt = t1 && t0 ? (t1 - t0) / 200000 : 0.1;
     const back = Math.ceil((Date.now() / 1000 - launchedAtMs / 1000 + 900) / bt);
+    // most launches are small: one query over the whole range usually works; big ones time out and fall back to chunks
+    const whole = await rpc("eth_getLogs", [{ address: token, topics: [TRANSFER], fromBlock: "0x" + Math.max(0, head - back).toString(16), toBlock: "0x" + head.toString(16) }]);
+    if (!whole.error && Array.isArray(whole.result)) return { logs: whole.result, head, bt, partial: false };
     let from = Math.max(0, head - back), step = 60000, calls = 0; const logs = [];
     while (from <= head && calls < 80) {
       const to = Math.min(head, from + step - 1);
@@ -212,7 +215,7 @@ export function makeRadar({ CFG, http, HERE }) {
     const now = Date.now();
     let pick = all.filter((x) => { const age = (now - Date.parse(x.launchedAt)) / 60000; return age >= (RD.minAgeMin ?? 20) && age <= (RD.windowHours ?? 6) * 60; });
     if (pick.length < (RD.minBatch ?? 5)) pick = all.filter((x) => (now - Date.parse(x.launchedAt)) / 60000 >= (RD.minAgeMin ?? 20)).slice(0, RD.minBatch ?? 5);
-    pick = pick.slice(0, RD.maxBatch ?? 15);
+    pick = pick.sort((a, c) => Date.parse(c.launchedAt) - Date.parse(a.launchedAt)).slice(0, RD.maxBatch ?? 15);
     const results = [];
     for (const item of pick) { try { results.push({ test: testNo, ...(await assess(item)) }); } catch (e) { results.push({ test: testNo, token: item.contractAddress, symbol: item.symbol, skipped: `error ${String(e).slice(0, 80)}` }); } }
     results.sort((a, c) => (c.score ?? -1) - (a.score ?? -1));
