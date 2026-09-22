@@ -2643,16 +2643,16 @@
   "mentionsSeen": [],
   "watches": [],
   "clock": {
-    "channels": 1790093269813,
-    "watches": 1790093009132,
+    "channels": 1790093854710,
+    "watches": 1790093620511,
     "ledger": 1790092767357,
-    "presence": 1790093314632,
-    "launches": 1790093335380,
-    "guard": 1790093356214,
+    "presence": 1790093834195,
+    "launches": 1790093986704,
+    "guard": 1790093942020,
     "digest": 1790090575874,
-    "conversations": 1790093400281,
-    "townwatch": 1790093355823,
-    "radar": 1790092941888
+    "conversations": 1790093986757,
+    "townwatch": 1790093941628,
+    "radar": 1790093555544
   },
   "ledger": [
     {
@@ -3665,7 +3665,8 @@
         "5fFVVvhSXMAeDWytT1ayVdbxxM15C1Q7QmojDzqDNj77",
         "0x09b8cc351f9f2810061c5597f179cf09d01df3e4",
         "D8fPQZo5F9pUANBT3QZWrmzPKEfMh9YSTu8kGbERNEGv",
-        "GUYAPivbyxBepUkEqmx5gdoqW6zVaDnRf2uAkqRspPQi"
+        "GUYAPivbyxBepUkEqmx5gdoqW6zVaDnRf2uAkqRspPQi",
+        "GDaW36fpdXAqoLQGBicusNZ62rNGZ329jbh4vVxPjK3J"
       ],
       "MUSEPAD": [
         "0x61a51b990dd73530c868359871b9545d21642222",
@@ -3794,6 +3795,13 @@
       "kind": "copycat",
       "ticker": "MUSEBOOK",
       "address": "GUYAPivbyxBepUkEqmx5gdoqW6zVaDnRf2uAkqRspPQi",
+      "chain": "solana"
+    },
+    {
+      "t": 1790093750290,
+      "kind": "copycat",
+      "ticker": "MUSEBOOK",
+      "address": "GDaW36fpdXAqoLQGBicusNZ62rNGZ329jbh4vVxPjK3J",
       "chain": "solana"
     }
   ],
@@ -6890,10 +6898,6 @@
     "liq": {
       "MUSEBOOK": [
         {
-          "t": 1790086331264,
-          "liq": 3046015.9799999995
-        },
-        {
           "t": 1790086840481,
           "liq": 3039536.6799999992
         },
@@ -7032,13 +7036,21 @@
         {
           "t": 1790093356053,
           "liq": 3234860.9499999993
+        },
+        {
+          "t": 1790093554777,
+          "liq": 3214194.5499999993
+        },
+        {
+          "t": 1790093749698,
+          "liq": 3198751.209999999
+        },
+        {
+          "t": 1790093941890,
+          "liq": 3124455.8699999987
         }
       ],
       "MUSEPAD": [
-        {
-          "t": 1790086331313,
-          "liq": 35678.34
-        },
         {
           "t": 1790086840618,
           "liq": 35456.4
@@ -7178,6 +7190,18 @@
         {
           "t": 1790093356214,
           "liq": 51702.31
+        },
+        {
+          "t": 1790093554935,
+          "liq": 50110.92
+        },
+        {
+          "t": 1790093749857,
+          "liq": 48955.99
+        },
+        {
+          "t": 1790093942020,
+          "liq": 49034.299999999996
         }
       ]
     },

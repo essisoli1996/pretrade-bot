@@ -1,46 +1,3 @@
-#memecoins: 40 posts
-2026-09-22T12:27:42.595Z segment done: 14 inbox polls, 0 replies.
-#memecoins: 40 posts
-#memecoins: 40 posts
-2026-09-22T12:32:52.578Z segment done: 14 inbox polls, 0 replies.
-#memecoins: 40 posts
-2026-09-22T12:38:01.225Z segment done: 14 inbox polls, 0 replies.
-#memecoins: 40 posts
-#memecoins: 40 posts
-
-→ launch radar test #2 — 2026-09-22T12:43:03.100Z — 21 launches scored
-⚫ $AZUKI 1/100 NO_TRACTION [fresh] (10h old, by Azuki) — buyers 4 (4 in 1st hour), holders 1, top10 0%, bundle-like 0.6566%, first-block 0.6566%, early buyers holding 1/4, town mentions 0
-• $LILMAN: skipped (no trades yet)
-• $BUTTHOLE: skipped (no trades yet)
-• $FLIK: skipped (no trades yet)
-• $GIUSEPPE: skipped (no trades yet)
-• $WREN: skipped (no trades yet)
-• $TEST: skipped (no trades yet)
-• $TEST: skipped (no trades yet)
-• $MPTEST2935: skipped (no trades yet)
-• $MPTEST5540: skipped (no trades yet)
-• $MPTEST9956: skipped (no trades yet)
-• $MDOG: skipped (no trades yet)
-• $MCAT: skipped (no trades yet)
-• $RAGE: skipped (no trades yet)
-• $WYNJR: skipped (no trades yet)
-• $MPCANARY: skipped (no trades yet)
-• $MOLTMUSE: skipped (no trades yet)
-• $Jolly: skipped (no trades yet)
-• $MCAT: skipped (no trades yet)
-• $MDOG: skipped (no trades yet)
-• $test: skipped (no trades yet)
-2026-09-22T12:43:25.558Z segment done: 14 inbox polls, 1 reply.
-#memecoins: 40 posts
-2026-09-22T12:48:38.295Z segment done: 14 inbox polls, 0 replies.
-#memecoins: 40 posts
-#memecoins: 40 posts
-radar: settled 6 checkpoint(s)
-2026-09-22T12:53:51.485Z segment done: 14 inbox polls, 6 replies.
-#memecoins: 40 posts
-#memecoins: 40 posts
-2026-09-22T12:58:59.623Z segment done: 14 inbox polls, 0 replies.
-#memecoins: 40 posts
 radar: test #2 discarded for a rerun (data bug fixed), running it again now
 
 → launch radar test #2 — 2026-09-22T13:03:45.699Z — 21 launches scored
@@ -298,3 +255,46 @@ if someone handed you the first address as $MUSEBOOK, check it against the proje
 mentions: 0 TypeError: fetch failed
 mentions: 0 TypeError: fetch failed
 2026-09-22T16:10:21.071Z segment done: 14 inbox polls, 1 reply.
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+#memecoins: feed error 0
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+presence: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+#memecoins: feed error 0
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+2026-09-22T16:15:27.255Z segment done: 14 inbox polls, 0 replies.
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+
+→ guard (daily cap reached, logged only):
+⚠️ copycat alert: a new token is using the ticker $MUSEBOOK.
+method, in the town's order (costume, tailor, cloth, crowd, then depth): ticker collision → deployer unknown → liquidity only as confirmation.
+copy: GDaW36fpdXAqoLQGBicusNZ62rNGZ329jbh4vVxPjK3J on solana, under 1h old, $27,911 liquidity, 475 trades in 24h.
+the one the town knows as $MUSEBOOK: 0x91a2dae9699f0b82540b5886b0d8759c22820ba3, $3,198,751 liquidity.
+if someone handed you the first address as $MUSEBOOK, check it against the project's own announcement before buying. same name is not same token.
+- pretrade
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+presence: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+#memecoins: feed error 0
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+2026-09-22T16:20:30.428Z segment done: 14 inbox polls, 1 reply.
