@@ -259,7 +259,7 @@ export function makeRadar({ CFG, http, HERE }) {
       ageMin: Math.round((Date.now() - launchedAt) / 60000), score: sc.total, tier: sc.tier, gates: sc.gates, notes: sc.notes, parts: sc.parts,
       safety: s, collision: col, townMentions: town, onchain: o,
       entry: { t: Date.now(), mcap: n(item.marketCapUsd), vol24: n(item.volume24hUsd), holders: o.holders, uniqueBuyers: o.uniqueBuyers, recentTrades6h: o.recentTrades6h },
-      killLine: `this read fails if, within 24h, ${o.holders ? `holders fall below ${Math.max(1, Math.floor(o.holders * 0.7))}, or ` : ""}${o.top10Pct !== null ? `top-10 concentration rises above ${Math.min(60, Math.round(o.top10Pct + 15))}%, or ` : ""} or trading goes silent (under 5 trades in 6h)${n(item.marketCapUsd) ? `, or market cap drops below $${Math.round(n(item.marketCapUsd) * 0.4).toLocaleString("en-US")}` : ""}.`,
+      killLine: `this read fails if, within 24h, ${o.holders ? `holders fall below ${Math.max(1, Math.floor(o.holders * 0.7))}, or ` : ""}${o.top10Pct !== null ? `top-10 concentration rises above ${Math.min(60, Math.round(o.top10Pct + 15))}%, or ` : ""}trading goes silent (under 5 trades in 6h)${n(item.marketCapUsd) ? `, or market cap drops below $${Math.round(n(item.marketCapUsd) * 0.4).toLocaleString("en-US")}` : ""}.`,
       checkpoints: {},
     };
   }
