@@ -289,7 +289,7 @@ export function makeRadar({ CFG, http, HERE }) {
       const entries = load(ENTRIES, []); entries.push(...results.filter((r) => !r.skipped)); save(ENTRIES, entries);
       save(join(DIR, `test-${testNo}.json`), results);
       const log = join(DIR, "radar.log"); writeFileSync(log, (existsSync(log) ? readFileSync(log, "utf8") : "") + summary + "\n\n");
-      const meta = load(META, { done: [] }); meta.done.push(testNo); if (RD.rerun?.includes(testNo)) meta.note = `test ${testNo} was rerun after a data fix`; save(META, meta);
+      const meta = load(META, { done: [] }); meta.done.push(testNo); if ((RD.rerun ?? []).some((t) => Number(String(t).split("@")[0]) === testNo)) meta.note = `test ${testNo} was rerun after data fixes (rate-limit backoff, exact launch block)`; save(META, meta);
     }
     return { results, summary };
   }
@@ -324,10 +324,11 @@ export function makeRadar({ CFG, http, HERE }) {
     const meta = load(META, { done: [] });
     let ran = 0;
     meta.reran = meta.reran ?? [];
-    for (const no of RD.rerun ?? []) {
-      if (meta.reran.includes(no) || !meta.done.includes(no)) continue;
+    for (const tag of RD.rerun ?? []) {
+      const no = Number(String(tag).split("@")[0]);
+      if (meta.reran.includes(tag) || !meta.done.includes(no)) continue;
       save(ENTRIES, load(ENTRIES, []).filter((e) => e.test !== no));
-      meta.done = meta.done.filter((x) => x !== no); meta.reran.push(no); save(META, meta);
+      meta.done = meta.done.filter((x) => x !== no); meta.reran.push(tag); save(META, meta);
       console.log(`radar: test #${no} discarded for a rerun (data bug fixed), running it again now`);
     }
     Object.assign(meta, load(META, meta));

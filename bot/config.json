@@ -192,7 +192,7 @@
     "freshMax": 12,
     "youngMaxDays": 7,
     "rerun": [
-      2
+      "2@2"
     ]
   }
 }
