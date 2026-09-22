@@ -2123,7 +2123,16 @@
    "recentTrades6h": 0
   },
   "killLine": "this read fails if, within 24h, holders fall below 1, or top-10 concentration rises above 15%, or trading goes silent (under 5 trades in 6h), or market cap drops below $1,612.",
-  "checkpoints": {}
+  "checkpoints": {
+   "1h": {
+    "t": 1790099045468,
+    "holders": 0,
+    "uniqueBuyers": 4,
+    "top10Pct": null,
+    "recentTrades6h": 4,
+    "mcap": 4031.2494388388727
+   }
+  }
  },
  {
   "test": 3,
