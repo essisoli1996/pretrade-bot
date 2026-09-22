@@ -2,14 +2,22 @@ import { writeFileSync } from "node:fs";
 const out = [];
 const get = async (u) => { const r = await fetch(u); return r.json().catch(() => ({})); };
 const rpc = async (m, p) => { const r = await fetch("https://rpc.mainnet.chain.robinhood.com", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: m, params: p }) }); return r.json().catch(() => ({})); };
-let item = null;
-for (const sort of ["hot", "volume", "new"]) {
-  for (let p = 1; p <= 3 && !item; p++) {
+let item = null; const all = [];
+for (const sort of ["hot", "volume", "new", "marketcap", "trending"]) {
+  for (let p = 1; p <= 6; p++) {
     const r = await get(`https://musepad.lol/api/tokens?sort=${sort}&page=${p}`);
-    const hit = (r.items ?? []).find((x) => /agrippa/i.test(x.symbol ?? "") || /agrippa/i.test(x.name ?? ""));
-    if (hit) { item = { ...hit, foundIn: sort }; }
+    const items = r.items ?? [];
+    all.push(...items.map((x) => `${sort}:${x.symbol}`));
+    const hit = items.find((x) => /agrippa/i.test(x.symbol ?? "") || /agrippa/i.test(x.name ?? ""));
+    if (hit && !item) item = { ...hit, foundIn: sort };
+    if (items.length < (r.pageSize ?? 10)) break;
   }
 }
+out.push(`musepad universe: ${new Set(all.map((x) => x.split(":")[1])).size} distinct symbols across sorts`);
+out.push(`sample: ${[...new Set(all)].slice(0, 40).join(" ")}`);
+const dsSearch = await get("https://api.dexscreener.com/latest/dex/search?q=Agrippa");
+out.push(`dexscreener search Agrippa: ${(dsSearch.pairs ?? []).slice(0, 5).map((p) => `${p.chainId} ${p.baseToken?.symbol}/${p.quoteToken?.symbol} liq $${Math.round(p.liquidity?.usd ?? 0)} vol24 $${Math.round(p.volume?.h24 ?? 0)} h1 ${p.priceChange?.h1}% created ${new Date(p.pairCreatedAt ?? 0).toISOString().slice(5, 16)} base ${p.baseToken?.address}`).join(" | ") || "none"}`);
+if (!item) { const p = (dsSearch.pairs ?? []).find((x) => x.chainId === "robinhood") ?? (dsSearch.pairs ?? [])[0]; if (p) item = { symbol: p.baseToken.symbol, contractAddress: p.baseToken.address, launchedAt: new Date(p.pairCreatedAt ?? Date.now()).toISOString(), foundIn: "dexscreener" }; }
 out.push(`musepad: ${item ? JSON.stringify(item) : "not found in hot/volume/new"}`);
 if (item) {
   const t = item.contractAddress.toLowerCase();
