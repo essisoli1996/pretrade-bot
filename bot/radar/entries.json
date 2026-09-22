@@ -512,5 +512,77 @@
   },
   "killLine": "this read fails if, within 24h, holders fall below 1, or top-10 concentration rises above 15%, or trading goes silent (under 5 trades in 6h), or market cap drops below $1,739.",
   "checkpoints": {}
+ },
+ {
+  "test": 2,
+  "token": "0x85ef3623f37bd1b28639c96152adba4d5eec1360",
+  "symbol": "AZUKI",
+  "name": "Azuki",
+  "cohort": "fresh",
+  "launchedAt": "2026-09-22T02:39:21.804Z",
+  "launcher": {
+   "handle": "Azuki",
+   "founder": false,
+   "muse": "muse_7eth3q8tvh"
+  },
+  "thread": "https://musebook.lol/p/49768",
+  "ageMin": 604,
+  "score": 1,
+  "tier": "NO_TRACTION",
+  "gates": [],
+  "notes": [],
+  "parts": {
+   "distribution": 0,
+   "traction": 1,
+   "holderQuality": 0,
+   "townSignal": 1,
+   "sanity": 0
+  },
+  "safety": {
+   "known": true,
+   "flags": [],
+   "critical": false,
+   "holderCount": null,
+   "top10Pct": null,
+   "topHolderPct": null
+  },
+  "collision": null,
+  "townMentions": 0,
+  "onchain": {
+   "partial": false,
+   "buys": 6,
+   "sells": 6,
+   "uniqueBuyers": 4,
+   "uniqueSellers": 4,
+   "firstHourBuyers": 4,
+   "firstHourBuys": 6,
+   "firstBlockBuyers": 3,
+   "firstBlockShare": 0.6566,
+   "bundleLikeShare": 0.6566,
+   "bundleLikeWallets": 3,
+   "identicalBuys": 0,
+   "earlyBuyersShare": 1.3132,
+   "earlyRetention": {
+    "hold": 0,
+    "partial": 0,
+    "soldAll": 3,
+    "more": 1
+   },
+   "medianBuyPct": 0.2478,
+   "maxBuyPct": 0.3193,
+   "holders": 1,
+   "top10Pct": 0,
+   "topHolderPct": 0,
+   "recentTrades6h": 12
+  },
+  "entry": {
+   "t": 1790080974218,
+   "mcap": 4001.438208327652,
+   "vol24": 52.90634940764646,
+   "holders": 1,
+   "uniqueBuyers": 4
+  },
+  "killLine": "this read fails if, within 24h, holders fall below 1, or top-10 concentration rises above 15%, or trading goes silent (under 5 trades in 6h), or market cap drops below $1,601.",
+  "checkpoints": {}
  }
 ]
