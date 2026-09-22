@@ -112,13 +112,15 @@ export function makeRadar({ CFG, http, HERE }) {
     return { handle: item.launchedBy?.handle ?? null, founder, muse };
   }
 
-  async function townAttention(symbol, launcher) {
+  async function townAttention(symbol, launcher, token) {
     const r = await http(`https://musebook.lol/api/search.json?q=${encodeURIComponent(symbol)}&limit=50`);
+    const named = new RegExp(`\\$${symbol}\\b|${token.slice(2, 12)}`, "i");
     const day = Date.now() - 864e5;
     const who = new Set();
     for (const p of r.json?.results ?? []) {
       const t = Date.parse(String(p.created_at ?? "").replace(" ", "T") + (/[zZ]$/.test(String(p.created_at)) ? "" : "Z"));
       if (Number.isFinite(t) && t < day) continue;
+      if (!named.test(String(p.text ?? ""))) continue; // generic words like TEST or AZUKI don't count, only "$TICKER" or the contract
       const nm = String(p.name ?? "").toLowerCase();
       if (["musepad", "pretrade", String(launcher ?? "").toLowerCase()].includes(nm)) continue;
       who.add(nm);
@@ -139,35 +141,44 @@ export function makeRadar({ CFG, http, HERE }) {
     if (yes(x.is_mintable)) flags.push("mintable");
     if (yes(x.hidden_owner)) flags.push("hidden owner");
     if (yes(x.slippage_modifiable)) flags.push("tax modifiable");
-    return { known: true, flags, critical: flags.some((f) => /honeypot|cannot sell|edit balances|sell tax/.test(f)) };
+    const hs = Array.isArray(x.holders) ? x.holders.filter((h) => !yes(h.is_contract) && !yes(h.is_locked)) : null;
+    return {
+      known: true, flags, critical: flags.some((f) => /honeypot|cannot sell|edit balances|sell tax/.test(f)),
+      holderCount: n(x.holder_count), top10Pct: hs ? Math.round(hs.slice(0, 10).reduce((t, h) => t + (n(h.percent) ?? 0), 0) * 10000) / 100 : null,
+      topHolderPct: hs && hs[0] ? Math.round((n(hs[0].percent) ?? 0) * 10000) / 100 : null,
+    };
   }
 
   async function collision(symbol, token) {
     const r = await http(`https://api.dexscreener.com/latest/dex/search?q=${encodeURIComponent(symbol)}`);
     const other = (r.json?.pairs ?? []).filter((p) => String(p.baseToken?.symbol).toLowerCase() === symbol.toLowerCase() && String(p.baseToken?.address).toLowerCase() !== token.toLowerCase());
     const big = other.filter((p) => (n(p.liquidity?.usd) ?? 0) >= 25000).sort((a, c) => (n(c.liquidity?.usd) ?? 0) - (n(a.liquidity?.usd) ?? 0))[0];
-    return big ? { with: big.baseToken.address, chain: big.chainId, liq: Math.round(n(big.liquidity.usd)) } : null;
+    return big ? { with: big.baseToken.address, chain: big.chainId, liq: Math.round(n(big.liquidity.usd)), sameChain: big.chainId === "robinhood" } : null;
   }
 
   const clamp = (x, lo, hi) => Math.max(lo, Math.min(hi, x));
   const lin = (x, bad, good) => clamp((x - bad) / (good - bad), 0, 1); // 0 at bad, 1 at good (works either direction)
 
   function score(o, s, town, launcher, col) {
-    const gates = [];
+    const gates = []; const notes = [];
+    const enough = o.uniqueBuyers >= (RD.minBuyers ?? 10);
+    const conf = lin(o.uniqueBuyers, RD.minBuyers ?? 10, 40); // distribution stats mean little with a handful of buyers
     if (s.critical) gates.push(`contract: ${s.flags.join(", ")}`);
-    if (col) gates.push(`ticker collision with an established token (${col.with.slice(0, 10)}… on ${col.chain}, $${col.liq.toLocaleString("en-US")} liquidity)`);
-    if (o.bundleLikeShare >= 30) gates.push(`bundle-like buying took ${o.bundleLikeShare}% of supply in the opening blocks`);
+    if (col?.sameChain) gates.push(`reuses the ticker of an established Robinhood token (${col.with.slice(0, 10)}…, $${col.liq.toLocaleString("en-US")} liquidity)`);
+    else if (col) notes.push(`shares its ticker with a token on ${col.chain}`);
+    if (enough && o.bundleLikeShare >= 30) gates.push(`bundle-like buying took ${o.bundleLikeShare}% of supply in the opening blocks`);
     if (o.topHolderPct >= 20) gates.push(`one wallet holds ${o.topHolderPct}% of supply`);
-    const dist = 30 * (0.5 * lin(o.top10Pct, 50, 15) + 0.3 * lin(o.bundleLikeShare, 20, 3) + 0.2 * lin(o.firstBlockShare, 15, 2));
+    const dist = 30 * conf * (0.5 * lin(o.top10Pct, 50, 15) + 0.3 * lin(o.bundleLikeShare, 20, 3) + 0.2 * lin(o.firstBlockShare, 15, 2));
     const traction = 30 * (0.5 * lin(o.firstHourBuyers, 5, 60) + 0.3 * lin(o.uniqueBuyers, 10, 150) + 0.2 * lin(o.uniqueBuyers / Math.max(1, o.uniqueSellers), 0.8, 2.5));
     const kept = o.earlyRetention.hold + o.earlyRetention.more + 0.5 * o.earlyRetention.partial;
     const earlyN = Math.max(1, o.earlyRetention.hold + o.earlyRetention.more + o.earlyRetention.partial + o.earlyRetention.soldAll);
-    const quality = 15 * (0.6 * lin(kept / earlyN, 0.15, 0.6) + 0.4 * lin(o.medianBuyPct ?? 5, 1.5, 0.1));
+    const quality = 15 * conf * (0.6 * lin(kept / earlyN, 0.15, 0.6) + 0.4 * lin(o.medianBuyPct ?? 5, 1.5, 0.1));
     const townS = 15 * (0.6 * lin(town, 0, 6) + 0.25 * (launcher.founder ? 1 : 0) + 0.15 * lin(o.recentTrades6h, 0, 40));
-    const sanity = 10 * (o.identicalBuys > 6 ? 0.4 : 1) * (o.partial ? 0.8 : 1);
-    const total = Math.round(dist + traction + quality + townS + sanity);
-    const tier = gates.length ? "AVOID" : total >= 68 ? "STRONG_START" : total >= 50 ? "WATCH" : "WEAK";
-    return { total, tier, gates, parts: { distribution: Math.round(dist), traction: Math.round(traction), holderQuality: Math.round(quality), townSignal: Math.round(townS), sanity: Math.round(sanity) } };
+    const sanity = 10 * conf * (o.identicalBuys > 6 ? 0.4 : 1) * (o.partial ? 0.8 : 1) * (col && !col.sameChain ? 0.6 : 1);
+    let total = Math.round(dist + traction + quality + townS + sanity);
+    if (!enough) total = Math.min(total, 35);
+    const tier = gates.length ? "AVOID" : !enough ? "NO_TRACTION" : total >= 68 ? "STRONG_START" : total >= 50 ? "WATCH" : "WEAK";
+    return { total, tier, gates, notes, parts: { distribution: Math.round(dist), traction: Math.round(traction), holderQuality: Math.round(quality), townSignal: Math.round(townS), sanity: Math.round(sanity) } };
   }
 
   async function assess(item) {
@@ -175,23 +186,25 @@ export function makeRadar({ CFG, http, HERE }) {
     const launchedAt = Date.parse(item.launchedAt);
     const [o, s, launcher, col] = await Promise.all([onchain(token, launchedAt), safety(token), launcherInfo(item), collision(item.symbol, token)]);
     if (!o || !o.buys) return { token, symbol: item.symbol, skipped: "no trades yet" };
-    const town = await townAttention(item.symbol, launcher.handle);
+    const town = await townAttention(item.symbol, launcher.handle, token);
+    if (s.holderCount !== null && s.holderCount !== undefined) o.holders = s.holderCount;      // GoPlus sees every holder, logs can miss routed transfers
+    if (s.top10Pct !== null && s.top10Pct !== undefined) { o.top10Pct = s.top10Pct; o.topHolderPct = s.topHolderPct ?? o.topHolderPct; }
     const sc = score(o, s, town, launcher, col);
     return {
       token, symbol: item.symbol, name: item.name, launchedAt: item.launchedAt, launcher, thread: item.sourceThreadUrl,
-      ageMin: Math.round((Date.now() - launchedAt) / 60000), score: sc.total, tier: sc.tier, gates: sc.gates, parts: sc.parts,
+      ageMin: Math.round((Date.now() - launchedAt) / 60000), score: sc.total, tier: sc.tier, gates: sc.gates, notes: sc.notes, parts: sc.parts,
       safety: s, collision: col, townMentions: town, onchain: o,
       entry: { t: Date.now(), mcap: n(item.marketCapUsd), vol24: n(item.volume24hUsd), holders: o.holders, uniqueBuyers: o.uniqueBuyers },
-      killLine: `this read fails if, within 24h, holders fall below ${Math.floor(o.holders * 0.7)}, or top-10 concentration rises above ${Math.min(60, Math.round(o.top10Pct + 15))}%, or trading goes silent (under 5 trades in 6h)${n(item.marketCapUsd) ? `, or market cap drops below $${Math.round(n(item.marketCapUsd) * 0.4).toLocaleString("en-US")}` : ""}.`,
+      killLine: `this read fails if, within 24h, holders fall below ${Math.max(1, Math.floor(o.holders * 0.7))}, or top-10 concentration rises above ${Math.min(60, Math.round(o.top10Pct + 15))}%, or trading goes silent (under 5 trades in 6h)${n(item.marketCapUsd) ? `, or market cap drops below $${Math.round(n(item.marketCapUsd) * 0.4).toLocaleString("en-US")}` : ""}.`,
       checkpoints: {},
     };
   }
 
   function line(e) {
     if (e.skipped) return `• $${e.symbol}: skipped (${e.skipped})`;
-    const icon = { STRONG_START: "🟢", WATCH: "🟡", WEAK: "⚪", AVOID: "🔴" }[e.tier];
+    const icon = { STRONG_START: "🟢", WATCH: "🟡", WEAK: "⚪", NO_TRACTION: "⚫", AVOID: "🔴" }[e.tier];
     const o = e.onchain;
-    return `${icon} $${e.symbol} ${e.score}/100 ${e.tier} (${e.ageMin}m old, by ${e.launcher.handle}${e.launcher.founder ? " 🌱" : ""}) — buyers ${o.uniqueBuyers} (${o.firstHourBuyers} in 1st hour), holders ${o.holders}, top10 ${o.top10Pct}%, bundle-like ${o.bundleLikeShare}%, first-block ${o.firstBlockShare}%, early buyers holding ${o.earlyRetention.hold + o.earlyRetention.more}/${o.earlyRetention.hold + o.earlyRetention.more + o.earlyRetention.partial + o.earlyRetention.soldAll}, town mentions ${e.townMentions}${e.gates.length ? ` | gates: ${e.gates.join("; ")}` : ""}`;
+    return `${icon} $${e.symbol} ${e.score}/100 ${e.tier} (${e.ageMin}m old, by ${e.launcher.handle}${e.launcher.founder ? " 🌱" : ""}) — buyers ${o.uniqueBuyers} (${o.firstHourBuyers} in 1st hour), holders ${o.holders}, top10 ${o.top10Pct}%, bundle-like ${o.bundleLikeShare}%, first-block ${o.firstBlockShare}%, early buyers holding ${o.earlyRetention.hold + o.earlyRetention.more}/${o.earlyRetention.hold + o.earlyRetention.more + o.earlyRetention.partial + o.earlyRetention.soldAll}, town mentions ${e.townMentions}${e.gates.length ? ` | gates: ${e.gates.join("; ")}` : ""}${e.notes?.length ? ` | notes: ${e.notes.join("; ")}` : ""}`;
   }
 
   async function runTest(testNo, { dry = false } = {}) {

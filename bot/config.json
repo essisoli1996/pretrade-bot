@@ -182,11 +182,12 @@
       "2026-09-22T15:38:24Z",
       "2026-09-22T19:38:24Z"
     ],
-    "windowHours": 6,
+    "windowHours": 12,
     "minAgeMin": 20,
     "minBatch": 6,
-    "maxBatch": 15,
-    "pages": 4,
-    "settlePerRun": 6
+    "maxBatch": 20,
+    "pages": 5,
+    "settlePerRun": 6,
+    "minBuyers": 10
   }
 }
