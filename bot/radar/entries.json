@@ -68,7 +68,16 @@
    "uniqueBuyers": 1
   },
   "killLine": "this read fails if, within 24h, holders fall below 1, or top-10 concentration rises above 15%, or trading goes silent (under 5 trades in 6h).",
-  "checkpoints": {}
+  "checkpoints": {
+   "1h": {
+    "t": 1790081583926,
+    "holders": 0,
+    "uniqueBuyers": 0,
+    "top10Pct": null,
+    "recentTrades6h": 0,
+    "mcap": null
+   }
+  }
  },
  {
   "test": 1,
@@ -146,7 +155,16 @@
    "uniqueBuyers": 1
   },
   "killLine": "this read fails if, within 24h, holders fall below 1, or top-10 concentration rises above 15%, or trading goes silent (under 5 trades in 6h).",
-  "checkpoints": {}
+  "checkpoints": {
+   "1h": {
+    "t": 1790081584313,
+    "holders": 0,
+    "uniqueBuyers": 0,
+    "top10Pct": null,
+    "recentTrades6h": 0,
+    "mcap": null
+   }
+  }
  },
  {
   "test": 1,
@@ -217,7 +235,16 @@
    "uniqueBuyers": 4
   },
   "killLine": "this read fails if, within 24h, holders fall below 1, or top-10 concentration rises above 15%, or trading goes silent (under 5 trades in 6h), or market cap drops below $1,598.",
-  "checkpoints": {}
+  "checkpoints": {
+   "1h": {
+    "t": 1790081584863,
+    "holders": 1,
+    "uniqueBuyers": 4,
+    "top10Pct": 0,
+    "recentTrades6h": 12,
+    "mcap": 4004.5333634080516
+   }
+  }
  },
  {
   "test": 1,
@@ -295,7 +322,16 @@
    "uniqueBuyers": 1
   },
   "killLine": "this read fails if, within 24h, holders fall below 1, or top-10 concentration rises above 15%, or trading goes silent (under 5 trades in 6h), or market cap drops below $2,584.",
-  "checkpoints": {}
+  "checkpoints": {
+   "1h": {
+    "t": 1790081585264,
+    "holders": 0,
+    "uniqueBuyers": 0,
+    "top10Pct": null,
+    "recentTrades6h": 0,
+    "mcap": 6366.908768795088
+   }
+  }
  },
  {
   "test": 1,
@@ -373,7 +409,16 @@
    "uniqueBuyers": 1
   },
   "killLine": "this read fails if, within 24h, holders fall below 1, or top-10 concentration rises above 15%, or trading goes silent (under 5 trades in 6h).",
-  "checkpoints": {}
+  "checkpoints": {
+   "1h": {
+    "t": 1790081585638,
+    "holders": 0,
+    "uniqueBuyers": 0,
+    "top10Pct": null,
+    "recentTrades6h": 0,
+    "mcap": null
+   }
+  }
  },
  {
   "test": 1,
@@ -444,7 +489,16 @@
    "uniqueBuyers": 1
   },
   "killLine": "this read fails if, within 24h, holders fall below 1, or top-10 concentration rises above 15%, or trading goes silent (under 5 trades in 6h), or market cap drops below $1,739.",
-  "checkpoints": {}
+  "checkpoints": {
+   "1h": {
+    "t": 1790081586030,
+    "holders": 0,
+    "uniqueBuyers": 0,
+    "top10Pct": null,
+    "recentTrades6h": 0,
+    "mcap": 4285.05707145588
+   }
+  }
  },
  {
   "test": 1,
