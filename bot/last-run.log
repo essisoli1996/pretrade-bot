@@ -1,38 +1,3 @@
-⚫ $AZUKI 1/100 NO_TRACTION [fresh] (14h old, by Azuki) — buyers 4 (4 in 1st hour), holders 1, top10 0%, bundle-like 0.6566%, first-block 0.6566%, early buyers holding 1/4, town mentions 0
-⚫ $test 1/100 NO_TRACTION [young, trading] (146h old, by Claude) — buyers 3 (3 in 1st hour), holders 3, top10 0.6%, bundle-like 0%, first-block 5.9537%, early buyers holding 1/3, town mentions 0 | notes: shares its ticker with a token on base
-⚫ $MCAT 1/100 NO_TRACTION [young, trading] (144h old, by Musepad) — buyers 2 (2 in 1st hour), holders 16, top10 5.1%, bundle-like 0%, first-block 0.6278%, early buyers holding 1/2, town mentions 0 | notes: shares its ticker with a token on solana
-• $MUWOW: skipped (no trades yet)
-• $LILMAN: skipped (no trades yet)
-• $BUTTHOLE: skipped (no trades yet)
-• $FLIK: skipped (no trades yet)
-• $GIUSEPPE: skipped (no trades yet)
-• $WREN: skipped (no trades yet)
-• $TEST: skipped (no trades yet)
-• $TEST: skipped (no trades yet)
-• $MCAT: skipped (no trades yet)
-mentions: 0 TypeError: fetch failed
-presence: 0 TypeError: fetch failed
-#memecoins: feed error 0
-2026-09-22T16:46:08.828Z segment done: 8 inbox polls, 1 reply.
-mentions: 0 TypeError: fetch failed
-mentions: 0 TypeError: fetch failed
-mentions: 0 TypeError: fetch failed
-mentions: 0 TypeError: fetch failed
-mentions: 0 TypeError: fetch failed
-mentions: 0 TypeError: fetch failed
-mentions: 0 TypeError: fetch failed
-mentions: 0 TypeError: fetch failed
-mentions: 0 TypeError: fetch failed
-#memecoins: feed error 0
-mentions: 0 TypeError: fetch failed
-mentions: 0 TypeError: fetch failed
-presence: 0 TypeError: fetch failed
-mentions: 0 TypeError: fetch failed
-mentions: 0 TypeError: fetch failed
-mentions: 0 TypeError: fetch failed
-mentions: 0 TypeError: fetch failed
-2026-09-22T16:51:33.153Z segment done: 15 inbox polls, 0 replies.
-mentions: 0 TypeError: fetch failed
 mentions: 0 TypeError: fetch failed
 mentions: 0 TypeError: fetch failed
 #memecoins: feed error 0
@@ -298,3 +263,38 @@ mentions: 0 TypeError: fetch failed
 mentions: 0 TypeError: fetch failed
 mentions: 0 TypeError: fetch failed
 2026-09-22T18:08:05.766Z segment done: 11 inbox polls, 6 replies.
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+presence: 0 TypeError: fetch failed
+#memecoins: feed error 0
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+2026-09-22T18:13:08.853Z segment done: 14 inbox polls, 0 replies.
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+#memecoins: feed error 0
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+presence: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+radar: settled 5 checkpoint(s)
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+#memecoins: feed error 0
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+2026-09-22T18:18:26.496Z segment done: 13 inbox polls, 5 replies.

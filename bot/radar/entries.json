@@ -2002,7 +2002,16 @@
    "recentTrades6h": 0
   },
   "killLine": "this read fails if, within 24h, holders fall below 136, or top-10 concentration rises above 36%, or trading goes silent (under 5 trades in 6h), or market cap drops below $4,825.",
-  "checkpoints": {}
+  "checkpoints": {
+   "1h": {
+    "t": 1790100904169,
+    "holders": 0,
+    "uniqueBuyers": 14,
+    "top10Pct": null,
+    "recentTrades6h": 0,
+    "mcap": null
+   }
+  }
  },
  {
   "test": 3,
@@ -2076,7 +2085,16 @@
    "recentTrades6h": 0
   },
   "killLine": "this read fails if, within 24h, holders fall below 88, or top-10 concentration rises above 28%, or trading goes silent (under 5 trades in 6h), or market cap drops below $11,017.",
-  "checkpoints": {}
+  "checkpoints": {
+   "1h": {
+    "t": 1790100912540,
+    "holders": 0,
+    "uniqueBuyers": 2,
+    "top10Pct": null,
+    "recentTrades6h": 0,
+    "mcap": null
+   }
+  }
  },
  {
   "test": 3,
@@ -2150,7 +2168,16 @@
    "recentTrades6h": 0
   },
   "killLine": "this read fails if, within 24h, holders fall below 3, or top-10 concentration rises above 22%, or trading goes silent (under 5 trades in 6h), or market cap drops below $1,886.",
-  "checkpoints": {}
+  "checkpoints": {
+   "1h": {
+    "t": 1790100919962,
+    "holders": 0,
+    "uniqueBuyers": 4,
+    "top10Pct": null,
+    "recentTrades6h": 0,
+    "mcap": 4724.655963354752
+   }
+  }
  },
  {
   "test": 3,
@@ -2314,7 +2341,16 @@
    "recentTrades6h": 0
   },
   "killLine": "this read fails if, within 24h, holders fall below 2, or top-10 concentration rises above 16%, or trading goes silent (under 5 trades in 6h), or market cap drops below $1,632.",
-  "checkpoints": {}
+  "checkpoints": {
+   "1h": {
+    "t": 1790100926853,
+    "holders": 0,
+    "uniqueBuyers": 3,
+    "top10Pct": null,
+    "recentTrades6h": 0,
+    "mcap": null
+   }
+  }
  },
  {
   "test": 3,
@@ -2395,6 +2431,15 @@
    "recentTrades6h": 2
   },
   "killLine": "this read fails if, within 24h, holders fall below 11, or top-10 concentration rises above 20%, or trading goes silent (under 5 trades in 6h), or market cap drops below $1,874.",
-  "checkpoints": {}
+  "checkpoints": {
+   "1h": {
+    "t": 1790100933843,
+    "holders": 0,
+    "uniqueBuyers": 2,
+    "top10Pct": null,
+    "recentTrades6h": 2,
+    "mcap": null
+   }
+  }
  }
 ]
