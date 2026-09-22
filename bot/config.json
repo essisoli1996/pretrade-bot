@@ -59,14 +59,6 @@
         "timeoutMs": 30000
       },
       {
-        "name": "openrouter-free-router",
-        "keyEnv": "OPENROUTER_KEY",
-        "baseUrl": "https://openrouter.ai/api/v1",
-        "model": "openrouter/free",
-        "referer": "https://github.com/essisoli1996/pretrade-bot",
-        "timeoutMs": 30000
-      },
-      {
         "name": "bankr",
         "keyEnv": "BANKR_LLM_KEY",
         "baseUrl": "https://llm.bankr.bot/v1",
@@ -85,7 +77,7 @@
   "avatarPath": "assets/ptrd-avatar.webp",
   "presence": {
     "channel": "memecoins",
-    "everyMinutes": 8
+    "everyMinutes": 4
   },
   "guard": {
     "tickers": [
@@ -177,6 +169,9 @@
     "maxPerThreadPerDay": 4,
     "ignore": [
       "musepad"
+    ],
+    "skipModels": [
+      "openrouter/free"
     ]
   }
 }
