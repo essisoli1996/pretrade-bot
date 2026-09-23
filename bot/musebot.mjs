@@ -1546,7 +1546,7 @@ async function pass(identity, state, indexOnly = false) {
   state.replyTimes = (state.replyTimes ?? []).filter((t) => t > hourAgo);
   let sent = 0;
 
-  for (const channel of CFG.channels) {
+  for (const channel of talkChannels()) {
     const feed = await http(`${BOARD}/api/latest.json?channel=${encodeURIComponent(channel)}&limit=${CFG.feedLimit}`);
     if (!feed.ok) { console.log(`#${channel}: feed error ${feed.status}`); continue; }
     const posts = postsFrom(feed.json);
@@ -1564,19 +1564,36 @@ async function pass(identity, state, indexOnly = false) {
       if (/^\s*!musepad/im.test(post.text)) continue;      // those addresses are fee wallets, not tokens
       if (/^Deployed .+ on /i.test(post.text)) continue;   // launchpad receipts: nothing to check yet
       if (state.threads.includes(thread)) continue;
+      if (post.created && Date.now() - post.created > (TALK.maxAgeHours ?? 2) * 36e5) continue; // old news; also covers newly added channels
 
       if (new RegExp(`@${CFG.name}\\b`, "i").test(post.text)) continue; // handled by the mentions inbox
       // don't re-check inside my own alert threads, or addresses i already filed as copycats
       state.ownPosts = state.ownPosts ?? [];
       if (post.parent && state.ownPosts.includes(post.parent)) continue;
       const filed = new Set(Object.values(state.guard?.known ?? {}).flat().map((x) => String(x).toLowerCase()));
-      const addrs = addressesIn(post.text).filter((x) => !state.tokens.includes(x) && !isOwnToken(x) && !filed.has(x.toLowerCase()));
-      if (addrs.length !== 1) continue; // none, or a list: a single reply would be noise
-
-      const check = await quickCheck(addrs[0]);
+      const allAddrs = addressesIn(post.text);
+      const addrs = allAddrs.filter((x) => !state.tokens.includes(x) && !isOwnToken(x) && !filed.has(x.toLowerCase()));
+      let check = null, lead = "";
+      if (addrs.length === 1) check = await quickCheck(addrs[0]);
+      else if (!allAddrs.length) {
+        // no address: someone talking about a token by its $TICKER
+        // outside the trading channel, only when the post is actually about the token, not a passing mention
+        if (!(TALK.anyMentionChannels ?? CFG.channels).includes(channel) && !TALK_INTENT.test(post.text)) continue;
+        const tick = tickersIn(post.text);
+        if (tick.length !== 1) continue; // none, or a list: a single reply would be noise
+        const t = await tokenTalk(tick[0], channel, state);
+        if (!t) continue;
+        if (t.text) { // a stock token: answered from Robinhood's registry instead of a DEX read
+          console.log(`\n→ stock talk reply to #${channel} post ${post.id} (${post.name}):\n${t.text}\n`);
+          if (LIVE) { const res = await postReply(identity, channel, post.id, t.text); if (!res.ok) continue; }
+          state.threads.push(thread); state.replyTimes.push(Date.now()); sent++;
+          continue;
+        }
+        check = t.check; lead = t.lead;
+      }
       if (!check) continue;
 
-      const text = replyText(check);
+      const text = lead + replyText(check);
       recordVerdict(state, check, "channel");
       console.log(`\n→ reply to #${channel} post ${post.id} (${post.name}):\n${text}\n`);
       if (LIVE) {
@@ -1590,6 +1607,123 @@ async function pass(identity, state, indexOnly = false) {
     }
   }
   return sent;
+}
+
+// ───────────────────────── token talk: answer when someone discusses a token by $TICKER ─────────────────────────
+const TALK = CFG.talk ?? {};
+const MAJORS = new Set(["USD", "USDC", "USDT", "USDG", "DAI", "ETH", "WETH", "BTC", "WBTC", "SOL", ...(TALK.skipTickers ?? [])]);
+const TALK_INTENT = /\?|\b(buy|buying|ape|aped|aping|safe|rug|rugged|legit|scam|honeypot|worth|entry|chart|pump|dump|moon|bag|bags|hold|holding|sell|selling|dyor|thoughts)\b/i;
+const talkChannels = () => [...new Set([...CFG.channels, ...(TALK.channels ?? CV.channels ?? [])])];
+/** $TICKER mentions in a post, minus majors and my own token. Dollar amounts ($500) don't match: tickers start with a letter. */
+function tickersIn(text) {
+  const out = new Set();
+  for (const m of String(text).matchAll(/(?<![A-Za-z0-9$])\$([A-Za-z][A-Za-z0-9]{1,14})\b/g)) {
+    const t = m[1].toUpperCase();
+    if (MAJORS.has(t) || t === String(TK.symbol ?? "").toUpperCase()) continue;
+    out.add(t);
+  }
+  return [...out];
+}
+/** Resolves a ticker to a Robinhood Chain token and reads it; null when there's nothing solid to say. */
+async function tokenTalk(sym, channel, state) {
+  state.talked = state.talked ?? {};
+  const key = `${channel}:${sym}`;
+  if (Date.now() - (state.talked[key] ?? 0) < (TALK.cooldownHours ?? 6) * 36e5) return null; // said it recently here
+  state.talked[key] = Date.now();
+  for (const [k, t] of Object.entries(state.talked)) if (Date.now() - t > 3 * 864e5) delete state.talked[k];
+  STOCKS ??= makeStocks({ http, rpc: rpcFor("robinhood") });
+  const { reg } = await STOCKS.load();
+  if (reg?.byTicker.has(sym)) return { text: await stockText(`stock ${sym}`) };
+  const canon = state.guard?.canonical?.[sym];
+  const onChain = (await tickerTokens(sym)).filter((t) => t.chain === (G.homeChain ?? "robinhood"));
+  const pick = canon ? onChain.find((t) => t.address === String(canon).toLowerCase()) ?? { address: String(canon).toLowerCase() } : onChain[0];
+  if (!pick || isOwnToken(pick.address)) return null;
+  const check = await quickCheck(pick.address);
+  if (!check) return null;
+  const others = onChain.filter((t) => t.address !== pick.address);
+  const lead = others.length
+    ? `saw $${sym} mentioned. ${others.length + 1} tokens on robinhood use that ticker; this is ${canon ? "the one the town knows" : "the deepest"}: ${pick.address}. check the address before you buy.\n`
+    : `saw $${sym} mentioned (${pick.address}):\n`;
+  return { check, lead };
+}
+
+// ───────────────────────── launch report: new Robinhood tokens, $MUSEBOOK pairs first, checked and posted ─────────────────────────
+const LR = CFG.launchReport ?? {};
+const PAIR_TOKEN = String(LR.pairToken ?? "0x91a2dae9699f0b82540b5886b0d8759c22820ba3").toLowerCase();
+const shortA = (a) => `${a.slice(0, 6)}…${a.slice(-4)}`;
+const ageText = (ms) => { const m = Math.max(1, Math.round((Date.now() - ms) / 60000)); return m < 90 ? `${m}m` : `${Math.round(m / 60)}h`; };
+const kUsd = (v) => (v >= 1e6 ? `$${(v / 1e6).toFixed(1)}m` : v >= 1e3 ? `$${(v / 1e3).toFixed(1)}k` : `$${Math.round(v)}`);
+
+/** Tokens launched on Robinhood Chain in the last day that are old enough to read, $MUSEBOOK pairs first. */
+async function freshLaunches(state) {
+  const done = new Set(state.launchReport?.done ?? []);
+  const pairs = [];
+  const a = await http(`https://api.dexscreener.com/token-pairs/v1/robinhood/${PAIR_TOKEN}`);
+  if (Array.isArray(a.json)) pairs.push(...a.json);
+  const mp = await http("https://musepad.lol/api/tokens?sort=new");
+  const addrs = (mp.json?.items ?? []).map((x) => String(x.contractAddress ?? "").toLowerCase()).filter((x) => /^0x[0-9a-f]{40}$/.test(x)).slice(0, 30);
+  if (addrs.length) { const b = await http(`https://api.dexscreener.com/tokens/v1/robinhood/${addrs.join(",")}`); if (Array.isArray(b.json)) pairs.push(...b.json); }
+  const byToken = new Map();
+  for (const p of pairs) {
+    if (p?.chainId !== "robinhood") continue;
+    const base = String(p.baseToken?.address ?? "").toLowerCase(), quote = String(p.quoteToken?.address ?? "").toLowerCase();
+    if (base === PAIR_TOKEN || !/^0x[0-9a-f]{40}$/.test(base) || isOwnToken(base) || done.has(base)) continue;
+    const created = n(p.pairCreatedAt), liq = n(p.liquidity?.usd) ?? 0;
+    const cur = byToken.get(base) ?? { token: base, symbol: p.baseToken?.symbol ?? "?", created, liq: 0, musebook: false };
+    cur.liq += liq; cur.musebook ||= quote === PAIR_TOKEN;
+    if (created && (!cur.created || created < cur.created)) cur.created = created;
+    byToken.set(base, cur);
+  }
+  const minAge = (LR.minAgeMinutes ?? 20) * 60_000, maxAge = (LR.maxAgeHours ?? 24) * 36e5;
+  return [...byToken.values()]
+    .filter((t) => t.created && Date.now() - t.created >= minAge && Date.now() - t.created <= maxAge && t.liq >= (LR.minLiquidityUsd ?? 1000))
+    .sort((x, y) => Number(y.musebook) - Number(x.musebook) || y.created - x.created);
+}
+
+function launchRow(f, c) {
+  const icon = { OK: "🟢", CAUTION: "🟡", DANGER: "🔴" }[c.verdict];
+  const sim = c.sim?.status === "ok" && !c.sim.flags.length ? `sell works, ${c.sim.roundTripLossPct}% round trip` : c.sim?.status && c.sim.status !== "unavailable" ? c.sim.flags.map((x) => x.text).join(", ") || c.sim.status : null;
+  const flags = c.flags.filter((x) => !/round trip|sell reverted|simulation/.test(x)).slice(0, 2);
+  return `${icon} $${c.symbol} (${shortA(f.token)}) · ${ageText(f.created)} old · liq ${kUsd(c.liquidity)} · ${c.verdict} ${c.score}/100${sim ? ` · ${sim}` : ""}${flags.length ? ` · ${flags.join(", ")}` : ""}${f.musebook ? "" : " · not a $MUSEBOOK pair"}`;
+}
+
+/** Checks new launches; posts an hourly digest, and a standalone alert right away when a sell reverts or a round trip loses 50%+. */
+async function launchReport(identity, state, dry = false) {
+  if (LR.enabled === false) return 0;
+  state.launchReport = state.launchReport ?? { done: [], pending: [], digests: [], alerts: [] };
+  const R = state.launchReport;
+  const day = Date.now() - 864e5;
+  R.digests = R.digests.filter((t) => t > day); R.alerts = R.alerts.filter((t) => t > day);
+  let posted = 0;
+  for (const f of (await freshLaunches(state)).slice(0, LR.maxPerRun ?? 6)) {
+    R.done.push(f.token);
+    const c = await quickCheck(f.token);
+    if (!c) continue;
+    recordVerdict(state, c, "launch");
+    const row = launchRow(f, c);
+    const critical = (c.sim?.flags ?? []).some((x) => x.critical) && c.sim?.scored;
+    if (critical && R.alerts.length < (LR.maxAlertsPerDay ?? 4)) {
+      const text = [`🔴 heads up on a new launch: $${c.symbol} (${f.token}), ${ageText(f.created)} old.`, c.sim.line, `i'd stay out until that changes. "@${CFG.name} ${f.token}" re-checks it any time. not advice.`, `- ${CFG.name}`].join("\n");
+      console.log(`\n→ launch alert${dry ? " (dry)" : ""}:\n${text}`);
+      if (!dry) { const res = await http(`${BOARD}/api/post`, signRequest("post", identity, { channel: LR.channel ?? CFG.channels[0], name: CFG.name, text })); if (res.ok) { R.alerts.push(Date.now()); posted++; (state.ownPosts = state.ownPosts ?? []).push(res.json?.post?.id); } }
+      continue;
+    }
+    R.pending.push({ row, t: Date.now() });
+  }
+  R.done = R.done.slice(-3000);
+  R.pending = R.pending.filter((x) => Date.now() - x.t < 6 * 36e5); // a read older than 6h is stale news
+  const last = R.digests[R.digests.length - 1] ?? 0;
+  if (R.pending.length && Date.now() - last >= (LR.digestMinutes ?? 60) * 60_000 && R.digests.length < (LR.maxDigestsPerDay ?? 12)) {
+    const rows = R.pending.slice(-(LR.maxRows ?? 8)).map((x) => x.row);
+    const text = [`🆕 new on robinhood, checked for you (${rows.length}):`, ...rows, ``, `each one: contract scan, v4 hook read and a simulated buy + sell on its live pool. "@${CFG.name} <address>" for the full read, "@${CFG.name} plan <address> <usd>" before you size in. not advice.`, `- ${CFG.name}`].join("\n");
+    console.log(`\n→ launch digest${dry ? " (dry)" : ""}:\n${text}`);
+    if (!dry) {
+      const res = await http(`${BOARD}/api/post`, signRequest("post", identity, { channel: LR.channel ?? CFG.channels[0], name: CFG.name, text }));
+      console.log(`  digest: HTTP ${res.status}`);
+      if (res.ok) { R.digests.push(Date.now()); R.pending = []; posted++; (state.ownPosts = state.ownPosts ?? []).push(res.json?.post?.id); }
+    }
+  }
+  return posted;
 }
 
 // ───────────────────────── commands ─────────────────────────
@@ -1634,6 +1768,31 @@ async function main() {
       if (c.sim?.flags?.length) console.log(`  sim flags: ${c.sim.flags.map((f) => `${f.text} (+${f.pts}${f.critical ? ", critical" : ""})`).join(", ")}${c.sim.scored ? "" : " [not scored]"}`);
     }
     return console.log(`\nsimulation results: ${JSON.stringify(tally)}`);
+  }
+
+  if (cmd === "launchreport") {
+    // Read-only: what the launch report would post right now (ignores the hourly spacing). Posts nothing.
+    const st = { launchReport: { done: [], pending: [], digests: [], alerts: [] } };
+    const f = await freshLaunches(st);
+    console.log(`${f.length} fresh launch(es) old enough to read: ${f.map((x) => `$${x.symbol}${x.musebook ? "" : "*"}`).join(", ")}`);
+    await launchReport(null, st, true);
+    return;
+  }
+
+  if (cmd === "talkscan") {
+    // Read-only: $TICKER mentions in the talk channels and what i would answer. Posts nothing.
+    const st = {};
+    for (const ch of talkChannels()) {
+      const posts = postsFrom((await http(`${BOARD}/api/latest.json?channel=${ch}&limit=40`)).json);
+      for (const p of posts.slice(0, 40)) {
+        if (addressesIn(p.text).length) continue;
+        const t = tickersIn(p.text);
+        if (t.length !== 1) continue;
+        const r = await tokenTalk(t[0], ch, st);
+        console.log(`#${ch} post ${p.id} (${p.name}) mentions $${t[0]} →\n${r ? (r.text ?? r.lead + replyText(r.check)) : "  (nothing solid to say)"}\n`);
+      }
+    }
+    return;
   }
 
   if (cmd === "try") {
@@ -1905,6 +2064,7 @@ async function main() {
         if (due("presence", CFG.presence?.everyMinutes ?? 4)) { const pr = await setPresence(identity); if (!pr.ok) quiet(`presence: ${pr.status} ${pr.text.slice(0, 120)}`); }
         if (due("channels", CFG.serve.channelMinutes)) n2 += await pass(identity, state, state.seen.length === 0);
         if (due("launches", CFG.serve.launchMinutes ?? 2)) n2 += (await launchWatch(identity, state)).length;
+        if (due("launchreport", LR.everyMinutes ?? 15)) n2 += await launchReport(identity, state);
         if (due("conversations", CV.everyMinutes ?? 1)) n2 += await conversations(identity, state);
         if (due("townwatch", G.townWatchMinutes ?? 3)) n2 += await townTokenWatch(identity, state);
         if (due("guard", G.everyMinutes ?? 15)) n2 += (await guardScan(identity, state)).length;

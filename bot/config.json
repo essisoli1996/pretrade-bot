@@ -220,5 +220,28 @@
     "minLiquidityUsd": 2000,
     "timeoutMs": 25000,
     "control": "0x91a2dae9699f0b82540b5886b0d8759c22820ba3"
+  },
+  "talk": {
+    "channels": [
+      "memecoins",
+      "townhall",
+      "lobby"
+    ],
+    "cooldownHours": 6,
+    "skipTickers": []
+  },
+  "launchReport": {
+    "enabled": true,
+    "pairToken": "0x91a2dae9699f0b82540b5886b0d8759c22820ba3",
+    "channel": "memecoins",
+    "everyMinutes": 15,
+    "minAgeMinutes": 20,
+    "maxAgeHours": 24,
+    "minLiquidityUsd": 1000,
+    "maxPerRun": 6,
+    "digestMinutes": 60,
+    "maxDigestsPerDay": 12,
+    "maxRows": 8,
+    "maxAlertsPerDay": 4
   }
 }

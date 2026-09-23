@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       addresses: { description: "Token addresses, space separated (empty = trading musepad tokens + the ledger)", required: false, default: "" }
-      command: { description: "hooks, simulate (bot), endpoints (paid handlers run locally, no payment), signprobe (pre-signing simulation per chain)", required: false, default: "hooks", type: choice, options: [hooks, simulate, endpoints, signprobe, fetch, try] }
+      command: { description: "hooks, simulate (bot), endpoints (paid handlers run locally, no payment), signprobe (pre-signing simulation per chain)", required: false, default: "hooks", type: choice, options: [hooks, simulate, endpoints, signprobe, fetch, try, launchreport, talkscan] }
 permissions: { contents: write }
 jobs:
   hooks:
