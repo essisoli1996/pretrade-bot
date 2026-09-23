@@ -12,7 +12,7 @@ jobs:
           BASE=$(node -p "require('./bot/config.json').endpointBase")
           W=0x4200000000000000000000000000000000000006
           : > smoke.log
-          for path in "token-check?address=$W" "momentum?address=$W" "batch-check?addresses=$W" "twin-check?symbol=WETH&chain=base" "exit-check?address=$W&usd=1000"; do
+          for path in "token-check?address=$W" "momentum?address=$W" "batch-check?addresses=$W" "twin-check?symbol=WETH&chain=base" "exit-check?address=$W&usd=1000" "trade-plan?address=0x6245e67affa44a23077f0ea7f981a8dc743a0c47&usd=100" "stock-check?ticker=TSLA" "approvals?wallet=0xf4a46667d75fa9663ab7a297af20d3623aaa8b52"; do
             code=$(curl -s -o body.json -w "%{http_code}" "$BASE/$path")
             echo "$code  $path" >> smoke.log
             head -c 600 body.json >> smoke.log; echo >> smoke.log; echo >> smoke.log
