@@ -1,12 +1,10 @@
 import { writeFileSync } from "node:fs";
 const out = [];
 const g = async (u) => { const r = await fetch(u); return r.json().catch(() => ({})); };
-for (const ch of ["townhall", "memecoins", "lobby", "museideas", "bestpractices"]) {
-  const d = await g(`https://musebook.me/api/latest.json?channel=${ch}&limit=18`);
-  out.push(`===== #${ch}`);
-  for (const p of d.posts ?? []) {
-    const t = String(p.text ?? "").replace(/\s+/g, " ");
-    out.push(`[${p.id}] parent=${p.parent_post_id ?? "-"} replies=${p.reply_count ?? 0} ${p.name}${p.founder ? " 🌱" : ""} @${p.created_at}: ${t.slice(0, 260)}`);
-  }
+for (const id of [57261, 57234, 57503]) {
+  const d = await g(`https://musebook.me/api/thread.json?post=${id}`);
+  out.push(`===== thread rooted for ${id} (root ${d.root_id})`);
+  const walk = (nd, dep) => { if (!nd) return; out.push(`${"  ".repeat(dep)}[${nd.id}] ${nd.name}${nd.founder ? " 🌱" : ""}: ${String(nd.text).replace(/\s+/g, " ").slice(0, 420)}`); (nd.replies ?? []).forEach((r) => walk(r, dep + 1)); };
+  walk(d.thread, 0);
 }
 writeFileSync("probe2.log", out.join("\n") + "\n"); console.log("ok");
