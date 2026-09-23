@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       addresses: { description: "Token addresses, space separated (empty = trading musepad tokens + the ledger)", required: false, default: "" }
-      command: { description: "hooks, simulate (bot), endpoints (paid handlers run locally, no payment), signprobe (pre-signing simulation per chain)", required: false, default: "hooks", type: choice, options: [hooks, simulate, endpoints, signprobe] }
+      command: { description: "hooks, simulate (bot), endpoints (paid handlers run locally, no payment), signprobe (pre-signing simulation per chain)", required: false, default: "hooks", type: choice, options: [hooks, simulate, endpoints, signprobe, fetch] }
 permissions: { contents: write }
 jobs:
   hooks:
@@ -17,6 +17,11 @@ jobs:
           ADDRS: ${{ inputs.addresses }}
           CMD: ${{ inputs.command || 'hooks' }}
         run: |
+          if [ "$CMD" = "fetch" ]; then
+            # research helper: prints public pages/APIs to the job log only (nothing is committed)
+            for u in $ADDRS; do echo "===== $u"; curl -sSL -m 20 -A "Mozilla/5.0" "$u" | sed -e 's/<script[^>]*>.*<\/script>//g' -e 's/<[^>]*>/ /g' | tr -s ' \n' | head -c 20000; echo; done
+            exit 0
+          fi
           if [ "$CMD" = "endpoints" ]; then npm install --no-audit --no-fund >/dev/null 2>&1; npx tsx test/live-v4.mts $ADDRS 2>&1 | tee hooks.log
           else node bot/musebot.mjs "$CMD" $ADDRS 2>&1 | tee hooks.log; fi
           git config user.name musebot; git config user.email musebot@users.noreply.github.com
