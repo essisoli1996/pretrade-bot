@@ -17,5 +17,11 @@ show("trade-plan BILL buy $500", await call(tradePlan, "trade-plan?address=0x4e9
 show("trade-plan FRONG sell $1000", await call(tradePlan, "trade-plan?address=0x6245e67affa44a23077f0ea7f981a8dc743a0c47&usd=1000&side=sell"), (b) => [b.verdict, b.expectedOut?.amount, b.expectedOut?.symbol]);
 show("stock-check TSLA", await call(stockCheck, "stock-check?ticker=TSLA"), (b) => [b.verdict, b.reference?.priceUsd, b.dex?.priceUsd, b.dex?.premiumPct, b.copycats?.length]);
 show("stock-check NVDA", await call(stockCheck, "stock-check?ticker=NVDA"), (b) => [b.verdict, b.official?.address, b.reference?.priceUsd, b.dex?.premiumPct]);
+// the bot module directly, without the handler's 25s cap, to see where the time goes
+// @ts-ignore
+const { makeApprovals } = await import("../bot/approvals.mjs");
+const httpJ = async (u: string, body?: unknown) => { const r = await fetch(u, body ? { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) } : {}); const text = await r.text(); let json = null; try { json = JSON.parse(text); } catch {} return { ok: r.ok, status: r.status, json, text }; };
+const direct = await makeApprovals({ http: httpJ, rpcFor: () => async (method: string, params: unknown[]) => { const r = await httpJ("https://mainnet.base.org", { jsonrpc: "2.0", id: 1, method, params }); return r.json ?? { error: { code: r.status, message: r.text.slice(0, 80) } }; } }).audit(WALLET, "base");
+console.log("approvals base, direct:", JSON.stringify({ timings: direct.timings, live: direct.live, scanned: direct.scannedGrants, unread: direct.approvals?.filter((x: any) => x.why.some((w: string) => /unreadable/.test(w))).length }));
 show("approvals base", await call(approvals, `approvals?wallet=${WALLET}&chain=base`), (b) => [b.historySource, b.scannedGrants, b.live, b.worthRevoking, b.approvals?.slice(0, 3).map((x: any) => [x.symbol, x.amount, x.spenderLabel ?? x.spender, x.risk])]);
 show("approvals robinhood", await call(approvals, `approvals?wallet=${WALLET}&chain=robinhood`), (b) => [b.historySource, b.scannedGrants, b.live, b.worthRevoking]);

@@ -143,9 +143,11 @@ export function makeApprovals({ rpcFor, known = {}, reputation = null, http = nu
     const raw = rpcFor(chain);
     if (!raw) return { error: `no RPC for ${chain}` };
     const rpc = patient(raw);
+    const t0 = Date.now(), timings = {};
     const owner = wallet.toLowerCase();
     const got = (await explorerLogs(chain, owner)) ?? (await logs(rpc, owner));
     if (got.error) return { error: `couldn't read the approval history (explorer unavailable, and the RPC says: ${got.error})` };
+    timings.historyMs = Date.now() - t0;
     const grants = latestGrants(got.logs).sort((a, b) => b.block - a.block); // newest first
     const live = [];
     await inPool(grants.slice(0, 80), 6, async (g) => {
@@ -180,6 +182,7 @@ export function makeApprovals({ rpcFor, known = {}, reputation = null, http = nu
       codeCache.set(a, v);
       return v;
     };
+    timings.allowancesMs = Date.now() - t0 - timings.historyMs;
     const repCache = new Map();
     const flaggedFor = (a) => { if (!repCache.has(a)) repCache.set(a, reputation ? reputation(a).catch(() => []) : Promise.resolve([])); return repCache.get(a); };
     const out = [];
@@ -196,7 +199,8 @@ export function makeApprovals({ rpcFor, known = {}, reputation = null, http = nu
     }
     const order = { critical: 0, high: 1, medium: 2, low: 3 };
     out.sort((a, b) => order[a.risk] - order[b.risk]);
-    return { wallet: owner, chain, historySource: got.source ?? "rpc", scannedGrants: grants.length, live: out.length, approvals: out };
+    timings.totalMs = Date.now() - t0;
+    return { wallet: owner, chain, historySource: got.source ?? "rpc", scannedGrants: grants.length, live: out.length, approvals: out, timings };
   }
   return { audit };
 }
