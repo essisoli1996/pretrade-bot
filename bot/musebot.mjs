@@ -339,7 +339,7 @@ async function approvalsText(text) {
   const m = text.match(/approvals\s+(0x[0-9a-fA-F]{40})(?:\s+(robinhood|base|ethereum))?/i);
   if (!m) return `usage: "@${CFG.name} approvals <wallet> [robinhood|base|ethereum]". i list every approval that wallet still has live, riskiest first, with a revoke transaction you can sign.\n- ${CFG.name}`;
   const chain = (m[2] ?? "robinhood").toLowerCase();
-  APPROVALS ??= makeApprovals({ rpcFor, known: { ...(S.trusted ?? {}), [PERMIT2]: "Permit2" }, reputation: async (a) => reputation(a) });
+  APPROVALS ??= makeApprovals({ rpcFor, http, known: { ...(S.trusted ?? {}), [PERMIT2]: "Permit2" }, reputation: async (a) => reputation(a) });
   const r = await APPROVALS.audit(m[1], chain);
   if (r.error) return `couldn't audit on ${chain}: ${r.error}.\n- ${CFG.name}`;
   if (!r.live) return `✅ ${m[1].slice(0, 8)}… has no live token approvals on ${chain} (${r.scannedGrants} past grant(s), all revoked or used up).\n- ${CFG.name}`;

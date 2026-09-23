@@ -25,7 +25,7 @@ jobs:
           if [ "$CMD" = "try" ]; then
             # addresses input holds commands separated by ";", e.g. "stock TSLA; plan 0x… 250"
             IFS=';' read -ra CMDS <<< "$ADDRS"; for c in "${CMDS[@]}"; do echo "===== try: $c"; node bot/musebot.mjs try $c 2>&1; echo; done | tee hooks.log
-          elif [ "$CMD" = "endpoints" ]; then npm install --no-audit --no-fund >/dev/null 2>&1; npx tsx test/live-v4.mts $ADDRS 2>&1 | tee hooks.log
+          elif [ "$CMD" = "endpoints" ]; then npm install --no-audit --no-fund >/dev/null 2>&1; { npx tsx test/live-v4.mts $ADDRS; npx tsx test/live-new.mts; } 2>&1 | tee hooks.log
           else node bot/musebot.mjs "$CMD" $ADDRS 2>&1 | tee hooks.log; fi
           git config user.name musebot; git config user.email musebot@users.noreply.github.com
           git add -f hooks.log; git diff --cached --quiet || git commit -qm "hooks log [skip ci]"; git pull -q --rebase || true; git push -q || true

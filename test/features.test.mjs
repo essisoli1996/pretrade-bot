@@ -56,6 +56,16 @@ check(grantRisk({ kind: "erc20", amount: 5n, spenderIsContract: true, flagged: [
 check(revokeTx({ kind: "erc20", token: T1, spender: S1 }, ME).data === "0x095ea7b3" + "0".repeat(24) + "bb".repeat(20) + "0".repeat(64), "revoke = approve(spender, 0)");
 check(revokeTx({ kind: "all", token: NFT, spender: S1 }, ME).data.startsWith("0xa22cb465"), "revoke all = setApprovalForAll(operator, false)");
 
+// the explorer path, with Blockscout's real answer shape (message "OK", no status, null topic padding)
+const { makeApprovals } = await import("../bot/approvals.mjs");
+const bsLog = { address: T1, blockNumber: "0x1f193f9", logIndex: "0x12d", data: "0x" + "f".repeat(64), topics: [A, t(ME), t(S1), null] };
+const fakeHttp = async (url) => ({ json: url.includes(A) ? { message: "OK", result: [bsLog] } : { message: "No logs found", result: [], status: "0" } });
+const fakeRpc = async (m, p) => ({ result: m === "eth_call" && p[0].data.startsWith("0xdd62ed3e") ? "0x" + "f".repeat(64) : m === "eth_getCode" ? "0x6080" : "0x" });
+const au = await makeApprovals({ rpcFor: () => fakeRpc, http: fakeHttp }).audit(ME, "base");
+check(au.historySource === "blockscout" && au.live === 1 && au.approvals[0].amount === "UNLIMITED", "Blockscout history (OK without status, null topics) → live unlimited approval found");
+const walled = await makeApprovals({ rpcFor: () => async (m) => (m === "eth_blockNumber" ? { result: "0x10" } : m === "eth_getLogs" ? { result: [] } : { result: "0x" }), http: async () => ({ json: null, text: "Just a moment..." }) }).audit(ME, "robinhood");
+check(walled.historySource === "rpc" && walled.live === 0, "explorer behind a bot wall → falls back to the RPC");
+
 // ── trade plan ──
 const E = 10n ** 18n;
 const res = (out, extra = {}) => ({ ok: true, block: 1, side: "buy", amountIn: 10n * E, out, refIn: E / 100n, refOut: (E / 100n) * 997n / 1000n, sellBackFails: false, roundTripBack: null, ...extra });

@@ -1,6 +1,6 @@
 # pretrade
 
-Check a token before you trade it. Five pay-per-call [x402](https://www.x402.org/) endpoints for trading agents, plus an always-on bot on [musebook.lol](https://musebook.lol/muse/muse_d2pa9v3lqo).
+Check a token before you trade it. Eight pay-per-call [x402](https://www.x402.org/) endpoints for trading agents, plus an always-on bot on [musebook.lol](https://musebook.lol/muse/muse_d2pa9v3lqo).
 
 No account. No API key. Pay per call in USDC on Base. Invalid requests and upstream outages return 4xx/5xx and are **never charged**.
 
@@ -15,6 +15,9 @@ Base URL: `https://x402.bankr.bot/0xf4a46667d75fa9663ab7a297af20d3623aaa8b52`
 | `GET /momentum?address=…` | $0.005 | Signal (`STRONG_UP` … `STRONG_DOWN`), buy/sell flow, volume acceleration, manipulation warnings |
 | `GET or POST /batch-check` | $0.05 | Up to 10 tokens ranked safest first |
 | `GET /twin-check?symbol=TICKER` | $0.03 | Every token using that ticker, ranked by market evidence, with the likely original. Pass `&address=` to learn if yours is a likely copycat |
+| `GET /trade-plan?address=…&usd=250` | $0.02 | Robinhood Chain: your exact size simulated on the live v4 pool → GO / CAUTION / NO_GO, measured impact, expected output, slippage and `amountOutMinimum`, split advice |
+| `GET /stock-check?ticker=TSLA` | $0.01 | Robinhood Stock Tokens: real or copycat (with the real address), paused, pending splits/dividends, DEX price vs the Chainlink feed |
+| `GET /approvals?wallet=…&chain=robinhood` | $0.02 | Every live token approval, riskiest first, each risky one with a ready revoke transaction (Robinhood Chain, Base, Ethereum) |
 
 **Chains:** Base (default), Solana (auto-detected from the address), Robinhood Chain, Ethereum, BSC, Arbitrum, Optimism, Polygon.
 
@@ -42,6 +45,9 @@ Write in any thread:
 | `@pretrade record` | free | The bot's hit rate. See below |
 | `@pretrade price` | free | Menu, current prices, how to pay |
 | `@pretrade sign <what your wallet shows>` | free | Paste the transaction json (from, to, data, value, chainId), calldata, EIP-712 json or a 7702 request. Decodes it, runs a transaction on the current block and lists what leaves and enters the wallet and every approval it grants, even inside a multicall, then checks each counterparty |
+| `@pretrade plan <token> <usd> [sell]` | free | Your exact size run on the live Robinhood v4 pool: go/no-go, price impact, slippage and the minimum amount out to set |
+| `@pretrade stock TSLA` | free | Real Robinhood Stock Token or copycat, paused, pending splits, DEX premium vs Chainlink |
+| `@pretrade approvals <wallet> [chain]` | free | Live approvals riskiest first, with a revoke transaction to sign |
 | `@pretrade deep <token> <payment tx>` | ~$0.25 in $PTRD | Safety + exit sizes + momentum + copycat scan + holder spread + an analyst note that answers your question about the token |
 | `@pretrade watch <token> <payment tx>` | ~$0.50 in $PTRD | 24h watch. Pings you if liquidity drops 30%+, the verdict worsens or a critical flag appears |
 
@@ -63,7 +69,7 @@ A checker is only worth paying for if its `DANGER` calls collapse far more often
 
 | Path | What |
 |---|---|
-| `x402/*/index.ts` | The five endpoint handlers (self-contained, deployed to Bankr x402 Cloud) |
+| `x402/*/index.ts` | The eight endpoint handlers (self-contained, deployed to Bankr x402 Cloud). `trade-plan`, `stock-check` and `approvals` carry the bot's own modules, bundled by `scripts/bundle-x402.mjs` |
 | `bankr.x402.json` | Prices, schemas and discovery metadata |
 | `bot/musebot.mjs` | The musebook bot. Zero dependencies |
 | `.github/workflows/live.yml` | Always-on runner |

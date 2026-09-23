@@ -180,6 +180,114 @@
         "robinhood",
         "trading"
       ]
+    },
+    "trade-plan": {
+      "description": "Exact trade plan for Robinhood Chain tokens. Give a token and your USD size; it runs that exact buy (or sell) on the live Uniswap v4 pool in a simulation (nothing is sent), plus a $1 reference trade in the same block, and returns GO / CAUTION / NO_GO, the measured price impact, the exact expected output, a slippage setting from recent volatility, the amountOutMinimum to put in your swap, and how to split the order if the size is too big. A buy whose immediate sell-back reverts is NO_GO. Use right before executing a swap.",
+      "price": "0.02",
+      "methods": [
+        "GET"
+      ],
+      "schema": {
+        "input": {
+          "address": "string, 0x token on Robinhood Chain",
+          "usd": "number, trade size in USD",
+          "side": "string, optional: buy (default) | sell",
+          "chain": "string, optional: robinhood (only chain supported)"
+        },
+        "output": {
+          "verdict": "GO | CAUTION | NO_GO | UNAVAILABLE",
+          "reasons": "string[]",
+          "impactPct": "number",
+          "slippagePct": "number",
+          "expectedOut": "{raw, amount, symbol, token, decimals}",
+          "amountOutMinimum": "{raw, amount}",
+          "split": "{pieces, usdEach, note} or null",
+          "pool": "{poolId, poolManager, hooks, fee, tickSpacing, currency0, currency1, liquidityUsd}",
+          "block": "number"
+        }
+      },
+      "category": "trading",
+      "tags": [
+        "trade",
+        "swap",
+        "slippage",
+        "price-impact",
+        "min-amount-out",
+        "simulation",
+        "uniswap-v4",
+        "robinhood",
+        "musepad",
+        "pre-trade",
+        "sandwich-protection"
+      ]
+    },
+    "stock-check": {
+      "description": "Is this Robinhood's real Stock Token, and is the DEX price fair? Checks a ticker (TSLA) or contract on Robinhood Chain against Robinhood's own Stock Token registry: real or COPYCAT (with the real address), paused contract, registry status, tradability and pending corporate actions (splits, dividends via the ERC-8056 multiplier). Compares the DEX price with the token's Chainlink feed and reports the premium or discount, and lists other contracts trading under the same ticker. Use before buying any tokenized stock or ETF on Robinhood Chain.",
+      "price": "0.01",
+      "methods": [
+        "GET"
+      ],
+      "schema": {
+        "input": {
+          "ticker": "string, e.g. TSLA (or use address)",
+          "address": "string, 0x contract on Robinhood Chain (or use ticker)"
+        },
+        "output": {
+          "verdict": "OFFICIAL | CAUTION | DANGER | COPYCAT | NOT_A_STOCK_TOKEN",
+          "flags": "array of {code, severity, detail}",
+          "official": "{ticker, name, address, isin, multiplier, pendingMultiplier, status, paused} or null",
+          "realTokenForTicker": "{ticker, address, name} when the input is a copycat",
+          "reference": "{source: Chainlink, feed, priceUsd, updatedAt} or null",
+          "dex": "{priceUsd, liquidityUsd, premiumPct, url} or null",
+          "copycats": "array of {address, liquidityUsd}"
+        }
+      },
+      "category": "security",
+      "tags": [
+        "stocks",
+        "tokenized-stocks",
+        "robinhood",
+        "stock-token",
+        "copycat",
+        "fake-token",
+        "chainlink",
+        "rwa",
+        "equities",
+        "pre-trade"
+      ]
+    },
+    "approvals": {
+      "description": "Wallet approval audit for Robinhood Chain, Base and Ethereum. Lists every token approval the wallet still has live (current allowance, not just past events), riskiest first: unlimited approvals, approvals to plain wallets, collection-wide NFT approvals, flagged or unrecognised spenders. Each risky one comes with a ready revoke transaction (to, data, value) the agent can sign. Use on a schedule for any agent wallet that approves routers, or after interacting with an unknown site.",
+      "price": "0.02",
+      "methods": [
+        "GET"
+      ],
+      "schema": {
+        "input": {
+          "wallet": "string, 0x wallet address",
+          "chain": "string, optional: robinhood (default) | base | ethereum"
+        },
+        "output": {
+          "live": "number of live approvals",
+          "worthRevoking": "number",
+          "approvals": "array of {token, symbol, spender, spenderLabel, kind, amount, grantedAtBlock, risk: critical|high|medium|low, why[], revoke: {from, to, data, value} or null}",
+          "historySource": "blockscout | rpc",
+          "scannedGrants": "number"
+        }
+      },
+      "category": "security",
+      "tags": [
+        "wallet",
+        "approvals",
+        "allowance",
+        "revoke",
+        "drainer",
+        "security",
+        "agent-wallet",
+        "robinhood",
+        "base",
+        "ethereum"
+      ]
     }
   }
 }
