@@ -22,6 +22,7 @@ import { fileURLToPath } from "node:url";
 import { makeRadar } from "./radar.mjs";
 import { makeV4Hooks, isV4, hookLine } from "./v4hooks.mjs";
 import { makeSim, classify } from "./sim.mjs";
+import { makeTxSim, describeTxSim, parseTx } from "./txsim.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const CFG = JSON.parse(readFileSync(join(HERE, "config.json"), "utf8"));
@@ -219,6 +220,7 @@ async function v4HookRead(pair, state = null) {
 
 // ───────────────────────── real buy+sell simulation on the v4 pool (see bot/sim.mjs) ─────────────────────────
 const SIMCFG = CFG.sim ?? {};
+let TXSIM = null;
 let SIM = null;
 const decimalsOf = async (currency) => {
   if (/^0x0{40}$/.test(currency)) return 18;
@@ -669,7 +671,7 @@ function decodeSignable(text) {
 
 async function explainSignable(dec, state) {
   const findings = dec.risks.map((r) => ({ ...r }));
-  for (const c of dec.counterparties.slice(0, 3)) {
+  for (const c of dec.counterparties.slice(0, 5)) {
     if (!/^0x[0-9a-f]{40}$/.test(c.addr)) continue;
     if (c.addr === PERMIT2) { findings.push({ why: "spender is the real Permit2 contract (check who Permit2 is then asked to pay)", pts: 0 }); continue; }
     const bad = await reputation(c.addr);
@@ -677,6 +679,7 @@ async function explainSignable(dec, state) {
     const chain = c.chain ?? "base";
     const d = await delegationOf(c.addr, chain);
     if (d.known && c.role !== "recipient" && c.role !== "delegate" && !d.isContract && !d.delegatedTo) findings.push({ why: `${c.role} ${c.addr.slice(0, 8)}… is a plain wallet, not a protocol contract: approvals to wallets are how drains are collected`, pts: 45, crit: true });
+    if (c.role === "forwarded to" && c.nothingBack && d.known && !d.isContract && !d.delegatedTo) findings.push({ why: `what you send is passed straight on to ${c.addr.slice(0, 8)}…, a plain wallet, and nothing comes back: the fake-claim drain`, pts: 60, crit: true });
     if (c.role === "delegate" && d.known && !d.isContract) findings.push({ why: `delegate ${c.addr.slice(0, 8)}… has no code on ${chain}: nothing legitimate to delegate to`, pts: 30 });
   }
   for (const h of poisoningHits(dec.counterparties.map((c) => c.addr), state)) findings.push({ why: h, pts: 60, crit: true });
@@ -1271,13 +1274,24 @@ async function premiumCommand(m, text, who, id, state) {
   if (cmd === "council") return councilText(state);
   if (cmd === "sign") {
     const full = (await fullPostText(id, text)).replace(new RegExp(`@${CFG.name}\\s+sign:?`, "i"), " ");
-    const dec = decodeSignable(full);
-    if (!dec) return `paste exactly what you're being asked to sign: the calldata (0x…), the EIP-712 json, or the delegation request. i decode it and check every counterparty. "@${CFG.name} sign <paste>"\n- ${CFG.name}`;
+    const tx = parseTx(full, CHAIN_BY_ID);
+    const dec = decodeSignable(full) ?? (tx ? { kind: "transaction", summary: [`call to ${tx.to}${tx.value ? ` sending ${tx.value} wei` : ""}`], risks: [], counterparties: [] } : null);
+    if (!dec) return `paste exactly what you're being asked to sign: the transaction your wallet shows (json with from, to, data, value, chainId), the calldata (0x…), the EIP-712 json, or the delegation request. i decode it, run a transaction on the current block, and check every counterparty. "@${CFG.name} sign <paste>"\n- ${CFG.name}`;
+    let simLines = [];
+    if (tx) {
+      // a real transaction: run it on the current block and see what actually moves
+      const chain = tx.chain && (tx.chain === "robinhood" || RPC[tx.chain]) ? tx.chain : "base";
+      const plainSend = tx.data === "0x" || /^0x(a9059cbb|23b872dd)/.test(tx.data);
+      TXSIM ??= makeTxSim({ rpcFor: (c) => { const url = c === "robinhood" ? TK.rpc : RPC[c]; return url ? async (method, params) => (await http(url, { jsonrpc: "2.0", id: 1, method, params })).json ?? {} : null; } });
+      const d = describeTxSim(await TXSIM.simulate(tx, chain), { plainSend });
+      simLines = [...(tx.chain ? [] : [`(no known chainId in what you pasted, so this ran on ${chain})`]), ...d.lines];
+      dec.risks.push(...d.findings); dec.counterparties.push(...d.counterparties);
+    }
     const f = (await explainSignable(dec, state)).sort((a, b) => (b.crit ? 1000 : 0) + b.pts - (a.crit ? 1000 : 0) - a.pts);
     const score = Math.min(100, f.reduce((t, x) => t + x.pts, 0)); const crit = f.some((x) => x.crit);
     const head = crit || score >= 60 ? "🔴 don't sign this." : score >= 25 ? "🟡 understand this before signing." : "⚪ nothing alarming decoded. still confirm the site is the real one.";
     addReceipt(state, { kind: "signature decoded", ticker: "-", verdict: crit || score >= 60 ? "NO" : score >= 25 ? "CAUTION" : "CLEAR", postId: id });
-    return [`✍️ signing check (${dec.kind}): ${head}`, `what it does: ${dec.summary.join("; ")}.`, ...(f.length ? [`why: ${f.slice(0, 5).map((x) => x.why).join("; ")}.`] : []), `if you already signed an approval you regret, revoke it (revoke.cash or your wallet's approvals page). a 7702 delegation is undone by delegating to the zero address.`, `- ${CFG.name}`].join("\n");
+    return [`✍️ signing check (${dec.kind}): ${head}`, `what it does: ${dec.summary.join("; ")}.`, ...simLines, ...(f.length ? [`why: ${f.slice(0, 5).map((x) => x.why).join("; ")}.`] : []), `if you already signed an approval you regret, revoke it (revoke.cash or your wallet's approvals page). a 7702 delegation is undone by delegating to the zero address.`, `- ${CFG.name}`].join("\n");
   }
   if (cmd === "wallet") {
     const a = addressesIn(text).find((x) => /^0x/i.test(x));
@@ -1517,6 +1531,25 @@ async function main() {
       if (c.sim?.flags?.length) console.log(`  sim flags: ${c.sim.flags.map((f) => `${f.text} (+${f.pts}${f.critical ? ", critical" : ""})`).join(", ")}${c.sim.scored ? "" : " [not scored]"}`);
     }
     return console.log(`\nsimulation results: ${JSON.stringify(tally)}`);
+  }
+
+  if (cmd === "signprobe") {
+    // Read-only. Checks, per chain, that pre-signing simulation works on the configured RPC (eth_simulateV1, or the
+    // eth_call fallback) using harmless sample transactions from a random address. Signs and sends nothing.
+    const who = "0x" + randomBytes(20).toString("hex");
+    const sim = makeTxSim({ rpcFor: (c) => { const url = c === "robinhood" ? TK.rpc : RPC[c]; return url ? async (method, params) => (await http(url, { jsonrpc: "2.0", id: 1, method, params })).json ?? {} : null; } });
+    const samples = [
+      ["base", "WETH deposit, 0.01 ETH", { from: who, to: "0x4200000000000000000000000000000000000006", data: "0xd0e30db0", value: 10n ** 16n }],
+      ["ethereum", "WETH deposit, 0.01 ETH", { from: who, to: "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2", data: "0xd0e30db0", value: 10n ** 16n }],
+      ["robinhood", "unlimited $musebook approval to a random address", { from: who, to: "0x91a2dae9699f0b82540b5886b0d8759c22820ba3", data: "0x095ea7b3" + "0".repeat(24) + randomBytes(20).toString("hex") + "f".repeat(64), value: 0n }],
+      ["robinhood", "plain send, 0.001 ETH", { from: who, to: "0x" + randomBytes(20).toString("hex"), data: "0x", value: 10n ** 15n }],
+    ];
+    for (const [chain, label, tx] of samples) {
+      const r = await sim.simulate(tx, chain);
+      const d = describeTxSim(r, { plainSend: tx.data === "0x" });
+      console.log(`${chain}: ${label} [${r.method ?? "no simulation"}]\n${d.lines.join("\n")}${d.findings.length ? `\n  findings: ${d.findings.map((f) => f.why).join(" | ")}` : ""}\n`);
+    }
+    return;
   }
 
   if (cmd === "hooks") {

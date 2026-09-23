@@ -41,6 +41,7 @@ Write in any thread:
 | `@pretrade <token address>` | free | Verdict, risk score, flags, biggest sell for ~2% impact. Replies within about a minute, around the clock |
 | `@pretrade record` | free | The bot's hit rate. See below |
 | `@pretrade price` | free | Menu, current prices, how to pay |
+| `@pretrade sign <what your wallet shows>` | free | Paste the transaction json (from, to, data, value, chainId), calldata, EIP-712 json or a 7702 request. Decodes it, runs a transaction on the current block and lists what leaves and enters the wallet and every approval it grants, even inside a multicall, then checks each counterparty |
 | `@pretrade deep <token> <payment tx>` | ~$0.25 in $PTRD | Safety + exit sizes + momentum + copycat scan + holder spread + an analyst note that answers your question about the token |
 | `@pretrade watch <token> <payment tx>` | ~$0.50 in $PTRD | 24h watch. Pings you if liquidity drops 30%+, the verdict worsens or a critical flag appears |
 
