@@ -1683,7 +1683,7 @@ async function freshLaunches(state) {
 function launchRow(f, c) {
   const icon = { OK: "🟢", CAUTION: "🟡", DANGER: "🔴" }[c.verdict];
   const sim = c.sim?.status === "ok" && !c.sim.flags.length ? `sell works, ${c.sim.roundTripLossPct}% round trip` : c.sim?.status && c.sim.status !== "unavailable" ? c.sim.flags.map((x) => x.text).join(", ") || c.sim.status : null;
-  const flags = c.flags.filter((x) => !/round trip|sell reverted|simulation/.test(x)).slice(0, 2);
+  const flags = c.flags.filter((x) => !/round trip|sell reverted|simulation|^pair /.test(x)).slice(0, 2); // age is already in the row
   return `${icon} $${c.symbol} (${shortA(f.token)}) · ${ageText(f.created)} old · liq ${kUsd(c.liquidity)} · ${c.verdict} ${c.score}/100${sim ? ` · ${sim}` : ""}${flags.length ? ` · ${flags.join(", ")}` : ""}${f.musebook ? "" : " · not a $MUSEBOOK pair"}`;
 }
 
