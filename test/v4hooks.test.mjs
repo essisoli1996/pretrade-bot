@@ -58,7 +58,7 @@ const pairsFor = async (a) => (a.toLowerCase() === OWN ? [pair(pools.std, OWN, "
 const v4 = makeV4Hooks({ http, rpcUrl: "https://rpc.invalid", baselineToken: OWN });
 const state = {};
 const standard = await v4.baselineHooks(pairsFor, state);
-check(standard.get(STD_HOOK)?.includes("PTRD"), "baseline = the hook on the bot's own token pool");
+check(standard.get(STD_HOOK) === "standard musepad launch hook", "baseline = the hook on the bot's own token pool, labelled without naming it");
 
 const std = await v4.inspect(pair(pools.stdOther, TOKEN, "STD"), standard, state);
 check(std.points === 0 && std.standard, "standard launchpad hook: reported, 0 points");

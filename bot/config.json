@@ -209,8 +209,8 @@
       "robinhood"
     ],
     "knownHooks": {
-      "0xe5e702641ea86f4ae6cc3cdaed2b886f976be044": "standard musepad launch hook (shared by most musepad launches)",
-      "0x4e3468951d49f2eea976ed0d6e75ffcb44a9a544": "standard musepad launch hook (same as $PTRD)"
+      "0xe5e702641ea86f4ae6cc3cdaed2b886f976be044": "standard musepad launch hook",
+      "0x4e3468951d49f2eea976ed0d6e75ffcb44a9a544": "standard musepad launch hook"
     }
   }
 }

@@ -187,7 +187,7 @@ export function makeV4Hooks({ http, rpcUrl, known = {}, baselineToken = null, ga
     for (const p of (await pairsFor(baselineToken)).filter(isV4)) {
       const key = await poolKey(p.pairAddress, p.pairCreatedAt, state);
       if (key?.hooks && key.hooks !== ZERO) {
-        const label = `standard launch hook (same as $${p.baseToken?.symbol ?? "own token"})`;
+        const label = "standard musepad launch hook"; // never name the bot's own token in reports about other tokens
         store.v4baseline = { hook: key.hooks, label, t: Date.now() };
         out.set(key.hooks, label);
         break;
