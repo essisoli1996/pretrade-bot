@@ -1,28 +1,51 @@
-base: WETH deposit, 0.01 ETH [eth_simulateV1]
-🧪 simulated on base block 51693404:
-  you send: 0.01 ETH → 0x4200…0006
-  you receive: nothing
-  true for this block only: the chain can change before a real transaction lands, and a contract can act differently for a simulation.
-  findings: value leaves your wallet and nothing comes back in this transaction. normal for bridges, deposits and payments; a drain looks exactly the same
+===== try: stock TSLA
+🏛 stock token check: ✅ OFFICIAL
+$TSLA: Tesla • Robinhood Token, 0x322f0929c4625ed5bad873c95208d54e1c003b2d, ISIN US88160R1014. multiplier 1.
+price: Chainlink reference $380.06, DEX $380.77 (+0.2%), liquidity $363,848.
+⚠️ 3 other contract(s) trade as $TSLA: 0x4ce288… ($43,806), 0xa330eb… ($20,293), 0x1b3342… ($6,109). not Robinhood's.
+source: Robinhood's registry and Chainlink. not advice. - pretrade
 
-ethereum: WETH deposit, 0.01 ETH [eth_simulateV1]
-🧪 simulated on ethereum block 26040978:
-  you send: 0.01 ETH → 0xc02a…6cc2
-  you receive: nothing
-  true for this block only: the chain can change before a real transaction lands, and a contract can act differently for a simulation.
-  findings: value leaves your wallet and nothing comes back in this transaction. normal for bridges, deposits and payments; a drain looks exactly the same
+===== try: stock CRM
+🏛 stock token check: ✅ OFFICIAL
+$CRM: Salesforce • Robinhood Token, 0xd95b44124e475743a7589e68f3d74008a5536d44, ISIN US79466L3024. multiplier 1.0011483228007143.
+price: Chainlink reference n/a, DEX $236.42, liquidity $38,558.
+source: Robinhood's registry and Chainlink. not advice. - pretrade
 
-robinhood: unlimited $musebook approval to a random address [eth_simulateV1]
-🧪 simulated on robinhood block 70609045:
-  you send: nothing
-  you receive: nothing
-  approval: UNLIMITED $musebook → 0xf898…9e1b
-  true for this block only: the chain can change before a real transaction lands, and a contract can act differently for a simulation.
-  findings: the transaction grants 0xf898…9e1b an unlimited $musebook approval
+===== try: stock 0x91a2dae9699f0b82540b5886b0d8759c22820ba3
+🏛 stock token check: ⚪ NOT A STOCK TOKEN
+flags: Not in Robinhood's Stock Token registry for Robinhood Chain.
+source: Robinhood's registry and Chainlink. not advice. - pretrade
 
-robinhood: plain send, 0.001 ETH [eth_simulateV1]
-🧪 simulated on robinhood block 70609045:
-  you send: 0.001 ETH → 0xdb17…54db
-  you receive: nothing
-  true for this block only: the chain can change before a real transaction lands, and a contract can act differently for a simulation.
+===== try: plan 0x85a574f2ff0795685f58d1d7b0d4b51f148ac489 250
+📐 trade plan: buy $250 of $PRINTER (simulated on the live pool, block 70615183)
+🟢 GO: clean at this size.
+you get: 47,643.735598 $PRINTER (price impact 0.1%).
+slippage 0.8% → amountOutMinimum 47,262.585713 $PRINTER (raw 47262585712767408452098).
+true for that block only; re-quote right before you send. not advice.
+- pretrade
+
+===== try: plan 0x4e9c619228dc53f9b57c7357208863d256b9cd69 500
+📐 trade plan: buy $500 of $BILL (simulated on the live pool, block 70615237)
+🔴 NO GO: price impact 10.2% at this size.
+you get: 47,746,869.176373 $BILL (price impact 10.2%).
+slippage 0.7% → amountOutMinimum 47,412,641.092139 $BILL (raw 47412641092138736645930704).
+split: 10 × ~$50 a few blocks apart, re-quote each.
+true for that block only; re-quote right before you send. not advice.
+- pretrade
+
+===== try: plan 0x6245e67affa44a23077f0ea7f981a8dc743a0c47 1000 sell
+📐 trade plan: sell $1,000 of $FRONG (simulated on the live pool, block 70615278)
+🟢 GO: clean at this size.
+you get: 0.371299 $ETH (price impact 0.3%).
+slippage 2.1% → amountOutMinimum 0.363502 $ETH (raw 363501596196428953).
+true for that block only; re-quote right before you send. not advice.
+- pretrade
+
+===== try: approvals 0xf4a46667d75fa9663ab7a297af20d3623aaa8b52 robinhood
+couldn't audit on robinhood: this RPC won't search the whole history (log query timed out).
+- pretrade
+
+===== try: approvals 0xf4a46667d75fa9663ab7a297af20d3623aaa8b52 base
+couldn't audit on base: this RPC won't search the whole history (eth_getLogs is limited to a 2,000 range).
+- pretrade
 
