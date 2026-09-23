@@ -16,6 +16,8 @@ const TOPIC = {
   approvalForAll: "0x17307eab39ab6107e8899845ad3d59bd9653f200f220920489ca2b5937696c31",
   transferSingle: "0xc3d58168c5ae7397731d063d5bbf3d657854427343f4c083240f7aacaa2d0f62",
   transferBatch: "0x4a39dc06d4c0dbc64b70af90fd698a233a518aa5d07e595d983b8c0526c8f7fb",
+  wethDeposit: "0xe1fffcc4923d04b559f4d29a8bfc6cda04eb5b0d3c460751c2402c5c5cc9109c", // WETH9 mints without a Transfer event
+  wethWithdrawal: "0x7fcf532c15f0a6db0bd6d0e038bea71d30d808c7d98cb3bf7268a95bf5081b65",
 };
 export const NATIVE = "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"; // eth_simulateV1 traceTransfers pseudo-token for ETH
 const UNLIMITED = 2n ** 255n;
@@ -66,6 +68,8 @@ export function effectsFor(logs, who) {
       const kind = addr === NATIVE ? "native" : nft ? "erc721" : "erc20";
       if (from === me) bump(addr, id, kind, "out", amt, to);
       if (to === me) bump(addr, id, kind, "in", amt, from);
+    } else if ((t[0] === TOPIC.wethDeposit || t[0] === TOPIC.wethWithdrawal) && t.length === 2 && topicAddr(t[1]) === me) {
+      bump(addr, null, "erc20", t[0] === TOPIC.wethDeposit ? "in" : "out", big(l.data), addr);
     } else if (t[0] === TOPIC.approval && t.length >= 3 && topicAddr(t[1]) === me) {
       if (t.length === 4) approvals.push({ token: addr, spender: topicAddr(t[2]), kind: "erc721", id: big(t[3]).toString() });
       else approvals.push({ token: addr, spender: topicAddr(t[2]), kind: "erc20", amount: big(l.data) });

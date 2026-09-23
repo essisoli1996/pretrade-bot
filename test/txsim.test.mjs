@@ -45,6 +45,13 @@ check(d.findings.some((f) => /unlimited \$USDC/.test(f.why)), "unlimited approva
 check(d.findings.some((f) => f.crit && /sweep shape/.test(f.why)), "3+ assets out to 2+ addresses: sweep shape, critical");
 check(d.counterparties.some((c) => c.addr === BAD && c.role === "spender"), "spenders go to the reputation checks");
 
+const WETH = "0x4200000000000000000000000000000000000006";
+const wrap = effectsFor([
+  { address: NATIVE, topics: [T.transfer, t(ME), t(WETH)], data: "0x" + w(10n ** 16n) },
+  { address: WETH, topics: ["0xe1fffcc4923d04b559f4d29a8bfc6cda04eb5b0d3c460751c2402c5c5cc9109c", t(ME)], data: "0x" + w(10n ** 16n) },
+], ME);
+const wrapD = describeTxSim({ ok: true, chain: "base", block: 9, ...wrap, info: { ...info, [WETH]: { symbol: "WETH", decimals: 18 } } });
+check(wrapD.lines.some((l) => /you receive: 0.01 \$WETH/.test(l)) && wrapD.findings.length === 0, "WETH wrap: Deposit event counts as receiving WETH, no false 'nothing back'");
 const claim = describeTxSim({ ok: true, chain: "base", block: 9, moves: [{ token: NATIVE, kind: "native", id: null, out: 10n ** 18n, in: 0n, counterparties: [DEX] }], approvals: [], forwards: [{ token: NATIVE, via: DEX, to: BAD, amount: 10n ** 18n }], info });
 check(claim.findings.some((f) => /nothing comes back/.test(f.why)) && claim.counterparties.some((c) => c.role === "forwarded to" && c.nothingBack), "value out, nothing back, forwarded: flagged and handed on");
 const send = describeTxSim({ ok: true, chain: "base", block: 9, moves: [{ token: NATIVE, kind: "native", id: null, out: 1n, in: 0n, counterparties: [DEX] }], approvals: [], forwards: [], info }, { plainSend: true });
