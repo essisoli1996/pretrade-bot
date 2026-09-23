@@ -21,6 +21,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { makeRadar } from "./radar.mjs";
 import { makeV4Hooks, isV4, hookLine } from "./v4hooks.mjs";
+import { makeSim, classify } from "./sim.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const CFG = JSON.parse(readFileSync(join(HERE, "config.json"), "utf8"));
@@ -99,7 +100,7 @@ const GOPLUS = { base: "8453", ethereum: "1", bsc: "56", arbitrum: "42161", opti
 const n = (v) => (v === null || v === undefined || v === "" || !Number.isFinite(Number(v)) ? null : Number(v));
 const yes = (v) => v === "1" || v === 1 || v === true;
 
-async function quickCheck(address) {
+async function quickCheck(address, { light = false } = {}) {
   const sol = isSol(address);
   const a = sol ? address : address.toLowerCase();
   const found = await http(`https://api.dexscreener.com/latest/dex/search?q=${a}`);
@@ -163,10 +164,12 @@ async function quickCheck(address) {
   if (liquidity < 5000) add("very low liquidity", 25);
   else if (liquidity < 25000) add("low liquidity", 10);
   if (ageH !== null && ageH < 24) add(`pair ${ageH < 1 ? "<1h" : Math.round(ageH) + "h"} old`, ageH < 1 ? 15 : 10);
-  const hook = await v4HookRead(p);
+  const hook = light ? null : await v4HookRead(p);
   // capped: a hook that CAN change amounts is not proof that it does. alone it reads CAUTION; with other flags it can reach DANGER
   let hookBudget = V4CFG.maxPoints ?? 50;
   for (const r of hook?.scored ? hook.risk : []) { const pts = Math.min(r.pts, hookBudget); hookBudget -= pts; add(r.text, pts); }
+  const sim = hook?.key ? await simRead(p, hook.key, a) : null;
+  for (const f of sim?.scored ? sim.flags : []) add(f.text, f.pts, !!f.critical);
 
   score = Math.min(100, score);
   const verdict = critical || score >= 60 ? "DANGER" : score >= 20 ? "CAUTION" : "OK";
@@ -187,7 +190,7 @@ async function quickCheck(address) {
     flowH1: { buys: n(p.txns?.h1?.buys) ?? 0, sells: n(p.txns?.h1?.sells) ?? 0 },
     volume24h: n(p.volume?.h24), marketCap: n(p.marketCap) ?? n(p.fdv),
     sellMax: { p1: sellMax(0.01), p2: sellMax(0.02), p5: sellMax(0.05) },
-    hook,
+    hook, sim,
   };
 }
 
@@ -211,6 +214,54 @@ async function v4HookRead(pair, state = null) {
     return r ? { ...r, scored: V4CFG.score !== false && standard.size > 0 } : null;
   } catch (e) {
     return { poolId: pair.pairAddress, readable: false, error: String(e).slice(0, 120) };
+  }
+}
+
+// ───────────────────────── real buy+sell simulation on the v4 pool (see bot/sim.mjs) ─────────────────────────
+const SIMCFG = CFG.sim ?? {};
+let SIM = null;
+const decimalsOf = async (currency) => {
+  if (/^0x0{40}$/.test(currency)) return 18;
+  const r = await v4().rpc("eth_call", [{ to: currency, data: "0x313ce567" }, "latest"]);
+  try { const d = Number(BigInt(r.result)); return d <= 36 ? d : null; } catch { return null; }
+};
+/** How much of the pool's quote currency buys `usd` worth, from DexScreener's two prices for the pair. */
+async function quoteAmount(pair, key, token, usd) {
+  const pUsd = n(pair.priceUsd), pNative = n(pair.priceNative);
+  if (!pUsd || !pNative) return null;
+  const quote = key.currency0 === token ? key.currency1 : key.currency0;
+  const dec = await decimalsOf(quote);
+  if (dec === null) return null;
+  const units = usd / (pUsd / pNative); // quote tokens
+  return (BigInt(Math.max(1, Math.floor(units * 1e6))) * 10n ** BigInt(dec)) / 1000000n;
+}
+async function simControl() {
+  const addr = String(SIMCFG.control ?? "").toLowerCase();
+  if (!addr) return null;
+  const p = (await pairsOf(addr)).filter(isV4).sort((x, y) => (n(y.liquidity?.usd) ?? 0) - (n(x.liquidity?.usd) ?? 0))[0];
+  if (!p) return null;
+  const key = await v4().poolKey(p.pairAddress, p.pairCreatedAt, null);
+  const quoteIn = key && (await quoteAmount(p, key, addr, SIMCFG.sizeUsd ?? 25));
+  return key && quoteIn ? { key, token: addr, quoteIn } : null;
+}
+/** Never throws, never penalises missing data. Below the liquidity floor it doesn't simulate at all. */
+async function simRead(pair, key, token) {
+  if (SIMCFG.enabled === false) return null;
+  const liq = n(pair.liquidity?.usd) ?? 0;
+  if (liq < (SIMCFG.minLiquidityUsd ?? 2000)) return null;
+  const sizeUsd = Math.min(SIMCFG.sizeUsd ?? 25, liq * 0.002);
+  try {
+    SIM ??= makeSim({ rpc: v4().rpc, control: simControl });
+    const go = async () => {
+      const quoteIn = await quoteAmount(pair, key, token, sizeUsd);
+      if (!quoteIn) return { status: "unavailable", line: "🧪 trade simulation unavailable (no price for the quote currency).", flags: [] };
+      return classify(await SIM.run({ key, token, quoteIn }), { fee: key.fee, sizeUsd });
+    };
+    const timeout = new Promise((_, no) => setTimeout(() => no(new Error("timed out")), SIMCFG.timeoutMs ?? 25000).unref());
+    const r = await Promise.race([go(), timeout]);
+    return { ...r, scored: SIMCFG.score === true };
+  } catch (e) {
+    return { status: "unavailable", line: `🧪 trade simulation unavailable (${String(e.message ?? e).slice(0, 60)}).`, flags: [], scored: false };
   }
 }
 
@@ -242,7 +293,7 @@ function recordVerdict(state, c, source) {
 async function settleLedger(state) {
   const due = (state.ledger ?? []).filter((e) => !e.out && e.t < Date.now() - 24 * 36e5).slice(0, 5);
   for (const e of due) {
-    const c = await quickCheck(e.token);
+    const c = await quickCheck(e.token, { light: true }); // only liquidity and price are needed here
     const liqChg = c && e.liq > 0 ? c.liquidity / e.liq - 1 : -1;
     const priceChg = c && e.price && c.price ? c.price / e.price - 1 : null;
     e.out = { t: Date.now(), liqChg: Math.round(liqChg * 100) / 100, priceChg: priceChg === null ? null : Math.round(priceChg * 100) / 100, rugged: !c || liqChg <= -0.8 || (priceChg !== null && priceChg <= -0.9) };
@@ -1174,6 +1225,7 @@ async function deepText(c, question) {
     `📋 deep report: $${c.symbol} on ${c.chain}`,
     `${icon} safety: ${c.verdict}, risk ${c.score}/100. flags: ${c.flags.length ? c.flags.join(", ") : "none"}.`,
     ...(c.hook ? [hookLine(c.hook)] : []),
+    ...(c.sim ? [c.sim.line] : []),
     `🚪 exit: biggest single sell for ~1% / 2% / 5% impact: $${c.sellMax.p1.toLocaleString("en-US")} / $${c.sellMax.p2.toLocaleString("en-US")} / $${c.sellMax.p5.toLocaleString("en-US")}. liquidity $${c.liquidity.toLocaleString("en-US")}.`,
     `📈 momentum: 1h ${pc(c.priceChange.h1)}, 6h ${pc(c.priceChange.h6)}, 24h ${pc(c.priceChange.h24)}. last hour: ${flow}. 24h volume $${Math.round(c.volume24h ?? 0).toLocaleString("en-US")}.`,
     `👯 copycats: ${twinLine}.`,
@@ -1423,6 +1475,20 @@ async function pass(identity, state, indexOnly = false) {
 }
 
 // ───────────────────────── commands ─────────────────────────
+/** Diagnostic targets: the addresses given, else tokens that actually trade (musepad hot/volume) plus the ledger. */
+async function diagTargets() {
+  const given = args.slice(1).filter((a) => !a.startsWith("--"));
+  if (given.length) return given;
+  const seen = new Set();
+  for (const sort of ["hot", "volume"]) {
+    const r = await http(`https://musepad.lol/api/tokens?sort=${sort}`);
+    for (const x of r.json?.items ?? []) if (x.contractAddress) seen.add(x.contractAddress.toLowerCase());
+  }
+  for (const e of loadJson(STATE_FILE, {}).ledger ?? []) if (e.chain === "robinhood" && e.token) seen.add(e.token.toLowerCase());
+  if (CFG.token?.address) seen.delete(CFG.token.address.toLowerCase()); // never check my own token
+  return [...seen].slice(0, 20);
+}
+
 async function main() {
   if (cmd === "keygen") {
     if (existsSync(ID_FILE)) return console.log("Identity already exists. Refusing to overwrite (losing the key = losing the name).");
@@ -1436,24 +1502,29 @@ async function main() {
     return console.log(`Saved ${ID_FILE}. Back it up somewhere private. Next: node bot/musebot.mjs intro`);
   }
 
+  if (cmd === "simulate") {
+    // Read-only. Runs the full free check, including the real buy+sell simulation, on trading musepad tokens
+    // (or the addresses given) and prints what the bot would see. Scores nothing, posts nothing.
+    SIMCFG.enabled = true;
+    const tally = {};
+    for (const t of await diagTargets()) {
+      const c = await quickCheck(t);
+      if (!c) { console.log(`${t}: no DEX pair`); continue; }
+      tally[c.sim?.status ?? "not simulated"] = (tally[c.sim?.status ?? "not simulated"] ?? 0) + 1;
+      console.log(`$${c.symbol} ${t} ${c.verdict} ${c.score}/100, liquidity $${c.liquidity.toLocaleString("en-US")}`);
+      console.log(`  ${hookLine(c.hook) ?? "no v4 hook read"}\n  ${c.sim?.line ?? "🧪 not simulated (not a v4 pool, or under the liquidity floor)"}`);
+      if (c.sim?.flags?.length) console.log(`  sim flags: ${c.sim.flags.map((f) => `${f.text} (+${f.pts}${f.critical ? ", critical" : ""})`).join(", ")}${c.sim.scored ? "" : " [not scored]"}`);
+    }
+    return console.log(`\nsimulation results: ${JSON.stringify(tally)}`);
+  }
+
   if (cmd === "hooks") {
     // Read-only. Shows the v4 hook of $PTRD and of recent musepad launches, and which of them match the standard
     // launchpad hook. Run it before trusting the hook score:  node bot/musebot.mjs hooks [address ...]
     const h = v4();
     const standard = await h.baselineHooks(pairsOf, null);
     console.log(`standard hooks: ${standard.size ? [...standard].map(([a, l]) => `${a} (${l})`).join(", ") : "NONE FOUND: hook flags will be reported but not scored"}`);
-    let targets = args.slice(1).filter((a) => !a.startsWith("--"));
-    if (!targets.length) {
-      // tokens that actually trade: brand-new launches often have no DEX pair yet, so they prove nothing here
-      const seen = new Set();
-      for (const sort of ["hot", "volume"]) {
-        const r = await http(`https://musepad.lol/api/tokens?sort=${sort}`);
-        for (const x of r.json?.items ?? []) if (x.contractAddress) seen.add(x.contractAddress.toLowerCase());
-      }
-      for (const e of loadJson(STATE_FILE, {}).ledger ?? []) if (e.chain === "robinhood" && e.token) seen.add(e.token.toLowerCase());
-      if (CFG.token?.address) seen.delete(CFG.token.address.toLowerCase());
-      targets = [...seen].slice(0, 20);
-    }
+    const targets = await diagTargets();
     const tally = {};
     for (const t of targets) {
       const pairs = (await pairsOf(t)).sort((x, y) => (n(y.liquidity?.usd) ?? 0) - (n(x.liquidity?.usd) ?? 0));

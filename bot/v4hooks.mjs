@@ -206,7 +206,7 @@ export function makeV4Hooks({ http, rpcUrl, known = {}, baselineToken = null, ga
     if (!key) return { poolId: pair.pairAddress, readable: false, why: memo.lastError ?? "no Initialize event found for this pool id" };
     const perms = key.hooks === ZERO ? [] : permissionsOf(key.hooks);
     const dynamicFee = key.fee === DYNAMIC_FEE;
-    const base = { poolId: pair.pairAddress.toLowerCase(), readable: true, hook: key.hooks, perms, dynamicFee, feePct: dynamicFee ? null : key.fee / 1e4, poolManager: key.poolManager };
+    const base = { poolId: pair.pairAddress.toLowerCase(), readable: true, key, hook: key.hooks, perms, dynamicFee, feePct: dynamicFee ? null : key.fee / 1e4, poolManager: key.poolManager };
     if (key.hooks === ZERO) return { ...base, none: true, risk: [], points: 0 };
     const label = standard.get(key.hooks) ?? null;
     const contract = await hookContract(key.hooks);
@@ -223,7 +223,7 @@ export function makeV4Hooks({ http, rpcUrl, known = {}, baselineToken = null, ga
     return { ...base, standard: label, contract, risk, points };
   }
 
-  return { inspect, baselineHooks, poolKey, hookContract };
+  return { inspect, baselineHooks, poolKey, hookContract, rpc };
 }
 
 /** DexScreener lists v4 pools by their 32-byte pool id instead of a 20-byte pair address. */

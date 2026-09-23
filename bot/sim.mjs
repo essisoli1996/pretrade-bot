@@ -1,0 +1,208 @@
+// Real buy-and-sell simulation on the token's own Uniswap v4 pool. Nothing is sent and nothing is paid:
+// a small contract (bot/Sim.sol) is placed at a scratch address with an eth_call state override, given some of
+// the quote currency, and asked to buy the token and sell it straight back through the real PoolManager, hook and
+// token code, pinned to one block. What comes back is measured, not estimated.
+//
+// Known ways a simulation lies, and what this does about each:
+// - the simulator itself breaks (RPC quirk, unsupported override): a failed sell is re-run on a known-good control
+//   token in the same block; if the control fails too, the result is thrown away, not reported.
+// - anti-bot cooldowns block a sell in the same block as the buy: a failed sell is re-run as a plain holder
+//   (balance set directly, no buy first). If the holder can sell, it's a cooldown, not a honeypot.
+// - a fresh pool with thin liquidity: not simulated below a liquidity floor.
+// - a result is only true for that block: the block number travels with every result.
+//
+// Zero dependencies. Rebuild the runtime after editing bot/Sim.sol with solc 0.8.26 (evm cancun, via-ir,
+// optimizer 200 runs, no metadata hash) and paste the deployed bytecode into bot/sim-runtime.mjs.
+import { keccak256 } from "./v4hooks.mjs";
+import { SIM_RUNTIME } from "./sim-runtime.mjs";
+
+const SIM_ADDR = "0x5117000000000000000000000000000000005117";
+const FROM = "0x5117000000000000000000000000000000000001";
+const ZERO = "0x0000000000000000000000000000000000000000";
+const DYNAMIC_FEE = 0x800000;
+const SEL_ROUND_TRIP = "0x7f70be11";
+const SEL_BALANCE_OF = "0x70a08231";
+const SEL_DECIMALS = "0x313ce567";
+
+const hex32 = (v) => BigInt.asUintN(256, BigInt(v)).toString(16).padStart(64, "0");
+const addr32 = (a) => a.replace(/^0x/, "").toLowerCase().padStart(64, "0");
+const hexBytes = (h) => Uint8Array.from((h.replace(/^0x/, "").match(/../g) ?? []).map((b) => parseInt(b, 16)));
+const toHexQty = (v) => "0x" + BigInt(v).toString(16);
+
+export function encodeRoundTrip(pm, key, tokenIs0, quoteIn, sellOnly, sellAmount) {
+  return SEL_ROUND_TRIP + addr32(pm) + addr32(key.currency0) + addr32(key.currency1) + hex32(key.fee) + hex32(key.tickSpacing) +
+    addr32(key.hooks) + hex32(tokenIs0 ? 1 : 0) + hex32(quoteIn) + hex32(sellOnly ? 1 : 0) + hex32(sellAmount);
+}
+
+/** Decodes Sim.Result: (uint8 stage, uint256 tokenOwed, uint256 tokenGot, uint256 quoteOwed, uint256 quoteBack, bytes revertData). */
+export function decodeResult(ret) {
+  const h = ret.replace(/^0x/, "");
+  const w = (i) => BigInt("0x" + h.slice(64 * i, 64 * (i + 1)));
+  const base = Number(w(0)) / 32; // offset of the tuple
+  const at = (i) => w(base + i);
+  const bytesOff = base + Number(at(5)) / 32;
+  const len = Number(w(bytesOff));
+  const revertData = "0x" + h.slice(64 * (bytesOff + 1), 64 * (bytesOff + 1) + len * 2);
+  return { stage: Number(at(0)), tokenOwed: at(1), tokenGot: at(2), quoteOwed: at(3), quoteBack: at(4), revertData };
+}
+
+/** Short human reason from revert bytes: Error(string), a v4 wrapped error, or the raw selector. */
+export function revertReason(data) {
+  const h = String(data ?? "").replace(/^0x/, "");
+  if (!h) return "reverted without a reason";
+  if (h.startsWith("08c379a0") && h.length >= 8 + 128) {
+    const len = parseInt(h.slice(8 + 64, 8 + 128), 16);
+    const txt = new TextDecoder().decode(hexBytes(h.slice(8 + 128, 8 + 128 + len * 2)));
+    return txt.slice(0, 80) || "reverted";
+  }
+  return KNOWN_ERRORS[h.slice(0, 8)] ?? `error 0x${h.slice(0, 8)}`;
+}
+const KNOWN_ERRORS = {
+  "5212cba1": "the token delivered less than it owed the pool (transfer tax or blocked transfer)",
+  "90bfb865": "the pool's hook reverted",
+  "7c9c6e8f": "price limit already exceeded",
+  "486aa307": "pool not initialized",
+};
+
+/** Candidate storage slots for balanceOf[holder] across common ERC20 layouts, used when eth_createAccessList is missing. */
+function candidateSlots(holder) {
+  const out = [];
+  for (let s = 0; s < 10; s++) {
+    out.push(keccak256(hexBytes(addr32(holder) + hex32(s)))); // solidity mapping
+    out.push(keccak256(hexBytes(hex32(s) + addr32(holder)))); // vyper mapping
+  }
+  out.push(keccak256(hexBytes(addr32(holder) + "52c63247e1f47db19d5ce0460030c497f067ca4cebf71ba98eeadabe20bace00"))); // OZ v5 upgradeable
+  out.push(keccak256(hexBytes(holder.replace(/^0x/, "").toLowerCase() + "0000000000000000" + "87a211a2"))); // solady
+  return out;
+}
+
+/**
+ * rpc(method, params) → JSON-RPC response object ({result} or {error}).
+ * control: optional async () => ({ key, token, quoteIn }) for a known-good pool, used to validate a failed sell.
+ */
+export function makeSim({ rpc, control = null }) {
+  const slotCache = new Map();
+  const decCache = new Map();
+
+  async function call(to, data, block, overrides) {
+    const r = await rpc("eth_call", [{ from: FROM, to, data, gas: "0x1c9c380" }, block, overrides]);
+    return r;
+  }
+
+  async function decimals(token, block) {
+    if (token === ZERO) return 18;
+    if (decCache.has(token)) return decCache.get(token);
+    const r = await call(token, SEL_DECIMALS, block, {});
+    const d = typeof r.result === "string" && r.result.length > 2 ? Number(BigInt(r.result)) : null;
+    if (d !== null && d <= 36) decCache.set(token, d);
+    return d;
+  }
+
+  /** Finds the storage slot holding balanceOf[holder] by writing a marker and reading it back. */
+  async function balanceSlot(token, holder, block) {
+    const k = `${token}:${holder}`;
+    if (slotCache.has(k)) return slotCache.get(k);
+    const data = SEL_BALANCE_OF + addr32(holder);
+    let keys = [];
+    const al = await rpc("eth_createAccessList", [{ from: FROM, to: token, data }, block]);
+    for (const e of al.result?.accessList ?? []) if (String(e.address).toLowerCase() === token) keys.push(...(e.storageKeys ?? []));
+    keys = [...new Set([...keys, ...candidateSlots(holder)])];
+    const marker = 0x5117_5117_5117n;
+    for (const slot of keys) {
+      const r = await call(token, data, block, { [token]: { stateDiff: { [slot]: "0x" + hex32(marker) } } });
+      if (typeof r.result === "string" && r.result.length > 2 && BigInt(r.result) === marker) { slotCache.set(k, slot); return slot; }
+    }
+    slotCache.set(k, null);
+    return null;
+  }
+
+  /** Builds the override: Sim code at SIM_ADDR, plus `amount` of `currency` in its balance. Null if it can't be funded. */
+  async function funded(currency, amount, block) {
+    const o = { [SIM_ADDR]: { code: SIM_RUNTIME } };
+    if (currency === ZERO) { o[SIM_ADDR].balance = toHexQty(amount); return o; }
+    const slot = await balanceSlot(currency, SIM_ADDR, block);
+    if (!slot) return null;
+    o[currency] = { stateDiff: { [slot]: "0x" + hex32(amount) } };
+    return o;
+  }
+
+  /** One round trip on one pool. sellOnly: fund the Sim with `amount` of the token and only sell. */
+  async function roundTrip({ key, token, amount, sellOnly = false, block }) {
+    const tokenIs0 = key.currency0 === token;
+    const quote = tokenIs0 ? key.currency1 : key.currency0;
+    const over = await funded(sellOnly ? token : quote, amount, block);
+    if (!over) return { stage: -1, why: `couldn't find the balance slot of ${sellOnly ? "the token" : "the quote currency"}` };
+    const r = await call(SIM_ADDR, encodeRoundTrip(key.poolManager, key, tokenIs0, sellOnly ? 0n : amount, sellOnly, sellOnly ? amount : 0n), block, over);
+    if (r.error) return { stage: -1, why: `eth_call failed: ${String(r.error.message ?? r.error.code).slice(0, 100)}` };
+    try { return decodeResult(r.result); } catch { return { stage: -1, why: "unreadable simulator output" }; }
+  }
+
+  /**
+   * Full read. key: v4 pool key incl. poolManager. token: lowercased token address.
+   * quoteIn: amount of the quote currency to buy with (base units). Returns the raw legs; classify() judges them.
+   */
+  async function run({ key, token, quoteIn }) {
+    const head = (await rpc("eth_blockNumber", [])).result;
+    if (typeof head !== "string") return { ok: false, why: "no block number from the RPC" };
+    const block = head;
+    const main = await roundTrip({ key, token, amount: quoteIn, block });
+    const out = { ok: true, block: parseInt(block, 16), quoteIn, main };
+    if (main.stage !== 1) return out;
+    // sell failed: is it the simulator, a cooldown, or the token?
+    if (control) {
+      try {
+        const c = await control();
+        if (c) out.control = await roundTrip({ key: c.key, token: c.token, amount: c.quoteIn, block });
+      } catch (e) { out.control = { stage: -1, why: String(e).slice(0, 100) }; }
+    }
+    if (main.tokenOwed > 0n) out.holder = await roundTrip({ key, token, amount: main.tokenOwed, sellOnly: true, block });
+    return out;
+  }
+
+  return { run, roundTrip, balanceSlot, decimals, block: async () => (await rpc("eth_blockNumber", [])).result };
+}
+
+const pct = (x) => Math.round(x * 1000) / 10;
+const ratio = (a, b) => (b > 0n ? Number((a * 1_000_000n) / b) / 1_000_000 : null);
+
+/**
+ * Turns raw legs into flags. Pure, so it is unit tested.
+ * Returns { status, line, flags: [{ text, pts, critical }], roundTripLossPct, buyTaxPct }.
+ */
+export function classify(res, { fee = null, sizeUsd = null } = {}) {
+  const size = sizeUsd ? `$${sizeUsd < 10 ? sizeUsd.toFixed(2) : Math.round(sizeUsd)}` : "a small";
+  if (!res?.ok) return { status: "unavailable", line: `🧪 trade simulation unavailable (${res?.why ?? "no result"}).`, flags: [] };
+  const m = res.main;
+  if (m.stage === -1) return { status: "unavailable", line: `🧪 trade simulation unavailable (${m.why}).`, flags: [] };
+  if (m.stage === 0) return { status: "buy-failed", line: `🧪 a simulated ${size} buy reverted (${revertReason(m.revertData)}), so buying and selling couldn't be tested. not scored.`, flags: [] };
+  const buyTax = m.tokenOwed > 0n ? 1 - ratio(m.tokenGot, m.tokenOwed) : 0;
+  const flags = [];
+  const buyTaxPct = pct(Math.max(0, buyTax));
+  if (buyTaxPct > 10) flags.push({ text: `buy tax ${Math.round(buyTaxPct)}% (simulated)`, pts: 15 });
+  if (m.stage === 1) {
+    const reason = revertReason(m.revertData);
+    const c = res.control;
+    if (c && c.stage !== 2) return { status: "inconclusive", line: `🧪 simulated sell failed, but so did a known-good control token in the same block, so the simulator is at fault. not scored.`, flags: [], buyTaxPct };
+    const h = res.holder;
+    if (h?.stage === 2) {
+      flags.push({ text: "can't sell in the same block as buying (anti-bot cooldown)", pts: 15 });
+      return { status: "cooldown", line: `🧪 simulated ${size} buy worked; selling in the same block reverted (${reason}), but a plain holder could sell. looks like an anti-bot cooldown, not a honeypot. block ${res.block}.`, flags, buyTaxPct };
+    }
+    if (h && h.stage >= 0 && h.stage < 2 && c?.stage === 2) {
+      flags.push({ text: "sell reverted in simulation (honeypot)", pts: 100, critical: true });
+      return { status: "honeypot", line: `🧪 simulated ${size} buy worked, but selling reverted (${reason}), for a fresh buyer and for a plain holder, while a control token sold fine in the same block. block ${res.block}.`, flags, buyTaxPct };
+    }
+    flags.push({ text: "sell failed in simulation (unconfirmed)", pts: 25 });
+    return { status: "sell-failed", line: `🧪 simulated ${size} buy worked, but selling it back reverted (${reason}). couldn't run every cross-check, so this is scored as a warning, not a verdict. block ${res.block}.`, flags, buyTaxPct };
+  }
+  const back = ratio(m.quoteBack, res.quoteIn);
+  const loss = Math.max(0, 1 - back);
+  const lossPct = pct(loss);
+  const expected = fee !== null && fee !== DYNAMIC_FEE ? pct((2 * fee) / 1e6) : null;
+  if (lossPct >= 50) flags.push({ text: `simulated round trip loses ${Math.round(lossPct)}%`, pts: 100, critical: true });
+  else if (lossPct >= 20) flags.push({ text: `simulated round trip loses ${Math.round(lossPct)}%`, pts: 40 });
+  else if (lossPct >= 10) flags.push({ text: `simulated round trip loses ${Math.round(lossPct)}%`, pts: 20 });
+  const feeNote = expected !== null ? ` (pool fees alone would be ~${expected}%)` : " incl. pool and hook fees";
+  const taxNote = buyTaxPct > 1 ? `, ${buyTaxPct}% of the bought tokens never arrived (transfer tax)` : "";
+  return { status: "ok", line: `🧪 simulated ${size} buy then sell on the real pool: ${lossPct}% round-trip cost${feeNote}${taxNote}. block ${res.block}.`, flags, roundTripLossPct: lossPct, buyTaxPct };
+}

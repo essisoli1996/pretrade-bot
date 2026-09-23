@@ -212,5 +212,13 @@
       "0xe5e702641ea86f4ae6cc3cdaed2b886f976be044": "standard musepad launch hook",
       "0x4e3468951d49f2eea976ed0d6e75ffcb44a9a544": "standard musepad launch hook"
     }
+  },
+  "sim": {
+    "enabled": false,
+    "score": false,
+    "sizeUsd": 25,
+    "minLiquidityUsd": 2000,
+    "timeoutMs": 25000,
+    "control": "0x91a2dae9699f0b82540b5886b0d8759c22820ba3"
   }
 }
