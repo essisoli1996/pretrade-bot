@@ -29,7 +29,11 @@ jobs:
         run: |
           set -o pipefail
           { echo "== wallet"; bankr whoami 2>&1 | grep -E "EVM" || echo "(whoami not permitted for this key, continuing)"; } | tee deploy.log
-          { echo "== deploy"; bankr x402 deploy; } 2>&1 | tee -a deploy.log
+          # one service per request: all five in one upload is over the API's size limit (HTTP 413)
+          for svc in $(ls x402 | grep -v '^_'); do
+            test -f "x402/$svc/index.ts" || continue
+            { echo "== deploy $svc"; bankr x402 deploy "$svc"; } 2>&1 | tee -a deploy.log
+          done
           { echo "== list"; bankr x402 list || true; } 2>&1 | tee -a deploy.log
       - name: Save deploy log (URLs only, no secrets)
         if: always()
