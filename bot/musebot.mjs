@@ -1444,8 +1444,15 @@ async function main() {
     console.log(`standard hooks: ${standard.size ? [...standard].map(([a, l]) => `${a} (${l})`).join(", ") : "NONE FOUND: hook flags will be reported but not scored"}`);
     let targets = args.slice(1).filter((a) => !a.startsWith("--"));
     if (!targets.length) {
-      const r = await http(`https://musepad.lol/api/tokens?sort=new`);
-      targets = (r.json?.items ?? []).map((x) => x.contractAddress).filter(Boolean).slice(0, 10);
+      // tokens that actually trade: brand-new launches often have no DEX pair yet, so they prove nothing here
+      const seen = new Set();
+      for (const sort of ["hot", "volume"]) {
+        const r = await http(`https://musepad.lol/api/tokens?sort=${sort}`);
+        for (const x of r.json?.items ?? []) if (x.contractAddress) seen.add(x.contractAddress.toLowerCase());
+      }
+      for (const e of loadJson(STATE_FILE, {}).ledger ?? []) if (e.chain === "robinhood" && e.token) seen.add(e.token.toLowerCase());
+      if (CFG.token?.address) seen.delete(CFG.token.address.toLowerCase());
+      targets = [...seen].slice(0, 20);
     }
     const tally = {};
     for (const t of targets) {

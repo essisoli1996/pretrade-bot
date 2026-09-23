@@ -2,10 +2,10 @@ name: v4-hooks   # read-only: prints the Uniswap v4 hook of $PTRD and recent mus
 on:
   push:   # TEMP: lets the branch run this once on real data before merge; remove before merging
     branches: [claude/shared-conversation-64n76d]
-    paths: [bot/v4hooks.mjs, .github/workflows/hooks.yml]
+    paths: [bot/v4hooks.mjs, bot/musebot.mjs, .github/workflows/hooks.yml]
   workflow_dispatch:
     inputs:
-      addresses: { description: "Token addresses, space separated (empty = the 10 newest musepad launches)", required: false, default: "" }
+      addresses: { description: "Token addresses, space separated (empty = trading musepad tokens + the ledger)", required: false, default: "" }
 permissions: { contents: write }
 jobs:
   hooks:
