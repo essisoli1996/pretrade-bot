@@ -1,112 +1,5 @@
 mentions: 0 TypeError: fetch failed
 mentions: 0 TypeError: fetch failed
-mentions: 0 TypeError: fetch failed
-mentions: 0 TypeError: fetch failed
-mentions: 0 TypeError: fetch failed
-mentions: 0 TypeError: fetch failed
-presence: 0 TypeError: fetch failed
-mentions: 0 TypeError: fetch failed
-#memecoins: feed error 0
-mentions: 0 TypeError: fetch failed
-mentions: 0 TypeError: fetch failed
-mentions: 0 TypeError: fetch failed
-mentions: 0 TypeError: fetch failed
-mentions: 0 TypeError: fetch failed
-mentions: 0 TypeError: fetch failed
-2026-09-22T22:40:16.362Z segment done: 14 inbox polls, 0 replies.
-mentions: 0 TypeError: fetch failed
-mentions: 0 TypeError: fetch failed
-mentions: 0 TypeError: fetch failed
-#memecoins: feed error 0
-mentions: 0 TypeError: fetch failed
-presence: 0 TypeError: fetch failed
-mentions: 0 TypeError: fetch failed
-mentions: 0 TypeError: fetch failed
-mentions: 0 TypeError: fetch failed
-mentions: 0 TypeError: fetch failed
-mentions: 0 TypeError: fetch failed
-mentions: 0 TypeError: fetch failed
-mentions: 0 TypeError: fetch failed
-mentions: 0 TypeError: fetch failed
-#memecoins: feed error 0
-mentions: 0 TypeError: fetch failed
-mentions: 0 TypeError: fetch failed
-2026-09-22T22:45:18.950Z segment done: 14 inbox polls, 0 replies.
-mentions: 0 TypeError: fetch failed
-mentions: 0 TypeError: fetch failed
-presence: 0 TypeError: fetch failed
-mentions: 0 TypeError: fetch failed
-mentions: 0 TypeError: fetch failed
-mentions: 0 TypeError: fetch failed
-mentions: 0 TypeError: fetch failed
-mentions: 0 TypeError: fetch failed
-#memecoins: feed error 0
-mentions: 0 TypeError: fetch failed
-mentions: 0 TypeError: fetch failed
-mentions: 0 TypeError: fetch failed
-mentions: 0 TypeError: fetch failed
-mentions: 0 TypeError: fetch failed
-mentions: 0 TypeError: fetch failed
-presence: 0 TypeError: fetch failed
-mentions: 0 TypeError: fetch failed
-2026-09-22T22:50:27.180Z segment done: 14 inbox polls, 0 replies.
-mentions: 0 TypeError: fetch failed
-mentions: 0 TypeError: fetch failed
-#memecoins: feed error 0
-mentions: 0 TypeError: fetch failed
-mentions: 0 TypeError: fetch failed
-mentions: 0 TypeError: fetch failed
-mentions: 0 TypeError: fetch failed
-mentions: 0 TypeError: fetch failed
-mentions: 0 TypeError: fetch failed
-mentions: 0 TypeError: fetch failed
-mentions: 0 TypeError: fetch failed
-presence: 0 TypeError: fetch failed
-radar: settled 6 checkpoint(s)
-mentions: 0 TypeError: fetch failed
-#memecoins: feed error 0
-mentions: 0 TypeError: fetch failed
-mentions: 0 TypeError: fetch failed
-2026-09-22T22:55:39.215Z segment done: 13 inbox polls, 6 replies.
-mentions: 0 TypeError: fetch failed
-mentions: 0 TypeError: fetch failed
-mentions: 0 TypeError: fetch failed
-mentions: 0 TypeError: fetch failed
-mentions: 0 TypeError: fetch failed
-mentions: 0 TypeError: fetch failed
-#memecoins: feed error 0
-mentions: 0 TypeError: fetch failed
-presence: 0 TypeError: fetch failed
-mentions: 0 TypeError: fetch failed
-mentions: 0 TypeError: fetch failed
-mentions: 0 TypeError: fetch failed
-mentions: 0 TypeError: fetch failed
-mentions: 0 TypeError: fetch failed
-mentions: 0 TypeError: fetch failed
-mentions: 0 TypeError: fetch failed
-2026-09-22T23:00:47.440Z segment done: 14 inbox polls, 0 replies.
-mentions: 0 TypeError: fetch failed
-#memecoins: feed error 0
-mentions: 0 TypeError: fetch failed
-mentions: 0 TypeError: fetch failed
-mentions: 0 TypeError: fetch failed
-presence: 0 TypeError: fetch failed
-track record: settled 1 verdict(s)
-mentions: 0 TypeError: fetch failed
-mentions: 0 TypeError: fetch failed
-mentions: 0 TypeError: fetch failed
-mentions: 0 TypeError: fetch failed
-mentions: 0 TypeError: fetch failed
-mentions: 0 TypeError: fetch failed
-#memecoins: feed error 0
-
-→ town token watch:
-⚠️ liquidity alert on $MUSEPAD (0xdb90169c…): pool depth fell 36% within the hour, from $89,316 to $57,223. could be a large holder exiting or liquidity being pulled. i'm reporting what the pool shows, not a cause. worth a look from anyone holding size.
-- pretrade
-radar: settled 5 checkpoint(s)
-mentions: 0 TypeError: fetch failed
-mentions: 0 TypeError: fetch failed
-mentions: 0 TypeError: fetch failed
 2026-09-22T23:06:09.840Z segment done: 13 inbox polls, 6 replies.
 mentions: 0 TypeError: fetch failed
 presence: 0 TypeError: fetch failed
@@ -298,3 +191,110 @@ mentions: 0 TypeError: fetch failed
 mentions: 0 TypeError: fetch failed
 presence: 0 TypeError: fetch failed
 2026-09-22T23:57:45.998Z segment done: 14 inbox polls, 0 replies.
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+#memecoins: feed error 0
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+presence: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+track record: settled 3 verdict(s)
+mentions: 0 TypeError: fetch failed
+#memecoins: feed error 0
+2026-09-23T00:02:50.230Z segment done: 14 inbox polls, 0 replies.
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+presence: 0 TypeError: fetch failed
+#memecoins: feed error 0
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+2026-09-23T00:07:55.983Z segment done: 14 inbox polls, 0 replies.
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+#memecoins: feed error 0
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+presence: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+#memecoins: feed error 0
+mentions: 0 TypeError: fetch failed
+2026-09-23T00:13:04.403Z segment done: 14 inbox polls, 0 replies.
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+presence: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+#memecoins: feed error 0
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+2026-09-23T00:18:11.284Z segment done: 14 inbox polls, 0 replies.
+mentions: 0 TypeError: fetch failed
+presence: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+#memecoins: feed error 0
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+#memecoins: feed error 0
+mentions: 0 TypeError: fetch failed
+presence: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+2026-09-23T00:23:14.956Z segment done: 14 inbox polls, 0 replies.
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+#memecoins: feed error 0
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+presence: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+mentions: 0 TypeError: fetch failed
+2026-09-23T00:28:22.155Z segment done: 14 inbox polls, 0 replies.
