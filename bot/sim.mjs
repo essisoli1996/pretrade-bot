@@ -159,7 +159,64 @@ export function makeSim({ rpc, control = null }) {
     return out;
   }
 
-  return { run, roundTrip, balanceSlot, decimals, block: async () => (await rpc("eth_blockNumber", [])).result };
+  /**
+   * Exact-size quote on the live pool, plus a small reference trade in the same block for the mid price.
+   * side "buy": spend `amount` of the quote currency. side "sell": sell `amount` of the token (as a plain holder).
+   */
+  async function plan({ key, token, side, amount, refAmount }) {
+    const head = (await rpc("eth_blockNumber", [])).result;
+    if (typeof head !== "string") return { ok: false, why: "no block number from the RPC" };
+    const sell = side === "sell";
+    const big = await roundTrip({ key, token, amount, sellOnly: sell, block: head });
+    const small = await roundTrip({ key, token, amount: refAmount, sellOnly: sell, block: head });
+    const got = (r) => (sell ? (r.stage === 2 ? r.quoteBack : null) : r.stage >= 1 ? r.tokenGot : null);
+    return {
+      ok: true, block: parseInt(head, 16), side: sell ? "sell" : "buy", amountIn: amount, out: got(big), refIn: refAmount, refOut: got(small),
+      stage: big.stage, why: big.why ?? null, revertData: big.revertData ?? null,
+      // a buy whose immediate sell-back reverts is a trap even if the buy itself works
+      sellBackFails: !sell && big.stage === 1, roundTripBack: !sell && big.stage === 2 ? big.quoteBack : null,
+    };
+  }
+
+  return { run, plan, roundTrip, balanceSlot, decimals, block: async () => (await rpc("eth_blockNumber", [])).result };
+}
+
+/**
+ * Turns an exact-size simulation into a trade plan. Pure, unit tested (and mirrored in x402/_shared/v4.ts).
+ * volatilityPct: recent move in % (DexScreener m5 / h1), used to size slippage for the time between quote and inclusion.
+ * Returns { verdict: GO | CAUTION | NO_GO, impactPct, slippagePct, minOutFraction, split, reasons[] }.
+ */
+export function planAdvice(res, { m5 = 0, h1 = 0, usd = null } = {}) {
+  if (!res?.ok) return { verdict: "UNAVAILABLE", reasons: [res?.why ?? "no simulation"] };
+  if (res.out === null || res.out === 0n) {
+    const what = res.side === "sell" ? "the sell" : "the buy";
+    return { verdict: "NO_GO", reasons: [`${what} reverted in simulation (${res.why ?? revertReason(res.revertData)})`] };
+  }
+  const reasons = [];
+  let impact = 0;
+  if (res.refOut && res.refOut > 0n && res.refIn > 0n) {
+    // price per unit at size vs at the reference size, same block
+    const atSize = Number((res.out * 10n ** 18n) / res.amountIn) / 1e18;
+    const atRef = Number((res.refOut * 10n ** 18n) / res.refIn) / 1e18;
+    impact = Math.max(0, 1 - atSize / atRef);
+  }
+  const impactPct = pct(impact);
+  const vol = Math.max(Math.abs(m5 ?? 0), Math.abs(h1 ?? 0) / 3);
+  const slippagePct = Math.round(Math.min(5, Math.max(0.5, 0.5 + 1.5 * vol)) * 10) / 10;
+  const minOutFraction = 1 - slippagePct / 100;
+  let verdict = "GO";
+  if (res.sellBackFails) { verdict = "NO_GO"; reasons.push("the buy works but selling it straight back reverts: you could get in and not out"); }
+  if (impactPct > 8) { verdict = "NO_GO"; reasons.push(`price impact ${impactPct}% at this size`); }
+  else if (impactPct > 2) { if (verdict === "GO") verdict = "CAUTION"; reasons.push(`price impact ${impactPct}% at this size`); }
+  if (res.roundTripBack !== null && res.amountIn > 0n) {
+    const rt = pct(Math.max(0, 1 - Number((res.roundTripBack * 1_000_000n) / res.amountIn) / 1e6));
+    if (rt >= 20 && verdict !== "NO_GO") { verdict = rt >= 50 ? "NO_GO" : "CAUTION"; reasons.push(`buying and selling back at this size loses ${rt}%`); }
+  }
+  // split so each piece stays near 1% impact (impact grows roughly linearly with size at these depths)
+  const pieces = impactPct > 2 ? Math.min(10, Math.ceil(impactPct / 1)) : 1;
+  const split = pieces > 1 ? { pieces, usdEach: usd ? Math.round((usd / pieces) * 100) / 100 : null, note: "a few blocks apart, re-quote each" } : null;
+  if (!reasons.length) reasons.push("clean at this size");
+  return { verdict, impactPct, slippagePct, minOutFraction, split, reasons };
 }
 
 const pct = (x) => Math.round(x * 1000) / 10;

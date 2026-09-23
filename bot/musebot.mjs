@@ -21,7 +21,9 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { makeRadar } from "./radar.mjs";
 import { makeV4Hooks, isV4, hookLine } from "./v4hooks.mjs";
-import { makeSim, classify } from "./sim.mjs";
+import { makeSim, classify, planAdvice } from "./sim.mjs";
+import { makeStocks } from "./stocks.mjs";
+import { makeApprovals } from "./approvals.mjs";
 import { makeTxSim, describeTxSim, parseTx } from "./txsim.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -265,6 +267,88 @@ async function simRead(pair, key, token) {
   } catch (e) {
     return { status: "unavailable", line: `🧪 trade simulation unavailable (${String(e.message ?? e).slice(0, 60)}).`, flags: [], scored: false };
   }
+}
+
+// ───────────────────────── trade plan, stock tokens, approvals (free commands) ─────────────────────────
+const rpcTo = (url) => (url ? async (method, params) => (await http(url, { jsonrpc: "2.0", id: 1, method, params })).json ?? {} : null);
+const rpcFor = (c) => rpcTo(c === "robinhood" ? CFG.token?.rpc : (CFG.security?.rpc ?? {})[c]);
+let STOCKS = null, APPROVALS = null;
+const fmtUnits = (v, dec) => (Number(v) / 10 ** dec).toLocaleString("en-US", { maximumFractionDigits: 6 });
+
+/** "@pretrade plan <token> <usd> [sell]": exact-size simulation on the live pool → go/no-go, impact, slippage, min out. */
+async function planText(text) {
+  const m = text.match(/plan\s+(0x[0-9a-fA-F]{40})\s+\$?([\d.,]+)\s*(sell)?/i);
+  if (!m) return `usage: "@${CFG.name} plan <token address> <usd> [sell]". i run your exact size on the live pool and give you go/no-go, price impact, a slippage setting and the minimum amount out.\n- ${CFG.name}`;
+  const addr = m[1].toLowerCase(), usd = Number(m[2].replace(/,/g, "")), side = m[3] ? "sell" : "buy";
+  if (isOwnToken(addr)) return `that is my own token, so i don't plan trades in it: conflict of interest.\n- ${CFG.name}`;
+  if (!(usd > 0 && usd <= 1e7)) return `size must be a dollar amount, like 250.\n- ${CFG.name}`;
+  const p = (await pairsOf(addr)).filter(isV4).sort((x, y) => (n(y.liquidity?.usd) ?? 0) - (n(x.liquidity?.usd) ?? 0))[0];
+  if (!p) return `exact simulation works on Robinhood Chain v4 pools, and i found none for ${addr}. "@${CFG.name} ${addr}" still gives the free read.\n- ${CFG.name}`;
+  const key = await v4().poolKey(p.pairAddress, p.pairCreatedAt, null);
+  if (!key) return `couldn't read that pool's key right now. try again in a minute.\n- ${CFG.name}`;
+  SIM ??= makeSim({ rpc: v4().rpc, control: simControl });
+  const tokenDec = await decimalsOf(addr);
+  let amount, ref;
+  if (side === "buy") { amount = await quoteAmount(p, key, addr, usd); ref = await quoteAmount(p, key, addr, Math.min(1, usd)); }
+  else {
+    const px = n(p.priceUsd);
+    if (!px || tokenDec === null) return `no usable price for that token right now.\n- ${CFG.name}`;
+    const units = (x) => (BigInt(Math.max(1, Math.floor((x / px) * 1e6))) * 10n ** BigInt(tokenDec)) / 1000000n;
+    amount = units(usd); ref = units(Math.min(1, usd));
+  }
+  if (!amount || !ref) return `no usable price for that pool right now.\n- ${CFG.name}`;
+  const res = await SIM.plan({ key, token: addr, side, amount, refAmount: ref });
+  const a = planAdvice(res, { m5: n(p.priceChange?.m5) ?? 0, h1: n(p.priceChange?.h1) ?? 0, usd });
+  const sym = p.baseToken?.symbol ?? "token";
+  const quoteSym = p.quoteToken?.symbol ?? "quote";
+  const outDec = side === "buy" ? tokenDec : await decimalsOf(key.currency0 === addr ? key.currency1 : key.currency0);
+  const icon = { GO: "🟢", CAUTION: "🟡", NO_GO: "🔴" }[a.verdict] ?? "⚪";
+  const lines = [`📐 trade plan: ${side} $${usd.toLocaleString("en-US")} of $${sym} (simulated on the live pool${res.block ? `, block ${res.block}` : ""})`, `${icon} ${a.verdict.replace("_", " ")}: ${a.reasons.join("; ")}.`];
+  if (res.out && outDec !== null) {
+    const outSym = side === "buy" ? `$${sym}` : `$${quoteSym}`;
+    const minOut = (res.out * BigInt(Math.round(a.minOutFraction * 1e6))) / 1000000n;
+    lines.push(`you get: ${fmtUnits(res.out, outDec)} ${outSym} (price impact ${a.impactPct}%).`);
+    lines.push(`slippage ${a.slippagePct}% → amountOutMinimum ${fmtUnits(minOut, outDec)} ${outSym} (raw ${minOut}).`);
+  }
+  if (a.split) lines.push(`split: ${a.split.pieces} × ~$${a.split.usdEach} ${a.split.note}.`);
+  lines.push(`true for that block only; re-quote right before you send. not advice.`, `- ${CFG.name}`);
+  return lines.join("\n");
+}
+
+/** "@pretrade stock <TICKER|address>": is it Robinhood's real Stock Token, and is the DEX price fair vs Chainlink? */
+async function stockText(text) {
+  const m = text.match(/stock\s+(0x[0-9a-fA-F]{40}|\$?[A-Za-z.]{1,8})\b/i);
+  if (!m) return `usage: "@${CFG.name} stock TSLA" or "@${CFG.name} stock <token address>". i check it against Robinhood's own Stock Token registry and the Chainlink reference price.\n- ${CFG.name}`;
+  STOCKS ??= makeStocks({ http, rpc: rpcFor("robinhood") });
+  const r = await STOCKS.check(m[1].replace(/^\$/, ""));
+  if (r.error) return `${r.error}. try again shortly.\n- ${CFG.name}`;
+  const icon = { OFFICIAL: "✅", CAUTION: "🟡", DANGER: "🔴", COPYCAT: "🔴", NOT_A_STOCK_TOKEN: "⚪" }[r.verdict] ?? "⚪";
+  const o = r.official;
+  const lines = [`🏛 stock token check: ${icon} ${r.verdict.replace(/_/g, " ")}`];
+  if (o) lines.push(`$${o.ticker}: ${o.name}, ${o.address}${o.isin ? `, ISIN ${o.isin}` : ""}. multiplier ${o.multiplier}${o.paused ? ", PAUSED" : ""}.`);
+  if (r.realTokenForTicker) lines.push(`the real Robinhood $${r.realTokenForTicker.ticker} token is ${r.realTokenForTicker.address}.`);
+  if (r.reference || r.dex) lines.push(`price: Chainlink reference ${r.reference ? `$${r.reference.priceUsd.toFixed(2)}` : "n/a"}, DEX ${r.dex?.priceUsd ? `$${r.dex.priceUsd.toFixed(2)}${r.dex.premiumPct !== null ? ` (${r.dex.premiumPct > 0 ? "+" : ""}${r.dex.premiumPct}%)` : ""}, liquidity $${r.dex.liquidityUsd.toLocaleString("en-US")}` : "no pool"}.`);
+  if (r.flags.length) lines.push(`flags: ${r.flags.map((f) => f.detail).join(" ")}`);
+  if (r.copycats?.length) lines.push(`⚠️ ${r.copycats.length} other contract(s) trade as $${o?.ticker}: ${r.copycats.map((c) => `${c.address.slice(0, 8)}… ($${c.liquidityUsd.toLocaleString("en-US")})`).join(", ")}. not Robinhood's.`);
+  lines.push(`source: Robinhood's registry and Chainlink. not advice. - ${CFG.name}`);
+  return lines.join("\n");
+}
+
+/** "@pretrade approvals <wallet> [chain]": every live approval, riskiest first, with a ready revoke transaction. */
+async function approvalsText(text) {
+  const m = text.match(/approvals\s+(0x[0-9a-fA-F]{40})(?:\s+(robinhood|base|ethereum))?/i);
+  if (!m) return `usage: "@${CFG.name} approvals <wallet> [robinhood|base|ethereum]". i list every approval that wallet still has live, riskiest first, with a revoke transaction you can sign.\n- ${CFG.name}`;
+  const chain = (m[2] ?? "robinhood").toLowerCase();
+  APPROVALS ??= makeApprovals({ rpcFor, known: { ...(S.trusted ?? {}), [PERMIT2]: "Permit2" }, reputation: async (a) => reputation(a) });
+  const r = await APPROVALS.audit(m[1], chain);
+  if (r.error) return `couldn't audit on ${chain}: ${r.error}.\n- ${CFG.name}`;
+  if (!r.live) return `✅ ${m[1].slice(0, 8)}… has no live token approvals on ${chain} (${r.scannedGrants} past grant(s), all revoked or used up).\n- ${CFG.name}`;
+  const risky = r.approvals.filter((x) => x.risk !== "low");
+  const lines = [`🔑 approvals for ${m[1].slice(0, 8)}… on ${chain}: ${r.live} live, ${risky.length} worth revoking.`];
+  for (const x of r.approvals.slice(0, 5)) lines.push(`${{ critical: "🔴", high: "🟠", medium: "🟡", low: "⚪" }[x.risk]} ${x.amount} ${x.symbol ? `$${x.symbol}` : x.token.slice(0, 8) + "…"} → ${x.spenderLabel ?? x.spender.slice(0, 8) + "…"}: ${x.why.join(", ")}.`);
+  for (const x of risky.slice(0, 2)) lines.push(`revoke ${x.symbol ? `$${x.symbol}` : "it"}: send a tx to ${x.revoke.to} with data ${x.revoke.data} (value 0).`);
+  lines.push(`revoking costs only gas. - ${CFG.name}`);
+  return lines.join("\n");
 }
 
 function replyText(c) {
@@ -1194,7 +1278,10 @@ function menuText(deep, watch) {
   return [
     `free, and always will be: "@${CFG.name} <token address>" → verdict, risk score, flags, max sell size. EVM + solana.`,
     `my hit rate, also free: "@${CFG.name} record". every read is logged and scored 24h later, nothing removed.`,
-    `signing forensics, free: "@${CFG.name} sign <calldata, EIP-712 json or 7702 request>" decodes what you'd be authorising and checks every counterparty. "@${CFG.name} wallet <address>" checks reputation, 7702 delegations and lookalikes.`,
+    `signing forensics, free: "@${CFG.name} sign <the tx json your wallet shows, calldata, EIP-712 json or 7702 request>" decodes it, simulates the transaction on the current block and shows what leaves and enters your wallet. "@${CFG.name} wallet <address>" checks reputation, 7702 delegations and lookalikes.`,
+    `trade plan, free: "@${CFG.name} plan <token> <usd> [sell]" runs your exact size on the live Robinhood v4 pool → go/no-go, price impact, slippage and the minimum amount out to set.`,
+    `stock tokens, free: "@${CFG.name} stock TSLA" (or an address) checks it against Robinhood's own registry and the Chainlink price: real or copycat, paused, pending splits, DEX premium.`,
+    `approvals, free: "@${CFG.name} approvals <wallet> [robinhood|base]" lists every live approval, riskiest first, with a revoke transaction to sign.`,
     `council runner, free: "@${CFG.name} vet <paste an offer>" → i check its links, addresses and handles for scam patterns and answer in the open. "@${CFG.name} council" for the weekly runner log.`,
     `town guard, free: i watch for copycats of the town's tokens and for launches that reuse an existing ticker, and flag them in the open. "@${CFG.name} receipts" lists every catch.`,
     `deep report (safety + exit sizes + momentum + copycat scan + holder concentration${llmOn ? " + an analyst note that answers your question about the token" : ""}): ${priceLine("deep", deep)}.`,
@@ -1269,9 +1356,12 @@ async function runWatches(identity, state) {
 
 /** Returns reply text for a premium command, or null if the mention is not one. */
 async function premiumCommand(m, text, who, id, state) {
-  const cmd = text.match(new RegExp(`@${CFG.name}\\s+(price|prices|menu|help|deep|watch|record|stats|receipts|vet|council|sign|wallet)\\b`, "i"))?.[1]?.toLowerCase();
+  const cmd = text.match(new RegExp(`@${CFG.name}\\s+(price|prices|menu|help|deep|watch|record|stats|receipts|vet|council|sign|wallet|plan|stock|approvals)\\b`, "i"))?.[1]?.toLowerCase();
   if (!cmd) return null;
   if (cmd === "council") return councilText(state);
+  if (cmd === "plan") return planText(text);
+  if (cmd === "stock") return stockText(text);
+  if (cmd === "approvals") return approvalsText(text);
   if (cmd === "sign") {
     const full = (await fullPostText(id, text)).replace(new RegExp(`@${CFG.name}\\s+sign:?`, "i"), " ");
     const tx = parseTx(full, CHAIN_BY_ID);
@@ -1531,6 +1621,15 @@ async function main() {
       if (c.sim?.flags?.length) console.log(`  sim flags: ${c.sim.flags.map((f) => `${f.text} (+${f.pts}${f.critical ? ", critical" : ""})`).join(", ")}${c.sim.scored ? "" : " [not scored]"}`);
     }
     return console.log(`\nsimulation results: ${JSON.stringify(tally)}`);
+  }
+
+  if (cmd === "try") {
+    // Read-only: runs one command exactly as a mention would, prints the reply, posts nothing.
+    //   node bot/musebot.mjs try "plan 0x… 250"   |   try "stock TSLA"   |   try "approvals 0x… base"
+    const t = `@${CFG.name} ${args.slice(1).join(" ")}`;
+    const c = t.match(/@\S+\s+(plan|stock|approvals)\b/i)?.[1]?.toLowerCase();
+    const out = c === "plan" ? await planText(t) : c === "stock" ? await stockText(t) : c === "approvals" ? await approvalsText(t) : "try supports: plan, stock, approvals";
+    return console.log(out);
   }
 
   if (cmd === "signprobe") {

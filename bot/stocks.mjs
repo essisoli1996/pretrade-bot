@@ -1,0 +1,185 @@
+// Robinhood Stock Token check: is this the real Robinhood token for that stock, and is the DEX price fair?
+// Sources, all public and read-only:
+// - Robinhood's asset registry (api.robinhood.com/rhj/assets): the canonical contract per ticker, multiplier,
+//   pending corporate actions, status and tradability. "A token with a matching name/ticker but a different contract
+//   address is not a Robinhood Stock Token." (Robinhood Chain docs)
+// - Chainlink's feed directory for Robinhood Chain: each stock token has a feed whose latestRoundData() is the price
+//   of one token (share price × multiplier), 8 decimals, updated 24/5.
+// - The token itself: paused() and uiMultiplier().
+// Zero dependencies.
+
+const REGISTRY = "https://api.robinhood.com/rhj/assets";
+const FEEDS = "https://reference-data-directory.vercel.app/feeds-robinhood-mainnet.json";
+const CHAIN_ID = 4663;
+const SEL = { paused: "0x5c975abb", uiMultiplier: "0xa60bf13d", latestRoundData: "0xfeaf968c", symbol: "0x95d89b41" };
+
+/** Registry JSON → Map(address → asset) and Map(TICKER → asset). Pure, unit tested. */
+export function indexRegistry(json) {
+  const byAddr = new Map(), byTicker = new Map();
+  for (const a of json?.assets ?? []) {
+    const dep = (a.deployments ?? []).find((d) => Number(d.chainId) === CHAIN_ID && /^0x[0-9a-fA-F]{40}$/.test(d.contractAddress ?? ""));
+    if (!dep) continue;
+    const asset = {
+      ticker: String(a.tokenSymbol ?? "").toUpperCase(), name: a.tokenName ?? null, address: dep.contractAddress.toLowerCase(),
+      multiplier: Number(a.currentMultiplier ?? 1) || 1, pendingMultiplier: a.pendingMultiplier ? Number(a.pendingMultiplier) : null,
+      status: a.status ?? null, isin: a.isin ?? null, trading: a.tradingCapabilities ?? null,
+    };
+    byAddr.set(asset.address, asset);
+    if (asset.ticker) byTicker.set(asset.ticker, asset);
+  }
+  return { byAddr, byTicker };
+}
+
+/** Chainlink directory JSON → Map(TICKER → { proxy, decimals, heartbeat }) for Robinhood tokenized equities. Pure. */
+export function indexFeeds(json) {
+  const out = new Map();
+  for (const f of Array.isArray(json) ? json : []) {
+    const d = f.docs ?? {};
+    if (d.assetClass !== "Equity" || !/^0x[0-9a-fA-F]{40}$/.test(f.proxyAddress ?? "")) continue;
+    if (!/^Robinhood /i.test(f.name ?? "") && d.productTypeCode !== "primaryTokenizedPrice") continue;
+    const t = String(d.baseAsset ?? "").toUpperCase();
+    if (t) out.set(t, { proxy: f.proxyAddress.toLowerCase(), decimals: Number(f.decimals ?? 8), heartbeat: Number(f.heartbeat ?? 86400) });
+  }
+  return out;
+}
+
+const tradable = (a) => {
+  const t = a?.trading;
+  if (!t) return null;
+  const any = ["market", "extended", "overnight"].some((s) => /TRADABLE$/.test(t[s]?.whole ?? "") && !/NOT|UN/.test(t[s]?.whole ?? ""));
+  return any;
+};
+
+/**
+ * Verdict from the gathered facts. Pure, unit tested.
+ * facts: { input, official, claimedTicker, officialForTicker, paused, feed: {price, updatedAt}, dexPrice, now }
+ */
+export function judgeStock(f) {
+  const flags = [];
+  const add = (code, severity, detail) => flags.push({ code, severity, detail });
+  if (!f.official) {
+    if (f.officialForTicker) {
+      add("NOT_THE_ROBINHOOD_TOKEN", "critical", `This contract is not Robinhood's $${f.officialForTicker.ticker} Stock Token. The real one is ${f.officialForTicker.address}.`);
+      return { verdict: "COPYCAT", flags };
+    }
+    return { verdict: "NOT_A_STOCK_TOKEN", flags: [{ code: "NOT_IN_REGISTRY", severity: "medium", detail: "Not in Robinhood's Stock Token registry for Robinhood Chain." }] };
+  }
+  const a = f.official;
+  if (f.paused === true) add("PAUSED", "critical", "The token contract is paused: transfers are blocked right now.");
+  if (a.status && a.status !== "ASSET_STATUS_ACTIVE") add("NOT_ACTIVE", "high", `Registry status ${a.status}.`);
+  if (tradable(a) === false) add("NOT_TRADABLE", "high", "Robinhood lists it as not tradable in any session.");
+  if (a.pendingMultiplier && Math.abs(a.pendingMultiplier - a.multiplier) > 1e-9) add("CORPORATE_ACTION_PENDING", "medium", `Multiplier changes from ${a.multiplier} to ${a.pendingMultiplier} soon (split or dividend): raw balances stay, the value per token changes.`);
+  let premiumPct = null;
+  if (f.feed?.price > 0 && f.dexPrice > 0) {
+    premiumPct = Math.round((f.dexPrice / f.feed.price - 1) * 1000) / 10;
+    const stale = f.now && f.feed.updatedAt ? f.now / 1000 - f.feed.updatedAt > 3 * 86400 : false;
+    if (!stale) {
+      if (premiumPct >= 5) add("DEX_PREMIUM", "high", `DEX price is ${premiumPct}% above the Chainlink reference: buying here overpays.`);
+      else if (premiumPct >= 2) add("DEX_PREMIUM", "medium", `DEX price is ${premiumPct}% above the Chainlink reference.`);
+      else if (premiumPct <= -5) add("DEX_DISCOUNT", "medium", `DEX price is ${Math.abs(premiumPct)}% below the reference: selling here undersells, or the reference is stale.`);
+    } else add("REFERENCE_STALE", "low", "The Chainlink reference hasn't updated for 3+ days (market closed?), so the premium isn't judged.");
+  }
+  const bad = flags.some((x) => x.severity === "critical") ? "DANGER" : flags.some((x) => x.severity === "high") ? "CAUTION" : "OFFICIAL";
+  return { verdict: bad, flags, premiumPct };
+}
+
+export function makeStocks({ http, rpc, ttlMs = 30 * 60 * 1000 }) {
+  let reg = null, feeds = null;
+  async function load() {
+    if (!reg || Date.now() - reg.t > ttlMs) {
+      const r = await http(REGISTRY);
+      if (r.json?.assets) reg = { t: Date.now(), ...indexRegistry(r.json) };
+    }
+    if (!feeds || Date.now() - feeds.t > ttlMs) {
+      const r = await http(FEEDS);
+      if (Array.isArray(r.json)) feeds = { t: Date.now(), map: indexFeeds(r.json) };
+    }
+    return { reg, feeds };
+  }
+  const word = (h, i) => h.slice(2 + 64 * i, 2 + 64 * (i + 1));
+  async function feedPrice(proxy) {
+    const r = await rpc("eth_call", [{ to: proxy, data: SEL.latestRoundData }, "latest"]);
+    const h = String(r?.result ?? "");
+    if (h.length < 2 + 64 * 5) return null;
+    let ans = BigInt("0x" + word(h, 1)); if (ans >= 2n ** 255n) ans -= 2n ** 256n;
+    return { raw: ans, updatedAt: Number(BigInt("0x" + word(h, 3))) };
+  }
+  async function paused(addr) {
+    const r = await rpc("eth_call", [{ to: addr, data: SEL.paused }, "latest"]);
+    return typeof r?.result === "string" && r.result.length >= 66 ? BigInt(r.result) === 1n : null;
+  }
+  async function symbolOf(addr) {
+    const r = await rpc("eth_call", [{ to: addr, data: SEL.symbol }, "latest"]);
+    const h = String(r?.result ?? "").replace(/^0x/, "");
+    try {
+      if (h.length >= 192) return new TextDecoder().decode(Uint8Array.from(h.slice(128, 128 + 2 * parseInt(h.slice(64, 128), 16)).match(/../g).map((b) => parseInt(b, 16)))).trim();
+    } catch {}
+    return null;
+  }
+  /** Deepest DexScreener price for a token on Robinhood Chain. */
+  async function dexPrice(addr) {
+    const r = await http(`https://api.dexscreener.com/tokens/v1/robinhood/${addr}`);
+    const pairs = (Array.isArray(r.json) ? r.json : []).filter((p) => String(p?.baseToken?.address ?? "").toLowerCase() === addr);
+    pairs.sort((x, y) => (Number(y?.liquidity?.usd) || 0) - (Number(x?.liquidity?.usd) || 0));
+    const p = pairs[0];
+    return p ? { price: Number(p.priceUsd) || null, liquidityUsd: Math.round(Number(p.liquidity?.usd) || 0), symbol: p.baseToken?.symbol ?? null, url: p.url ?? null } : null;
+  }
+  /** Other contracts on Robinhood Chain trading under an official ticker (by DEX symbol). */
+  async function copycats(ticker, officialAddr) {
+    const r = await http(`https://api.dexscreener.com/latest/dex/search?q=${encodeURIComponent(ticker)}`);
+    const seen = new Map();
+    for (const p of r.json?.pairs ?? []) {
+      if (p?.chainId !== "robinhood") continue;
+      const a = String(p?.baseToken?.address ?? "").toLowerCase();
+      if (a === officialAddr || String(p?.baseToken?.symbol ?? "").toUpperCase().replace(/^\$/, "") !== ticker) continue;
+      seen.set(a, (seen.get(a) ?? 0) + (Number(p?.liquidity?.usd) || 0));
+    }
+    return [...seen.entries()].map(([address, liquidityUsd]) => ({ address, liquidityUsd: Math.round(liquidityUsd) })).sort((a, b) => b.liquidityUsd - a.liquidityUsd).slice(0, 5);
+  }
+
+  /** input: a 0x address or a ticker like TSLA. */
+  async function check(input) {
+    const { reg, feeds } = await load();
+    if (!reg) return { error: "Robinhood's registry is unreachable right now" };
+    const isAddr = /^0x[0-9a-fA-F]{40}$/.test(input);
+    let official = null, officialForTicker = null, claimedTicker = null, addr = null;
+    if (isAddr) {
+      addr = input.toLowerCase();
+      official = reg.byAddr.get(addr) ?? null;
+      if (!official) {
+        const dex = await dexPrice(addr);
+        claimedTicker = String(dex?.symbol ?? (await symbolOf(addr)) ?? "").toUpperCase().replace(/^\$/, "");
+        // copycats often add a suffix, like TSLAX for TSLA
+        officialForTicker = reg.byTicker.get(claimedTicker) ?? (claimedTicker.endsWith("X") ? reg.byTicker.get(claimedTicker.slice(0, -1)) : null) ?? null;
+      }
+    } else {
+      claimedTicker = input.toUpperCase().replace(/^\$/, "");
+      official = reg.byTicker.get(claimedTicker) ?? null;
+      if (!official) return { input, verdict: "NOT_A_STOCK_TOKEN", flags: [{ code: "NO_SUCH_TICKER", severity: "medium", detail: `Robinhood has no Stock Token for ${claimedTicker} on Robinhood Chain.` }] };
+      addr = official.address;
+    }
+    const facts = { input, official, officialForTicker, claimedTicker, now: Date.now() };
+    let feedInfo = null, dex = null, clones = [];
+    if (official) {
+      facts.paused = await paused(official.address);
+      const f = feeds?.map.get(official.ticker);
+      if (f) {
+        const p = await feedPrice(f.proxy);
+        if (p && p.raw > 0n) { facts.feed = { price: Number(p.raw) / 10 ** f.decimals, updatedAt: p.updatedAt }; feedInfo = { proxy: f.proxy, ...facts.feed }; }
+      }
+      dex = await dexPrice(official.address);
+      facts.dexPrice = dex?.price ?? null;
+      clones = await copycats(official.ticker, official.address);
+    }
+    const j = judgeStock(facts);
+    return {
+      input, address: addr, verdict: j.verdict, flags: j.flags,
+      official: official ? { ticker: official.ticker, name: official.name, address: official.address, isin: official.isin, multiplier: official.multiplier, pendingMultiplier: official.pendingMultiplier, status: official.status, paused: facts.paused } : null,
+      realTokenForTicker: officialForTicker ? { ticker: officialForTicker.ticker, address: officialForTicker.address, name: officialForTicker.name } : null,
+      reference: feedInfo ? { source: "Chainlink", feed: feedInfo.proxy, priceUsd: feedInfo.price, updatedAt: new Date(feedInfo.updatedAt * 1000).toISOString() } : null,
+      dex: dex ? { priceUsd: dex.price, liquidityUsd: dex.liquidityUsd, premiumPct: j.premiumPct ?? null, url: dex.url } : null,
+      copycats: clones,
+    };
+  }
+  return { check, load };
+}
