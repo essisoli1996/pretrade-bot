@@ -2,7 +2,7 @@
   "network": "base",
   "services": {
     "token-check": {
-      "description": "Pre-trade token safety check for Base, Solana, Robinhood Chain and major EVM chains. One call returns a verdict (OK / CAUTION / DANGER), a 0-100 risk score and ranked flags: honeypot, sell/buy tax, owner privileges, mint and freeze authority, creator honeypot history, holder concentration, LP lock, liquidity and pair age, plus the largest sell that stays under 1/2/5% price impact. Call before any swap or buy.",
+      "description": "Pre-trade token safety check for Base, Solana, Robinhood Chain and major EVM chains. One call returns a verdict (OK / CAUTION / DANGER), a 0-100 risk score and ranked flags: honeypot, sell/buy tax, owner privileges, mint and freeze authority, creator honeypot history, holder concentration, LP lock, liquidity and pair age, plus the largest sell that stays under 1/2/5% price impact. On Robinhood Chain Uniswap v4 pools it also reads the pool's hook and simulates a real buy and sell on the live pool (nothing is sent), so honeypots and fee-skimming hooks are measured, not guessed. Call before any swap or buy.",
       "price": "0.01",
       "methods": [
         "GET"
@@ -20,7 +20,8 @@
           "taxes": "{buy, sell}",
           "market": "{symbol, priceUsd, marketCapUsd, liquidityUsd, volume24hUsd, pairAgeHours, topPair}",
           "creator": "{address, honeypotHistory} (EVM)",
-          "exit": "{impact1pct, impact2pct, impact5pct} max sell size in USD"
+          "exit": "{impact1pct, impact2pct, impact5pct} max sell size in USD",
+          "v4": "{hook: {address, standard, permissions, dynamicFee, lpFeePct, upgradeable, owner}, simulation: {status: ok | honeypot | cooldown | sell-failed | buy-failed | inconclusive | skipped | unavailable, detail, roundTripCostPct, buyTaxPct, sizeUsd, block}} for Robinhood Chain v4 pools, else null"
         }
       },
       "category": "security",
@@ -143,7 +144,7 @@
       ]
     },
     "exit-check": {
-      "description": "Can I get out? Position-sizing and exit check for any DEX-traded token on Base, Solana, Robinhood Chain and major EVM chains. Give a token and a USD size and get estimated price impact, sell tax, total exit cost, expected proceeds, share of 24h volume, an exitability rating (EASY / OK / COSTLY / HARD / TRAPPED) and the largest single sell that stays under 1, 2 and 5% impact. Flags tokens whose contract blocks selling. Use before entering a position or when planning an exit.",
+      "description": "Can I get out? Position-sizing and exit check for any DEX-traded token on Base, Solana, Robinhood Chain and major EVM chains. Give a token and a USD size and get estimated price impact, sell tax, total exit cost, expected proceeds, share of 24h volume, an exitability rating (EASY / OK / COSTLY / HARD / TRAPPED) and the largest single sell that stays under 1, 2 and 5% impact. Flags tokens whose contract blocks selling; on Robinhood Chain v4 pools it simulates a real buy and sell on the live pool and reports the measured round-trip cost. Use before entering a position or when planning an exit.",
       "price": "0.01",
       "methods": [
         "GET"
@@ -161,7 +162,8 @@
           "maxSellUsd": "{impact1pct, impact2pct, impact5pct}",
           "sellBlockedByContract": "boolean",
           "pool": "{deepestPoolUsd, totalLiquidityUsd, volume24hUsd, dex, url}",
-          "contractVerdict": "{verdict, riskScore, topFlags}"
+          "contractVerdict": "{verdict, riskScore, topFlags}",
+          "simulation": "Robinhood Chain v4 pools: {status, detail, roundTripCostPct, buyTaxPct, sizeUsd, block}, else null"
         }
       },
       "category": "trading",
