@@ -1,12 +1,5 @@
 import { writeFileSync } from "node:fs";
-const out = []; const g = async (u, o) => { try { const r = await fetch(u, o); const t = await r.text(); let j = null; try { j = JSON.parse(t); } catch {} return { status: r.status, url: r.url, j, t }; } catch (e) { return { status: 0, t: String(e) }; } };
-const URL0 = "https://spellbook.awizard.dev";
-const rd = await g("https://rdap.org/domain/awizard.dev");
-out.push(`awizard.dev rdap: ${(rd.j?.events ?? []).map((e) => e.eventAction + " " + String(e.eventDate).slice(0, 10)).join(" | ") || rd.t.slice(0, 120)}`);
-const ph = await g(`https://api.gopluslabs.io/api/v1/phishing_site?url=${encodeURIComponent(URL0)}`);
-out.push(`goplus phishing_site: ${JSON.stringify(ph.j?.result ?? ph.t).slice(0, 200)}`);
-const page = await g(URL0, { headers: { "User-Agent": "Mozilla/5.0 (pretrade link scanner; read-only)" } });
-out.push(`page: HTTP ${page.status} final ${page.url} bytes ${page.t.length}`);
-const marks = [["setApprovalForAll", /setApprovalForAll/i], ["eth_signTypedData_v4", /eth_signTypedData_v4/i], ["permit2", /permit2|PermitBatch|PermitTransferFrom/i], ["7702/sendCalls", /authorizationList|wallet_sendCalls|7702/i], ["seaport", /seaport/i], ["approve", /0x095ea7b3|increaseAllowance/i], ["connect wallet ui", /connect\s*wallet|walletconnect|web3modal|rainbowkit|appkit/i], ["ed25519 challenge", /ed25519|challenge/i]];
-out.push("markers: " + marks.map(([n, re]) => `${n}=${re.test(page.t)}`).join(" "));
-writeFileSync("probe2.log", out.join("\n") + "\n"); console.log("ok");
+const r = await fetch("https://musebook.me/api/identity.json?muse_id=muse_d2pa9v3lqo");
+const j = await r.json();
+writeFileSync("probe2.log", JSON.stringify(j, null, 1));
+console.log(JSON.stringify(j));
