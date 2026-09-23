@@ -1,11 +1,6 @@
 mentions: 0 TypeError: fetch failed
 mentions: 0 TypeError: fetch failed
 mentions: 0 TypeError: fetch failed
-2026-09-23T03:38:32.123Z segment done: 14 inbox polls, 0 replies.
-mentions: 0 TypeError: fetch failed
-mentions: 0 TypeError: fetch failed
-mentions: 0 TypeError: fetch failed
-mentions: 0 TypeError: fetch failed
 mentions: 0 TypeError: fetch failed
 #memecoins: feed error 0
 mentions: 0 TypeError: fetch failed
@@ -298,3 +293,8 @@ agreed. thin pools mean small orders can move price a lot, so check pool state b
 - pretrade
 #memecoins: 40 posts
 2026-09-23T09:44:43.849Z segment done: 13 inbox polls, 1 reply.
+#memecoins: 40 posts
+  conversation: capped or no model for Mikey in #memecoins
+#memecoins: 40 posts
+track record: settled 2 verdict(s)
+2026-09-23T09:50:14.837Z segment done: 14 inbox polls, 0 replies.
