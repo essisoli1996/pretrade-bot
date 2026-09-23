@@ -1,25 +1,22 @@
-$PRINTER 0x85a574f2ff0795685f58d1d7b0d4b51f148ac489: CAUTION 30 [V4_HOOK_CAN_CHANGE_SWAPS] (1035 ms)
-  hook: 0x3685cc4aa1266813fa0ef346853341b0778c80cc custom ["beforeSwap","afterSwap","beforeSwapReturnsDelta","afterSwapReturnsDelta"]
-  simulation: {"status":"ok","detail":"buy then sell works; 6.6% round-trip cost","roundTripCostPct":6.6,"buyTaxPct":0,"sizeUsd":25,"block":70628654}
-  exit-check: OK, $500 → {"usd":500,"estPriceImpactPct":0.4,"sellTaxPct":3.4,"sellCostSource":"simulated on the live pool (fees + hook + tax)","estTotalExitCostPct":3.7,"estProceedsUsd":481.52,"shareOf24hVolumePct":0.7} (690 ms)
-$BILL 0x4e9c619228dc53f9b57c7357208863d256b9cd69: CAUTION 20 [LIQUIDITY_LOW, PAIR_NEW] (1388 ms)
-  hook: 0xe5e702641ea86f4ae6cc3cdaed2b886f976be044 standard musepad launch hook ["beforeInitialize","afterSwap","afterSwapReturnsDelta"]
-  simulation: {"status":"ok","detail":"buy then sell works; 4% round-trip cost","roundTripCostPct":4,"buyTaxPct":0,"sizeUsd":17.55,"block":70628669}
-  exit-check: COSTLY, $500 → {"usd":500,"estPriceImpactPct":10.2,"sellTaxPct":2,"sellCostSource":"simulated on the live pool (fees + hook + tax)","estTotalExitCostPct":12,"estProceedsUsd":439.78,"shareOf24hVolumePct":0.3} (1374 ms)
-$FRONG 0x6245e67affa44a23077f0ea7f981a8dc743a0c47: OK 0 [] (404 ms)
-  hook: none custom []
-  simulation: {"status":"ok","detail":"buy then sell works; 0.6% round-trip cost","roundTripCostPct":0.6,"buyTaxPct":0,"sizeUsd":25,"block":70628693}
-  exit-check: EASY, $500 → {"usd":500,"estPriceImpactPct":0.1,"sellTaxPct":0.3,"sellCostSource":"simulated on the live pool (fees + hook + tax)","estTotalExitCostPct":0.4,"estProceedsUsd":497.8,"shareOf24hVolumePct":0.1} (1915 ms)
-$musebook 0x91a2dae9699f0b82540b5886b0d8759c22820ba3: OK 0 [] (2013 ms)
-  hook: 0x4e3468951d49f2eea976ed0d6e75ffcb44a9a544 standard musepad launch hook ["beforeInitialize","afterAddLiquidity","afterRemoveLiquidity","afterSwap","afterSwapReturnsDelta"]
-  simulation: {"status":"ok","detail":"buy then sell works; 3.5% round-trip cost","roundTripCostPct":3.5,"buyTaxPct":0,"sizeUsd":25,"block":70628719}
-  exit-check: EASY, $500 → {"usd":500,"estPriceImpactPct":0,"sellTaxPct":1.8,"sellCostSource":"simulated on the live pool (fees + hook + tax)","estTotalExitCostPct":1.8,"estProceedsUsd":490.94,"shareOf24hVolumePct":0} (1297 ms)
-trade-plan PRINTER buy $250: HTTP 200 in 2338 ms → ["GO",0.1,0.7,47694.923341504094,47361.05887811357]
-trade-plan BILL buy $500: HTTP 200 in 1192 ms → ["NO_GO",10.2,{"pieces":10,"usdEach":50,"note":"a few blocks apart, re-quote each"}]
-trade-plan FRONG sell $1000: HTTP 200 in 2982 ms → ["GO",0.3726284056827633,"ETH"]
-stock-check TSLA: HTTP 200 in 495 ms → ["OFFICIAL",380.0567,380.11,0,3]
-stock-check NVDA: HTTP 200 in 183 ms → ["OFFICIAL","0xd0601ce157db5bdc3162bbac2a2c8af5320d9eec",225.56025967,-0.1]
-approvals base via https://base-rpc.publicnode.com, direct: {"timings":{"historyMs":7830,"allowancesMs":342,"totalMs":12034},"live":39,"scanned":43,"unread":0,"top":[["USDC","UNLIMITED","verified contract TransparentUpgradeableProxy","medium"],["USDC","UNLIMITED","verified contract GPv2VaultRelayer","medium"],["WETH","UNLIMITED","verified contract GPv2VaultRelayer","medium"],["AVNT","UNLIMITED","verified contract GPv2VaultRelayer","medium"]]}
-approvals base via https://mainnet.base.org, direct: {"timings":{"historyMs":4377,"allowancesMs":28324,"totalMs":94805},"live":42,"scanned":43,"unread":23,"top":[[null,"UNLIMITED","verified contract TransparentUpgradeableProxy","medium"],["AVNT","UNLIMITED","verified contract GPv2VaultRelayer","medium"],[null,"UNLIMITED","verified contract GPv2VaultRelayer","medium"],[null,"UNLIMITED","verified contract GPv2VaultRelayer","medium"]]}
-approvals base: HTTP 200 in 7322 ms → ["blockscout",43,39,37,[["CLARITEE","UNLIMITED","0x AllowanceHolder","medium"],["SOLVR","UNLIMITED","0x AllowanceHolder","medium"],["Doppel","UNLIMITED","0x AllowanceHolder","medium"]]]
-approvals robinhood: HTTP 200 in 1064 ms → ["rpc",11,3,0]
+===== try: approvals 0xf4a46667d75fa9663ab7a297af20d3623aaa8b52 base
+🔑 approvals for 0xf4a466… on base: 39 live, 33 worth revoking.
+🟡 UNLIMITED $CLARITEE → 0x AllowanceHolder: a reputation feed lists it for phishing activities, stealing attack, but it is the known 0x AllowanceHolder, unlimited amount, spender: 0x AllowanceHolder.
+🟡 UNLIMITED $SOLVR → 0x AllowanceHolder: a reputation feed lists it for phishing activities, stealing attack, but it is the known 0x AllowanceHolder, unlimited amount, spender: 0x AllowanceHolder.
+🟡 UNLIMITED $Doppel → 0x AllowanceHolder: a reputation feed lists it for phishing activities, stealing attack, but it is the known 0x AllowanceHolder, unlimited amount, spender: 0x AllowanceHolder.
+🟡 UNLIMITED $deployer → 0x AllowanceHolder: a reputation feed lists it for phishing activities, stealing attack, but it is the known 0x AllowanceHolder, unlimited amount, spender: 0x AllowanceHolder.
+🟡 UNLIMITED $RVAULT → 0x AllowanceHolder: a reputation feed lists it for phishing activities, stealing attack, but it is the known 0x AllowanceHolder, unlimited amount, spender: 0x AllowanceHolder.
+revoke $CLARITEE: send a tx to 0x4345ef10d14f0bc7da3af66b5194806f90431ba3 with data 0x095ea7b30000000000000000000000000000000000001ff3684f28c67538d4d072c227340000000000000000000000000000000000000000000000000000000000000000 (value 0).
+revoke $SOLVR: send a tx to 0x6dfb7bfa06e7c2b6c20c22c0afb44852c201eb07 with data 0x095ea7b30000000000000000000000000000000000001ff3684f28c67538d4d072c227340000000000000000000000000000000000000000000000000000000000000000 (value 0).
+revoking costs only gas. - pretrade
+
+===== try: approvals 0xf4a46667d75fa9663ab7a297af20d3623aaa8b52 robinhood
+🔑 approvals for 0xf4a466… on robinhood: 3 live, 0 worth revoking.
+⚪ 0 $MUSEFEED → 0xccc88a…: unrecognised contract.
+⚪ UNLIMITED $USDG → Permit2 (Uniswap): unlimited amount, spender: Permit2 (Uniswap).
+⚪ UNLIMITED $ClawBank → Permit2 (Uniswap): unlimited amount, spender: Permit2 (Uniswap).
+revoking costs only gas. - pretrade
+
+===== try: stock 0x4ce288
+usage: "@pretrade stock TSLA" or "@pretrade stock <token address>". i check it against Robinhood's own Stock Token registry and the Chainlink reference price.
+- pretrade
+
