@@ -52,7 +52,8 @@ function latestGrants(logs) {
     const k = `${kind}|${token}|${spender}`;
     const at = [parseInt(l.blockNumber ?? "0x0", 16), parseInt(l.logIndex ?? "0x0", 16)];
     const prev = m.get(k);
-    if (!prev || at[0] > prev.at[0] || (at[0] === prev.at[0] && at[1] > prev.at[1])) m.set(k, { kind, token, spender, at, block: at[0] });
+    const granted = kind === "erc20" ? (() => { try { return BigInt(l.data && l.data !== "0x" ? l.data : "0x0"); } catch { return 0n; } })() : null;
+    if (!prev || at[0] > prev.at[0] || (at[0] === prev.at[0] && at[1] > prev.at[1])) m.set(k, { kind, token, spender, at, block: at[0], granted });
   }
   return [...m.values()];
 }
@@ -65,7 +66,12 @@ function grantRisk(g) {
   const why = [];
   let level = "low";
   const bump = (l) => { const o = { low: 0, medium: 1, high: 2, critical: 3 }; if (o[l] > o[level]) level = l; };
-  if (g.flagged?.length) { bump("critical"); why.push(`spender is flagged for ${g.flagged.join(", ")}`); }
+  if (g.flagged?.length) {
+    // reputation feeds also list well-known infrastructure that drainers route through (GoPlus flags the verified
+    // 0x AllowanceHolder, for one); for a recognised spender the flag is shown, not escalated
+    if (g.spenderLabel) { bump("medium"); why.push(`a reputation feed lists it for ${g.flagged.join(", ")}, but it is the known ${g.spenderLabel}`); }
+    else { bump("critical"); why.push(`spender is flagged for ${g.flagged.join(", ")}`); }
+  }
   if (g.spenderIsContract === false) { bump(g.kind === "all" || g.amount >= UNLIMITED ? "critical" : "high"); why.push("spender is a plain wallet, not a protocol contract"); }
   if (g.kind === "all") { bump(g.spenderLabel ? "medium" : "high"); why.push("can move every item in the collection"); }
   else if (g.amount >= UNLIMITED) { bump(g.spenderLabel ? "low" : "medium"); why.push("unlimited amount"); }
@@ -82,6 +88,13 @@ function revokeTx(g, owner) {
     : { from: owner, to: g.token, data: "0x095ea7b3" + spender + "0".repeat(64), value: "0x0" };
 }
 
+/** Widely used spenders, so a normal router approval isn't reported as an unknown contract. Same address on every chain. */
+const KNOWN_SPENDERS = {
+  "0x000000000022d473030f116ddee9f6b43ac78ba3": "Permit2 (Uniswap)",
+  "0x0000000000001ff3684f28c67538d4d072c22734": "0x AllowanceHolder",
+  "0x111111125421ca6dc452d289314280a0f8842a65": "1inch Router v6",
+};
+
 const EXPLORERS = {
   robinhood: "https://robinhoodchain.blockscout.com",
   base: "https://base.blockscout.com",
@@ -89,6 +102,16 @@ const EXPLORERS = {
 };
 
 function makeApprovals({ rpcFor, known = {}, reputation = null, http = null, explorers = EXPLORERS }) {
+  known = { ...KNOWN_SPENDERS, ...known };
+  // public RPCs rate-limit a burst of reads; a failed read must never look like "no approval"
+  const patient = (rpc) => async (method, params) => {
+    for (let i = 0; ; i++) {
+      const r = await rpc(method, params);
+      const limited = r?.error && (r.error.code === 429 || r.error.code === -32005 || /rate|limit|too many/i.test(r.error.message ?? ""));
+      if (!limited || i >= 3) return r;
+      await new Promise((ok) => setTimeout(ok, 700 * 2 ** i));
+    }
+  };
   /** Whole-history logs from Blockscout. null when unavailable, so the caller can fall back. */
   async function explorerLogs(chain, wallet) {
     const base = explorers[chain];
@@ -133,22 +156,26 @@ function makeApprovals({ rpcFor, known = {}, reputation = null, http = null, exp
 
   /** chain: "robinhood" | "base" | … (whatever rpcFor knows). */
   async function audit(wallet, chain) {
-    const rpc = rpcFor(chain);
-    if (!rpc) return { error: `no RPC for ${chain}` };
+    const raw = rpcFor(chain);
+    if (!raw) return { error: `no RPC for ${chain}` };
+    const rpc = patient(raw);
     const owner = wallet.toLowerCase();
     const got = (await explorerLogs(chain, owner)) ?? (await logs(rpc, owner));
     if (got.error) return { error: `couldn't read the approval history (explorer unavailable, and the RPC says: ${got.error})` };
     const grants = latestGrants(got.logs);
     const live = [];
     for (const g of grants.slice(0, 60)) {
-      if (g.kind === "erc20") {
-        const r = await rpc("eth_call", [{ to: g.token, data: "0xdd62ed3e" + pad(owner).slice(2) + pad(g.spender).slice(2) }, "latest"]);
-        const amt = typeof r?.result === "string" && r.result.length >= 66 ? BigInt(r.result.slice(0, 66)) : 0n;
-        if (amt > 0n) live.push({ ...g, amount: amt });
-      } else {
-        const r = await rpc("eth_call", [{ to: g.token, data: "0xe985e9c5" + pad(owner).slice(2) + pad(g.spender).slice(2) }, "latest"]);
-        if (typeof r?.result === "string" && r.result.length >= 66 && BigInt(r.result.slice(0, 66)) === 1n) live.push(g);
+      const sel = g.kind === "erc20" ? "0xdd62ed3e" : "0xe985e9c5";
+      const r = await rpc("eth_call", [{ to: g.token, data: sel + pad(owner).slice(2) + pad(g.spender).slice(2) }, "latest"]);
+      const readable = typeof r?.result === "string" && r.result.length >= 66;
+      if (!readable) {
+        // can't read the current state: report what was granted rather than silently dropping it
+        if (g.kind === "all" || (g.granted ?? 0n) > 0n) live.push({ ...g, amount: g.granted ?? 0n, unread: true });
+        continue;
       }
+      const v = BigInt(r.result.slice(0, 66));
+      if (g.kind === "erc20" && v > 0n) live.push({ ...g, amount: v });
+      if (g.kind === "all" && v === 1n) live.push(g);
     }
     const meta = new Map();
     const symbol = async (token) => {
@@ -175,6 +202,7 @@ function makeApprovals({ rpcFor, known = {}, reputation = null, http = null, exp
       const spenderIsContract = await isContract(g.spender);
       const flagged = reputation ? await reputation(g.spender) : [];
       const risk = grantRisk({ ...g, spenderIsContract, spenderLabel: known[g.spender] ?? null, flagged });
+      if (g.unread) risk.why.push("current allowance unreadable right now; this is the amount last granted");
       const amount = g.kind === "all" ? "ALL" : g.amount >= UNLIMITED ? "UNLIMITED"
         : m.decimals === null ? g.amount.toString() : (Number(g.amount) / 10 ** m.decimals).toLocaleString("en-US", { maximumFractionDigits: 4 });
       out.push({ token: g.token, symbol: m.symbol, spender: g.spender, spenderLabel: known[g.spender] ?? null, kind: g.kind, amount, grantedAtBlock: g.block, risk: risk.level, why: risk.why, revoke: risk.level === "low" ? null : revokeTx(g, owner) });
@@ -185,7 +213,7 @@ function makeApprovals({ rpcFor, known = {}, reputation = null, http = null, exp
   }
   return { audit };
 }
-return { latestGrants, grantRisk, revokeTx, EXPLORERS, makeApprovals };
+return { latestGrants, grantRisk, revokeTx, KNOWN_SPENDERS, EXPLORERS, makeApprovals };
 })();
 // ── END bundle ──
 
