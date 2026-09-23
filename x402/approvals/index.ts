@@ -4,7 +4,7 @@
 // spender code and reputation checks and a ready revoke transaction for each risky one.
 const RPCS: Record<string, string> = {
   robinhood: "https://rpc.mainnet.chain.robinhood.com",
-  base: "https://mainnet.base.org",
+  base: "https://base-rpc.publicnode.com",
   ethereum: "https://ethereum-rpc.publicnode.com",
 };
 const GOPLUS_ID: Record<string, string> = { robinhood: "4663", base: "8453", ethereum: "1" };
@@ -174,11 +174,20 @@ function makeApprovals({ rpcFor, known = {}, reputation = null, http = null, exp
     const got = (await explorerLogs(chain, owner)) ?? (await logs(rpc, owner));
     if (got.error) return { error: `couldn't read the approval history (explorer unavailable, and the RPC says: ${got.error})` };
     timings.historyMs = Date.now() - t0;
-    const grants = latestGrants(got.logs).sort((a, b) => b.block - a.block); // newest first
+    const grants = latestGrants(got.logs).sort((a, b) => b.block - a.block).slice(0, 80); // newest first
     const live = [];
-    await inPool(grants.slice(0, 80), 6, async (g) => {
-      const sel = g.kind === "erc20" ? "0xdd62ed3e" : "0xe985e9c5";
-      const r = await rpc("eth_call", [{ to: g.token, data: sel + pad(owner).slice(2) + pad(g.spender).slice(2) }, "latest"]);
+    const callOf = (g) => ["eth_call", [{ to: g.token, data: (g.kind === "erc20" ? "0xdd62ed3e" : "0xe985e9c5") + pad(owner).slice(2) + pad(g.spender).slice(2) }, "latest"]];
+    // one JSON-RPC batch per 20 reads when the caller offers it: public RPCs throttle bursts of single calls
+    const batched = new Map();
+    if (raw.batch) {
+      for (let i = 0; i < grants.length; i += 20) {
+        const part = grants.slice(i, i + 20);
+        const res = await raw.batch(part.map(callOf)).catch(() => null);
+        if (Array.isArray(res)) part.forEach((g, j) => { if (res[j]) batched.set(g, res[j]); });
+      }
+    }
+    await inPool(grants, 6, async (g) => {
+      const r = batched.get(g) ?? (await rpc(...callOf(g)));
       const readable = typeof r?.result === "string" && r.result.length >= 66;
       if (!readable) {
         // can't read the current state: report what was granted rather than silently dropping it
@@ -201,8 +210,19 @@ function makeApprovals({ rpcFor, known = {}, reputation = null, http = null, exp
       return v;
     };
     const codeCache = new Map();
+    const names = new Map();
     const isContract = async (a) => {
       if (codeCache.has(a)) return codeCache.get(a);
+      // Blockscout knows whether an address is a contract, whether its source is verified, and its name
+      if (explorers[chain] && http) {
+        const r = await http(`${explorers[chain]}/api/v2/addresses/${a}`);
+        const j = r.json;
+        if (j && typeof j.is_contract === "boolean") {
+          if (j.is_contract && j.is_verified && j.name) names.set(a, `verified contract ${j.name}`);
+          codeCache.set(a, j.is_contract);
+          return j.is_contract;
+        }
+      }
       const c = (await rpc("eth_getCode", [a, "latest"]))?.result;
       const v = typeof c === "string" ? c !== "0x" && !c.toLowerCase().startsWith("0xef0100") : null;
       codeCache.set(a, v);
@@ -218,10 +238,11 @@ function makeApprovals({ rpcFor, known = {}, reputation = null, http = null, exp
       const spenderIsContract = await isContract(g.spender);
       const flagged = await flaggedFor(g.spender);
       const risk = grantRisk({ ...g, spenderIsContract, spenderLabel: known[g.spender] ?? null, flagged });
+      if (!known[g.spender] && names.has(g.spender)) risk.why.push(names.get(g.spender));
       if (g.unread) risk.why.push("current allowance unreadable right now; this is the amount last granted");
       const amount = g.kind === "all" ? "ALL" : g.amount >= UNLIMITED ? "UNLIMITED"
         : m.decimals === null ? g.amount.toString() : (Number(g.amount) / 10 ** m.decimals).toLocaleString("en-US", { maximumFractionDigits: 4 });
-      out.push({ token: g.token, symbol: m.symbol, spender: g.spender, spenderLabel: known[g.spender] ?? null, kind: g.kind, amount, grantedAtBlock: g.block, risk: risk.level, why: risk.why, revoke: risk.level === "low" ? null : revokeTx(g, owner) });
+      out.push({ token: g.token, symbol: m.symbol, spender: g.spender, spenderLabel: known[g.spender] ?? names.get(g.spender) ?? null, kind: g.kind, amount, grantedAtBlock: g.block, risk: risk.level, why: risk.why, revoke: risk.level === "low" ? null : revokeTx(g, owner) });
     }
     const order = { critical: 0, high: 1, medium: 2, low: 3 };
     out.sort((a, b) => order[a.risk] - order[b.risk]);
@@ -242,7 +263,16 @@ export default async function handler(req: Request): Promise<Response> {
   const chain = (url.searchParams.get("chain") ?? "robinhood").toLowerCase();
   if (!/^0x[0-9a-f]{40}$/.test(wallet)) return bad(400, "invalid_wallet", "Pass ?wallet=0x…");
   if (!RPCS[chain]) return bad(400, "unsupported_chain", `Supported: ${Object.keys(RPCS).join(", ")}`);
-  const rpcFor = (c: string) => async (method: string, params: unknown[]) => (await http(RPCS[c], { jsonrpc: "2.0", id: 1, method, params })).json ?? {};
+  const rpcFor = (c: string) => {
+    const one: any = async (method: string, params: unknown[]) => { const r = await http(RPCS[c], { jsonrpc: "2.0", id: 1, method, params }); return r.json ?? { error: { code: r.status, message: r.text.slice(0, 80) } }; };
+    one.batch = async (calls: [string, unknown[]][]) => {
+      const r = await http(RPCS[c], calls.map(([method, params], id) => ({ jsonrpc: "2.0", id, method, params })));
+      if (!Array.isArray(r.json)) return null;
+      const byId = new Map(r.json.map((x: any) => [x.id, x]));
+      return calls.map((_, id) => byId.get(id) ?? null);
+    };
+    return one;
+  };
   const reputation = async (a: string) => {
     const r = await http(`https://api.gopluslabs.io/api/v1/address_security/${a}?chain_id=${GOPLUS_ID[chain]}`);
     const x = r.json?.result ?? {};

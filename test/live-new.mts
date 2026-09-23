@@ -21,7 +21,11 @@ show("stock-check NVDA", await call(stockCheck, "stock-check?ticker=NVDA"), (b) 
 // @ts-ignore
 const { makeApprovals } = await import("../bot/approvals.mjs");
 const httpJ = async (u: string, body?: unknown) => { const r = await fetch(u, body ? { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) } : {}); const text = await r.text(); let json = null; try { json = JSON.parse(text); } catch {} return { ok: r.ok, status: r.status, json, text }; };
-const direct = await makeApprovals({ http: httpJ, rpcFor: () => async (method: string, params: unknown[]) => { const r = await httpJ("https://mainnet.base.org", { jsonrpc: "2.0", id: 1, method, params }); return r.json ?? { error: { code: r.status, message: r.text.slice(0, 80) } }; } }).audit(WALLET, "base");
-console.log("approvals base, direct:", JSON.stringify({ timings: direct.timings, live: direct.live, scanned: direct.scannedGrants, unread: direct.approvals?.filter((x: any) => x.why.some((w: string) => /unreadable/.test(w))).length }));
+for (const url of ["https://base-rpc.publicnode.com", "https://mainnet.base.org"]) {
+  const one: any = async (method: string, params: unknown[]) => { const r = await httpJ(url, { jsonrpc: "2.0", id: 1, method, params }); return r.json ?? { error: { code: r.status, message: r.text.slice(0, 80) } }; };
+  one.batch = async (calls: any[]) => { const r = await httpJ(url, calls.map(([method, params]: any, id: number) => ({ jsonrpc: "2.0", id, method, params }))); if (!Array.isArray(r.json)) return null; const m = new Map(r.json.map((x: any) => [x.id, x])); return calls.map((_: any, id: number) => m.get(id) ?? null); };
+  const direct = await makeApprovals({ http: httpJ, rpcFor: () => one }).audit(WALLET, "base");
+  console.log(`approvals base via ${url}, direct:`, JSON.stringify({ timings: direct.timings, live: direct.live, scanned: direct.scannedGrants, unread: direct.approvals?.filter((x: any) => x.why.some((w: string) => /unreadable/.test(w))).length, top: direct.approvals?.slice(0, 4).map((x: any) => [x.symbol, x.amount, x.spenderLabel ?? x.spender.slice(0, 10), x.risk]) }));
+}
 show("approvals base", await call(approvals, `approvals?wallet=${WALLET}&chain=base`), (b) => [b.historySource, b.scannedGrants, b.live, b.worthRevoking, b.approvals?.slice(0, 3).map((x: any) => [x.symbol, x.amount, x.spenderLabel ?? x.spender, x.risk])]);
 show("approvals robinhood", await call(approvals, `approvals?wallet=${WALLET}&chain=robinhood`), (b) => [b.historySource, b.scannedGrants, b.live, b.worthRevoking]);
