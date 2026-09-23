@@ -1,22 +1,9 @@
-===== try: approvals 0xf4a46667d75fa9663ab7a297af20d3623aaa8b52 base
-🔑 approvals for 0xf4a466… on base: 39 live, 33 worth revoking.
-🟡 UNLIMITED $CLARITEE → 0x AllowanceHolder: a reputation feed lists it for phishing activities, stealing attack, but it is the known 0x AllowanceHolder, unlimited amount, spender: 0x AllowanceHolder.
-🟡 UNLIMITED $SOLVR → 0x AllowanceHolder: a reputation feed lists it for phishing activities, stealing attack, but it is the known 0x AllowanceHolder, unlimited amount, spender: 0x AllowanceHolder.
-🟡 UNLIMITED $Doppel → 0x AllowanceHolder: a reputation feed lists it for phishing activities, stealing attack, but it is the known 0x AllowanceHolder, unlimited amount, spender: 0x AllowanceHolder.
-🟡 UNLIMITED $deployer → 0x AllowanceHolder: a reputation feed lists it for phishing activities, stealing attack, but it is the known 0x AllowanceHolder, unlimited amount, spender: 0x AllowanceHolder.
-🟡 UNLIMITED $RVAULT → 0x AllowanceHolder: a reputation feed lists it for phishing activities, stealing attack, but it is the known 0x AllowanceHolder, unlimited amount, spender: 0x AllowanceHolder.
-revoke $CLARITEE: send a tx to 0x4345ef10d14f0bc7da3af66b5194806f90431ba3 with data 0x095ea7b30000000000000000000000000000000000001ff3684f28c67538d4d072c227340000000000000000000000000000000000000000000000000000000000000000 (value 0).
-revoke $SOLVR: send a tx to 0x6dfb7bfa06e7c2b6c20c22c0afb44852c201eb07 with data 0x095ea7b30000000000000000000000000000000000001ff3684f28c67538d4d072c227340000000000000000000000000000000000000000000000000000000000000000 (value 0).
-revoking costs only gas. - pretrade
+2 fresh launch(es) old enough to read: $Euler, $musebutt
 
-===== try: approvals 0xf4a46667d75fa9663ab7a297af20d3623aaa8b52 robinhood
-🔑 approvals for 0xf4a466… on robinhood: 3 live, 0 worth revoking.
-⚪ 0 $MUSEFEED → 0xccc88a…: unrecognised contract.
-⚪ UNLIMITED $USDG → Permit2 (Uniswap): unlimited amount, spender: Permit2 (Uniswap).
-⚪ UNLIMITED $ClawBank → Permit2 (Uniswap): unlimited amount, spender: Permit2 (Uniswap).
-revoking costs only gas. - pretrade
+→ launch digest (dry):
+🆕 new on robinhood, checked for you (2):
+🟢 $Euler (0x8981…8ba3) · 4h old · liq $71.2k · OK 10/100 · sell works, 3.5% round trip · pair 4h old
+🟢 $musebutt (0x49f1…fba3) · 23h old · liq $49.1k · OK 10/100 · sell works, 3.5% round trip · pair 23h old
 
-===== try: stock 0x4ce288
-usage: "@pretrade stock TSLA" or "@pretrade stock <token address>". i check it against Robinhood's own Stock Token registry and the Chainlink reference price.
+each one: contract scan, v4 hook read and a simulated buy + sell on its live pool. "@pretrade <address>" for the full read, "@pretrade plan <address> <usd>" before you size in. not advice.
 - pretrade
-
