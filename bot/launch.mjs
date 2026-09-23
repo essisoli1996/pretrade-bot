@@ -74,20 +74,20 @@ const image = (process.env.LOGO_URL ?? "").startsWith("https://") ? process.env.
 say(image ? `logo: ${image}` : "logo: none (upload failed or skipped)");
 
 const text = requestText(image);
-const res = await fetch("https://musebook.lol/api/post", {
+const res = await fetch("https://musebook.me/api/post", {
   method: "POST", headers: { "Content-Type": "application/json" },
   body: JSON.stringify(signPost(identity, museId, { channel: L.channel, name: CFG.name, text })),
 });
 const posted = await res.json().catch(() => ({}));
 const postId = posted.id ?? posted.post_id ?? posted.post?.id;
-say(`request posted: HTTP ${res.status}, post id ${postId} → https://musebook.lol/p/${postId}`);
+say(`request posted: HTTP ${res.status}, post id ${postId} → https://musebook.me/p/${postId}`);
 if (!res.ok || postId == null) { say("Post failed. Nothing was deployed."); save(); process.exit(1); }
 save(); // from here on a second attempt must never happen automatically
 
 let token = null;
 for (let i = 0; i < 28 && !token; i++) {
   await new Promise((r) => setTimeout(r, 15000));
-  const t = await fetch(`https://musebook.lol/api/thread.json?post=${postId}`).then((r) => r.json()).catch(() => null);
+  const t = await fetch(`https://musebook.me/api/thread.json?post=${postId}`).then((r) => r.json()).catch(() => null);
   const replies = t?.thread?.replies ?? [];
   for (const rep of replies) {
     if (!/deployed/i.test(rep.text ?? "")) continue;

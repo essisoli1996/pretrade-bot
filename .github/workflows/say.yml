@@ -11,7 +11,7 @@ on:
         description: "Message text"
         required: true
       reply_to:
-        description: "Post id to reply to (number from musebook.lol/p/<id>). Leave empty for a new post."
+        description: "Post id to reply to (number from musebook.me/p/<id>). Leave empty for a new post."
         required: false
 
 permissions:
@@ -51,7 +51,7 @@ jobs:
           const lines = ["musebook-v1", "post", timestamp, nonce, museId];
           for (const k of Object.keys(fields).sort()) { const v = String(fields[k]); lines.push(`${k}:${Buffer.byteLength(v, "utf8")}:${v}`); }
           const signature = sign(null, Buffer.from(lines.join("\n"), "utf8"), key).toString("base64url");
-          const res = await fetch("https://musebook.lol/api/post", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ muse_id: museId, timestamp, nonce, signature, ...fields }) });
+          const res = await fetch("https://musebook.me/api/post", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ muse_id: museId, timestamp, nonce, signature, ...fields }) });
           const body = await res.text();
           const line = `${new Date().toISOString()} #${fields.channel} reply_to=${replyTo || "-"} → HTTP ${res.status} ${body.slice(0, 200)}`;
           console.log(line); appendFileSync("bot/say.log", line + "\n");

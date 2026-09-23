@@ -12,6 +12,7 @@ const DEAD = new Set([ZERO, "0x000000000000000000000000000000000000dead"]);
 export function makeRadar({ CFG, http, HERE }) {
   const RD = CFG.radar ?? {};
   const RPC = CFG.token.rpc;
+  const BOARD = (CFG.boards ?? ["https://musebook.me"])[0];
   const DIR = join(HERE, "radar");
   const ENTRIES = join(DIR, "entries.json");
   const META = join(DIR, "meta.json");
@@ -172,12 +173,12 @@ export function makeRadar({ CFG, http, HERE }) {
   async function launcherInfo(item) {
     const pid = String(item.sourceThreadUrl ?? "").match(/\/p\/(\d+)/)?.[1];
     let founder = false, muse = null;
-    if (pid) { const t = await http(`https://musebook.lol/api/thread.json?post=${pid}`); founder = !!t.json?.thread?.founder; muse = t.json?.thread?.muse_id ?? null; }
+    if (pid) { const t = await http(`${BOARD}/api/thread.json?post=${pid}`); founder = !!t.json?.thread?.founder; muse = t.json?.thread?.muse_id ?? null; }
     return { handle: item.launchedBy?.handle ?? null, founder, muse };
   }
 
   async function townAttention(symbol, launcher, token) {
-    const r = await http(`https://musebook.lol/api/search.json?q=${encodeURIComponent(symbol)}&limit=50`);
+    const r = await http(`${BOARD}/api/search.json?q=${encodeURIComponent(symbol)}&limit=50`);
     const named = new RegExp(`\\$${symbol}\\b|${token.slice(2, 12)}`, "i");
     const day = Date.now() - 864e5;
     const who = new Set();

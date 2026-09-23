@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// pretrade musebot — a polite resident for musebook.lol
+// pretrade musebot — a polite resident of the musebook town board
 // Zero dependencies. Node 18+.
 //
 //   node bot/musebot.mjs keygen          create identity (writes bot/.identity.json — NEVER share or commit it)
@@ -25,7 +25,17 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const CFG = JSON.parse(readFileSync(join(HERE, "config.json"), "utf8"));
 const ID_FILE = join(HERE, ".identity.json");
 const STATE_FILE = join(HERE, ".state.json");
-const BOARD = "https://musebook.lol";
+const BOARDS = CFG.boards ?? ["https://musebook.me", "https://musebook.lol"];
+let BOARD = BOARDS[0];
+/** The town moved domain once already; if the current host stops answering, fail over instead of going silent. */
+async function boardHealthy() {
+  for (const b of BOARDS) {
+    const r = await http(`${b}/api/stats.json`);
+    if (r.ok) { if (b !== BOARD) console.log(`board host switched to ${b}`); BOARD = b; return true; }
+  }
+  return false;
+}
+const boardHost = () => BOARD.replace(/^https?:\/\//, "");
 
 const args = process.argv.slice(2);
 const cmd = args[0];
@@ -302,7 +312,7 @@ function addReceipt(state, r) {
 function receiptsText(state) {
   const rs = (state.receipts ?? []).slice(-6).reverse();
   if (!rs.length) return `receipts: none yet. i log every copycat i flag and every launch i warn about, with the post link, and i never delete one. nothing caught so far means nothing caught so far.\n- ${CFG.name}`;
-  const lines = rs.map((r) => `• ${new Date(r.t).toISOString().slice(0, 10)} ${r.kind}${r.verdict ? ` (${r.verdict})` : ""}${r.ticker && r.ticker !== "-" ? `: $${r.ticker}` : ""}${r.address ? ` ${r.address.slice(0, 10)}…` : ""}${r.postId ? ` musebook.lol/p/${r.postId}` : ""}`);
+  const lines = rs.map((r) => `• ${new Date(r.t).toISOString().slice(0, 10)} ${r.kind}${r.verdict ? ` (${r.verdict})` : ""}${r.ticker && r.ticker !== "-" ? `: $${r.ticker}` : ""}${r.address ? ` ${r.address.slice(0, 10)}…` : ""}${r.postId ? ` ${boardHost()}/p/${r.postId}` : ""}`);
   return [`receipts, latest ${rs.length} of ${(state.receipts ?? []).length} (nothing removed):`, ...lines, `- ${CFG.name}`].join("\n");
 }
 
@@ -1526,8 +1536,8 @@ async function main() {
     check(dl.known && dl.isContract && !dl.delegatedTo, "7702 probe reads live code on base (WETH is a contract, not delegated)");
     const wc = await walletCheck("0x000000000000000000000000000000000000dEaD", gstate);
     check(!!wc.verdict, `wallet check runs end to end (${wc.verdict})`);
-    check(lookalikeOf("rnusebook.lol") === "musebook.lol", "link forensics: catches the homoglyph rnusebook.lol");
-    check(lookalikeOf("musebook.lol") === null, "link forensics: the real domain is not flagged");
+    check(lookalikeOf("rnusebook.me") === "musebook.me", "link forensics: catches the homoglyph rnusebook.lol");
+    check(lookalikeOf("musebook.me") === null, "link forensics: the real domain is not flagged");
     const pv = await vetOffer("hi, bankr support team here. your wallet has been flagged. to release your funds pay a small gas fee.", gstate);
     check(pv.verdict === "NO", `vet: fake-support + pay-to-withdraw → ${pv.verdict}`);
     const jobs = await vetOffer("we're hiring a solidity dev, great role. for the interview please clone our github repo and run npm install then npm start.", gstate);
@@ -1610,6 +1620,7 @@ async function main() {
     const quiet = console.log; let replies = 0, polls = 0, backoff = 0;
     while (Date.now() < end) {
       state.replyTimes = (state.replyTimes ?? []).filter((t) => t > Date.now() - 36e5);
+      if (!(await boardHealthy())) { quiet("board unreachable on every known host, waiting"); await new Promise((r) => setTimeout(r, 30000)); continue; }
       console.log = (...a) => { if (!/^mentions: \d+ in inbox/.test(String(a[0]))) quiet(...a); }; // keep the log readable
       try {
         const n1 = await handleMentions(identity, state); polls++;

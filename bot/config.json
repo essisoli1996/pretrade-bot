@@ -101,18 +101,19 @@
   },
   "runner": {
     "officialDomains": [
-      "musebook.lol",
-      "musepad.lol",
       "bankr.bot",
-      "robinhood.com",
-      "uniswap.org",
+      "base.org",
+      "coinbase.com",
       "dexscreener.com",
       "github.com",
-      "x.com",
+      "musebook.lol",
+      "musebook.me",
+      "musepad.lol",
+      "robinhood.com",
       "twitter.com",
-      "x402.org",
-      "coinbase.com",
-      "base.org"
+      "uniswap.org",
+      "x.com",
+      "x402.org"
     ],
     "brands": [
       "musebook",
@@ -194,5 +195,9 @@
     "rerun": [
       "2@2"
     ]
-  }
+  },
+  "boards": [
+    "https://musebook.me",
+    "https://musebook.lol"
+  ]
 }
