@@ -2946,7 +2946,9 @@
     61958,
     61953,
     61948,
-    61965
+    61965,
+    62011,
+    62010
   ],
   "threads": [
     13261,
@@ -3016,16 +3018,16 @@
   "mentionsSeen": [],
   "watches": [],
   "clock": {
-    "channels": 1790197301134,
+    "channels": 1790197488596,
     "watches": 1790197114775,
     "ledger": 1790196829815,
-    "presence": 1790197276852,
-    "launches": 1790197349638,
-    "guard": 1790197301765,
+    "presence": 1790197538135,
+    "launches": 1790197626843,
+    "guard": 1790197491116,
     "digest": 1790195295343,
-    "conversations": 1790197350160,
-    "townwatch": 1790197301563,
-    "radar": 1790196996460
+    "conversations": 1790197627301,
+    "townwatch": 1790197490902,
+    "radar": 1790197605483
   },
   "ledger": [
     {
@@ -4498,7 +4500,9 @@
       61948,
       61965,
       61958,
-      61953
+      61953,
+      62011,
+      62010
     ],
     "known": {
       "MUSEBOOK": [
@@ -4557,7 +4561,8 @@
         "0x7b3cd054d99dd4ec4574e6de0df5d9b256717777",
         "GhT5S6zMsubnUDKJBCy7WaXwbQybvGppL16kojRY2KgC",
         "uUfY6cMrohxaE1FpX7jnqrPpLAGGBmtxcGADj4LA1tq",
-        "5mnBU3fGiogLZNvmcm2sTNtjVkSGLreRtveFdRmY5Jcb"
+        "5mnBU3fGiogLZNvmcm2sTNtjVkSGLreRtveFdRmY5Jcb",
+        "Ctj417MViWQajMKJpvrkUBPiyVvkaokktnsZxTXoMfu5"
       ],
       "MUSEPAD": [
         "0x61a51b990dd73530c868359871b9545d21642222",
@@ -4800,6 +4805,13 @@
       "ticker": "MUSEBOOK",
       "address": "5mnBU3fGiogLZNvmcm2sTNtjVkSGLreRtveFdRmY5Jcb",
       "chain": "solana"
+    },
+    {
+      "t": 1790197491922,
+      "kind": "copycat",
+      "ticker": "MUSEBOOK",
+      "address": "Ctj417MViWQajMKJpvrkUBPiyVvkaokktnsZxTXoMfu5",
+      "chain": "solana"
     }
   ],
   "ownPosts": [
@@ -4935,18 +4947,6 @@
       ]
     },
     "seen": [
-      58152,
-      58151,
-      58161,
-      58168,
-      58169,
-      58167,
-      58166,
-      58172,
-      58174,
-      58170,
-      58175,
-      58183,
       58177,
       58186,
       58185,
@@ -7934,7 +7934,19 @@
       61998,
       62004,
       62003,
-      62002
+      62002,
+      62007,
+      62006,
+      62011,
+      62010,
+      62013,
+      62014,
+      62012,
+      62009,
+      62017,
+      62015,
+      62020,
+      62018
     ],
     "primed": {
       "memecoins": true,
@@ -7945,10 +7957,6 @@
   "watchTown": {
     "liq": {
       "MUSEBOOK": [
-        {
-          "t": 1790190171791,
-          "liq": 3506241.1999999997
-        },
         {
           "t": 1790190363412,
           "liq": 3484606.6199999987
@@ -8100,13 +8108,13 @@
         {
           "t": 1790197301723,
           "liq": 3431323.68
+        },
+        {
+          "t": 1790197491076,
+          "liq": 3431051.7199999997
         }
       ],
       "MUSEPAD": [
-        {
-          "t": 1790190171819,
-          "liq": 74250.98
-        },
         {
           "t": 1790190363446,
           "liq": 73604.59999999999
@@ -8258,6 +8266,10 @@
         {
           "t": 1790197301765,
           "liq": 70532.37
+        },
+        {
+          "t": 1790197491116,
+          "liq": 68850.40000000001
         }
       ]
     },
