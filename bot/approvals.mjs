@@ -69,6 +69,16 @@ export const KNOWN_SPENDERS = {
   "0x111111125421ca6dc452d289314280a0f8842a65": "1inch Router v6",
 };
 
+/** Runs fn over items with at most n in flight (public RPCs throttle bursts; one-at-a-time is too slow). */
+async function inPool(items, n, fn) {
+  const out = new Array(items.length);
+  let next = 0;
+  await Promise.all(Array.from({ length: Math.min(n, items.length) }, async () => {
+    while (next < items.length) { const i = next++; out[i] = await fn(items[i], i); }
+  }));
+  return out;
+}
+
 export const EXPLORERS = {
   robinhood: "https://robinhoodchain.blockscout.com",
   base: "https://base.blockscout.com",
@@ -136,21 +146,21 @@ export function makeApprovals({ rpcFor, known = {}, reputation = null, http = nu
     const owner = wallet.toLowerCase();
     const got = (await explorerLogs(chain, owner)) ?? (await logs(rpc, owner));
     if (got.error) return { error: `couldn't read the approval history (explorer unavailable, and the RPC says: ${got.error})` };
-    const grants = latestGrants(got.logs);
+    const grants = latestGrants(got.logs).sort((a, b) => b.block - a.block); // newest first
     const live = [];
-    for (const g of grants.slice(0, 60)) {
+    await inPool(grants.slice(0, 80), 6, async (g) => {
       const sel = g.kind === "erc20" ? "0xdd62ed3e" : "0xe985e9c5";
       const r = await rpc("eth_call", [{ to: g.token, data: sel + pad(owner).slice(2) + pad(g.spender).slice(2) }, "latest"]);
       const readable = typeof r?.result === "string" && r.result.length >= 66;
       if (!readable) {
         // can't read the current state: report what was granted rather than silently dropping it
         if (g.kind === "all" || (g.granted ?? 0n) > 0n) live.push({ ...g, amount: g.granted ?? 0n, unread: true });
-        continue;
+        return;
       }
       const v = BigInt(r.result.slice(0, 66));
       if (g.kind === "erc20" && v > 0n) live.push({ ...g, amount: v });
       if (g.kind === "all" && v === 1n) live.push(g);
-    }
+    });
     const meta = new Map();
     const symbol = async (token) => {
       if (meta.has(token)) return meta.get(token);
@@ -170,11 +180,14 @@ export function makeApprovals({ rpcFor, known = {}, reputation = null, http = nu
       codeCache.set(a, v);
       return v;
     };
+    const repCache = new Map();
+    const flaggedFor = (a) => { if (!repCache.has(a)) repCache.set(a, reputation ? reputation(a).catch(() => []) : Promise.resolve([])); return repCache.get(a); };
     const out = [];
+    await inPool(live, 6, async (g) => { await symbol(g.token); await isContract(g.spender); await flaggedFor(g.spender); }); // warm the caches in parallel
     for (const g of live) {
       const m = await symbol(g.token);
       const spenderIsContract = await isContract(g.spender);
-      const flagged = reputation ? await reputation(g.spender) : [];
+      const flagged = await flaggedFor(g.spender);
       const risk = grantRisk({ ...g, spenderIsContract, spenderLabel: known[g.spender] ?? null, flagged });
       if (g.unread) risk.why.push("current allowance unreadable right now; this is the amount last granted");
       const amount = g.kind === "all" ? "ALL" : g.amount >= UNLIMITED ? "UNLIMITED"
