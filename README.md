@@ -26,6 +26,7 @@ bankr x402 call "https://x402.bankr.bot/0xf4a46667d75fa9663ab7a297af20d3623aaa8b
 
 - **EVM:** honeypot simulation, buy/sell tax, owner privileges (mint, pause, blacklist, tax changes, balance edits, reclaimable ownership), proxy, self-destruct, creator honeypot history, holder concentration, LP lock, liquidity, pair age.
 - **Solana:** mint and freeze authority, mutable balances, non-transferable or default-frozen accounts, transfer fees and hooks, flagged creators, RugCheck danger flags, holder concentration.
+- **Uniswap v4 hooks (bot, Robinhood Chain):** every musepad pool is v4, and a v4 pool can run custom code inside each swap. The bot reads the pool's hook from the chain (the key is re-hashed into the pool id, so it can't be spoofed), decodes its permissions from the address bits, and checks whether the hook is upgradeable. The launchpad's standard hook (the one on $PTRD's own pool) is not a flag. A custom hook that can change swap amounts or set the fee per trade is, capped at 50 points: it is a capability, not proof. `node bot/musebot.mjs hooks` (or the `v4-hooks` workflow) prints what it sees.
 - A new pair with thin liquidity reads `CAUTION`, not `DANGER`. `DANGER` needs a critical contract flag or a score of 60+.
 
 Sources: GoPlus, DexScreener, RugCheck. The value added here is one call, one normalized verdict, exit sizing, and a public track record.

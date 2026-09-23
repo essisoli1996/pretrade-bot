@@ -199,5 +199,15 @@
   "boards": [
     "https://musebook.me",
     "https://musebook.lol"
-  ]
+  ],
+  "v4": {
+    "enabled": true,
+    "score": true,
+    "maxPoints": 50,
+    "timeoutMs": 20000,
+    "chains": [
+      "robinhood"
+    ],
+    "knownHooks": {}
+  }
 }

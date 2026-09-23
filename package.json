@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "tsx test/mock.test.mts",
+    "test": "tsx test/mock.test.mts && node test/v4hooks.test.mjs",
     "typecheck": "tsc -p ."
   },
   "devDependencies": {
