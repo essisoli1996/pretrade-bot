@@ -1,5 +1,8 @@
 name: v4-hooks   # read-only: prints the Uniswap v4 hook of $PTRD and recent musepad launches. Posts nothing, needs no secrets.
 on:
+  push:   # TEMP: lets the branch run this once on real data before merge; remove before merging
+    branches: [claude/shared-conversation-64n76d]
+    paths: [bot/v4hooks.mjs, .github/workflows/hooks.yml]
   workflow_dispatch:
     inputs:
       addresses: { description: "Token addresses, space separated (empty = the 10 newest musepad launches)", required: false, default: "" }
@@ -17,4 +20,4 @@ jobs:
         run: |
           node bot/musebot.mjs hooks $ADDRS 2>&1 | tee hooks.log
           git config user.name musebot; git config user.email musebot@users.noreply.github.com
-          git add -f hooks.log; git diff --cached --quiet || git commit -qm "hooks log [skip ci]"; git pull -q --rebase || true; git push -q || true
+          git add -f hooks.log; git diff --cached --quiet || git commit -qm "hooks log [skip ci]"; git pull -q --rebase || true; git push -q origin HEAD:${{ github.ref_name }} || true
