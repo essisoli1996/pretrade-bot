@@ -53,7 +53,7 @@ check(grantRisk({ kind: "erc20", amount: U, spenderIsContract: true, spenderLabe
 check(grantRisk({ kind: "erc20", amount: U, spenderIsContract: true }).level === "medium", "unlimited to an unknown contract: medium");
 check(grantRisk({ kind: "all", spenderIsContract: true }).level === "high", "collection-wide approval to an unknown contract: high");
 check(grantRisk({ kind: "erc20", amount: 5n, spenderIsContract: true, flagged: ["phishing activities"] }).level === "critical", "flagged spender: critical");
-check(grantRisk({ kind: "erc20", amount: U, spenderIsContract: true, spenderLabel: "0x AllowanceHolder", knownInfra: true, flagged: ["phishing activities"] }).level === "medium", "known infrastructure listed by a reputation feed: shown, not escalated to critical");
+check(grantRisk({ kind: "erc20", amount: U, spenderIsContract: true, spenderLabel: "0x AllowanceHolder", knownInfra: true, flagged: ["phishing activities"] }).level === "low", "known infrastructure listed by a reputation feed: shown, not escalated");
 check(grantRisk({ kind: "erc20", amount: U, spenderIsContract: true, spenderLabel: "verified contract Drainer", flagged: ["stealing attack"] }).level === "critical", "a merely verified contract that is flagged: still critical");
 check(grantRisk({ kind: "erc20", amount: U, spenderIsContract: true, spenderLabel: "verified contract GPv2VaultRelayer" }).level === "low", "unlimited to a verified, named contract: low");
 check(revokeTx({ kind: "erc20", token: T1, spender: S1 }, ME).data === "0x095ea7b3" + "0".repeat(24) + "bb".repeat(20) + "0".repeat(64), "revoke = approve(spender, 0)");

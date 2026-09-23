@@ -71,7 +71,7 @@ function grantRisk(g) {
   if (g.flagged?.length) {
     // reputation feeds also list well-known infrastructure that drainers route through (GoPlus flags the verified
     // 0x AllowanceHolder, for one); for a recognised spender the flag is shown, not escalated
-    if (g.knownInfra) { bump("medium"); why.push(`a reputation feed lists it for ${g.flagged.join(", ")}, but it is the known ${g.spenderLabel}`); }
+    if (g.knownInfra) why.push(`a reputation feed lists it for ${g.flagged.join(", ")}, but it is the known ${g.spenderLabel}`);
     else { bump("critical"); why.push(`spender is flagged for ${g.flagged.join(", ")}`); }
   }
   if (g.spenderIsContract === false) { bump(g.kind === "all" || g.amount >= UNLIMITED ? "critical" : "high"); why.push("spender is a plain wallet, not a protocol contract"); }
@@ -242,7 +242,8 @@ function makeApprovals({ rpcFor, known = {}, reputation = null, http = null, exp
       const risk = grantRisk({ ...g, spenderIsContract, spenderLabel: known[g.spender] ?? names.get(g.spender) ?? null, knownInfra: !!known[g.spender], flagged });
       if (g.unread) risk.why.push("current allowance unreadable right now; this is the amount last granted");
       const amount = g.kind === "all" ? "ALL" : g.amount >= UNLIMITED ? "UNLIMITED"
-        : m.decimals === null ? g.amount.toString() : (Number(g.amount) / 10 ** m.decimals).toLocaleString("en-US", { maximumFractionDigits: 4 });
+        : m.decimals === null ? g.amount.toString()
+        : (() => { const v = Number(g.amount) / 10 ** m.decimals; return v > 0 && v < 1e-4 ? "<0.0001" : v.toLocaleString("en-US", { maximumFractionDigits: 4 }); })();
       out.push({ token: g.token, symbol: m.symbol, spender: g.spender, spenderLabel: known[g.spender] ?? names.get(g.spender) ?? null, kind: g.kind, amount, grantedAtBlock: g.block, risk: risk.level, why: risk.why, revoke: risk.level === "low" ? null : revokeTx(g, owner) });
     }
     const order = { critical: 0, high: 1, medium: 2, low: 3 };
