@@ -34,7 +34,9 @@ export function latestGrants(logs) {
 
 /**
  * Risk for one live grant. Pure, unit tested.
- * g: { kind, amount (bigint, erc20), spenderIsContract, spenderLabel, flagged: [] }
+ * g: { kind, amount (bigint, erc20), spenderIsContract, spenderLabel, knownInfra, flagged: [] }
+ * spenderLabel: a known name (our list, or a verified contract name from the explorer) → an unlimited approval is normal.
+ * knownInfra: on our fixed list of well-known spenders → a reputation-feed hit is shown, not escalated.
  */
 export function grantRisk(g) {
   const why = [];
@@ -43,7 +45,7 @@ export function grantRisk(g) {
   if (g.flagged?.length) {
     // reputation feeds also list well-known infrastructure that drainers route through (GoPlus flags the verified
     // 0x AllowanceHolder, for one); for a recognised spender the flag is shown, not escalated
-    if (g.spenderLabel) { bump("medium"); why.push(`a reputation feed lists it for ${g.flagged.join(", ")}, but it is the known ${g.spenderLabel}`); }
+    if (g.knownInfra) { bump("medium"); why.push(`a reputation feed lists it for ${g.flagged.join(", ")}, but it is the known ${g.spenderLabel}`); }
     else { bump("critical"); why.push(`spender is flagged for ${g.flagged.join(", ")}`); }
   }
   if (g.spenderIsContract === false) { bump(g.kind === "all" || g.amount >= UNLIMITED ? "critical" : "high"); why.push("spender is a plain wallet, not a protocol contract"); }
@@ -211,8 +213,7 @@ export function makeApprovals({ rpcFor, known = {}, reputation = null, http = nu
       const m = await symbol(g.token);
       const spenderIsContract = await isContract(g.spender);
       const flagged = await flaggedFor(g.spender);
-      const risk = grantRisk({ ...g, spenderIsContract, spenderLabel: known[g.spender] ?? null, flagged });
-      if (!known[g.spender] && names.has(g.spender)) risk.why.push(names.get(g.spender));
+      const risk = grantRisk({ ...g, spenderIsContract, spenderLabel: known[g.spender] ?? names.get(g.spender) ?? null, knownInfra: !!known[g.spender], flagged });
       if (g.unread) risk.why.push("current allowance unreadable right now; this is the amount last granted");
       const amount = g.kind === "all" ? "ALL" : g.amount >= UNLIMITED ? "UNLIMITED"
         : m.decimals === null ? g.amount.toString() : (Number(g.amount) / 10 ** m.decimals).toLocaleString("en-US", { maximumFractionDigits: 4 });
