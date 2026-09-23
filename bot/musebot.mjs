@@ -255,7 +255,7 @@ async function simRead(pair, key, token) {
     const go = async () => {
       const quoteIn = await quoteAmount(pair, key, token, sizeUsd);
       if (!quoteIn) return { status: "unavailable", line: "🧪 trade simulation unavailable (no price for the quote currency).", flags: [] };
-      return classify(await SIM.run({ key, token, quoteIn }), { fee: key.fee, sizeUsd });
+      return classify(await SIM.run({ key, token, quoteIn }), { fee: key.fee, sizeUsd, hasHook: !/^0x0{40}$/.test(key.hooks) });
     };
     const timeout = new Promise((_, no) => setTimeout(() => no(new Error("timed out")), SIMCFG.timeoutMs ?? 25000).unref());
     const r = await Promise.race([go(), timeout]);
@@ -273,6 +273,7 @@ function replyText(c) {
   return [
     `${icon} $${c.symbol} on ${c.chain}: ${c.verdict}, risk ${c.score}/100${scan}`,
     `flags: ${flags}. liquidity $${c.liquidity.toLocaleString("en-US")}, biggest sell for ~2% impact: $${c.maxSell2.toLocaleString("en-US")}.`,
+    ...(c.sim?.status === "ok" && !c.sim.flags.length ? [`simulated a small buy and sell on the live pool: selling works, ${c.sim.roundTripLossPct}% round-trip cost.`] : []),
     c.verdict === "CAUTION" && c.flags.every((f) => /liquidity|old/.test(f))
       ? `only market-age flags here, which is normal for a fresh launch. free read from public data, not advice.`
       : `free read from public data, not advice, and OK is never a guarantee.`,

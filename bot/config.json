@@ -214,8 +214,8 @@
     }
   },
   "sim": {
-    "enabled": false,
-    "score": false,
+    "enabled": true,
+    "score": true,
     "sizeUsd": 25,
     "minLiquidityUsd": 2000,
     "timeoutMs": 25000,

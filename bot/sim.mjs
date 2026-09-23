@@ -169,7 +169,7 @@ const ratio = (a, b) => (b > 0n ? Number((a * 1_000_000n) / b) / 1_000_000 : nul
  * Turns raw legs into flags. Pure, so it is unit tested.
  * Returns { status, line, flags: [{ text, pts, critical }], roundTripLossPct, buyTaxPct }.
  */
-export function classify(res, { fee = null, sizeUsd = null } = {}) {
+export function classify(res, { fee = null, sizeUsd = null, hasHook = false } = {}) {
   const size = sizeUsd ? `$${sizeUsd < 10 ? sizeUsd.toFixed(2) : Math.round(sizeUsd)}` : "a small";
   if (!res?.ok) return { status: "unavailable", line: `🧪 trade simulation unavailable (${res?.why ?? "no result"}).`, flags: [] };
   const m = res.main;
@@ -202,7 +202,9 @@ export function classify(res, { fee = null, sizeUsd = null } = {}) {
   if (lossPct >= 50) flags.push({ text: `simulated round trip loses ${Math.round(lossPct)}%`, pts: 100, critical: true });
   else if (lossPct >= 20) flags.push({ text: `simulated round trip loses ${Math.round(lossPct)}%`, pts: 40 });
   else if (lossPct >= 10) flags.push({ text: `simulated round trip loses ${Math.round(lossPct)}%`, pts: 20 });
-  const feeNote = expected !== null ? ` (pool fees alone would be ~${expected}%)` : " incl. pool and hook fees";
+  const feeNote = expected === null ? " incl. pool and hook fees"
+    : hasHook && lossPct > expected + 0.5 ? ` (pool fee ~${expected}%, the rest goes to the pool's hook)`
+    : ` (pool fees alone would be ~${expected}%)`;
   const taxNote = buyTaxPct > 1 ? `, ${buyTaxPct}% of the bought tokens never arrived (transfer tax)` : "";
   return { status: "ok", line: `🧪 simulated ${size} buy then sell on the real pool: ${lossPct}% round-trip cost${feeNote}${taxNote}. block ${res.block}.`, flags, roundTripLossPct: lossPct, buyTaxPct };
 }
