@@ -1,16 +1,28 @@
-$PRINTER 0x85a574f2ff0795685f58d1d7b0d4b51f148ac489: CAUTION 30 [V4_HOOK_CAN_CHANGE_SWAPS] (4983 ms)
-  hook: 0x3685cc4aa1266813fa0ef346853341b0778c80cc custom ["beforeSwap","afterSwap","beforeSwapReturnsDelta","afterSwapReturnsDelta"]
-  simulation: {"status":"ok","detail":"buy then sell works; 6.6% round-trip cost","roundTripCostPct":6.6,"buyTaxPct":0,"sizeUsd":25,"block":70605765}
-  exit-check: OK, $500 → {"usd":500,"estPriceImpactPct":0.4,"sellTaxPct":3.4,"sellCostSource":"simulated on the live pool (fees + hook + tax)","estTotalExitCostPct":3.7,"estProceedsUsd":481.51,"shareOf24hVolumePct":0.7} (1200 ms)
-$BILL 0x4e9c619228dc53f9b57c7357208863d256b9cd69: CAUTION 20 [LIQUIDITY_LOW, PAIR_NEW] (2402 ms)
-  hook: 0xe5e702641ea86f4ae6cc3cdaed2b886f976be044 standard musepad launch hook ["beforeInitialize","afterSwap","afterSwapReturnsDelta"]
-  simulation: {"status":"ok","detail":"buy then sell works; 4% round-trip cost","roundTripCostPct":4,"buyTaxPct":0,"sizeUsd":17.52,"block":70605790}
-  exit-check: COSTLY, $500 → {"usd":500,"estPriceImpactPct":10.2,"sellTaxPct":2,"sellCostSource":"simulated on the live pool (fees + hook + tax)","estTotalExitCostPct":12.1,"estProceedsUsd":439.7,"shareOf24hVolumePct":0.3} (2492 ms)
-$FRONG 0x6245e67affa44a23077f0ea7f981a8dc743a0c47: OK 0 [] (470 ms)
-  hook: none custom []
-  simulation: {"status":"ok","detail":"buy then sell works; 0.6% round-trip cost","roundTripCostPct":0.6,"buyTaxPct":0,"sizeUsd":25,"block":70605835}
-  exit-check: EASY, $500 → {"usd":500,"estPriceImpactPct":0.1,"sellTaxPct":0.3,"sellCostSource":"simulated on the live pool (fees + hook + tax)","estTotalExitCostPct":0.4,"estProceedsUsd":497.8,"shareOf24hVolumePct":0.1} (470 ms)
-$musebook 0x91a2dae9699f0b82540b5886b0d8759c22820ba3: OK 0 [] (2502 ms)
-  hook: 0x4e3468951d49f2eea976ed0d6e75ffcb44a9a544 standard musepad launch hook ["beforeInitialize","afterAddLiquidity","afterRemoveLiquidity","afterSwap","afterSwapReturnsDelta"]
-  simulation: {"status":"ok","detail":"buy then sell works; 3.5% round-trip cost","roundTripCostPct":3.5,"buyTaxPct":0,"sizeUsd":25,"block":70605845}
-  exit-check: EASY, $500 → {"usd":500,"estPriceImpactPct":0,"sellTaxPct":1.8,"sellCostSource":"simulated on the live pool (fees + hook + tax)","estTotalExitCostPct":1.8,"estProceedsUsd":490.93,"shareOf24hVolumePct":0} (2696 ms)
+base: WETH deposit, 0.01 ETH [eth_simulateV1]
+🧪 simulated on base block 51693404:
+  you send: 0.01 ETH → 0x4200…0006
+  you receive: nothing
+  true for this block only: the chain can change before a real transaction lands, and a contract can act differently for a simulation.
+  findings: value leaves your wallet and nothing comes back in this transaction. normal for bridges, deposits and payments; a drain looks exactly the same
+
+ethereum: WETH deposit, 0.01 ETH [eth_simulateV1]
+🧪 simulated on ethereum block 26040978:
+  you send: 0.01 ETH → 0xc02a…6cc2
+  you receive: nothing
+  true for this block only: the chain can change before a real transaction lands, and a contract can act differently for a simulation.
+  findings: value leaves your wallet and nothing comes back in this transaction. normal for bridges, deposits and payments; a drain looks exactly the same
+
+robinhood: unlimited $musebook approval to a random address [eth_simulateV1]
+🧪 simulated on robinhood block 70609045:
+  you send: nothing
+  you receive: nothing
+  approval: UNLIMITED $musebook → 0xf898…9e1b
+  true for this block only: the chain can change before a real transaction lands, and a contract can act differently for a simulation.
+  findings: the transaction grants 0xf898…9e1b an unlimited $musebook approval
+
+robinhood: plain send, 0.001 ETH [eth_simulateV1]
+🧪 simulated on robinhood block 70609045:
+  you send: 0.001 ETH → 0xdb17…54db
+  you receive: nothing
+  true for this block only: the chain can change before a real transaction lands, and a contract can act differently for a simulation.
+
