@@ -97,11 +97,21 @@ export function keyFromLog(log) {
   return { ...key, poolManager: String(log.address ?? "").toLowerCase(), block: parseInt(log.blockNumber ?? "0x0", 16) };
 }
 
-export function makeV4Hooks({ http, rpcUrl, known = {}, baselineToken = null }) {
+export function makeV4Hooks({ http, rpcUrl, known = {}, baselineToken = null, gapMs = 150 }) {
   const memo = {}; // used when the caller has no state object to cache into
+  // the public Robinhood RPC rate-limits hard: space calls out and back off on 429 instead of reading it as "no data"
+  let last = 0;
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   async function rpc(method, params) {
-    const r = await http(rpcUrl, { jsonrpc: "2.0", id: 1, method, params });
-    return r.json ?? { error: { message: `HTTP ${r.status}` } };
+    for (let attempt = 0; ; attempt++) {
+      const wait = last + gapMs - Date.now(); if (wait > 0) await sleep(wait);
+      last = Date.now();
+      const r = await http(rpcUrl, { jsonrpc: "2.0", id: 1, method, params });
+      const j = r.json ?? { error: { code: r.status, message: `HTTP ${r.status}` } };
+      const limited = r.status === 429 || j.error?.code === 429 || /too many requests|rate limit/i.test(j.error?.message ?? "");
+      if (!limited || attempt >= 4) return j;
+      await sleep(Math.min(8000, 800 * 2 ** attempt));
+    }
   }
 
   async function blockAt(tsSec) {
@@ -125,6 +135,7 @@ export function makeV4Hooks({ http, rpcUrl, known = {}, baselineToken = null }) 
     const pick = (logs) => { for (const l of logs ?? []) { const k = keyFromLog(l); if (k) return k; } return null; };
     let key = null;
     const all = await rpc("eth_getLogs", [{ topics: [INIT_TOPIC, id], fromBlock: "0x0", toBlock: "latest" }]);
+    memo.lastError = all.error ? String(all.error.message ?? all.error.code).slice(0, 100) : null;
     if (!all.error) key = pick(all.result);
     else if (createdAtMs) {
       const at = await blockAt(Math.floor(createdAtMs / 1000) - 3600);
@@ -154,11 +165,9 @@ export function makeV4Hooks({ http, rpcUrl, known = {}, baselineToken = null }) 
     if (code === "0x") return { known: true, hasCode: false };
     const lc = code.toLowerCase();
     const clone = lc.startsWith(CLONE_PREFIX) ? "0x" + lc.slice(CLONE_PREFIX.length, CLONE_PREFIX.length + 40) : null;
-    const [impl, beacon, owner] = await Promise.all([
-      rpc("eth_getStorageAt", [hook, IMPL_SLOT, "latest"]),
-      rpc("eth_getStorageAt", [hook, BEACON_SLOT, "latest"]),
-      rpc("eth_call", [{ to: hook, data: "0x8da5cb5b" }, "latest"]),
-    ]);
+    const impl = await rpc("eth_getStorageAt", [hook, IMPL_SLOT, "latest"]);
+    const beacon = await rpc("eth_getStorageAt", [hook, BEACON_SLOT, "latest"]);
+    const owner = await rpc("eth_call", [{ to: hook, data: "0x8da5cb5b" }, "latest"]);
     const slotAddr = (r) => (typeof r.result === "string" && /^0x0*[1-9a-f]/i.test(r.result) ? wordAddr(pad32(r.result)) : null);
     const ownerAddr = typeof owner.result === "string" && owner.result.length >= 66 ? wordAddr(owner.result.slice(2, 66)) : null;
     return {
@@ -178,7 +187,7 @@ export function makeV4Hooks({ http, rpcUrl, known = {}, baselineToken = null }) 
     for (const p of (await pairsFor(baselineToken)).filter(isV4)) {
       const key = await poolKey(p.pairAddress, p.pairCreatedAt, state);
       if (key?.hooks && key.hooks !== ZERO) {
-        const label = `standard ${p.dexId ?? "launchpad"} launch hook (same as $${p.baseToken?.symbol ?? "own token"})`;
+        const label = `standard launch hook (same as $${p.baseToken?.symbol ?? "own token"})`;
         store.v4baseline = { hook: key.hooks, label, t: Date.now() };
         out.set(key.hooks, label);
         break;
@@ -194,7 +203,7 @@ export function makeV4Hooks({ http, rpcUrl, known = {}, baselineToken = null }) 
   async function inspect(pair, standard, state) {
     if (!isV4(pair)) return null;
     const key = await poolKey(pair.pairAddress, pair.pairCreatedAt, state);
-    if (!key) return { poolId: pair.pairAddress, readable: false };
+    if (!key) return { poolId: pair.pairAddress, readable: false, why: memo.lastError ?? "no Initialize event found for this pool id" };
     const perms = key.hooks === ZERO ? [] : permissionsOf(key.hooks);
     const dynamicFee = key.fee === DYNAMIC_FEE;
     const base = { poolId: pair.pairAddress.toLowerCase(), readable: true, hook: key.hooks, perms, dynamicFee, feePct: dynamicFee ? null : key.fee / 1e4, poolManager: key.poolManager };

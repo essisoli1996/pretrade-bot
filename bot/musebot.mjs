@@ -1461,7 +1461,7 @@ async function main() {
       if (!p) { console.log(`${t}: no v4 pair on DexScreener (${pairs.length} pair(s) total)`); continue; }
       const r = await v4HookRead(p);
       if (r?.hook) tally[r.hook] = (tally[r.hook] ?? 0) + 1;
-      console.log(`$${p.baseToken?.symbol ?? "?"} ${t}\n  ${hookLine(r) ?? "not v4"}${r?.risk?.length ? `\n  flags: ${r.risk.map((x) => `${x.text} (+${x.pts})`).join(", ")}${r.scored ? "" : " [not scored]"}` : ""}${r?.error ? `\n  error: ${r.error}` : ""}`);
+      console.log(`$${p.baseToken?.symbol ?? "?"} ${t}\n  ${hookLine(r) ?? "not v4"}${r?.risk?.length ? `\n  flags: ${r.risk.map((x) => `${x.text} (+${x.pts})`).join(", ")}${r.scored ? "" : " [not scored]"}` : ""}${r?.error || r?.why ? `\n  why: ${r.error ?? r.why}` : ""}`);
     }
     return console.log(`\nhook usage across ${targets.length} token(s): ${JSON.stringify(tally)}`);
   }
