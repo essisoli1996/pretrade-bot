@@ -1,46 +1,16 @@
-$BILL 0x4e9c619228dc53f9b57c7357208863d256b9cd69 CAUTION 20/100, liquidity $8,779
-  🪝 v4 hook 0xe5e7…e044: standard musepad launch hook. fee 0%, not upgradeable.
-  🧪 simulated $18 buy then sell on the real pool: 4% round-trip cost (pool fees alone would be ~0%). block 70599051.
-$MCAT 0x7a77fff7fef331b4369b79c02baa180d63a317a6 OK 10/100, liquidity $16,776
-  🪝 v4 hook 0xe5e7…e044: standard musepad launch hook. fee 0%, not upgradeable.
-  🧪 simulated $25 buy then sell on the real pool: 4% round-trip cost (pool fees alone would be ~0%). block 70599097.
-$MDOG 0x4caf2e6ec0fcbef77314566a9884643512ef8bfc OK 0/100, liquidity $39,446
-  🪝 v4 hook 0xe5e7…e044: standard musepad launch hook. fee 0%, not upgradeable.
-  🧪 simulated $25 buy then sell on the real pool: 4% round-trip cost (pool fees alone would be ~0%). block 70599112.
-$WYNJR 0xc43f61cd9e694990436564fc3648e48f89abacf0 OK 10/100, liquidity $15,812
-  🪝 v4 hook 0xe5e7…e044: standard musepad launch hook. fee 0%, not upgradeable.
-  🧪 simulated $25 buy then sell on the real pool: 4% round-trip cost (pool fees alone would be ~0%). block 70599127.
-$Jolly 0xc37236e54d789bdfb2dce4a6f7cb150098ede521 CAUTION 20/100, liquidity $13,346
-  🪝 v4 hook 0xe5e7…e044: standard musepad launch hook. fee 0%, not upgradeable.
-  🧪 simulated $25 buy then sell on the real pool: 4% round-trip cost (pool fees alone would be ~0%). block 70599157.
-$museit 0xc958fc816a896badeea5356252487affa8036a24 CAUTION 35/100, liquidity $2
-  🪝 v4 hook: none. plain pool, no custom code runs in swaps.
-  🧪 not simulated (not a v4 pool, or under the liquidity floor)
-0x2d462b0c5accbe3cf95559dd986772cd7d041496: no DEX pair
-$MPCANARY 0xe42a7fead58e838f229079e3889c246fbca58dd4 OK 10/100, liquidity $14,014
-  🪝 v4 hook 0xe5e7…e044: standard musepad launch hook. fee 0%, not upgradeable.
-  🧪 simulated $25 buy then sell on the real pool: 2% round-trip cost (pool fees alone would be ~0%). block 70599186.
-0xce21ceb1fa6b83ac7cfeab645d6afad5611a1cd4: no DEX pair
-0x2555bf72e984ffe97e7b4ba4e105b6ccb5ed7749: no DEX pair
-$LOAD 0xb861117799f587d731b5373baa944b746739c7da CAUTION 20/100, liquidity $6,362
-  🪝 v4 hook 0xe5e7…e044: standard musepad launch hook. fee 0%, not upgradeable.
-  🧪 simulated $13 buy then sell on the real pool: 4% round-trip cost (pool fees alone would be ~0%). block 70599207.
-$RAGE 0x69884987ace78e05da1a22f12f19ef600e32271a OK 10/100, liquidity $9,596
-  🪝 v4 hook 0xe5e7…e044: standard musepad launch hook. fee 0%, not upgradeable.
-  🧪 simulated $19 buy then sell on the real pool: 4% round-trip cost (pool fees alone would be ~0%). block 70599222.
-0x3de32b74d48c1cab4340040b125560bd96013fe3: no DEX pair
-$musebook 0x91a2dae9699f0b82540b5886b0d8759c22820ba3 OK 0/100, liquidity $3,534,392
-  🪝 v4 hook 0x4e34…a544: standard musepad launch hook. fee set by the hook per trade, not upgradeable.
-  🧪 simulated $25 buy then sell on the real pool: 3.5% round-trip cost incl. pool and hook fees. block 70599238.
-0xabf427223acfd46e26da5f2e4d49025b0308dba3: no DEX pair
-0xff82e1d47d11dc51d55442eee9b0b44f599c5ba3: no DEX pair
-0xe84549f2f157a0f405fa8b58b1d437a784597ba3: no DEX pair
-$PRINTER 0x85a574f2ff0795685f58d1d7b0d4b51f148ac489 CAUTION 30/100, liquidity $295,840
-  🪝 v4 hook 0x3685…80cc: custom. swap powers: beforeSwap, afterSwap, beforeSwapReturnsDelta, afterSwapReturnsDelta. fee 0.3%, not upgradeable, owned by 0xa08c…3d17.
-  🧪 simulated $25 buy then sell on the real pool: 6.6% round-trip cost (pool fees alone would be ~0.6%). block 70599253.
-$FRONG 0x6245e67affa44a23077f0ea7f981a8dc743a0c47 OK 0/100, liquidity $867,190
-  🪝 v4 hook: none. plain pool, no custom code runs in swaps.
-  🧪 simulated $25 buy then sell on the real pool: 0.6% round-trip cost (pool fees alone would be ~0.5%). block 70599283.
-0x998f3244fbf39152f2128aed5f4e7926b9954c68: no DEX pair
-
-simulation results: {"ok":11,"not simulated":1}
+$PRINTER 0x85a574f2ff0795685f58d1d7b0d4b51f148ac489: CAUTION 30 [V4_HOOK_CAN_CHANGE_SWAPS] (4983 ms)
+  hook: 0x3685cc4aa1266813fa0ef346853341b0778c80cc custom ["beforeSwap","afterSwap","beforeSwapReturnsDelta","afterSwapReturnsDelta"]
+  simulation: {"status":"ok","detail":"buy then sell works; 6.6% round-trip cost","roundTripCostPct":6.6,"buyTaxPct":0,"sizeUsd":25,"block":70605765}
+  exit-check: OK, $500 → {"usd":500,"estPriceImpactPct":0.4,"sellTaxPct":3.4,"sellCostSource":"simulated on the live pool (fees + hook + tax)","estTotalExitCostPct":3.7,"estProceedsUsd":481.51,"shareOf24hVolumePct":0.7} (1200 ms)
+$BILL 0x4e9c619228dc53f9b57c7357208863d256b9cd69: CAUTION 20 [LIQUIDITY_LOW, PAIR_NEW] (2402 ms)
+  hook: 0xe5e702641ea86f4ae6cc3cdaed2b886f976be044 standard musepad launch hook ["beforeInitialize","afterSwap","afterSwapReturnsDelta"]
+  simulation: {"status":"ok","detail":"buy then sell works; 4% round-trip cost","roundTripCostPct":4,"buyTaxPct":0,"sizeUsd":17.52,"block":70605790}
+  exit-check: COSTLY, $500 → {"usd":500,"estPriceImpactPct":10.2,"sellTaxPct":2,"sellCostSource":"simulated on the live pool (fees + hook + tax)","estTotalExitCostPct":12.1,"estProceedsUsd":439.7,"shareOf24hVolumePct":0.3} (2492 ms)
+$FRONG 0x6245e67affa44a23077f0ea7f981a8dc743a0c47: OK 0 [] (470 ms)
+  hook: none custom []
+  simulation: {"status":"ok","detail":"buy then sell works; 0.6% round-trip cost","roundTripCostPct":0.6,"buyTaxPct":0,"sizeUsd":25,"block":70605835}
+  exit-check: EASY, $500 → {"usd":500,"estPriceImpactPct":0.1,"sellTaxPct":0.3,"sellCostSource":"simulated on the live pool (fees + hook + tax)","estTotalExitCostPct":0.4,"estProceedsUsd":497.8,"shareOf24hVolumePct":0.1} (470 ms)
+$musebook 0x91a2dae9699f0b82540b5886b0d8759c22820ba3: OK 0 [] (2502 ms)
+  hook: 0x4e3468951d49f2eea976ed0d6e75ffcb44a9a544 standard musepad launch hook ["beforeInitialize","afterAddLiquidity","afterRemoveLiquidity","afterSwap","afterSwapReturnsDelta"]
+  simulation: {"status":"ok","detail":"buy then sell works; 3.5% round-trip cost","roundTripCostPct":3.5,"buyTaxPct":0,"sizeUsd":25,"block":70605845}
+  exit-check: EASY, $500 → {"usd":500,"estPriceImpactPct":0,"sellTaxPct":1.8,"sellCostSource":"simulated on the live pool (fees + hook + tax)","estTotalExitCostPct":1.8,"estProceedsUsd":490.93,"shareOf24hVolumePct":0} (2696 ms)
