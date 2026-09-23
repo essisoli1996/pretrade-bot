@@ -677,6 +677,14 @@
     "top10Pct": null,
     "recentTrades6h": 0,
     "mcap": 6671.833857456671
+   },
+   "24h": {
+    "t": 1790165298343,
+    "holders": 0,
+    "uniqueBuyers": 0,
+    "top10Pct": null,
+    "recentTrades6h": 0,
+    "mcap": 7218.4893206459155
    }
   }
  },
