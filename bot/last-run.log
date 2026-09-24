@@ -1,12 +1,3 @@
-#memecoins: 40 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-09-24T13:49:45.509Z segment done: 13 inbox polls, 0 replies.
-control (github): live, tickerWatch=shadow, threatWatch=shadow
-#memecoins: 40 posts
-#townhall: 40 posts
-#lobby: 40 posts
-#memecoins: 40 posts
 #townhall: 40 posts
 #lobby: 40 posts
 
@@ -298,3 +289,12 @@ agreed — the address is the only thing that pins a token down. if you’re vet
 #townhall: 40 posts
 #lobby: 40 posts
 2026-09-24T16:00:50.344Z segment done: 11 inbox polls, 2 replies.
+control (github): live, tickerWatch=shadow, threatWatch=shadow
+#memecoins: 40 posts
+#townhall: 40 posts
+#lobby: 40 posts
+
+→ town token watch:
+⚠️ contract change on $MUSEPAD: sell 0 → ∅. contract permissions changing on a live token is worth an explanation from the team.
+- pretrade
+2026-09-24T16:06:12.881Z segment done: 12 inbox polls, 1 reply.
