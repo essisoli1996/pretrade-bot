@@ -1,25 +1,61 @@
-$PRINTER 0x85a574f2ff0795685f58d1d7b0d4b51f148ac489: CAUTION 30 [V4_HOOK_CAN_CHANGE_SWAPS] (3601 ms)
-  hook: 0x3685cc4aa1266813fa0ef346853341b0778c80cc custom ["beforeSwap","afterSwap","beforeSwapReturnsDelta","afterSwapReturnsDelta"]
-  simulation: {"status":"ok","detail":"buy then sell works; 6.6% round-trip cost","roundTripCostPct":6.6,"buyTaxPct":0,"sizeUsd":25,"block":71298819}
-  exit-check: OK, $500 → {"usd":500,"estPriceImpactPct":0.4,"sellTaxPct":3.4,"sellCostSource":"simulated on the live pool (fees + hook + tax)","estTotalExitCostPct":3.7,"estProceedsUsd":481.45,"shareOf24hVolumePct":2.6} (530 ms)
-$BILL 0x4e9c619228dc53f9b57c7357208863d256b9cd69: OK 10 [LIQUIDITY_LOW] (2661 ms)
-  hook: 0xe5e702641ea86f4ae6cc3cdaed2b886f976be044 standard musepad launch hook ["beforeInitialize","afterSwap","afterSwapReturnsDelta"]
-  simulation: {"status":"ok","detail":"buy then sell works; 4% round-trip cost","roundTripCostPct":4,"buyTaxPct":0,"sizeUsd":14.77,"block":71298843}
-  exit-check: COSTLY, $500 → {"usd":500,"estPriceImpactPct":11.9,"sellTaxPct":2,"sellCostSource":"simulated on the live pool (fees + hook + tax)","estTotalExitCostPct":13.7,"estProceedsUsd":431.49,"shareOf24hVolumePct":45.2} (2555 ms)
-$FRONG 0x6245e67affa44a23077f0ea7f981a8dc743a0c47: OK 0 [] (307 ms)
-  hook: none custom []
-  simulation: {"status":"ok","detail":"buy then sell works; 0.6% round-trip cost","roundTripCostPct":0.6,"buyTaxPct":0,"sizeUsd":25,"block":71298879}
-  exit-check: EASY, $500 → {"usd":500,"estPriceImpactPct":0.1,"sellTaxPct":0.3,"sellCostSource":"simulated on the live pool (fees + hook + tax)","estTotalExitCostPct":0.4,"estProceedsUsd":497.76,"shareOf24hVolumePct":0.1} (301 ms)
-$musebook 0x91a2dae9699f0b82540b5886b0d8759c22820ba3: OK 0 [] (976 ms)
-  hook: 0x4e3468951d49f2eea976ed0d6e75ffcb44a9a544 standard musepad launch hook ["beforeInitialize","afterAddLiquidity","afterRemoveLiquidity","afterSwap","afterSwapReturnsDelta"]
-  simulation: {"status":"ok","detail":"buy then sell works; 3.5% round-trip cost","roundTripCostPct":3.5,"buyTaxPct":0,"sizeUsd":25,"block":71298888}
-  exit-check: EASY, $500 → {"usd":500,"estPriceImpactPct":0.1,"sellTaxPct":1.8,"sellCostSource":"simulated on the live pool (fees + hook + tax)","estTotalExitCostPct":1.8,"estProceedsUsd":490.88,"shareOf24hVolumePct":0} (1003 ms)
-trade-plan PRINTER buy $250: HTTP 200 in 406 ms → ["GO",0.1,0.5,51194.63917386569,50938.66597799637]
-trade-plan BILL buy $500: HTTP 200 in 742 ms → ["NO_GO",11.9,{"pieces":10,"usdEach":50,"note":"a few blocks apart, re-quote each"}]
-trade-plan FRONG sell $1000: HTTP 200 in 708 ms → ["GO",0.37726154769265247,"ETH"]
-stock-check TSLA: HTTP 200 in 313 ms → ["OFFICIAL",375.8057,375.63,0,0]
-stock-check NVDA: HTTP 200 in 82 ms → ["OFFICIAL","0xd0601ce157db5bdc3162bbac2a2c8af5320d9eec",223.19802998,0]
-approvals base via https://base-rpc.publicnode.com, direct: {"timings":{"historyMs":6757,"allowancesMs":251,"totalMs":9135},"live":39,"scanned":43,"unread":0,"top":[["CLARITEE","UNLIMITED","0x AllowanceHolder","low"],["SOLVR","UNLIMITED","0x AllowanceHolder","low"],["Doppel","UNLIMITED","0x AllowanceHolder","low"],["deployer","UNLIMITED","0x AllowanceHolder","low"]]}
-approvals base via https://mainnet.base.org, direct: {"timings":{"historyMs":4658,"allowancesMs":30521,"totalMs":93512},"live":42,"scanned":43,"unread":23,"top":[[null,"UNLIMITED","0x AllowanceHolder","low"],[null,"UNLIMITED","0x AllowanceHolder","low"],[null,"UNLIMITED","0x AllowanceHolder","low"],[null,"UNLIMITED","0x AllowanceHolder","low"]]}
-approvals base: HTTP 200 in 8409 ms → ["blockscout",43,39,0,[["CLARITEE","UNLIMITED","0x AllowanceHolder","low"],["SOLVR","UNLIMITED","0x AllowanceHolder","low"],["Doppel","UNLIMITED","0x AllowanceHolder","low"]]]
-approvals robinhood: HTTP 504 in 25002 ms → {"error":"scan_timeout","hint":"The chain was too slow to scan. You were not charged."}
+musepad directory: 278 launches, 201 tickers. latest 60:
+  -   $COUCH 0x2adc0347e22fa666e22bc9e3c807ce53c7b7fbdf by Couch Mutt · fee: wallet
+  -   $RFOX 0xff0d9fc172bea20bf5eebbd6748b790026d69c6f by Relay Fox · fee: wallet
+  -   $BBEETLE 0x64b13ca42785212be0a4695f30dfff4bb2916131 by MoonlitCapy · fee: wallet
+  -   $musewhisper 0xed629e0103d4371838ed96161429dab2069feba3 by Luna · fee: wallet
+  -   $MUSAPE 0x769145b3c16aa0eae0ad0ea8b9635bd73dd3ff02 by Musape Archive · fee: wallet
+  -   $PORCH 0x655d23cad9a3db8f730696efd0f94e3b2c662c97 by Pip · fee: contract
+  -   $GLASS 0x2d7d077c63e56eddf9c8295f57b3bb520d8462b8 by optic · fee: wallet
+  -   $GLASS 0x7856615ff3f1caaf4a309e7484d7e50b5f23c264 by optic · fee: wallet
+  -   $NEWS 0x43922a8718eac5e867f346e2c77a8e5b43481207 by Flash · fee: wallet
+  -   $NEWS 0xe6b18dc965939d0a2beedcf77249048e4684e592 by Flash · fee: wallet
+  -   $QREV 0x5367566cf41b80956e3fdb3127ae12a217de7deb by Quantum · fee: wallet
+  -   $VMOTH 0x0de24baa30e432ea23f87b7a428980e29eae69bd by MoonlitCapy · fee: wallet
+  -   $MAXO 0xcdb64ad9f23233535ea1cbd09e856d8b77cfaa4c by MoonlitCapy · fee: wallet
+  -   $CFERRET 0x17ebeee8df7e3a1e99b7ba7e4013cf0588181468 by MoonlitCapy · fee: wallet
+  -   $TTOAD 0x50237113451257f6dba721096d27a46cfb06e947 by MoonlitCapy · fee: wallet
+  -   $TCMOUSE 0x93fc265d57ab5a92224622a60dc99988422c5d47 by MoonlitCapy · fee: wallet
+  -   $MMOLE 0x43e098dd2ba28fd6b31f049ba18d290f22436208 by MoonlitCapy · fee: wallet
+  -   $ABAT 0xba704d218d4f8415b9fbafd44fe0413c3a992dc6 by MoonlitCapy · fee: wallet
+  -   $CKOALA 0x58852b728a10dc6731499735d59fe6452c6355bf by MoonlitCapy · fee: wallet
+  -   $BBADGER 0xe3c4de9d00cd868a671ceb0018bd6160fcbc8a4e by MoonlitCapy · fee: wallet
+  -   $NNEWT 0x8412c0662754415b7d972b7219522a8ab3b4576b by MoonlitCapy · fee: wallet
+  -   $TTURTLE 0xc9426a04a47122f8d66c9562b3671e3bec0baa77 by MoonlitCapy · fee: wallet
+  -   $WWALRUS 0xe96c6a4ba3c28279ca268b0e359e86bde1da7555 by MoonlitCapy · fee: wallet
+  -   $PPARROT 0x7e390a9e5c1a6f826760ee63cd10b38c632be28e by MoonlitCapy · fee: wallet
+  -   $LGECKO 0xd969edbb811f4672674c6d05176043029687e23e by MoonlitCapy · fee: wallet
+  -   $BBUNNY 0x7182dce9ed84869e0a3985e569faf40f7bb64d9e by MoonlitCapy · fee: wallet
+  -   $PPANDA 0xe26eed033033b4987ab9545169305ca6bc1330c4 by MoonlitCapy · fee: wallet
+  -   $DIST 0x5694725cfb7f1b42c383c4e40d335e841d974e03 by Signal Porter · fee: wallet
+  -   $SPRNG 0x99621ec1a8400bffb73fbb69476ff7d9a97af582 by Brackish Cartographer · fee: wallet
+  -   $PATCH 0x5a84b799627d22bbdfafa2290a657c96960034bd by Patch · fee: wallet
+  -   $CONSTABLE 0xfa7608752d6994f4b4cc83a7917909ea3e19fba3 by silt · fee: wallet
+  -   $CONSTABLE 0xdd9e2e77ec84886e56289e65bcd4f5d4b4122a0b by grove · fee: wallet
+  -   $CONSTABLE 0xe3fddee7356d1aa00c07b1a63db64d177c3a545d by silt · fee: wallet
+  -   $METAMUSE 0x14071b58e433f8325093cc5e310e74f61c605355 by Lumi · fee: wallet
+  -   $撸妹 0x25d430592f06d76c80b61cbe0701be271a150ba3 by Lumi · fee: wallet
+  -   $BELL 0x7a6cbae02df7bf16c8a529487d58f0c45f97e890 by MoonlitCapy · fee: wallet
+  -   $musecases 0xc4db664ee56614f8d6cd68e93ac8c2bff12f0342 by Lumi · fee: wallet
+  -   $BEAN 0xb057565547484170b82a0b8f60f8948a5c61d9cd by MoonlitCapy · fee: wallet
+  -   $WISP 0x6559d2dc4776867b2a1ff41b54185a8f334e6895 by MoonlitCapy · fee: wallet
+  -   $DEW 0xf921c1707b96698f66695e527ecfe4e35527ad4e by MoonlitCapy · fee: wallet
+  -   $ORBIT 0xa497e8ea31f4eeb60e713d7802c190a8a1eae973 by MoonlitCapy · fee: wallet
+  -   $SPROUT 0xcff672bc0e09841307649fa688e231c1c0daf390 by MoonlitCapy · fee: wallet
+  -   $GLOW 0x2e530b6c427765eaff4f7c825f1132c8d272844c by MoonlitCapy · fee: wallet
+  -   $PEBBLE 0xb54f74292dfbade61dd1ab34dfe893a67c090b63 by MoonlitCapy · fee: wallet
+  -   $PUFF 0x3f9f1d581f1b0fd4fceea2e25e31454b9c3434d8 by MoonlitCapy · fee: wallet
+  -   $BLOOM 0x56953e38c079da4cca3041c80a1db638ac81011b by MoonlitCapy · fee: wallet
+  -   $MALLOW 0x52a744bf7f8af9fdee3fdd363b313f44a7635d4d by MoonlitCapy · fee: wallet
+  -   $CDUMP 0xa56abe47f5f1524004d2c15f25c45054c76aa96e by MoonlitCapy · fee: wallet
+  -   $CNAP 0xa95d3f681dac013aa946f3b36f16dd84a364d4a1 by MoonlitCapy · fee: wallet
+  -   $MCAPY 0xbbf723a0ae2e0b94cabf7131ad41337b6d644d7a by MoonlitCapy · fee: wallet
+  -   $SSFC0418 0x41039687dfb3ac6a965813172432ca2dadbd57d9 by PadAuthzProbe · fee: wallet
+  -   $SSFL9888 0xc2d646d9c72e0f47ddd68e656a8f9ad6c15af073 by PadAuthzProbe · fee: wallet
+  -   $SSFM9892 0x045257a90cd39e93b484a487eb663ff2fbd5de07 by PadAuthzProbe · fee: wallet
+  -   $IMGP9124 0xf377ac9977e9ddb8f4f1f2fe0405262ec61ab575 by PadAuthzProbe · fee: wallet
+  -   $PAYR7997 0xf5812c98f4cbdeed981205fcc358806f5e699d02 by PadPayProbe · fee: custodial
+  -   $MUSECASE 0xb4f32e5e4fa2af5785a2a40131f5d24d16ef89e0 by Cutie · fee: wallet
+  -   $MPAPI001 0xc51a51606f3e1ce94d6ff8b119fdfca201590d7f by test-e2e-consumer · fee: wallet
+  -   $MUSEBOT 0x2d0f2da901fa858232fd66a4f7e8aeface9d667d by grove · fee: wallet
+  -   $MUSEBOT 0xe49d6d5fc8cf439b59e2a6ce6d1a9b4e818adfdc by silt · fee: wallet
+  -   $PAYC0050 0x0fc69df94028d9ee4f362c5f45c5d5faa664c259 by PadPayProbe · fee: custodial
