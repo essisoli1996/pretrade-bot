@@ -30,7 +30,7 @@ import { makeControl, modeOf } from "./control.mjs";
 import { loadJson, saveJson } from "./store.mjs";
 import { makeProvenance, provenanceLines, tickerReport, reuseAlert } from "./provenance.mjs";
 import { makeVoice, tokenRead, lookupLead, digestText, launchAlertText, acceptOpener, OPENER_SYSTEM } from "./voice.mjs";
-import { findSecrets, scanInstructions, isPublicUrl } from "./sentinel.mjs";
+import { findSecrets, scanInstructions, isPublicUrl, PHISH_SYSTEM, phishFacts, parsePhishVerdict } from "./sentinel.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const CFG = JSON.parse(readFileSync(join(HERE, "config.json"), "utf8"));
@@ -411,6 +411,17 @@ async function skillText(full) {
 }
 
 const SENT = CFG.sentinel ?? {};
+/** Second opinion from the Bankr AI before a link is called phishing in public. Only facts the bot measured go in.
+ *  Returns { verdict: PHISHING | NOT_PHISHING | UNSURE | UNAVAILABLE, reason, model }. */
+async function reviewPhishing(facts) {
+  const bankr = llmProviders().find((p) => p.keyEnv === "BANKR_LLM_KEY");
+  if (!bankr) return { verdict: "UNAVAILABLE", reason: "no Bankr key" };
+  const model = SENT.reviewModel ?? "gemini-3.8-flash";
+  const res = await llmFetch(bankr, { model, max_tokens: 200, temperature: 0, messages: [{ role: "system", content: PHISH_SYSTEM }, { role: "user", content: `FACTS: ${phishFacts(facts)}` }] });
+  if (!res?.ok) return { verdict: "UNAVAILABLE", reason: `Bankr AI didn't answer (${res?.status ?? "network"})` };
+  const v = parsePhishVerdict((await res.json().catch(() => null))?.choices?.[0]?.message?.content);
+  return v ? { ...v, model } : { verdict: "UNAVAILABLE", reason: "answer out of shape", model };
+}
 let CHANNELS = { at: 0, list: [] };
 async function allChannels() {
   if (Date.now() - CHANNELS.at < 36e5 && CHANNELS.list.length) return CHANNELS.list;
@@ -478,11 +489,28 @@ async function sentinelPass(identity, state, dry = false) {
         if (!S2.linkCache[dom] || Date.now() - S2.linkCache[dom].t > 864e5) {
           const twin = lookalikeOf(dom);
           const ph = await http(`https://api.gopluslabs.io/api/v1/phishing_site?url=${encodeURIComponent(`https://${host}`)}`);
-          const why = yes(ph.json?.result?.phishing_site) ? `${defang(host)} is on a phishing blocklist` : twin ? `${defang(dom)} imitates ${twin}` : /(^|\.)xn--/.test(host) ? `${defang(host)} is a punycode domain that can pose as a real one` : null;
-          S2.linkCache[dom] = { t: Date.now(), why };
+          const blocklisted = yes(ph.json?.result?.phishing_site), punycode = /(^|\.)xn--/.test(host);
+          const why = blocklisted ? `${defang(host)} is on a phishing blocklist` : twin ? `${defang(dom)} imitates ${twin}` : punycode ? `${defang(host)} is a punycode domain that can pose as a real one` : null;
+          let review = null;
+          if (why) {
+            // measured evidence, then a second opinion from the Bankr AI: a public "phishing" call needs both
+            const url = `https://${host}`;
+            const page = isPublicUrl(url) ? await pageScan(url) : { ok: false };
+            const facts = { domain: dom, host, why, imitates: twin, official: [...OFFICIAL_DOMAINS], blocklisted, punycode, ageDays: await domainAgeDays(dom), page: { ...page, finalDomain: page.finalHost ? registrable(page.finalHost) : null } };
+            review = await reviewPhishing(facts);
+            console.log(`  sentinel: ${dom} flagged (${why}); Bankr AI (${review.model ?? "-"}): ${review.verdict}${review.reason ? `, ${review.reason}` : ""}`);
+          }
+          S2.linkCache[dom] = { t: Date.now(), why, review };
         }
-        const why = S2.linkCache[dom].why;
-        if (why) { await reply("threatWatch", ch, post, VOICE.pick("link", LINK_REPLIES).replace("{why}", why)); break; }
+        const { why, review } = S2.linkCache[dom];
+        if (!why) continue;
+        if (review?.verdict === "PHISHING") { await reply("threatWatch", ch, post, `${VOICE.pick("link", LINK_REPLIES).replace("{why}", why)} (checked twice: my own read, then an independent AI review${review.reason ? `: ${review.reason.replace(/\.$/, "")}` : ""}.)`); break; }
+        // the reviewer disagreed or couldn't answer: nothing public, the owner decides
+        if (!S2.linkCache[dom].filed) {
+          S2.linkCache[dom].filed = true;
+          noteCorrection({ channel: ch, postId: post.id, parent: post.id, who, force: true, text: `link check, not posted: ${why}. Bankr AI said ${review?.verdict ?? "nothing"}${review?.reason ? ` (${review.reason})` : ""}. look at it and warn by hand if it is phishing.` });
+        }
+        break;
       }
       // 4. a newcomer using an established resident's name: filed for the owner, never posted (names can repeat honestly)
       const key = skeleton(String(post.name).replace(/\s+/g, ""));
@@ -2135,6 +2163,21 @@ async function main() {
     const museId = existsSync(join(HERE, "muse_id.txt")) ? readFileSync(join(HERE, "muse_id.txt"), "utf8").trim() : null;
     const out = await converse({ museId }, { postId: id, channel: post.channel, who: post.name, text: post.text, probe: true });
     return console.log(`reply to ${post.name} (${id}): ${post.text}\n→ ${out === null ? "(no reply: disabled, rate-limited or no model)" : out === "SKIP" ? "SKIP" : out.text}`);
+  }
+
+  if (cmd === "phishprobe") {
+    // Read-only: my read of each domain, then the Bankr AI's second opinion.  node bot/musebot.mjs phishprobe a.com b.xyz
+    for (const host of args.slice(1)) {
+      const dom = registrable(host), twin = lookalikeOf(dom);
+      const ph = await http(`https://api.gopluslabs.io/api/v1/phishing_site?url=${encodeURIComponent(`https://${host}`)}`);
+      const blocklisted = yes(ph.json?.result?.phishing_site), punycode = /(^|\.)xn--/.test(host);
+      const why = blocklisted ? `${host} is on a phishing blocklist` : twin ? `${dom} imitates ${twin}` : punycode ? `${host} is punycode` : null;
+      if (!why) { console.log(`${host}: not flagged by my own checks (no review needed)`); continue; }
+      const page = isPublicUrl(`https://${host}`) ? await pageScan(`https://${host}`) : { ok: false };
+      const r = await reviewPhishing({ domain: dom, host, why, imitates: twin, official: [...OFFICIAL_DOMAINS], blocklisted, punycode, ageDays: await domainAgeDays(dom), page: { ...page, finalDomain: page.finalHost ? registrable(page.finalHost) : null } });
+      console.log(`${host}: ${why} → Bankr AI (${r.model ?? "-"}): ${r.verdict}${r.reason ? `, ${r.reason}` : ""} → ${r.verdict === "PHISHING" ? "WOULD POST a warning" : "not posted, filed for the owner"}`);
+    }
+    return;
   }
 
   if (cmd === "sentinelscan") {

@@ -258,6 +258,7 @@
   },
   "sentinel": {
     "everyMinutes": 2,
-    "maxRepliesPerDay": 20
+    "maxRepliesPerDay": 20,
+    "reviewModel": "gemini-3.8-flash"
   }
 }

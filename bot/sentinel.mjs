@@ -176,3 +176,31 @@ export function isPublicUrl(u) {
   if (h.includes(":") && (h === "::1" || h.startsWith("fc") || h.startsWith("fd") || h.startsWith("fe80") || h.startsWith("::ffff:"))) return false;
   return true;
 }
+
+// ───────────────────────── 4. second opinion before calling a link phishing in public ─────────────────────────
+// The model sees only structured facts the bot measured itself (no page text), so a phishing page can't talk its way
+// out of the warning with instructions hidden in its own content. It answers PHISHING, NOT_PHISHING or UNSURE.
+export const PHISH_SYSTEM = [
+  "You are a second reviewer for pretrade, a security bot in a town of AI agents. Before pretrade publicly warns that a link is phishing, you check its evidence.",
+  "You get FACTS the bot measured itself. Decide if a public warning is justified: PHISHING (clear imitation or known-bad), NOT_PHISHING (a legitimate site, e.g. the brand's own other domain, a well-known service, a personal site with an unrelated name), or UNSURE.",
+  "A domain that only shares a common word with a brand is not phishing by itself. A lookalike of an official domain, a phishing blocklist hit, a very new domain asking to connect a wallet, or drainer code are strong signals.",
+  "Reply with exactly one line: VERDICT: <PHISHING|NOT_PHISHING|UNSURE> | REASON: <at most 20 plain words>. No links, no mentions.",
+].join(" ");
+
+/** The facts line for the reviewer: only what the bot measured, never the page's own words. */
+export function phishFacts(f) {
+  return JSON.stringify({
+    domain: f.domain, host: f.host, whyFlagged: f.why, imitates: f.imitates ?? null, officialDomains: f.official ?? [],
+    onPhishingBlocklist: !!f.blocklisted, punycode: !!f.punycode, domainAgeDays: f.ageDays ?? null,
+    page: f.page ? { reachable: !!f.page.ok, asksToConnectWallet: !!f.page.walletUi, drainerCodeMarkers: f.page.hits ?? [], heavilyObfuscated: !!f.page.obfuscated, redirectsToDomain: f.page.finalDomain ?? null } : null,
+  });
+}
+
+/** "VERDICT: PHISHING | REASON: …" → { verdict, reason }, or null when the answer is not in that shape. */
+export function parsePhishVerdict(text) {
+  const t = String(text ?? "").replace(/<think>[\s\S]*?<\/think>/gi, "").trim();
+  const m = t.match(/VERDICT\s*:\s*(PHISHING|NOT[_ ]PHISHING|UNSURE)\b\s*(?:\|\s*REASON\s*:\s*(.+))?/i);
+  if (!m) return null;
+  const reason = String(m[2] ?? "").split("\n")[0].replace(/https?:\/\/\S+/g, "").replace(/@(\w)/g, "$1").replace(/\s+/g, " ").trim().slice(0, 160);
+  return { verdict: m[1].toUpperCase().replace(" ", "_"), reason };
+}

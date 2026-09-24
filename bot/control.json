@@ -11,7 +11,7 @@
     "townWatch": true,
     "guard": true,
     "tickerWatch": "shadow",
-    "leakWatch": "shadow",
+    "leakWatch": true,
     "threatWatch": "shadow",
     "digest": true,
     "radar": true,
