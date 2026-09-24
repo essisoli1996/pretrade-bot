@@ -1,11 +1,10 @@
-name: bankr-deploy   # deploys x402/ services to Bankr x402 Cloud, then switches the musebook bot on
+name: bankr-deploy   # deploys x402/ services to Bankr x402 Cloud (the live bot itself is live.yml)
 
 on:
   workflow_dispatch: {}
 
 permissions:
   contents: write
-  actions: write
 
 jobs:
   deploy:
@@ -42,13 +41,8 @@ jobs:
           sed -i -E 's/bk_[A-Za-z0-9_-]+/bk_***/g' deploy.log
           git config user.name "musebot"; git config user.email "musebot@users.noreply.github.com"
           git add -f deploy.log; git diff --cached --quiet || git commit -qm "deploy log [skip ci]"; git push
-      - name: Switch the bot on only if the live URLs match bot/config.json
-        env:
-          GH_TOKEN: ${{ github.token }}
+      - name: Check the live URLs match bot/config.json
         run: |
           BASE=$(node -p "require('./bot/config.json').endpointBase.toLowerCase()")
-          if grep -qi "$BASE" deploy.log; then
-            gh workflow enable musebot.yml && echo "bot enabled"
-          else
-            echo "::warning::Deployed wallet address differs from bot/config.json. Bot left OFF. Fix endpointBase, then enable the musebot workflow."
-          fi
+          if grep -qi "$BASE" deploy.log; then echo "endpoints live at $BASE"
+          else echo "::warning::Deployed wallet address differs from bot/config.json endpointBase: the bot links to the wrong URLs until it is fixed."; fi
