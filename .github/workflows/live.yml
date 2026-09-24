@@ -30,17 +30,22 @@ jobs:
         run: |
           test -n "$MUSE_IDENTITY" || { echo "MUSE_IDENTITY secret is missing"; exit 1; }
           git config user.name "musebot"; git config user.email "musebot@users.noreply.github.com"
+          # exactly one bot is live: deploy/host says which. When the server has it, this run stands down.
+          host() { git fetch -q origin main 2>/dev/null; git show origin/main:deploy/host 2>/dev/null | tr -d '[:space:]'; }
+          if [ "$(host)" = server ]; then echo "the server is the live bot (deploy/host); standing down"; echo server > /tmp/host; exit 0; fi
           date +%s > /tmp/started
           END=$(( $(date +%s) + 340*60 )); LAST_PUSH=0
           while [ "$(date +%s)" -lt "$END" ]; do
+            if [ "$(host)" = server ]; then echo "switched to the server: pushing my memory and standing down"; echo server > /tmp/host; LAST_PUSH=-99999; else
             node bot/musebot.mjs serve --live --segment 5 --poll 20 2>&1 | tee /tmp/seg.log || sleep 30
-            cat /tmp/seg.log >> bot/last-run.log; tail -n 300 bot/last-run.log > /tmp/l && mv /tmp/l bot/last-run.log
+            cat /tmp/seg.log >> bot/last-run.log; tail -n 300 bot/last-run.log > /tmp/l && mv /tmp/l bot/last-run.log; fi
             NOW=$(date +%s)
             if ! grep -q " 0 replies\." /tmp/seg.log || [ $(( NOW - LAST_PUSH )) -ge 1800 ]; then
               git add -f bot/.state.json bot/last-run.log; test -d bot/ledger && git add -f bot/ledger; test -d bot/radar && git add -f bot/radar; test -f bot/mentions.log && git add -f bot/mentions.log
               git diff --cached --quiet || { git commit -qm "state [skip ci]"; git pull -q --rebase -X theirs || git rebase --abort || true; git push -q || true; }
               LAST_PUSH=$NOW
             fi
+            test -f /tmp/host && break
           done
       - name: Hand over to the next run
         if: always()
@@ -48,5 +53,6 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           RAN=$(( $(date +%s) - $(cat /tmp/started 2>/dev/null || date +%s) ))
+          if [ -f /tmp/host ]; then echo "the server is the live bot; not starting a successor"; exit 0; fi
           if [ "$RAN" -lt 120 ]; then echo "Run lasted ${RAN}s: something is wrong, NOT restarting (the hourly watchdog will retry)."; exit 0; fi
           gh workflow run live.yml --ref main && echo "successor started"

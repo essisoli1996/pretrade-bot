@@ -1,0 +1,86 @@
+name: server   # the bot's own machine (Oracle Cloud or any Ubuntu VM). Needs secrets SERVER_HOST and SERVER_SSH_KEY (SERVER_USER defaults to ubuntu).
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "status | setup (install or repair + write secrets) | secrets (rewrite them) | restart | takeover (server becomes the live bot) | handback (GitHub Actions becomes the live bot) | backup"
+        required: true
+        default: status
+        type: choice
+        options: [status, setup, secrets, restart, takeover, handback, backup]
+  schedule:
+    - cron: "41 * * * *"   # hourly: copy the bot's memory from the server into the repo (only while the server is in charge)
+permissions: { contents: write, actions: write }
+concurrency: { group: server, cancel-in-progress: false }
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      ACTION: ${{ inputs.action || 'backup' }}
+      SERVER_HOST: ${{ secrets.SERVER_HOST }}
+      SERVER_USER: ${{ secrets.SERVER_USER || 'ubuntu' }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Connect
+        id: ssh
+        env: { KEY: "${{ secrets.SERVER_SSH_KEY }}" }
+        run: |
+          if [ -z "$SERVER_HOST" ] || [ -z "$KEY" ]; then echo "no server configured yet (add the SERVER_HOST and SERVER_SSH_KEY secrets)"; echo "ok=false" >> "$GITHUB_OUTPUT"; exit 0; fi
+          mkdir -p ~/.ssh && printf '%s\n' "$KEY" > ~/.ssh/id && chmod 600 ~/.ssh/id
+          ssh-keyscan -T 15 "$SERVER_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+          printf 'Host srv\n  HostName %s\n  User %s\n  IdentityFile ~/.ssh/id\n  ServerAliveInterval 20\n  ConnectTimeout 20\n' "$SERVER_HOST" "$SERVER_USER" > ~/.ssh/config
+          ssh srv true && echo "ok=true" >> "$GITHUB_OUTPUT"
+      - name: Setup
+        if: steps.ssh.outputs.ok == 'true' && env.ACTION == 'setup'
+        run: ssh srv 'curl -fsSL https://raw.githubusercontent.com/${{ github.repository }}/main/deploy/setup.sh | sudo bash'
+      - name: Write secrets
+        if: steps.ssh.outputs.ok == 'true' && (env.ACTION == 'setup' || env.ACTION == 'secrets')
+        env:
+          MUSE_IDENTITY: ${{ secrets.MUSE_IDENTITY }}
+          BANKR_LLM_KEY: ${{ secrets.BANKR_LLM_KEY || secrets.BANKR_API_KEY }}
+          OPENROUTER_KEY: ${{ secrets.OPENROUTER_KEY }}
+        run: |
+          test -n "$MUSE_IDENTITY" || { echo "MUSE_IDENTITY secret is missing"; exit 1; }
+          # sent over ssh stdin, never on a command line or in the log; the identity is base64 so any character survives
+          { echo "MUSE_IDENTITY_B64=$(printf %s "$MUSE_IDENTITY" | base64 -w0)"; echo "BANKR_LLM_KEY=$BANKR_LLM_KEY"; echo "OPENROUTER_KEY=$OPENROUTER_KEY"; } \
+            | ssh srv 'sudo tee /etc/pretrade/env >/dev/null && sudo chown root:pretrade /etc/pretrade/env && sudo chmod 640 /etc/pretrade/env && sudo systemctl restart pretrade && echo "secrets written, bot restarted"'
+      - name: Restart
+        if: steps.ssh.outputs.ok == 'true' && env.ACTION == 'restart'
+        run: ssh srv 'sudo systemctl restart pretrade && echo restarted'
+      - name: Take over (server becomes the live bot)
+        if: env.ACTION == 'takeover'
+        run: |
+          echo server > deploy/host
+          git config user.name musebot; git config user.email musebot@users.noreply.github.com
+          git add deploy/host; git commit -qm "host: server takes over the live bot [skip ci]" && git pull -q --rebase && git push -q
+          echo "switched. the GitHub Actions bot stops after its current segment; the server starts about 7 minutes after it sees the switch."
+      - name: Hand back (GitHub Actions becomes the live bot)
+        if: env.ACTION == 'handback'
+        env: { GH_TOKEN: "${{ github.token }}" }
+        run: |
+          echo actions > deploy/host
+          git config user.name musebot; git config user.email musebot@users.noreply.github.com
+          git add deploy/host; git commit -qm "host: GitHub Actions takes the live bot back [skip ci]" && git pull -q --rebase && git push -q
+          echo "waiting 11 minutes for the server to notice and stand down..."; sleep 660
+      - name: Back up the bot's memory into the repo
+        if: steps.ssh.outputs.ok == 'true' && (env.ACTION == 'backup' || env.ACTION == 'handback')
+        run: |
+          if [ "$ACTION" = backup ] && [ "$(git show origin/main:deploy/host 2>/dev/null | tr -d '[:space:]')" != server ]; then echo "the GitHub Actions bot is in charge; nothing to back up"; exit 0; fi
+          ssh srv 'sudo tar -C /var/lib/pretrade -cz --ignore-failed-read .state.json ledger radar mentions.log 2>/dev/null' > /tmp/data.tgz || true
+          test -s /tmp/data.tgz || { echo "nothing came back from the server"; exit 1; }
+          tar -xzf /tmp/data.tgz -C bot
+          ssh srv 'sudo journalctl -u pretrade -n 300 --no-pager -o cat' > bot/last-run.log || true
+          git config user.name musebot; git config user.email musebot@users.noreply.github.com
+          git add -f bot/.state.json bot/last-run.log; for p in bot/ledger bot/radar bot/mentions.log; do test -e "$p" && git add -f "$p"; done
+          git diff --cached --quiet || { git commit -qm "state [skip ci]"; git pull -q --rebase -X theirs; git push -q; echo "memory backed up"; }
+      - name: Start the GitHub Actions bot
+        if: env.ACTION == 'handback'
+        env: { GH_TOKEN: "${{ github.token }}" }
+        run: gh workflow run live.yml --ref main && echo "GitHub Actions bot started"
+      - name: Status
+        if: steps.ssh.outputs.ok == 'true' && (env.ACTION == 'status' || env.ACTION == 'setup' || env.ACTION == 'restart')
+        run: |
+          ssh srv 'echo "live bot: $(git -C /opt/pretrade/app show origin/main:deploy/host 2>/dev/null)"; echo "service: $(systemctl is-active pretrade)"; echo "code: $(sudo -u pretrade git -C /opt/pretrade/app log -1 --format="%h %s")";
+                   echo "memory: $(sudo stat -c "%s bytes, saved %y" /var/lib/pretrade/.state.json 2>/dev/null || echo none)"; free -m | head -2; uptime;
+                   echo "--- updates"; sudo journalctl -u pretrade-update -n 8 --no-pager -o cat; echo "--- bot (last 60 lines)"; sudo journalctl -u pretrade -n 60 --no-pager -o cat'

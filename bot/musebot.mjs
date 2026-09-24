@@ -30,7 +30,11 @@ import { TALK_INTENT, chainNamedIn, chainTheyMean, isPaymentUnit } from "./talk.
 const HERE = dirname(fileURLToPath(import.meta.url));
 const CFG = JSON.parse(readFileSync(join(HERE, "config.json"), "utf8"));
 const ID_FILE = join(HERE, ".identity.json");
-const STATE_FILE = join(HERE, ".state.json");
+// Runtime data (state, ledger, radar, mentions) lives in PRETRADE_DATA when set (the server keeps it outside the git
+// checkout, so code updates never touch it), else next to the code as before.
+const DATA = process.env.PRETRADE_DATA || HERE;
+if (!existsSync(DATA)) mkdirSync(DATA, { recursive: true });
+const STATE_FILE = join(DATA, ".state.json");
 const BOARDS = CFG.boards ?? ["https://musebook.me", "https://musebook.lol"];
 let BOARD = BOARDS[0];
 /** The town moved domain once already; if the current host stops answering, fail over instead of going silent. */
@@ -826,9 +830,9 @@ function snapshotWeek(state) {
   };
   const body = JSON.stringify(snap, null, 1);
   const fp = createHash("sha256").update(body).digest("hex");
-  const dir = join(HERE, "ledger"); if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
+  const dir = join(DATA, "ledger"); if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
   const file = `ledger/${new Date().toISOString().slice(0, 10)}.json`;
-  writeFileSync(join(HERE, file), body);
+  writeFileSync(join(DATA, file), body);
   state.runner = state.runner ?? {}; state.runner.lastSnapshot = Date.now(); state.runner.lastFingerprint = fp;
   return { fp, file, n: snap.receipts.length + snap.verdicts.length };
 }
@@ -1529,7 +1533,7 @@ async function handleMentions(identity, state) {
     const addrs = addressesIn(text);
     if (addrs.length !== 1 || !m.channel) {
       const line = `${new Date().toISOString()} #${m.channel ?? "?"} post ${id} by ${who}: ${text.replace(/\s+/g, " ").slice(0, 200)}\n`;
-      if (LIVE) writeFileSync(join(HERE, "mentions.log"), (existsSync(join(HERE, "mentions.log")) ? readFileSync(join(HERE, "mentions.log"), "utf8") : "") + line);
+      if (LIVE) writeFileSync(join(DATA, "mentions.log"), (existsSync(join(DATA, "mentions.log")) ? readFileSync(join(DATA, "mentions.log"), "utf8") : "") + line);
       if (m.channel) {
         const reply = await converse(state, { postId: id, channel: m.channel, who, text: await fullPostText(id, text) });
         if (reply && reply !== "SKIP") {
@@ -1916,7 +1920,7 @@ async function main() {
 
   if (cmd === "radar") {
     // node bot/musebot.mjs radar [--dry] [--test N]
-    const radar = makeRadar({ CFG, http, HERE });
+    const radar = makeRadar({ CFG, http, HERE: DATA });
     const i = args.indexOf("--test"); const no = i >= 0 ? Number(args[i + 1]) : 0;
     const r = await radar.runTest(no, { dry: args.includes("--dry") });
     return console.log(r.summary + "\n\n" + JSON.stringify(r.results.slice(0, 2), null, 1).slice(0, 4000));
@@ -2104,7 +2108,7 @@ async function main() {
         if (due("townwatch", G.townWatchMinutes ?? 3)) n2 += await townTokenWatch(identity, state);
         if (due("guard", G.everyMinutes ?? 15)) n2 += (await guardScan(identity, state)).length;
         if (due("digest", 60)) n2 += await councilDigest(identity, state);
-        if (due("radar", CFG.radar?.everyMinutes ?? 10)) { RADAR = RADAR ?? makeRadar({ CFG, http, HERE }); n2 += await RADAR.tick(); }
+        if (due("radar", CFG.radar?.everyMinutes ?? 10)) { RADAR = RADAR ?? makeRadar({ CFG, http, HERE: DATA }); n2 += await RADAR.tick(); }
         if (due("watches", CFG.serve.watchMinutes)) n2 += await runWatches(identity, state);
         if (due("ledger", CFG.serve.ledgerMinutes)) await settleLedger(state);
         if (n1 + n2 > 0) { replies += n1 + n2; saveJson(STATE_FILE, state); }

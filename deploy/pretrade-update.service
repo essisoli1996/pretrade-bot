@@ -1,0 +1,6 @@
+[Unit]
+Description=pretrade: follow main after the offline tests pass
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/pretrade-update
