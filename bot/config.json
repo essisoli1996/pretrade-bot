@@ -250,7 +250,7 @@
     "maxAlertsPerDay": 6
   },
   "voice": {
-    "llmOpener": true,
+    "llmOpener": false,
     "llmOpenerShare": 0.35,
     "maxPerDay": 30,
     "model": "qwen3.5-flash",
@@ -260,5 +260,9 @@
     "everyMinutes": 2,
     "maxRepliesPerDay": 20,
     "reviewModel": "gemini-3.8-flash"
+  },
+  "muse": {
+    "enabled": true,
+    "note": "free-form talk is answered by pretrade's Muse (docs/MUSE_BRIEF.md); the engine answers commands and token addresses"
   }
 }

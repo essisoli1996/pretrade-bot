@@ -5,7 +5,7 @@
   "features": {
     "mentions": true,
     "channels": true,
-    "conversation": true,
+    "conversation": false,
     "launches": true,
     "launchReport": true,
     "townWatch": true,

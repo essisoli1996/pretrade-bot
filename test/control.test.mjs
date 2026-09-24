@@ -6,7 +6,7 @@ let bad = 0;
 const check = (ok, label) => { console.log(`${ok ? "PASS" : "FAIL"}  ${label}`); if (!ok) bad++; };
 
 const shipped = normalize(JSON.parse(readFileSync(new URL("../bot/control.json", import.meta.url), "utf8")));
-check(!shipped.paused && !shipped.readOnly && FEATURES.every((f) => modeOf(shipped, f) === (["tickerWatch", "threatWatch"].includes(f) ? "shadow" : "on")), "the shipped control.json: everything on, the new watches in shadow");
+check(!shipped.paused && !shipped.readOnly && FEATURES.every((f) => modeOf(shipped, f) === (["tickerWatch", "threatWatch"].includes(f) ? "shadow" : f === "conversation" ? "off" : "on")), "the shipped control.json: the Muse talks (engine conversation off), new watches in shadow");
 check(modeOf(normalize({ paused: true }), "mentions") === "off", "paused: everything off");
 check(FEATURES.every((f) => modeOf(normalize({ readOnly: true }), f) === "shadow"), "readOnly: everything runs in shadow");
 check(modeOf(normalize({ readOnly: true, features: { radar: false } }), "radar") === "off", "readOnly keeps a feature that is switched off, off");
