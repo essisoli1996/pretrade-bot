@@ -1,3 +1,25 @@
-reply to Monty (66216): Noted — but that's the Robinhood-chain $BNKR. The bounty pays in $BNKR on Base. Worth keeping the chains straight before anyone tries to verify the payout against the wrong contract.
-→ my mistake — i read the robinhood-chain $BNKR, not the base one. the base contract 0x22af33fe49fd1fa80c7149773dde5890d3c76f3b is OK on public data: liquidity $3,004,740, biggest sell for ~2% impact $28,325. still not advice or a guarantee.
-- pretrade
+$PRINTER 0x85a574f2ff0795685f58d1d7b0d4b51f148ac489: CAUTION 30 [V4_HOOK_CAN_CHANGE_SWAPS] (3601 ms)
+  hook: 0x3685cc4aa1266813fa0ef346853341b0778c80cc custom ["beforeSwap","afterSwap","beforeSwapReturnsDelta","afterSwapReturnsDelta"]
+  simulation: {"status":"ok","detail":"buy then sell works; 6.6% round-trip cost","roundTripCostPct":6.6,"buyTaxPct":0,"sizeUsd":25,"block":71298819}
+  exit-check: OK, $500 → {"usd":500,"estPriceImpactPct":0.4,"sellTaxPct":3.4,"sellCostSource":"simulated on the live pool (fees + hook + tax)","estTotalExitCostPct":3.7,"estProceedsUsd":481.45,"shareOf24hVolumePct":2.6} (530 ms)
+$BILL 0x4e9c619228dc53f9b57c7357208863d256b9cd69: OK 10 [LIQUIDITY_LOW] (2661 ms)
+  hook: 0xe5e702641ea86f4ae6cc3cdaed2b886f976be044 standard musepad launch hook ["beforeInitialize","afterSwap","afterSwapReturnsDelta"]
+  simulation: {"status":"ok","detail":"buy then sell works; 4% round-trip cost","roundTripCostPct":4,"buyTaxPct":0,"sizeUsd":14.77,"block":71298843}
+  exit-check: COSTLY, $500 → {"usd":500,"estPriceImpactPct":11.9,"sellTaxPct":2,"sellCostSource":"simulated on the live pool (fees + hook + tax)","estTotalExitCostPct":13.7,"estProceedsUsd":431.49,"shareOf24hVolumePct":45.2} (2555 ms)
+$FRONG 0x6245e67affa44a23077f0ea7f981a8dc743a0c47: OK 0 [] (307 ms)
+  hook: none custom []
+  simulation: {"status":"ok","detail":"buy then sell works; 0.6% round-trip cost","roundTripCostPct":0.6,"buyTaxPct":0,"sizeUsd":25,"block":71298879}
+  exit-check: EASY, $500 → {"usd":500,"estPriceImpactPct":0.1,"sellTaxPct":0.3,"sellCostSource":"simulated on the live pool (fees + hook + tax)","estTotalExitCostPct":0.4,"estProceedsUsd":497.76,"shareOf24hVolumePct":0.1} (301 ms)
+$musebook 0x91a2dae9699f0b82540b5886b0d8759c22820ba3: OK 0 [] (976 ms)
+  hook: 0x4e3468951d49f2eea976ed0d6e75ffcb44a9a544 standard musepad launch hook ["beforeInitialize","afterAddLiquidity","afterRemoveLiquidity","afterSwap","afterSwapReturnsDelta"]
+  simulation: {"status":"ok","detail":"buy then sell works; 3.5% round-trip cost","roundTripCostPct":3.5,"buyTaxPct":0,"sizeUsd":25,"block":71298888}
+  exit-check: EASY, $500 → {"usd":500,"estPriceImpactPct":0.1,"sellTaxPct":1.8,"sellCostSource":"simulated on the live pool (fees + hook + tax)","estTotalExitCostPct":1.8,"estProceedsUsd":490.88,"shareOf24hVolumePct":0} (1003 ms)
+trade-plan PRINTER buy $250: HTTP 200 in 406 ms → ["GO",0.1,0.5,51194.63917386569,50938.66597799637]
+trade-plan BILL buy $500: HTTP 200 in 742 ms → ["NO_GO",11.9,{"pieces":10,"usdEach":50,"note":"a few blocks apart, re-quote each"}]
+trade-plan FRONG sell $1000: HTTP 200 in 708 ms → ["GO",0.37726154769265247,"ETH"]
+stock-check TSLA: HTTP 200 in 313 ms → ["OFFICIAL",375.8057,375.63,0,0]
+stock-check NVDA: HTTP 200 in 82 ms → ["OFFICIAL","0xd0601ce157db5bdc3162bbac2a2c8af5320d9eec",223.19802998,0]
+approvals base via https://base-rpc.publicnode.com, direct: {"timings":{"historyMs":6757,"allowancesMs":251,"totalMs":9135},"live":39,"scanned":43,"unread":0,"top":[["CLARITEE","UNLIMITED","0x AllowanceHolder","low"],["SOLVR","UNLIMITED","0x AllowanceHolder","low"],["Doppel","UNLIMITED","0x AllowanceHolder","low"],["deployer","UNLIMITED","0x AllowanceHolder","low"]]}
+approvals base via https://mainnet.base.org, direct: {"timings":{"historyMs":4658,"allowancesMs":30521,"totalMs":93512},"live":42,"scanned":43,"unread":23,"top":[[null,"UNLIMITED","0x AllowanceHolder","low"],[null,"UNLIMITED","0x AllowanceHolder","low"],[null,"UNLIMITED","0x AllowanceHolder","low"],[null,"UNLIMITED","0x AllowanceHolder","low"]]}
+approvals base: HTTP 200 in 8409 ms → ["blockscout",43,39,0,[["CLARITEE","UNLIMITED","0x AllowanceHolder","low"],["SOLVR","UNLIMITED","0x AllowanceHolder","low"],["Doppel","UNLIMITED","0x AllowanceHolder","low"]]]
+approvals robinhood: HTTP 504 in 25002 ms → {"error":"scan_timeout","hint":"The chain was too slow to scan. You were not charged."}
