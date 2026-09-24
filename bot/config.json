@@ -243,5 +243,10 @@
     "maxDigestsPerDay": 12,
     "maxRows": 8,
     "maxAlertsPerDay": 4
+  },
+  "provenance": {
+    "everyMinutes": 5,
+    "minLiquidityUsd": 5000,
+    "maxAlertsPerDay": 6
   }
 }

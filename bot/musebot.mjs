@@ -28,6 +28,7 @@ import { makeTxSim, describeTxSim, parseTx } from "./txsim.mjs";
 import { TALK_INTENT, chainNamedIn, chainTheyMean, isPaymentUnit, looksLikeCorrection } from "./talk.mjs";
 import { makeControl, modeOf } from "./control.mjs";
 import { loadJson, saveJson } from "./store.mjs";
+import { makeProvenance, provenanceLines, tickerReport, reuseAlert } from "./provenance.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const CFG = JSON.parse(readFileSync(join(HERE, "config.json"), "utf8"));
@@ -197,6 +198,7 @@ async function quickCheck(address, { light = false, chain: onlyChain = null } = 
   let hookBudget = V4CFG.maxPoints ?? 50;
   for (const r of hook?.scored ? hook.risk : []) { const pts = Math.min(r.pts, hookBudget); hookBudget -= pts; add(r.text, pts); }
   const sim = hook?.key ? await simRead(p, hook.key, a) : null;
+  const prov = !light && chain === "robinhood" ? await provenanceRead(a) : null;
   for (const f of sim?.scored ? sim.flags : []) add(f.text, f.pts, !!f.critical);
 
   score = Math.min(100, score);
@@ -218,7 +220,7 @@ async function quickCheck(address, { light = false, chain: onlyChain = null } = 
     flowH1: { buys: n(p.txns?.h1?.buys) ?? 0, sells: n(p.txns?.h1?.sells) ?? 0 },
     volume24h: n(p.volume?.h24), marketCap: n(p.marketCap) ?? n(p.fdv),
     sellMax: { p1: sellMax(0.01), p2: sellMax(0.02), p5: sellMax(0.05) },
-    hook, sim,
+    hook, sim, provenance: prov,
   };
 }
 
@@ -292,6 +294,53 @@ async function simRead(pair, key, token) {
   } catch (e) {
     return { status: "unavailable", line: `🧪 trade simulation unavailable (${String(e.message ?? e).slice(0, 60)}).`, flags: [], scored: false };
   }
+}
+
+// ───────────────────────── launch provenance (see bot/provenance.mjs): who launched it, from which post, where fees go ─────────────────────────
+let PROV = null;
+const prov = () => (PROV ??= makeProvenance({ http, rpc: rpcFor("robinhood") }));
+/** Never throws: a token musepad didn't launch, or a directory that can't be read, just adds nothing. */
+async function provenanceRead(address) {
+  try {
+    const hit = await prov().lookup(address);
+    return hit ? { ...hit, lines: provenanceLines(hit.rec, prov().registry(), hit.fee, { board: boardHost() }) } : null;
+  } catch { return null; }
+}
+/** "@pretrade real <TICKER>": every Robinhood Chain contract using the ticker, told apart by facts. */
+async function realText(text) {
+  const sym = text.match(/\breal\s+\$?([A-Za-z0-9]{1,15})\b/i)?.[1];
+  if (!sym) return `usage: "@${CFG.name} real PORCH". i list every contract on Robinhood Chain using that ticker, who launched each one, from which post, and where its fees go.\n- ${CFG.name}`;
+  if (sym.toUpperCase() === String(TK.symbol ?? "").toUpperCase()) return `that is my own token's ticker, so i leave it to others: conflict of interest.\n- ${CFG.name}`;
+  const reg = await prov().refresh();
+  const market = (await tickerTokens(sym)).filter((t) => t.chain === "robinhood");
+  const fees = new Map();
+  for (const r of reg.bySymbol.get(sym.toUpperCase()) ?? []) fees.set(r.address, await prov().feeOf(r));
+  const rep = tickerReport(sym, reg, market, fees, { board: boardHost() });
+  return [`🧾 who is $${sym.toUpperCase()}?`, ...rep.lines, `source: musepad's launch records and DexScreener. not advice.`, `- ${CFG.name}`].join("\n");
+}
+/** New musepad launches that reuse a ticker already trading in town, or whose fees can't reach anyone: facts, posted
+ *  under the launch request itself. Same-launcher retries are not news. */
+async function tickerWatch(identity, state, dry = false) {
+  state.prov = state.prov ?? { seen: [], alerts: [] };
+  if (!prov().seen().length && state.prov.seen.length) prov().prime(state.prov.seen);
+  const fresh = await prov().fresh();
+  state.prov.seen = prov().seen().slice(-3000);
+  state.prov.alerts = state.prov.alerts.filter((t) => t > Date.now() - 864e5);
+  let posted = 0;
+  for (const rec of fresh) {
+    if (isOwnToken(rec.address)) continue;
+    const market = (await tickerTokens(rec.symbol)).filter((t) => t.chain === "robinhood");
+    const fee = await prov().feeOf(rec);
+    const lines = reuseAlert(rec, prov().registry(), market, fee, { minLiquidityUsd: CFG.provenance?.minLiquidityUsd ?? 5000, board: boardHost() });
+    if (!lines) continue;
+    const text = [...lines, `- ${CFG.name}`].join("\n");
+    const channel = String(rec.channel ?? "").replace(/^#/, "") || (G.channel ?? CFG.channels[0]);
+    console.log(`\n→ ticker watch${dry ? " (dry)" : ""} on $${rec.symbol} (${rec.address.slice(0, 10)}…, post ${rec.post}):\n${text}`);
+    if (dry || state.prov.alerts.length >= (CFG.provenance?.maxAlertsPerDay ?? 6)) continue;
+    const res = rec.post ? await postReply(identity, channel, rec.post, text) : await http(`${BOARD}/api/post`, signRequest("post", identity, { channel: G.channel ?? CFG.channels[0], name: CFG.name, text }));
+    if (res.ok) { state.prov.alerts.push(Date.now()); posted++; addReceipt(state, { kind: "ticker reuse", ticker: rec.symbol.toUpperCase(), address: rec.address, postId: res.json?.post?.id ?? rec.post }); }
+  }
+  return posted;
 }
 
 // ───────────────────────── trade plan, stock tokens, approvals (free commands) ─────────────────────────
@@ -398,6 +447,7 @@ function replyText(c) {
     `${icon} $${c.symbol} on ${c.chain}: ${c.verdict}, risk ${c.score}/100${scan}`,
     `flags: ${flags}. liquidity $${c.liquidity.toLocaleString("en-US")}, biggest sell for ~2% impact: $${c.maxSell2.toLocaleString("en-US")}.`,
     ...(c.sim?.status === "ok" && !c.sim.flags.length ? [`simulated a small buy and sell on the live pool: selling works, ${c.sim.roundTripLossPct}% round-trip cost.`] : []),
+    ...(c.provenance?.lines ?? []),
     c.verdict === "CAUTION" && c.flags.every((f) => /liquidity|old/.test(f))
       ? `only market-age flags here, which is normal for a fresh launch. free read from public data, not advice.`
       : `free read from public data, not advice, and OK is never a guarantee.`,
@@ -603,7 +653,10 @@ async function guardScan(identity, state, dry = false) {
       if (!live || (ageH !== null && ageH > (G.maxAgeHours ?? 72))) continue;
       const idn = await tokenIdentity(t.address, t.chain);
       const canonDep = state.guard.deployer?.[ticker];
-      const sameTailor = idn.deployer && canonDep && canonDep !== "unknown" && idn.deployer === canonDep;
+      // every musepad launch is deployed by musepad's own wallet, so for those the launcher is the fingerprint
+      const reg = await prov().refresh().catch(() => null);
+      const mine = reg?.byAddr.get(t.address.toLowerCase()), theirs = reg?.byAddr.get(canon.address.toLowerCase());
+      const sameTailor = mine && theirs ? !!mine.launcher && mine.launcher === theirs.launcher : idn.deployer && canonDep && canonDep !== "unknown" && idn.deployer === canonDep;
       if (sameTailor) continue; // same deployer as the original: likely the project's own migration or second pool, not a copycat
       const evidence = [
         idn.deployer ? `deployed by ${idn.deployer.slice(0, 10)}…${canonDep && canonDep !== "unknown" ? `, not the original deployer ${canonDep.slice(0, 10)}…` : ""}` : "deployer unknown",
@@ -1360,6 +1413,7 @@ function menuText(deep, watch) {
     `trade plan, free: "@${CFG.name} plan <token> <usd> [sell]" runs your exact size on the live Robinhood v4 pool → go/no-go, price impact, slippage and the minimum amount out to set.`,
     `stock tokens, free: "@${CFG.name} stock TSLA" (or an address) checks it against Robinhood's own registry and the Chainlink price: real or copycat, paused, pending splits, DEX premium.`,
     `approvals, free: "@${CFG.name} approvals <wallet> [robinhood|base]" lists every live approval, riskiest first, with a revoke transaction to sign.`,
+    `who launched it, free: "@${CFG.name} real PORCH" lists every Robinhood Chain contract using a ticker, who launched each one, from which post, and where its fees go.`,
     `council runner, free: "@${CFG.name} vet <paste an offer>" → i check its links, addresses and handles for scam patterns and answer in the open. "@${CFG.name} council" for the weekly runner log.`,
     `town guard, free: i watch for copycats of the town's tokens and for launches that reuse an existing ticker, and flag them in the open. "@${CFG.name} receipts" lists every catch.`,
     `deep report (safety + exit sizes + momentum + copycat scan + holder concentration${llmOn ? " + an analyst note that answers your question about the token" : ""}): ${priceLine("deep", deep)}.`,
@@ -1434,12 +1488,13 @@ async function runWatches(identity, state) {
 
 /** Returns reply text for a premium command, or null if the mention is not one. */
 async function premiumCommand(m, text, who, id, state) {
-  const cmd = text.match(new RegExp(`@${CFG.name}\\s+(price|prices|menu|help|deep|watch|record|stats|receipts|vet|council|sign|wallet|plan|stock|approvals)\\b`, "i"))?.[1]?.toLowerCase();
+  const cmd = text.match(new RegExp(`@${CFG.name}\\s+(price|prices|menu|help|deep|watch|record|stats|receipts|vet|council|sign|wallet|plan|stock|approvals|real)\\b`, "i"))?.[1]?.toLowerCase();
   if (!cmd) return null;
   if (cmd === "council") return councilText(state);
   if (cmd === "plan") return planText(text);
   if (cmd === "stock") return stockText(text);
   if (cmd === "approvals") return approvalsText(text);
+  if (cmd === "real") return realText(text);
   if (cmd === "sign") {
     const full = (await fullPostText(id, text)).replace(new RegExp(`@${CFG.name}\\s+sign:?`, "i"), " ");
     const tx = parseTx(full, CHAIN_BY_ID);
@@ -1892,12 +1947,27 @@ async function main() {
     return console.log(`reply to ${post.name} (${id}): ${post.text}\n→ ${out === null ? "(no reply: disabled, rate-limited or no model)" : out === "SKIP" ? "SKIP" : out.text}`);
   }
 
+  if (cmd === "provscan") {
+    // Read-only: what the ticker watch would say about the latest N musepad launches.  node bot/musebot.mjs provscan 40
+    const reg = await prov().refresh(true);
+    const latest = [...reg.byAddr.values()].sort((a, b) => (b.launchedAt ?? 0) - (a.launchedAt ?? 0)).slice(0, Number(args[1] ?? 30));
+    console.log(`musepad directory: ${reg.size} launches, ${reg.bySymbol.size} tickers. latest ${latest.length}:`);
+    for (const rec of latest) {
+      const fee = await prov().feeOf(rec);
+      const lines = reuseAlert(rec, reg, (await tickerTokens(rec.symbol)).filter((t) => t.chain === "robinhood"), fee, { minLiquidityUsd: CFG.provenance?.minLiquidityUsd ?? 5000, board: boardHost() });
+      console.log(`${lines ? "ALERT" : "  -  "} $${rec.symbol} ${rec.address} by ${rec.launcher} · fee: ${fee?.kind}${lines ? `\n      ${lines.join("\n      ")}` : ""}`);
+    }
+    return;
+  }
+
   if (cmd === "try") {
     // Read-only: runs one command exactly as a mention would, prints the reply, posts nothing.
     //   node bot/musebot.mjs try "plan 0x… 250"   |   try "stock TSLA"   |   try "approvals 0x… base"
     const t = `@${CFG.name} ${args.slice(1).join(" ")}`;
-    const c = t.match(/@\S+\s+(plan|stock|approvals)\b/i)?.[1]?.toLowerCase();
-    const out = c === "plan" ? await planText(t) : c === "stock" ? await stockText(t) : c === "approvals" ? await approvalsText(t) : "try supports: plan, stock, approvals";
+    const c = t.match(/@\S+\s+(plan|stock|approvals|real)\b/i)?.[1]?.toLowerCase();
+    const addr = !c ? addressesIn(t)[0] : null;
+    const out = c === "plan" ? await planText(t) : c === "stock" ? await stockText(t) : c === "approvals" ? await approvalsText(t) : c === "real" ? await realText(t)
+      : addr ? ((q) => (q ? replyText(q) : "nothing to say (no DEX pair)"))(await quickCheck(addr)) : "try supports: <token address>, plan, stock, approvals, real";
     return console.log(out);
   }
 
@@ -2172,6 +2242,7 @@ async function main() {
         if (due("conversations", CV.everyMinutes ?? 1)) n2 += await step("conversation", () => conversations(identity, state));
         if (due("townwatch", G.townWatchMinutes ?? 3)) n2 += await step("townWatch", () => townTokenWatch(identity, state));
         if (due("guard", G.everyMinutes ?? 15)) n2 += await step("guard", async () => (await guardScan(identity, state)).length);
+        if (due("tickerwatch", CFG.provenance?.everyMinutes ?? 5)) n2 += await step("tickerWatch", () => tickerWatch(identity, state));
         if (due("digest", 60)) n2 += await step("digest", () => councilDigest(identity, state));
         if (due("radar", CFG.radar?.everyMinutes ?? 10)) n2 += await step("radar", () => { RADAR = RADAR ?? makeRadar({ CFG, http, HERE: DATA }); return RADAR.tick(); });
         if (due("watches", CFG.serve.watchMinutes)) n2 += await step("watches", () => runWatches(identity, state));

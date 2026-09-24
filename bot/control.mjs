@@ -3,7 +3,7 @@
 //   paused: true        → the bot does nothing at all (not even reading)
 //   readOnly: true      → everything runs, nothing is posted: every post goes to shadow.log instead
 //   features.<name>     → true (on), false (off), or "shadow" (runs, writes what it would post to shadow.log)
-export const FEATURES = ["mentions", "channels", "conversation", "launches", "launchReport", "townWatch", "guard", "digest", "radar", "watches", "presence"];
+export const FEATURES = ["mentions", "channels", "conversation", "launches", "launchReport", "townWatch", "guard", "tickerWatch", "digest", "radar", "watches", "presence"];
 export const DEFAULTS = Object.freeze({ paused: false, readOnly: false, features: {} });
 
 /** Accepts whatever is in the file and keeps only what makes sense; anything unreadable means "on" (the default). */

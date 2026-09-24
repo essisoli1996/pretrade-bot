@@ -10,6 +10,7 @@
     "launchReport": true,
     "townWatch": true,
     "guard": true,
+    "tickerWatch": "shadow",
     "digest": true,
     "radar": true,
     "watches": true,
