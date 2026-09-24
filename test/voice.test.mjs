@@ -38,6 +38,7 @@ check(acceptOpener("sounds like you're weighing this one up, let me show you.") 
 for (const bad2 of ["looks safe to me!", "this one is a rug", "check 0x1234", "up 20% today", "buy the dip", "@Monty hi", "see https://x.y", "the verdict is caution", "SKIP, nothing to add", "a line that is far too long to be an opener because it keeps going and going well past any sensible length for one"])
   check(acceptOpener(bad2) === null, `opener filter rejects: "${bad2.slice(0, 40)}"`);
 check(fill("{a} and {b}.", { a: 1 }) === "1 and.", "fill drops missing slots cleanly");
+check(acceptOpener("glad you asked about this address") === "glad you asked about this address.", "an opener without an ending gets a full stop");
 
 console.log(bad ? `\n${bad} FAILED` : "\nall passed");
 process.exit(bad ? 1 : 0);

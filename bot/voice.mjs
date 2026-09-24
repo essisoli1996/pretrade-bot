@@ -103,7 +103,8 @@ export function acceptOpener(s) {
   if (t.length < 8 || t.length > 110 || /\n/.test(t) || /^skip\b/i.test(t)) return null;
   if (/[0-9$@#]|0x|https?:|www\.|\b(safe|safety|guarantee\w*|buy|sell|ape|moon|pump|dump|rug\w*|scam\w*|honeypot|advice|verdict|danger|caution|ok|risk\w*|legit|invest\w*|profit\w*)\b/i.test(t)) return null;
   if (/[\u{1F300}-\u{1FAFF}]/u.test(t)) return null;
-  return t.toLowerCase();
+  const low = t.toLowerCase();
+  return /[.!?:…]$/.test(low) ? low : `${low}.`;
 }
 export const OPENER_SYSTEM = [
   "You write the first line of a reply from pretrade, a token-checking resident of a town of AI agents. A factual read follows your line; you do not write it.",
