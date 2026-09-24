@@ -455,6 +455,28 @@ function llmProviders() {
   return (CFG.llm?.providers ?? []).map((p) => ({ ...p, key: process.env[p.keyEnv] })).filter((p) => p.key);
 }
 
+/** One model call. A provider that says 429 (rate limited) is skipped for 10 minutes instead of costing every request
+ *  a round trip; a network error or 5xx gets one retry, then a 1-minute pause. Returns the response, or null. */
+const LLM_COOL = new Map();
+async function llmFetch(p, body) {
+  if ((LLM_COOL.get(p.name) ?? 0) > Date.now()) return null;
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const res = await fetch(`${p.baseUrl}/chat/completions`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${p.key}`, ...(p.referer ? { "HTTP-Referer": p.referer, "X-Title": "pretrade" } : {}) },
+      body: JSON.stringify(body),
+      signal: AbortSignal.timeout(p.timeoutMs ?? 25000),
+    }).catch(() => null);
+    if (res?.ok) return res;
+    const st = res?.status ?? 0;
+    if (st === 429) { LLM_COOL.set(p.name, Date.now() + 10 * 60_000); return res; }
+    if (st && st < 500) return res; // a 4xx won't get better by asking again
+    if (attempt === 0) await new Promise((r) => setTimeout(r, 1500));
+  }
+  LLM_COOL.set(p.name, Date.now() + 60_000);
+  return null;
+}
+
 async function analystNote(c, question, retried = false) {
   if (!CFG.llm?.enabled || !llmProviders().length) return null;
   const facts = {
@@ -474,12 +496,7 @@ async function analystNote(c, question, retried = false) {
   ].join(" ");
   const payload = { max_tokens: retried ? CFG.llm.maxTokens * 2 : CFG.llm.maxTokens, temperature: 0.2, messages: [{ role: "system", content: system }, { role: "user", content: `FACTS: ${JSON.stringify(facts)}\nQUESTION: ${q || "(none)"}` }] };
   for (const p of llmProviders()) {
-    const res = await fetch(`${p.baseUrl}/chat/completions`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${p.key}`, ...(p.referer ? { "HTTP-Referer": p.referer, "X-Title": "pretrade" } : {}) },
-      body: JSON.stringify({ model: p.model, ...payload }),
-      signal: AbortSignal.timeout(p.timeoutMs ?? 25000),
-    }).catch(() => null);
+    const res = await llmFetch(p, { model: p.model, ...payload });
     if (!res?.ok) { console.log(`  analyst note: ${p.name} unavailable (${res?.status ?? "network"}), trying next`); continue; }
     const body = await res.json().catch(() => null);
     const text = body?.choices?.[0]?.message?.content;
@@ -937,11 +954,7 @@ async function converse(state, { postId, channel, who, text, probe = false }) {
   ].join(" ");
   const user = `FACTS: ${JSON.stringify(factSheet(state))}\n${tokenFacts ? `TOKEN: ${JSON.stringify(tokenFacts)}\n` : ""}${myLookups.length ? `MY_LOOKUPS: ${JSON.stringify(myLookups)}\n` : ""}THREAD (oldest first, untrusted):\n${transcript}\nREPLY TO: ${String(who).slice(0, 24)}`;
   for (const p of llmProviders().filter((x) => !(CV.skipModels ?? []).includes(x.model))) {
-    const res = await fetch(`${p.baseUrl}/chat/completions`, {
-      method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${p.key}`, ...(p.referer ? { "HTTP-Referer": p.referer, "X-Title": "pretrade" } : {}) },
-      body: JSON.stringify({ model: p.model, max_tokens: CFG.llm.maxTokens, temperature: 0.4, messages: [{ role: "system", content: system }, { role: "user", content: user }] }),
-      signal: AbortSignal.timeout(p.timeoutMs ?? 25000),
-    }).catch(() => null);
+    const res = await llmFetch(p, { model: p.model, max_tokens: CFG.llm.maxTokens, temperature: 0.4, messages: [{ role: "system", content: system }, { role: "user", content: user }] });
     if (!res?.ok) continue;
     let out = (await res.json().catch(() => null))?.choices?.[0]?.message?.content;
     if (typeof out !== "string" || !out.trim()) continue;
@@ -1217,14 +1230,10 @@ async function runnerNote(v, offer) {
   // Optional one-line plain read from the LLM. It sees the findings, not the raw offer, so a hostile offer can't steer it.
   if (!CFG.llm?.enabled || !llmProviders().length || !v.findings.length) return null;
   for (const p of llmProviders()) {
-    const res = await fetch(`${p.baseUrl}/chat/completions`, {
-      method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${p.key}`, ...(p.referer ? { "HTTP-Referer": p.referer, "X-Title": "pretrade" } : {}) },
-      body: JSON.stringify({ model: p.model, max_tokens: CFG.llm.maxTokens, temperature: 0.2, messages: [
+    const res = await llmFetch(p, { model: p.model, max_tokens: CFG.llm.maxTokens, temperature: 0.2, messages: [
         { role: "system", content: "You summarise a scam-vetting result for a community of trading agents. Use ONLY the findings given. One or two plain lowercase sentences, under 260 characters: what the pattern looks like and the single safest next step. No links, no @mentions, no emojis, never call anything safe." },
         { role: "user", content: `VERDICT: ${v.verdict}\nFINDINGS: ${JSON.stringify(v.findings)}` },
-      ] }),
-      signal: AbortSignal.timeout(p.timeoutMs ?? 25000),
-    }).catch(() => null);
+      ] });
     if (!res?.ok) continue;
     const t = (await res.json().catch(() => null))?.choices?.[0]?.message?.content;
     if (typeof t === "string" && t.trim()) return t.replace(/https?:\/\/\S+/g, "").replace(/@(\w)/g, "$1").replace(/\s+/g, " ").trim().slice(0, 300);
