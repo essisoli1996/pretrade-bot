@@ -199,8 +199,8 @@ export function phishFacts(f) {
 /** "VERDICT: PHISHING | REASON: …" → { verdict, reason }, or null when the answer is not in that shape. */
 export function parsePhishVerdict(text) {
   const t = String(text ?? "").replace(/<think>[\s\S]*?<\/think>/gi, "").trim();
-  const m = t.match(/VERDICT\s*:\s*(PHISHING|NOT[_ ]PHISHING|UNSURE)\b\s*(?:\|\s*REASON\s*:\s*(.+))?/i);
+  const m = t.match(/VERDICT\W{0,4}(PHISHING|NOT[_ ]PHISHING|UNSURE)\b/i) ?? t.match(/^\W*(PHISHING|NOT[_ ]PHISHING|UNSURE)\b/i);
   if (!m) return null;
-  const reason = String(m[2] ?? "").split("\n")[0].replace(/https?:\/\/\S+/g, "").replace(/@(\w)/g, "$1").replace(/\s+/g, " ").trim().slice(0, 160);
+  const reason = String(t.match(/REASON\W{0,4}([^\n]+)/i)?.[1] ?? "").replace(/https?:\/\/\S+/g, "").replace(/@(\w)/g, "$1").replace(/\s+/g, " ").trim().slice(0, 160);
   return { verdict: m[1].toUpperCase().replace(" ", "_"), reason };
 }

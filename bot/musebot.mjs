@@ -417,10 +417,15 @@ async function reviewPhishing(facts) {
   const bankr = llmProviders().find((p) => p.keyEnv === "BANKR_LLM_KEY");
   if (!bankr) return { verdict: "UNAVAILABLE", reason: "no Bankr key" };
   const model = SENT.reviewModel ?? "gemini-3.8-flash";
-  const res = await llmFetch(bankr, { model, max_tokens: 200, temperature: 0, messages: [{ role: "system", content: PHISH_SYSTEM }, { role: "user", content: `FACTS: ${phishFacts(facts)}` }] });
-  if (!res?.ok) return { verdict: "UNAVAILABLE", reason: `Bankr AI didn't answer (${res?.status ?? "network"})` };
-  const v = parsePhishVerdict((await res.json().catch(() => null))?.choices?.[0]?.message?.content);
-  return v ? { ...v, model } : { verdict: "UNAVAILABLE", reason: "answer out of shape", model };
+  let last = "";
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const res = await llmFetch(bankr, { model, max_tokens: 600, temperature: 0, messages: [{ role: "system", content: PHISH_SYSTEM }, { role: "user", content: `FACTS: ${phishFacts(facts)}` }] });
+    if (!res?.ok) return { verdict: "UNAVAILABLE", reason: `Bankr AI didn't answer (${res?.status ?? "network"})` };
+    last = String((await res.json().catch(() => null))?.choices?.[0]?.message?.content ?? "");
+    const v = parsePhishVerdict(last);
+    if (v) return { ...v, model };
+  }
+  return { verdict: "UNAVAILABLE", reason: `answer out of shape: ${last.replace(/\s+/g, " ").slice(0, 80)}`, model };
 }
 let CHANNELS = { at: 0, list: [] };
 async function allChannels() {
@@ -490,7 +495,8 @@ async function sentinelPass(identity, state, dry = false) {
           const twin = lookalikeOf(dom);
           const ph = await http(`https://api.gopluslabs.io/api/v1/phishing_site?url=${encodeURIComponent(`https://${host}`)}`);
           const blocklisted = yes(ph.json?.result?.phishing_site), punycode = /(^|\.)xn--/.test(host);
-          const why = blocklisted ? `${defang(host)} is on a phishing blocklist` : twin ? `${defang(dom)} imitates ${twin}` : punycode ? `${defang(host)} is a punycode domain that can pose as a real one` : null;
+          const brand = BRANDS.find((b) => host.includes(b));
+          const why = blocklisted ? `${defang(host)} is on a phishing blocklist` : twin ? `${defang(dom)} imitates ${twin}` : brand ? `${defang(host)} uses the name "${brand}" but is not its official domain` : punycode ? `${defang(host)} is a punycode domain that can pose as a real one` : null;
           let review = null;
           if (why) {
             // measured evidence, then a second opinion from the Bankr AI: a public "phishing" call needs both
@@ -2171,7 +2177,8 @@ async function main() {
       const dom = registrable(host), twin = lookalikeOf(dom);
       const ph = await http(`https://api.gopluslabs.io/api/v1/phishing_site?url=${encodeURIComponent(`https://${host}`)}`);
       const blocklisted = yes(ph.json?.result?.phishing_site), punycode = /(^|\.)xn--/.test(host);
-      const why = blocklisted ? `${host} is on a phishing blocklist` : twin ? `${dom} imitates ${twin}` : punycode ? `${host} is punycode` : null;
+      const brand = BRANDS.find((b) => host.includes(b));
+      const why = blocklisted ? `${host} is on a phishing blocklist` : twin ? `${dom} imitates ${twin}` : brand ? `${host} uses the name "${brand}" but is not its official domain` : punycode ? `${host} is punycode` : null;
       if (!why) { console.log(`${host}: not flagged by my own checks (no review needed)`); continue; }
       const page = isPublicUrl(`https://${host}`) ? await pageScan(`https://${host}`) : { ok: false };
       const r = await reviewPhishing({ domain: dom, host, why, imitates: twin, official: [...OFFICIAL_DOMAINS], blocklisted, punycode, ageDays: await domainAgeDays(dom), page: { ...page, finalDomain: page.finalHost ? registrable(page.finalHost) : null } });
