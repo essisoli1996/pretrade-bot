@@ -97,7 +97,9 @@ export function tickerReport(symbol, reg, market, fees = new Map(), { now = Date
     lines.push(`• ${r.address}${tags.length ? ` [${tags.join(", ")}]` : ""}: $${Math.round(r.liq).toLocaleString("en-US")} liquidity, ${r.trades} trades 24h, ${who.replace(/ +\(/, " (").trim()}${fee && fee.kind !== "wallet" ? `; ${fee.text}` : ""}.`);
   }
   if (list.length > 5) lines.push(`…and ${list.length - 5} more.`);
-  if (list.length > 1) lines.push(`same name is not same token: take the address from the project's own launch post.`);
+  const launchers = new Set(list.map((r) => r.launch?.launcher ?? null));
+  if (list.length > 1 && launchers.size === 1 && !launchers.has(null)) lines.push(`all ${list.length} were launched by ${[...launchers][0]}: likely retries of one launch, not copies.`);
+  else if (list.length > 1) lines.push(`same name is not same token: take the address from the project's own launch post.`);
   return { found: list.length, first: first.address, deepest: deepest.address, lines };
 }
 

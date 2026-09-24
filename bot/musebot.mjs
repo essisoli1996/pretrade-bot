@@ -318,6 +318,33 @@ async function realText(text) {
   const rep = tickerReport(sym, reg, market, fees, { board: boardHost() });
   return [`🧾 who is $${sym.toUpperCase()}?`, ...rep.lines, `source: musepad's launch records and DexScreener. not advice.`, `- ${CFG.name}`].join("\n");
 }
+/** "@pretrade fees <token>": where a musepad launch's creator fees go, and what has piled up there. */
+async function feesText(text) {
+  const addr = addressesIn(text).find((x) => /^0x/.test(x));
+  if (!addr) return `usage: "@${CFG.name} fees <token address>". for a musepad launch i show where its creator fees go and what that address holds and has moved.\n- ${CFG.name}`;
+  if (isOwnToken(addr)) return `that is my own token, so i leave it to others: conflict of interest.\n- ${CFG.name}`;
+  const hit = await prov().lookup(addr);
+  if (!hit) return `${addr.slice(0, 8)}… isn't in musepad's launch records, so i can't say where its fees go from a launch record. "@${CFG.name} ${addr}" still gives the free read.\n- ${CFG.name}`;
+  const { rec, fee } = hit;
+  const lines = [`💸 fees for $${rec.symbol} (${rec.address.slice(0, 8)}…), launched by ${rec.launcher ?? "?"} via musepad${rec.post ? ` (${boardHost()}/p/${rec.post})` : ""}:`, `${fee.text}.`];
+  if (["wallet", "contract", "wallet?"].includes(fee.kind) && rec.wallet) {
+    const rpc = rpcFor("robinhood");
+    const bal = async (token) => { const r = await rpc("eth_call", [{ to: token, data: "0x70a08231" + rec.wallet.slice(2).padStart(64, "0") }, "latest"]).catch(() => null); try { return BigInt(r?.result); } catch { return null; } };
+    const pair = (await pairsOf(rec.address)).sort((x, y) => (n(y.liquidity?.usd) ?? 0) - (n(x.liquidity?.usd) ?? 0))[0];
+    const quote = pair?.quoteToken?.address?.toLowerCase();
+    const [own, q, eth, sent] = await Promise.all([bal(rec.address), quote ? bal(quote) : null, rpc("eth_getBalance", [rec.wallet, "latest"]).catch(() => null), rpc("eth_getTransactionCount", [rec.wallet, "latest"]).catch(() => null)]);
+    const dec = await decimalsOf(rec.address), qdec = quote ? await decimalsOf(quote) : null;
+    const px = n(pair?.priceUsd), qpx = pair && n(pair.priceNative) ? px / n(pair.priceNative) : null;
+    const usd = (v, d, p) => (v !== null && d !== null && p ? ` (~$${Math.round((Number(v) / 10 ** d) * p).toLocaleString("en-US")})` : "");
+    const holds = [own !== null && dec !== null ? `${fmtUnits(own, dec)} $${rec.symbol}${usd(own, dec, px)}` : null, q !== null && qdec !== null ? `${fmtUnits(q, qdec)} $${pair.quoteToken.symbol}${usd(q, qdec, qpx)}` : null, eth?.result ? `${fmtUnits(BigInt(eth.result), 18)} ETH` : null].filter(Boolean);
+    if (holds.length) lines.push(`that address holds now: ${holds.join(", ")}.`);
+    const nonce = sent?.result ? Number(BigInt(sent.result)) : null;
+    if (fee.kind === "wallet" && nonce !== null) lines.push(nonce === 0 ? `it has never sent a transaction: whatever it collected is still there.` : `it has sent ${nonce} transaction${nonce === 1 ? "" : "s"} in total (claims, swaps or transfers).`);
+  }
+  lines.push(`musepad's creator fee is set by its operator (1% at the time of writing). facts from the launch record and the chain, not advice.`, `- ${CFG.name}`);
+  return lines.join("\n");
+}
+
 /** New musepad launches that reuse a ticker already trading in town, or whose fees can't reach anyone: facts, posted
  *  under the launch request itself. Same-launcher retries are not news. */
 async function tickerWatch(identity, state, dry = false) {
@@ -1414,6 +1441,7 @@ function menuText(deep, watch) {
     `stock tokens, free: "@${CFG.name} stock TSLA" (or an address) checks it against Robinhood's own registry and the Chainlink price: real or copycat, paused, pending splits, DEX premium.`,
     `approvals, free: "@${CFG.name} approvals <wallet> [robinhood|base]" lists every live approval, riskiest first, with a revoke transaction to sign.`,
     `who launched it, free: "@${CFG.name} real PORCH" lists every Robinhood Chain contract using a ticker, who launched each one, from which post, and where its fees go.`,
+    `fees, free: "@${CFG.name} fees <token>" shows where a musepad launch's creator fees go and what that address holds and has moved.`,
     `council runner, free: "@${CFG.name} vet <paste an offer>" → i check its links, addresses and handles for scam patterns and answer in the open. "@${CFG.name} council" for the weekly runner log.`,
     `town guard, free: i watch for copycats of the town's tokens and for launches that reuse an existing ticker, and flag them in the open. "@${CFG.name} receipts" lists every catch.`,
     `deep report (safety + exit sizes + momentum + copycat scan + holder concentration${llmOn ? " + an analyst note that answers your question about the token" : ""}): ${priceLine("deep", deep)}.`,
@@ -1488,13 +1516,14 @@ async function runWatches(identity, state) {
 
 /** Returns reply text for a premium command, or null if the mention is not one. */
 async function premiumCommand(m, text, who, id, state) {
-  const cmd = text.match(new RegExp(`@${CFG.name}\\s+(price|prices|menu|help|deep|watch|record|stats|receipts|vet|council|sign|wallet|plan|stock|approvals|real)\\b`, "i"))?.[1]?.toLowerCase();
+  const cmd = text.match(new RegExp(`@${CFG.name}\\s+(price|prices|menu|help|deep|watch|record|stats|receipts|vet|council|sign|wallet|plan|stock|approvals|real|fees)\\b`, "i"))?.[1]?.toLowerCase();
   if (!cmd) return null;
   if (cmd === "council") return councilText(state);
   if (cmd === "plan") return planText(text);
   if (cmd === "stock") return stockText(text);
   if (cmd === "approvals") return approvalsText(text);
   if (cmd === "real") return realText(text);
+  if (cmd === "fees") return feesText(text);
   if (cmd === "sign") {
     const full = (await fullPostText(id, text)).replace(new RegExp(`@${CFG.name}\\s+sign:?`, "i"), " ");
     const tx = parseTx(full, CHAIN_BY_ID);
@@ -1964,9 +1993,9 @@ async function main() {
     // Read-only: runs one command exactly as a mention would, prints the reply, posts nothing.
     //   node bot/musebot.mjs try "plan 0x… 250"   |   try "stock TSLA"   |   try "approvals 0x… base"
     const t = `@${CFG.name} ${args.slice(1).join(" ")}`;
-    const c = t.match(/@\S+\s+(plan|stock|approvals|real)\b/i)?.[1]?.toLowerCase();
+    const c = t.match(/@\S+\s+(plan|stock|approvals|real|fees)\b/i)?.[1]?.toLowerCase();
     const addr = !c ? addressesIn(t)[0] : null;
-    const out = c === "plan" ? await planText(t) : c === "stock" ? await stockText(t) : c === "approvals" ? await approvalsText(t) : c === "real" ? await realText(t)
+    const out = c === "plan" ? await planText(t) : c === "stock" ? await stockText(t) : c === "approvals" ? await approvalsText(t) : c === "real" ? await realText(t) : c === "fees" ? await feesText(t)
       : addr ? ((q) => (q ? replyText(q) : "nothing to say (no DEX pair)"))(await quickCheck(addr)) : "try supports: <token address>, plan, stock, approvals, real";
     return console.log(out);
   }
