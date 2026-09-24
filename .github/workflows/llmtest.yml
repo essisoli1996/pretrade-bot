@@ -26,6 +26,19 @@ jobs:
             const j = await r.json().catch(() => ({}));
             out.push(`${p.name} (${p.model}) → HTTP ${r.status} in ${Date.now() - t0}ms | reply: ${String(j.choices?.[0]?.message?.content ?? JSON.stringify(j).slice(0, 200)).slice(0, 120)} | served: ${j.model ?? "?"} | cost: ${j.usage?.cost ?? "n/a"}`);
           }
+          // which models this key can reach on the Bankr gateway, and what each costs (ids and prices only)
+          const bk = process.env.BANKR_LLM_KEY;
+          if (bk) {
+            const m = await fetch("https://llm.bankr.bot/v1/models", { headers: { Authorization: `Bearer ${bk}` } });
+            const j = await m.json().catch(() => ({}));
+            out.push(`--- bankr /v1/models → HTTP ${m.status}`);
+            for (const x of j.data ?? []) out.push(`${x.id} | ${JSON.stringify(x.pricing ?? x.price ?? x.cost ?? {}).slice(0, 160)}${x.free !== undefined ? ` | free=${x.free}` : ""}`);
+            if (!(j.data ?? []).length) out.push(JSON.stringify(j).slice(0, 400));
+            for (const path of ["/v1/credits", "/v1/usage", "/v1/me", "/v1/key"]) {
+              const r = await fetch(`https://llm.bankr.bot${path}`, { headers: { Authorization: `Bearer ${bk}` } }).catch(() => null);
+              out.push(`bankr ${path} → ${r ? `HTTP ${r.status} ${(await r.text()).replace(/\s+/g, " ").slice(0, 300)}` : "no answer"}`);
+            }
+          }
           writeFileSync("llm-test.log", out.join("\n") + "\n"); console.log(out.join("\n"));
           JS
           node /tmp/t.mjs || true
