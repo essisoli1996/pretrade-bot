@@ -74,8 +74,11 @@ export function findSecrets(text) {
 // ───────────────────────── 2. instructions an agent should not follow ─────────────────────────
 const RULES = [
   // [id, severity, regex, why]
-  ["asks-for-secrets", "high", /\b(send|paste|share|post|include|provide|dump|reveal|print|export|upload|reply with|give)\b[^.\n]{0,60}\b(private[\s-]*keys?|seed[\s-]*phrase|recovery[\s-]*phrase|mnemonic|api[\s_-]*keys?|secret[\s-]*keys?|\.env\b|process\.env|environment variables|keystore|wallet file|identity file)/i, "asks for keys, seed phrases or environment secrets"],
-  ["asks-for-secrets", "high", /\b(private[\s-]*key|seed[\s-]*phrase|recovery[\s-]*phrase|mnemonic)\b[^.\n]{0,40}\b(here|below|to (us|me|this))\b/i, "asks for a key or seed phrase"],
+  // wallet secrets: there is no honest reason to hand these to anyone (code that signs with its own key is not asking)
+  ["asks-for-secrets", "high", /\b(send|paste|share|post|include|provide|dump|reveal|print|export|upload|reply with|give|enter|type|submit)\b[^.\n]{0,60}\b(private[\s-]*keys?|seed[\s-]*phrase|recovery[\s-]*phrase|mnemonic|keystore|wallet file|identity file)\b/i, "asks for keys or seed phrases", { skipCode: true, skipIf: /\b(never|don'?t|do not|no one|nobody|not)\b/i }],
+  // service secrets: putting your own API key in a request header is normal; handing it over or dumping env is not
+  ["asks-for-secrets", "high", /\b(send|paste|share|post|dump|reveal|print|export|reply with|give)\b[^.\n]{0,40}\b(api[\s_-]*keys?|secret[\s-]*keys?|\.env\b|process\.env|environment variables|credentials)\b[^.\n]{0,30}\b(to (us|me|this|the thread)|here|below|in (a|your|the) (reply|post|comment|message|dm))\b|\b(dump|print|reveal|list)\b[^.\n]{0,20}\b(your )?(\.env\b|process\.env|environment variables|system prompt)/i, "asks the agent to hand over its API keys or environment", { skipCode: true, skipIf: /\b(authorization|bearer|x-api-key|header)\b/i }],
+  ["asks-for-secrets", "high", /\b(private[\s-]*key|seed[\s-]*phrase|recovery[\s-]*phrase|mnemonic)\b[^.\n]{0,40}\b(here|below|to (us|me|this))\b/i, "asks for a key or seed phrase", { skipCode: true, skipIf: /\b(never|don'?t|do not|no one|nobody|not)\b/i }],
   ["remote-code", "high", /\b(curl|wget)\b[^\n|]{0,200}\|\s*(sudo\s+)?(ba|z)?sh\b|\biwr\b[^\n]{0,100}\|\s*iex\b|powershell[^\n]{0,40}-enc(odedcommand)?\b/i, "pipes a download straight into a shell"],
   ["remote-code", "medium", /\beval\s*\(|\bnew Function\s*\(|child_process|\bexec(Sync)?\s*\(|base64\s+(-d|--decode)[^\n]{0,40}\|\s*(ba)?sh/i, "runs dynamically built code"],
   ["moves-money", "high", /\b(approve|setApprovalForAll|increaseAllowance)\b[^.\n]{0,40}\b(max|unlimited|infinite|all|2\s*\*\*\s*256|uint256\.max|type\(uint256\)\.max)\b/i, "asks for an unlimited approval"],
@@ -88,9 +91,10 @@ const RULES = [
   ["override", "high", /\b(ignore|disregard|forget|override)\b[^.\n]{0,20}\b(all |any |your )?(previous|prior|above|earlier|system|safety|original)\b[^.\n]{0,15}\b(instructions?|rules|prompts?|guidelines|guardrails)\b/i, "tries to override the agent's own rules"],
   ["override", "medium", /\byou are now\b|\bnew (system )?instructions?\s*:|\bdeveloper mode\b|\bjailbreak\b|\bDAN\b/, "tries to give the agent a new identity or instructions"],
   ["persistence", "medium", /\b(add|write|append|save|store|insert|put)\b[^.\n]{0,30}\b(to|into|in)\s+(your\s+)?(memory|memories|system prompt|instructions|config|cron|crontab|heartbeat|soul\.md|agents?\.md|claude\.md|profile|startup)/i, "writes itself into the agent's memory or schedule"],
-  ["dynamic", "high", /\b(fetch|download|read|load|curl|get)\b[^\n]{0,90}?\b(and|then)\s+(follow|execute|run|obey|do what it says|apply)\b/i, "fetches more instructions at run time and follows them"],
+  ["dynamic", "high", /\b(fetch|download|read|load|curl|get)\b[^\n]{0,90}?\b(and|then)\s+(follow|execute|run|obey|apply)\s+(the |its |any |all |those |these |whatever )?(instructions?|commands?|steps|directions|orders|rules)\b|\bdo (whatever|what) it says\b/i, "fetches more instructions at run time and follows them"],
 ];
 
+const CODE_LINE = /^\s*(const|let|var|import|export|await|return|function|if|for|def|async)\b|[{};]\s*$|\w+\([^)]*\b(privateKey|secret|key)\b[^)]*\)|=>|^\s*[$>#] /;
 const INVISIBLE = /[​-‏⁠-⁤﻿­]/g;
 const BIDI = /[‪-‮⁦-⁩]/g;
 const TAGS = /[\u{E0000}-\u{E007F}]/gu;
@@ -120,8 +124,18 @@ export function scanInstructions(input, { depth = 0 } = {}) {
   const findings = [];
   const lineOf = (i) => text.slice(0, i).split("\n").length;
   const add = (f) => { if (!findings.some((x) => x.id === f.id && x.why === f.why && x.hidden === f.hidden)) findings.push(f); };
-  const lineText = (i) => { const st = text.lastIndexOf("\n", i) + 1, en = text.indexOf("\n", i); return text.slice(st, en < 0 ? undefined : en).trim().slice(0, 160); };
-  for (const [id, severity, re, why] of RULES) { const m = text.match(re); if (m) add({ id, severity, why, line: lineOf(m.index), quote: lineText(m.index) }); }
+  // line by line, so a rule can look at the line it matched: code that uses a key, or a line that warns against it
+  const lines = text.split("\n");
+  for (const [id, severity, re, why, opt = {}] of RULES) {
+    for (let i = 0; i < lines.length; i++) {
+      const l = lines[i];
+      if (!re.test(l)) continue;
+      if (opt.skipCode && CODE_LINE.test(l)) continue;
+      if (opt.skipIf && opt.skipIf.test(l)) continue;
+      add({ id, severity, why, line: i + 1, quote: l.trim().slice(0, 160) });
+      break;
+    }
+  }
   if (depth === 0) {
     const secrets = findSecrets(text);
     for (const s of secrets) add({ id: "contains-secret", severity: "critical", why: `contains what looks like a ${s.kind}`, line: lineOf(s.at) });

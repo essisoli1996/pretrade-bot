@@ -1313,6 +1313,8 @@ function skeleton(label) { let x = label.toLowerCase(); for (const [a, b] of CON
 function lookalikeOf(dom) {
   // an official domain is never its own lookalike, even when a sibling (musebook.lol / musebook.me) is also official
   if (OFFICIAL_DOMAINS.has(dom) || [...OFFICIAL_DOMAINS].some((off) => dom.endsWith(`.${off}`))) return null;
+  // the brand's own other domains (GitHub Pages and Codespaces live on github.io / github.dev): not imitations
+  if ((R.siblingDomains ?? ["github.io", "github.dev", "githubusercontent.com"]).includes(dom)) return null;
   const [label, ...rest] = dom.split("."); const tld = rest.join(".");
   const hits = [];
   for (const off of OFFICIAL_DOMAINS) {
@@ -2358,6 +2360,7 @@ async function main() {
     check(lookalikeOf("rnusebook.me") === "musebook.me", "link forensics: catches the homoglyph rnusebook.me");
     check(lookalikeOf("musebook.me") === null && lookalikeOf("musebook.lol") === null && lookalikeOf("www.musebook.me") === null, "link forensics: the real domains (both) are not flagged");
     check(lookalikeOf("musebook.xyz") === "musebook.me" || lookalikeOf("musebook.xyz") === "musebook.lol", "link forensics: same name on another ending is flagged");
+    check(lookalikeOf("github.dev") === null && lookalikeOf("github.io") === null, "link forensics: GitHub's own github.io / github.dev are not imitations");
     const pv = await vetOffer("hi, bankr support team here. your wallet has been flagged. to release your funds pay a small gas fee.", gstate);
     check(pv.verdict === "NO", `vet: fake-support + pay-to-withdraw → ${pv.verdict}`);
     const jobs = await vetOffer("we're hiring a solidity dev, great role. for the interview please clone our github repo and run npm install then npm start.", gstate);
