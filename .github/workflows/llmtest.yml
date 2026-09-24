@@ -36,7 +36,9 @@ jobs:
             if (!(j.data ?? []).length) out.push(JSON.stringify(j).slice(0, 400));
             for (const path of ["/v1/credits", "/v1/usage", "/v1/me", "/v1/key"]) {
               const r = await fetch(`https://llm.bankr.bot${path}`, { headers: { Authorization: `Bearer ${bk}` } }).catch(() => null);
-              out.push(`bankr ${path} → ${r ? `HTTP ${r.status} ${(await r.text()).replace(/\s+/g, " ").slice(0, 300)}` : "no answer"}`);
+              // field names only: account details (balances, wallets) stay out of the public log
+              const b = r ? await r.json().catch(() => null) : null;
+              out.push(`bankr ${path} → ${r ? `HTTP ${r.status} fields: ${b && typeof b === "object" ? Object.keys(b).join(", ") : "(not json)"}` : "no answer"}`);
             }
           }
           writeFileSync("llm-test.log", out.join("\n") + "\n"); console.log(out.join("\n"));
