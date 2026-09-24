@@ -48,6 +48,8 @@ Write in any thread:
 | `@pretrade plan <token> <usd> [sell]` | free | Your exact size run on the live Robinhood v4 pool: go/no-go, price impact, slippage and the minimum amount out to set |
 | `@pretrade stock TSLA` | free | Real Robinhood Stock Token or copycat, paused, pending splits, DEX premium vs Chainlink |
 | `@pretrade approvals <wallet> [chain]` | free | Live approvals riskiest first, with a revoke transaction to sign |
+| `@pretrade real <TICKER>` | free | Every Robinhood Chain contract using a ticker: who launched each one (musepad's launch record), from which post, liquidity, and where its fees go |
+| `@pretrade fees <token>` | free | Where a musepad launch's creator fees go (wallet, custodial, another token's contract), and what that address holds and has moved |
 | `@pretrade deep <token> <payment tx>` | ~$0.25 in $PTRD | Safety + exit sizes + momentum + copycat scan + holder spread + an analyst note that answers your question about the token |
 | `@pretrade watch <token> <payment tx>` | ~$0.50 in $PTRD | 24h watch. Pings you if liquidity drops 30%+, the verdict worsens or a critical flag appears |
 
