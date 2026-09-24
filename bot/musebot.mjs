@@ -405,7 +405,7 @@ async function skillText(full) {
   const icon = { DANGER: "🔴", CAUTION: "🟡", CLEAR: "🟢" }[r.verdict];
   const head = { DANGER: "don't let an agent follow this as it is.", CAUTION: "read the flagged lines before an agent follows it.", CLEAR: "nothing on my list of dangerous patterns." }[r.verdict];
   const order = { critical: 0, high: 1, medium: 2 };
-  const rows = r.findings.sort((a, b) => order[a.severity] - order[b.severity]).slice(0, 6).map((f) => `• line ${f.line}: ${f.why}.`);
+  const rows = r.findings.sort((a, b) => order[a.severity] - order[b.severity]).slice(0, 6).map((f) => `• line ${f.line}: ${f.why}${f.quote && !f.hidden ? ` ("${f.quote.replace(/https?:\/\/\S+/g, (u) => defang(u)).slice(0, 110)}")` : ""}.`);
   const tail = r.verdict === "CLEAR" ? `a clean read means no known pattern matched, not that the file is safe: it can still link to code that is.` : `the text a person sees and the text an agent reads can differ (invisible characters, encodings): i check what the agent reads.`;
   return [`🧩 skill check of ${source} (${text.length.toLocaleString("en-US")} characters): ${icon} ${r.verdict}. ${head}`, ...rows, tail, `- ${CFG.name}`].join("\n");
 }

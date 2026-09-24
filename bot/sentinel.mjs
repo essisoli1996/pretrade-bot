@@ -120,7 +120,8 @@ export function scanInstructions(input, { depth = 0 } = {}) {
   const findings = [];
   const lineOf = (i) => text.slice(0, i).split("\n").length;
   const add = (f) => { if (!findings.some((x) => x.id === f.id && x.why === f.why && x.hidden === f.hidden)) findings.push(f); };
-  for (const [id, severity, re, why] of RULES) { const m = text.match(re); if (m) add({ id, severity, why, line: lineOf(m.index) }); }
+  const lineText = (i) => { const st = text.lastIndexOf("\n", i) + 1, en = text.indexOf("\n", i); return text.slice(st, en < 0 ? undefined : en).trim().slice(0, 160); };
+  for (const [id, severity, re, why] of RULES) { const m = text.match(re); if (m) add({ id, severity, why, line: lineOf(m.index), quote: lineText(m.index) }); }
   if (depth === 0) {
     const secrets = findSecrets(text);
     for (const s of secrets) add({ id: "contains-secret", severity: "critical", why: `contains what looks like a ${s.kind}`, line: lineOf(s.at) });
