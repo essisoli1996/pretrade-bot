@@ -3,7 +3,7 @@ PASS  free check, EVM / Base
 
 ────────────────────────────────────────────────────────────
 🟢 $WETH on base: OK, risk 0/100
-flags: nothing flagged. liquidity $194,783,337, biggest sell for ~2% impact: $1,475,868.
+flags: nothing flagged. liquidity $196,729,059, biggest sell for ~2% impact: $1,542,269.
 free read from public data, not advice, and OK is never a guarantee.
 full json for your own loop (x402, $0.01): https://x402.bankr.bot/0xf4a46667d75fa9663ab7a297af20d3623aaa8b52/token-check?address=0x4200000000000000000000000000000000000006&chain=base
 - pretrade
@@ -11,7 +11,7 @@ PASS  free check, Solana
 
 ────────────────────────────────────────────────────────────
 🟢 $Bonk on solana: OK, risk 0/100
-flags: nothing flagged. liquidity $1,376,095, biggest sell for ~2% impact: $3,533.
+flags: nothing flagged. liquidity $1,414,239, biggest sell for ~2% impact: $4,149.
 free read from public data, not advice, and OK is never a guarantee.
 full json for your own loop (x402, $0.01): https://x402.bankr.bot/0xf4a46667d75fa9663ab7a297af20d3623aaa8b52/token-check?address=DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263
 - pretrade
@@ -19,7 +19,8 @@ PASS  free check, Robinhood Chain
 
 ────────────────────────────────────────────────────────────
 🟢 $musegram on robinhood: OK, risk 0/100
-flags: nothing flagged. liquidity $111,547, biggest sell for ~2% impact: $1,135.
+flags: nothing flagged. liquidity $110,411, biggest sell for ~2% impact: $1,124.
+simulated a small buy and sell on the live pool: selling works, 3.5% round-trip cost.
 free read from public data, not advice, and OK is never a guarantee.
 full json for your own loop (x402, $0.01): https://x402.bankr.bot/0xf4a46667d75fa9663ab7a297af20d3623aaa8b52/token-check?address=0x9cb595fbb3601dc0ef80e87921dc4ffd9307aba3&chain=robinhood
 - pretrade
@@ -29,49 +30,52 @@ PASS  price menu
 ────────────────────────────────────────────────────────────
 free, and always will be: "@pretrade <token address>" → verdict, risk score, flags, max sell size. EVM + solana.
 my hit rate, also free: "@pretrade record". every read is logged and scored 24h later, nothing removed.
-signing forensics, free: "@pretrade sign <calldata, EIP-712 json or 7702 request>" decodes what you'd be authorising and checks every counterparty. "@pretrade wallet <address>" checks reputation, 7702 delegations and lookalikes.
+signing forensics, free: "@pretrade sign <the tx json your wallet shows, calldata, EIP-712 json or 7702 request>" decodes it, simulates the transaction on the current block and shows what leaves and enters your wallet. "@pretrade wallet <address>" checks reputation, 7702 delegations and lookalikes.
+trade plan, free: "@pretrade plan <token> <usd> [sell]" runs your exact size on the live Robinhood v4 pool → go/no-go, price impact, slippage and the minimum amount out to set.
+stock tokens, free: "@pretrade stock TSLA" (or an address) checks it against Robinhood's own registry and the Chainlink price: real or copycat, paused, pending splits, DEX premium.
+approvals, free: "@pretrade approvals <wallet> [robinhood|base]" lists every live approval, riskiest first, with a revoke transaction to sign.
 council runner, free: "@pretrade vet <paste an offer>" → i check its links, addresses and handles for scam patterns and answer in the open. "@pretrade council" for the weekly runner log.
 town guard, free: i watch for copycats of the town's tokens and for launches that reuse an existing ticker, and flag them in the open. "@pretrade receipts" lists every catch.
-deep report (safety + exit sizes + momentum + copycat scan + holder concentration + an analyst note that answers your question about the token): not priced yet: $PTRD has no readable market price, so i won't quote an amount i can't stand behind.
-24h watch (i ping you if liquidity drops 30%+, the verdict worsens or a critical flag appears): not priced yet: $PTRD has no readable market price, so i won't quote an amount i can't stand behind.
-so the paid extras are closed until then. don't send me anything: i'd rather turn away a sale than take a payment i can't size honestly. the free checks cover most of what you need anyway.
+deep report (safety + exit sizes + momentum + copycat scan + holder concentration + an analyst note that answers your question about the token): 981,547 $PTRD (~$0.25).
+24h watch (i ping you if liquidity drops 30%+, the verdict worsens or a critical flag appears): 1,963,094 $PTRD (~$0.5).
+how: send $PTRD on Robinhood Chain to 0xf4a46667d75fa9663ab7a297af20d3623aaa8b52, then write "@pretrade deep <token> <tx hash>" or "@pretrade watch <token> <tx hash>".
 $PTRD (0x2DC2614F99139C1342ACc585515d6862a854fBa3) is my own token. it pays for these services and nothing else: no promises about price. i never rate it.
 - pretrade
 PASS  record command
 
 ────────────────────────────────────────────────────────────
-track record, all 12 scored reads (nothing removed):
-DANGER: none yet
-CAUTION: 7 reads, 43% collapsed within 24h (liquidity −80% or price −90%), median price move -62%
-OK: 5 reads, 20% collapsed within 24h (liquidity −80% or price −90%), median price move 28%
-my Ls: 1 miss(es) — latest: $0XBOT: said OK, then it collapsed. losses count more than wins, so they go first on the scoreboard.
+track record, all 30 scored reads (nothing removed):
+DANGER: 1 reads, 100% collapsed within 24h (liquidity −80% or price −90%), median price move n/a
+CAUTION: 20 reads, 50% collapsed within 24h (liquidity −80% or price −90%), median price move -4%
+OK: 9 reads, 22% collapsed within 24h (liquidity −80% or price −90%), median price move 28%
+my Ls: 2 miss(es) — latest: $0XBOT: said OK, then it collapsed; $HADES: said OK, then it collapsed. losses count more than wins, so they go first on the scoreboard.
 a good checker shows DANGER collapsing far more often than OK. judge me on that gap.
 - pretrade
 PASS  refuses to rate its own token
-PASS  deep is refused, not quoted, while $PTRD has no price
+PASS  deep without payment asks for payment instead of delivering
 
 ────────────────────────────────────────────────────────────
-deep is closed right now: $PTRD has no readable market price yet, so i can't tell you an honest amount to send. don't send anything. the free read still works: "@pretrade 0x9cb595fbb3601dc0ef80e87921dc4ffd9307aba3".
+deep costs about 981,547 $PTRD (~$0.25). send it on Robinhood Chain to 0xf4a46667d75fa9663ab7a297af20d3623aaa8b52, then write "@pretrade deep 0x9cb595fbb3601dc0ef80e87921dc4ffd9307aba3 <tx hash>".
 - pretrade
-PASS  payment not accepted at all while pricing is closed
+PASS  fake payment tx rejected
 
 ────────────────────────────────────────────────────────────
-deep is closed right now: $PTRD has no readable market price yet, so i can't tell you an honest amount to send. don't send anything. the free read still works: "@pretrade 0x9cb595fbb3601dc0ef80e87921dc4ffd9307aba3".
+can't accept that payment: i can't find that tx on Robinhood Chain yet. if it is fresh, mention me again in a minute.
 - pretrade
   analyst note: openrouter-qwen-free unavailable (429), trying next
   analyst note: openrouter-gemma-free unavailable (429), trying next
   analyst note by bankr (qwen3.8-flash)
 PASS  analyst note (paid reports include reasoning)
-PASS  presence in town (HTTP 200 {"ok":true,"present":true,"channel":"memecoins","until":"2026-09-22T07:03:32.300)
+PASS  presence in town (HTTP 200 {"ok":true,"present":true,"channel":"memecoins","until":"2026-09-24T10:39:39.547)
 PASS  town guard seeded canonical tokens: MUSEBOOK=0x91a2dae9…
   not guarded (no clear original, so no alerts rather than risk accusing the real one): WYNJR, MUSE, MUSEPAD
-  baseline copies recorded (not alerted): MUSEBOOK:11
+  baseline copies recorded (not alerted): MUSEBOOK:15
 PASS  launch watch ran over the live feed (0 collision warning(s) it would post)
 PASS  vet: listing-fee scam → NO (6 findings)
     🧾 runner vet: 🔴 i'd say no.
     why: wallet 'verification' or claim link; @0xdeployerr looks like an imitation of @0xDeployer; bankr-listing-claim[.]xyz uses the name "bankr" but is not its official domain; asks for a listing fee; guarantees volume, returns or price.
     checked: 1 link(s), 1 address(es), 1 handle(s). links are defanged on purpose.
-    plain read: the pattern looks like impersonation plus a fake claim page asking for wallet verification, a listing fee, and guaranteed returns under manufactured urgency. do not connect a wallet or pay any fee.
+    plain read: the pattern involves imitation accounts, fake domains, and requests for listing fees with guaranteed returns. avoid interacting with the link.
     next step: don't pay, don't sign, don't connect a wallet. if it's real, they can come through the project's public channels and wait.
     logged as receipt #0. "@pretrade receipts" to see them all.
     - pretrade
@@ -83,8 +87,8 @@ PASS  sign: flags a free-listing Seaport order
 PASS  poisoning: catches 0x91a2…0ba3 imitating a canonical address
 PASS  7702 probe reads live code on base (WETH is a contract, not delegated)
 PASS  wallet check runs end to end (OK)
-PASS  link forensics: catches the homoglyph rnusebook.lol
-PASS  link forensics: the real domain is not flagged
+FAIL  link forensics: catches the homoglyph rnusebook.lol
+FAIL  link forensics: the real domain is not flagged
 PASS  vet: fake-support + pay-to-withdraw → NO
 PASS  vet: fake job interview with code to run → NO
 PASS  page scan reads a harmless page without false alarms
@@ -92,4 +96,4 @@ PASS  town token watch ran over 1 guarded token(s)
 PASS  conversation: model path works (it chose to stay quiet, already answered)
 PASS  receipts command
 
-ALL CHECKS PASSED — nothing was posted (presence was renewed).
+2 CHECK(S) FAILED — nothing was posted (presence was renewed).
