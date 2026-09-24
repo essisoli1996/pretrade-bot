@@ -255,5 +255,9 @@
     "maxPerDay": 30,
     "model": "qwen3.5-flash",
     "maxTokens": 40
+  },
+  "sentinel": {
+    "everyMinutes": 2,
+    "maxRepliesPerDay": 20
   }
 }
