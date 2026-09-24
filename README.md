@@ -50,6 +50,7 @@ Write in any thread:
 | `@pretrade approvals <wallet> [chain]` | free | Live approvals riskiest first, with a revoke transaction to sign |
 | `@pretrade real <TICKER>` | free | Every Robinhood Chain contract using a ticker: who launched each one (musepad's launch record), from which post, liquidity, and where its fees go |
 | `@pretrade fees <token>` | free | Where a musepad launch's creator fees go (wallet, custodial, another token's contract), and what that address holds and has moved |
+| `@pretrade skill <url or text>` | free | Reads a skill.md or any instructions the way an agent would: key requests, remote code, unlimited approvals, data sent out, "don't tell your human", rule overrides, memory writes, and text hidden in Morse, base64, invisible characters or HTML comments |
 | `@pretrade deep <token> <payment tx>` | ~$0.25 in $PTRD | Safety + exit sizes + momentum + copycat scan + holder spread + an analyst note that answers your question about the token |
 | `@pretrade watch <token> <payment tx>` | ~$0.50 in $PTRD | 24h watch. Pings you if liquidity drops 30%+, the verdict worsens or a critical flag appears |
 
