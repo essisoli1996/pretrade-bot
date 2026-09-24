@@ -1,0 +1,56 @@
+name: health   # every 30 minutes: is the bot alive and well? Problems and corrections become GitHub issues (the phone app notifies you).
+on:
+  schedule: [{ cron: "7,37 * * * *" }]
+  workflow_dispatch: {}
+permissions: { contents: read, issues: write, actions: read }
+concurrency: { group: health, cancel-in-progress: false }
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      GH_TOKEN: ${{ github.token }}
+      BANKR_LLM_KEY: ${{ secrets.BANKR_LLM_KEY || secrets.BANKR_API_KEY }}
+      MIN_CREDIT_USD: "2"
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 200 }
+      - name: Check
+        run: |
+          problems=()
+          host=$(tr -d '[:space:]' < deploy/host 2>/dev/null); host=${host:-actions}
+          # 1. alive: a fresh memory save (the bot saves at least every 30 minutes) and, on Actions, a running live-bot
+          age=$(( ( $(date +%s) - $(git log -1 --format=%ct -- bot/.state.json) ) / 60 ))
+          limit=$([ "$host" = server ] && echo 100 || echo 50)
+          [ "$age" -gt "$limit" ] && problems+=("the bot's memory was last saved ${age} minutes ago (limit ${limit}): it may be down")
+          if [ "$host" = actions ] && [ "$(gh run list --workflow live.yml --status in_progress --json databaseId --jq length)" = 0 ]; then
+            problems+=("no live-bot run is in progress on GitHub Actions (the hourly watchdog should restart it; if this repeats, run live-bot by hand)")
+          fi
+          # 2. the loop: errors and an unreachable board in the latest log
+          errs=$(grep -c "loop error" bot/last-run.log || true); down=$(grep -c "board unreachable" bot/last-run.log || true)
+          [ "${errs:-0}" -ge 10 ] && problems+=("${errs} loop errors in the latest log: $(grep "loop error" bot/last-run.log | tail -1 | cut -c1-200)")
+          [ "${down:-0}" -ge 10 ] && problems+=("musebook was unreachable ${down} times in the latest log")
+          # 3. the model account: out of credit means no conversation replies
+          if [ -n "$BANKR_LLM_KEY" ]; then
+            bal=$(curl -s -m 15 -H "Authorization: Bearer $BANKR_LLM_KEY" https://llm.bankr.bot/v1/credits | jq -r '.effectiveBalanceUsd // .balanceUsd // empty')
+            [ -n "$bal" ] && awk "BEGIN{exit !($bal < $MIN_CREDIT_USD)}" && problems+=("Bankr LLM credit is below \$${MIN_CREDIT_USD}: top up at bankr.bot/llm or conversation replies will stop")
+          fi
+          gh label create health --color B60205 --description "the bot needs attention" --force >/dev/null
+          gh label create correction --color FBCA04 --description "someone says the bot got something wrong" --force >/dev/null
+          open=$(gh issue list --label health --state open --json number --jq '.[0].number // empty')
+          if [ ${#problems[@]} -gt 0 ]; then
+            body=$(printf -- '- %s\n' "${problems[@]}"); body="$body"$'\n\n'"Checked $(date -u '+%Y-%m-%d %H:%M UTC'), live bot on: **${host}**. This issue closes itself when the next check is clean."
+            if [ -z "$open" ]; then gh issue create --label health --title "🚨 the bot needs attention" --body "$body"; else gh issue comment "$open" --body "still failing:"$'\n'"$body"; fi
+            printf '%s\n' "${problems[@]}"
+          else
+            echo "healthy (memory saved ${age} min ago, live bot on ${host})"
+            [ -n "$open" ] && gh issue close "$open" --comment "✅ recovered: the last check was clean ($(date -u '+%H:%M UTC'))."
+          fi
+          # 4. corrections: one issue per reply that reads like someone correcting the bot
+          test -f bot/corrections.log || exit 0
+          while IFS= read -r line; do
+            id=$(jq -r .postId <<<"$line"); [ -n "$id" ] || continue
+            gh issue list --label correction --state all --search "corr:$id in:body" --json number --jq length | grep -qx 0 || continue
+            who=$(jq -r .who <<<"$line"); ch=$(jq -r .channel <<<"$line"); parent=$(jq -r .parent <<<"$line"); text=$(jq -r .text <<<"$line")
+            gh issue create --label correction --title "✋ ${who} may be correcting the bot (#${ch})" --body "$(printf '**%s** replied to my post https://musebook.me/p/%s :\n\n> %s\n\nTheir post: https://musebook.me/p/%s\n\nRead both. If the bot was wrong, fix it (and decide whether it should say so publicly). If not, close this.\n\n<!-- corr:%s -->' "$who" "$parent" "$(sed 's/^/> /;1s/^> //' <<<"$text")" "$id" "$id")"
+          done < <(tail -n 30 bot/corrections.log)

@@ -1,6 +1,6 @@
 // When does a $TICKER mention deserve a reply, and on which chain? Fixtures are real town posts.
 // Run: node test/talk.test.mjs
-import { TALK_INTENT, chainNamedIn, chainTheyMean, isPaymentUnit } from "../bot/talk.mjs";
+import { TALK_INTENT, chainNamedIn, chainTheyMean, isPaymentUnit, looksLikeCorrection } from "../bot/talk.mjs";
 
 let bad = 0;
 const check = (ok, label) => { console.log(`${ok ? "PASS" : "FAIL"}  ${label}`); if (!ok) bad++; };
@@ -22,6 +22,12 @@ const montyReply = "Noted — but that's the Robinhood-chain $BNKR. The bounty p
 check(chainTheyMean(montyReply, "saw $BNKR mentioned (0x178e…):\n🟢 $BNKR on robinhood: OK, risk 0/100") === "base", "Monty's correction: I read Robinhood, they mean Base");
 check(chainTheyMean("wrong one, check it on solana", "") === "solana", "one chain named: that one");
 check(!isPaymentUnit("i bought 500 $QREV, holding", "QREV"), "\"500 $QREV\" is a position, not a price tag");
+
+// corrections inbox: the real correction from townhall 66216, and replies that are not corrections
+check(looksLikeCorrection(montyReply), "Monty's \"that's the Robinhood-chain $BNKR\" is filed as a correction");
+check(looksLikeCorrection("wrong contract, the real one is on base"), "\"wrong contract\": correction");
+check(!looksLikeCorrection("thanks pretrade, that helps"), "thanks: not a correction");
+check(!looksLikeCorrection("what about $NEWS?"), "a follow-up question: not a correction");
 
 console.log(bad ? `\n${bad} FAILED` : "\nall passed");
 process.exit(bad ? 1 : 0);

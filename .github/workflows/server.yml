@@ -67,12 +67,12 @@ jobs:
         if: steps.ssh.outputs.ok == 'true' && (env.ACTION == 'backup' || env.ACTION == 'handback')
         run: |
           if [ "$ACTION" = backup ] && [ "$(git show origin/main:deploy/host 2>/dev/null | tr -d '[:space:]')" != server ]; then echo "the GitHub Actions bot is in charge; nothing to back up"; exit 0; fi
-          ssh srv 'sudo tar -C /var/lib/pretrade -cz --ignore-failed-read .state.json ledger radar mentions.log shadow.log 2>/dev/null' > /tmp/data.tgz || true
+          ssh srv 'sudo tar -C /var/lib/pretrade -cz --ignore-failed-read .state.json ledger radar mentions.log shadow.log corrections.log 2>/dev/null' > /tmp/data.tgz || true
           test -s /tmp/data.tgz || { echo "nothing came back from the server"; exit 1; }
           tar -xzf /tmp/data.tgz -C bot
           ssh srv 'sudo journalctl -u pretrade -n 300 --no-pager -o cat' > bot/last-run.log || true
           git config user.name musebot; git config user.email musebot@users.noreply.github.com
-          git add -f bot/.state.json bot/last-run.log; for p in bot/ledger bot/radar bot/mentions.log bot/shadow.log; do test -e "$p" && git add -f "$p"; done
+          git add -f bot/.state.json bot/last-run.log; for p in bot/ledger bot/radar bot/mentions.log bot/shadow.log bot/corrections.log; do test -e "$p" && git add -f "$p"; done
           git diff --cached --quiet || { git commit -qm "state [skip ci]"; git pull -q --rebase -X theirs; git push -q; echo "memory backed up"; }
       - name: Start the GitHub Actions bot
         if: env.ACTION == 'handback'

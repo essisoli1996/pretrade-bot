@@ -25,7 +25,7 @@ import { makeSim, classify, planAdvice } from "./sim.mjs";
 import { makeStocks } from "./stocks.mjs";
 import { makeApprovals } from "./approvals.mjs";
 import { makeTxSim, describeTxSim, parseTx } from "./txsim.mjs";
-import { TALK_INTENT, chainNamedIn, chainTheyMean, isPaymentUnit } from "./talk.mjs";
+import { TALK_INTENT, chainNamedIn, chainTheyMean, isPaymentUnit, looksLikeCorrection } from "./talk.mjs";
 import { makeControl, modeOf } from "./control.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -972,6 +972,15 @@ function convNote(state, who, rootId) {
 }
 
 /** Replies to posts that answer mine (without an @mention, which the inbox already handles). */
+/** Someone replying to me as if i got something wrong: filed for the owner (corrections.log → a GitHub issue). */
+function noteCorrection({ channel, postId, parent, who, text }) {
+  if (!looksLikeCorrection(text)) return;
+  const f = join(DATA, "corrections.log"), prev = existsSync(f) ? readFileSync(f, "utf8") : "";
+  if (prev.includes(`"postId":${postId},`)) return;
+  writeFileSync(f, prev + JSON.stringify({ t: new Date().toISOString(), channel, postId, parent, who: String(who).slice(0, 40), text: String(text).slice(0, 600) }) + "\n");
+  console.log(`  correction noted: ${who} on my post ${parent}`);
+}
+
 async function conversations(identity, state) {
   state.conv = state.conv ?? { times: [], byAuthor: {}, byThread: {}, seen: [] };
   state.conv.seen = state.conv.seen ?? [];
@@ -987,6 +996,7 @@ async function conversations(identity, state) {
       if (state.conv.seen.includes(post.id)) continue;
       state.conv.seen.push(post.id);
       if (!post.parent || !own.has(String(post.parent)) || post.museId === identity.muse_id) continue;
+      noteCorrection({ channel: ch, postId: post.id, parent: post.parent, who: post.name, text: post.text });
       if (new RegExp(`@${CFG.name}\\b`, "i").test(post.text)) continue; // inbox handles it
       const reply = await converse(state, { postId: post.id, channel: ch, who: post.name, text: post.text });
       if (!reply || reply === "SKIP") { console.log(`  conversation: ${reply === "SKIP" ? "nothing to add" : "capped or no model"} for ${post.name} in #${ch}`); continue; }
@@ -1534,6 +1544,8 @@ async function handleMentions(identity, state) {
     state.mentionsSeen.push(id);
     const text = String(m.text ?? m.excerpt ?? m.preview ?? "");
     const who = String(m.name ?? m.from ?? m.by ?? "?");
+    const parent = m.parent_post_id ?? m.parent_id ?? null;
+    if (parent && (state.ownPosts ?? []).map(String).includes(String(parent))) noteCorrection({ channel: m.channel, postId: id, parent, who, text });
     if (m.channel && state.replyTimes.length < CFG.maxRepliesPerHour) {
       const premium = await premiumCommand(m, text, who, id, state);
       if (premium) {

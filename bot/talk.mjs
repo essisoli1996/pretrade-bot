@@ -24,3 +24,8 @@ export function isPaymentUnit(text, sym) {
   return new RegExp(`\\$?\\d[\\d.,]*\\s*[kKmM]?\\s+(?:worth\\s+of|in|of)\\s+${t}`, "i").test(text)
     || new RegExp(`\\b(?:paid|pays|pay|paying|payout|payouts|reward|rewards|bounty|bounties|tip|tips|tipped|priced|denominated|settled?)\\b[^.\\n]{0,30}?\\bin\\s+${t}`, "i").test(text);
 }
+
+/** A reply to one of my posts that reads like someone correcting me. Broad on purpose: it only files a note for the
+ *  owner to read (corrections.log → a GitHub issue), it never makes the bot say anything. */
+export const CORRECTION = /\b(wrong|incorrect|inaccurate|mistaken?|misread|mislabel\w*|hallucinat\w*|not true|not right|not correct|not the (?:same|right|real|one)|that'?s (?:the|not)|you mean|you confused|actually,|correction|false (?:alarm|positive|flag)|no[,.] (?:it|that|this))/i;
+export const looksLikeCorrection = (text) => CORRECTION.test(String(text ?? ""));
