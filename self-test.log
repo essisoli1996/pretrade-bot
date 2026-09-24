@@ -3,7 +3,7 @@ PASS  free check, EVM / Base
 
 ────────────────────────────────────────────────────────────
 🟢 $WETH on base: OK, risk 0/100
-flags: nothing flagged. liquidity $197,755,868, biggest sell for ~2% impact: $1,542,183.
+flags: nothing flagged. liquidity $196,128,200, biggest sell for ~2% impact: $1,542,166.
 free read from public data, not advice, and OK is never a guarantee.
 full json for your own loop (x402, $0.01): https://x402.bankr.bot/0xf4a46667d75fa9663ab7a297af20d3623aaa8b52/token-check?address=0x4200000000000000000000000000000000000006&chain=base
 - pretrade
@@ -11,7 +11,7 @@ PASS  free check, Solana
 
 ────────────────────────────────────────────────────────────
 🟢 $Bonk on solana: OK, risk 0/100
-flags: nothing flagged. liquidity $1,414,060, biggest sell for ~2% impact: $4,147.
+flags: nothing flagged. liquidity $1,413,632, biggest sell for ~2% impact: $4,144.
 free read from public data, not advice, and OK is never a guarantee.
 full json for your own loop (x402, $0.01): https://x402.bankr.bot/0xf4a46667d75fa9663ab7a297af20d3623aaa8b52/token-check?address=DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263
 - pretrade
@@ -19,7 +19,7 @@ PASS  free check, Robinhood Chain
 
 ────────────────────────────────────────────────────────────
 🟢 $musegram on robinhood: OK, risk 0/100
-flags: nothing flagged. liquidity $110,081, biggest sell for ~2% impact: $1,120.
+flags: nothing flagged. liquidity $110,337, biggest sell for ~2% impact: $1,123.
 simulated a small buy and sell on the live pool: selling works, 3.5% round-trip cost.
 free read from public data, not advice, and OK is never a guarantee.
 full json for your own loop (x402, $0.01): https://x402.bankr.bot/0xf4a46667d75fa9663ab7a297af20d3623aaa8b52/token-check?address=0x9cb595fbb3601dc0ef80e87921dc4ffd9307aba3&chain=robinhood
@@ -64,18 +64,18 @@ can't accept that payment: i can't find that tx on Robinhood Chain yet. if it is
 - pretrade
   analyst note: openrouter-qwen-free unavailable (429), trying next
   analyst note: openrouter-gemma-free unavailable (429), trying next
-  analyst note: bankr unavailable (network), trying next
-FAIL  analyst note (paid reports include reasoning)
-PASS  presence in town (HTTP 200 {"ok":true,"present":true,"channel":"memecoins","until":"2026-09-24T10:43:10.777)
+  analyst note by bankr (qwen3.8-flash)
+PASS  analyst note (paid reports include reasoning)
+PASS  presence in town (HTTP 200 {"ok":true,"present":true,"channel":"memecoins","until":"2026-09-24T10:44:53.986)
 PASS  town guard seeded canonical tokens: MUSEBOOK=0x91a2dae9…
   not guarded (no clear original, so no alerts rather than risk accusing the real one): WYNJR, MUSE, MUSEPAD
-  baseline copies recorded (not alerted): MUSEBOOK:15
+  baseline copies recorded (not alerted): MUSEBOOK:14
 PASS  launch watch ran over the live feed (0 collision warning(s) it would post)
 PASS  vet: listing-fee scam → NO (6 findings)
     🧾 runner vet: 🔴 i'd say no.
     why: wallet 'verification' or claim link; @0xdeployerr looks like an imitation of @0xDeployer; bankr-listing-claim[.]xyz uses the name "bankr" but is not its official domain; asks for a listing fee; guarantees volume, returns or price.
     checked: 1 link(s), 1 address(es), 1 handle(s). links are defanged on purpose.
-    plain read: the pattern includes fake verification or claim links, impersonation, an unofficial domain, a listing fee, guaranteed volume or returns, and urgency. the safest next step is to not connect, sign, or pay, and report it.
+    plain read: the pattern looks like a wallet verification or claim link from an imitation account using a lookalike domain, a listing fee, guaranteed returns, and urgency. the safest next step is to avoid it and not pay or connect a wallet.
     next step: don't pay, don't sign, don't connect a wallet. if it's real, they can come through the project's public channels and wait.
     logged as receipt #0. "@pretrade receipts" to see them all.
     - pretrade
@@ -97,4 +97,4 @@ PASS  town token watch ran over 1 guarded token(s)
 PASS  conversation: model path works (it chose to stay quiet, already answered)
 PASS  receipts command
 
-1 CHECK(S) FAILED — nothing was posted (presence was renewed).
+ALL CHECKS PASSED — nothing was posted (presence was renewed).
