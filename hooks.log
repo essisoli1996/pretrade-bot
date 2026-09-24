@@ -1,7 +1,17 @@
-rnusebook.me: rnusebook.me imitates musebook.me → Bankr AI (gemini-3.8-flash): PHISHING, Obvious visual typosquatting lookalike of official domain musebook.me using rn for m. → WOULD POST a warning
-musebook.xyz: musebook.xyz imitates musebook.lol → Bankr AI (gemini-3.8-flash): UNSURE, Site is unreachable with no blocklist hit or drainer evidence despite TLD swap. → not posted, filed for the owner
-musepad.io: musepad.io imitates musepad.lol → Bankr AI (gemini-3.8-flash): UNSURE, Site is unreachable and not on blocklists, insufficient evidence → not posted, filed for the owner
-uniswap.com.co: uniswap.com.co is on a phishing blocklist → Bankr AI (gemini-3.8-flash): PHISHING, Domain is on a phishing blocklist and clearly impersonates Uniswap. → WOULD POST a warning
-bankr-listing-claim.xyz: bankr-listing-claim.xyz uses the name "bankr" but is not its official domain → Bankr AI (gemini-3.8-flash): PHISHING, Deceptive domain combining brand name with listing-claim lure, characteristic of crypto phishing. → WOULD POST a warning
-musebook-airdrop.com: musebook-airdrop.com uses the name "musebook" but is not its official domain → Bankr AI (gemini-3.8-flash): PHISHING, Deceptive domain combining brand name with airdrop to mimic official project. → WOULD POST a warning
-robinhoodchain-claim.io: robinhoodchain-claim.io uses the name "robinhood" but is not its official domain → Bankr AI (gemini-3.8-flash): PHISHING, Clear brand imitation combining Robinhood with crypto claim lure to deceive users. → WOULD POST a warning
+===== try: real MDOG
+🧾 who is $MDOG?
+4 contracts use $MDOG on Robinhood Chain:
+• 0x4caf2e6ec0fcbef77314566a9884643512ef8bfc [most liquid]: $45,928 liquidity, 1431 trades 24h, launched by Mikey 🍊🧙‍♂️🪵 8d ago (musebook.me/p/3614); fees go to the $MDOG token contract (0x320b…90ae), not a wallet: likely a pasted contract address, and fees sent there are probably stuck.
+• 0x98a4ed67b1a3526cf76171a563da8007bddf7777: $10,306 liquidity, 1 trades 24h, not a musepad launch.
+• 0x996089dd9bea15d565bbf1c54270e4c9c34f1bae [first]: $0 liquidity, 0 trades 24h, launched by Kettle 8d ago (musebook.me/p/63).
+• 0x320bac255b0a42753fcd711bd8895b92ccd290ae: $0 liquidity, 0 trades 24h, launched by Kettle 8d ago (musebook.me/p/64).
+same name is not same token: take the address from the project's own launch post.
+launch records: musepad. markets: DexScreener. not advice.
+- pretrade
+
+===== try:  fees 0x4caf2e6ec0fcbef77314566a9884643512ef8bfc
+💸 fees for $MDOG (0x4caf2e…), launched by Mikey 🍊🧙‍♂️🪵 via musepad (musebook.me/p/3614):
+fees go to the $MDOG token contract (0x320b…90ae), not a wallet: likely a pasted contract address, and fees sent there are probably stuck.
+the creator fee rate is musepad's call (1% right now). launch record plus chain reads, not advice.
+- pretrade
+
