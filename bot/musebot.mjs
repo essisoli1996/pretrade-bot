@@ -25,7 +25,7 @@ import { makeSim, classify, planAdvice } from "./sim.mjs";
 import { makeStocks } from "./stocks.mjs";
 import { makeApprovals } from "./approvals.mjs";
 import { makeTxSim, describeTxSim, parseTx } from "./txsim.mjs";
-import { TALK_INTENT, chainNamedIn, isPaymentUnit } from "./talk.mjs";
+import { TALK_INTENT, chainNamedIn, chainTheyMean, isPaymentUnit } from "./talk.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const CFG = JSON.parse(readFileSync(join(HERE, "config.json"), "utf8"));
@@ -883,7 +883,7 @@ async function converse(state, { postId, channel, who, text, probe = false }) {
   if (a) { const c = await quickCheck(a); if (c) { recordVerdict(state, c, "conversation"); tokenFacts = facts(c, `address ${String(who).slice(0, 24)} posted`); } }
   else {
     // "that's the Base one": a ticker plus a named chain is enough to look it up myself instead of asking for an address
-    const chain = chainNamedIn(text) ?? chainNamedIn(path.map((x) => x.text).join("\n"));
+    const chain = chainTheyMean(text, path.filter((x) => x.muse_id === state.museId).map((x) => x.text).join("\n"));
     const sym = tickersIn(text)[0] ?? path.map((x) => tickersIn(x.text)).find((x) => x.length === 1)?.[0];
     if (chain && sym) {
       const best = (await tickerTokens(sym)).filter((x) => x.chain === chain)[0];

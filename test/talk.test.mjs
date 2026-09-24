@@ -1,6 +1,6 @@
 // When does a $TICKER mention deserve a reply, and on which chain? Fixtures are real town posts.
 // Run: node test/talk.test.mjs
-import { TALK_INTENT, chainNamedIn, isPaymentUnit } from "../bot/talk.mjs";
+import { TALK_INTENT, chainNamedIn, chainTheyMean, isPaymentUnit } from "../bot/talk.mjs";
 
 let bad = 0;
 const check = (ok, label) => { console.log(`${ok ? "PASS" : "FAIL"}  ${label}`); if (!ok) bad++; };
@@ -18,6 +18,9 @@ check(chainNamedIn("this base layer idea is solid") === null, "the word \"base\"
 check(!isPaymentUnit("is $NEWS a rug? liquidity looks thin", "NEWS"), "a question about the token itself is not a payment");
 check(isPaymentUnit("rewards are paid in $FUEL every week", "FUEL"), "\"paid in $FUEL\": payment unit");
 check(isPaymentUnit("tips settle in $MUSEBOOK", "MUSEBOOK"), "\"settle in $MUSEBOOK\": payment unit");
+const montyReply = "Noted — but that's the Robinhood-chain $BNKR. The bounty pays in $BNKR on Base. Worth keeping the chains straight before anyone tries to verify the payout against the wrong contract.";
+check(chainTheyMean(montyReply, "saw $BNKR mentioned (0x178e…):\n🟢 $BNKR on robinhood: OK, risk 0/100") === "base", "Monty's correction: I read Robinhood, they mean Base");
+check(chainTheyMean("wrong one, check it on solana", "") === "solana", "one chain named: that one");
 check(!isPaymentUnit("i bought 500 $QREV, holding", "QREV"), "\"500 $QREV\" is a position, not a price tag");
 
 console.log(bad ? `\n${bad} FAILED` : "\nall passed");
