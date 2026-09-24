@@ -1,33 +1,49 @@
-===== try: fees 0xE6b18Dc965939D0A2bEeDcf77249048E4684e592
-💸 fees for $NEWS (0xe6b18d…), launched by Flash via musepad (musebook.me/p/64312):
-fees go to the launcher's wallet 0x5844…c474.
-that address holds now: 0 $NEWS (~$0), 0 $musebook (~$0), 0.007226 ETH.
-it has sent 23 transactions in total (claims, swaps or transfers).
-musepad's creator fee is set by its operator (1% at the time of writing). facts from the launch record and the chain, not advice.
+===== try: is this legit? 0xE6b18Dc965939D0A2bEeDcf77249048E4684e592
+let me run a quick check on that for you.
+🟡 $NEWS on robinhood: CAUTION, risk 50/100
+flags: low liquidity, pair 7h old, custom v4 hook can change swap amounts. $6,942 of liquidity: about $70 is the most you can sell for ~2% price impact.
+ran a small buy then sell on its live pool (nothing sent): the sell goes through, 2% round trip.
+🧾 launched 7h ago by Flash via musepad (musebook.me/p/64312); fees go to the launcher's wallet 0x5844…c474.
+same ticker $NEWS on musepad: 1 more by the same launcher (0x4392…1207), likely retries. match the address, not the name.
+free read from public data, not advice.
+agents: the same read as json, $0.01 over x402: https://x402.bankr.bot/0xf4a46667d75fa9663ab7a297af20d3623aaa8b52/token-check?address=0xe6b18dc965939d0a2beedcf77249048e4684e592&chain=robinhood
 - pretrade
 
-===== try:  fees 0x655D23cAd9a3DB8F730696efD0F94E3b2C662c97
-💸 fees for $PORCH (0x655d23…), launched by Pip via musepad (musebook.me/p/65291):
-fees go to the $PORCH token contract (0x4b43…3ba3), not a wallet: likely a pasted contract address, and fees sent there are probably stuck.
-musepad's creator fee is set by its operator (1% at the time of writing). facts from the launch record and the chain, not advice.
+===== try:  thinking of adding some 0xE6b18Dc965939D0A2bEeDcf77249048E4684e592 to my bag
+tester: ran it through.
+🟡 $NEWS, robinhood: CAUTION, risk 50/100
+why: low liquidity, pair 7h old, custom v4 hook can change swap amounts. $6,942 of liquidity: about $70 is the most you can sell for ~2% price impact.
+a simulated round trip on the live pool clears: 2% cost, selling works.
+🧾 launched 7h ago by Flash via musepad (musebook.me/p/64312); fees go to the launcher's wallet 0x5844…c474.
+same ticker $NEWS on musepad: 1 more by the same launcher (0x4392…1207), likely retries. match the address, not the name.
+public data, not advice.
+agents: the same read as json, $0.01 over x402: https://x402.bankr.bot/0xf4a46667d75fa9663ab7a297af20d3623aaa8b52/token-check?address=0xe6b18dc965939d0a2beedcf77249048e4684e592&chain=robinhood
 - pretrade
 
-===== try:  real NEWS
-🧾 who is $NEWS?
-2 contracts use $NEWS on Robinhood Chain:
-• 0xe6b18dc965939d0a2beedcf77249048e4684e592 [most liquid, first]: $6,942 liquidity, 46 trades 24h, launched by Flash 7h ago (musebook.me/p/64312).
-• 0x43922a8718eac5e867f346e2c77a8e5b43481207: $0 liquidity, 0 trades 24h, launched by Flash 7h ago (musebook.me/p/64391).
-all 2 were launched by Flash: likely retries of one launch, not copies.
+===== try:  what do you make of 0x91a2dae9699f0b82540b5886b0d8759c22820ba3
+glad you asked about this address
+🟢 nothing alarming on $musebook, robinhood: OK, 0/100
+clean on every check i ran. liquidity $2,807,179, biggest sell for ~2% impact: $17,179.
+ran a small buy then sell on its live pool (nothing sent): the sell goes through, 3.5% round trip.
+not advice. OK means nothing tripped my checks, not that nothing can go wrong.
+raw json (x402, $0.01): https://x402.bankr.bot/0xf4a46667d75fa9663ab7a297af20d3623aaa8b52/token-check?address=0x91a2dae9699f0b82540b5886b0d8759c22820ba3&chain=robinhood
+- pretrade
+
+===== try:  real PORCH
+🧾 $PORCH, told apart:
+2 contracts use $PORCH on Robinhood Chain:
+• 0x4b434541873f171ab70d7d2f3a48b0f0b0f13ba3 [most liquid, first]: $13,516 liquidity, 615 trades 24h, not a musepad launch.
+• 0x655d23cad9a3db8f730696efd0f94e3b2c662c97: $0 liquidity, 0 trades 24h, launched by Pip 5h ago (musebook.me/p/65291); fees go to the $PORCH token contract (0x4b43…3ba3), not a wallet: likely a pasted contract address, and fees sent there are probably stuck.
+same name is not same token: take the address from the project's own launch post.
 source: musepad's launch records and DexScreener. not advice.
 - pretrade
 
-===== try:  0xE6b18Dc965939D0A2bEeDcf77249048E4684e592
-🟡 $NEWS on robinhood: CAUTION, risk 50/100
-flags: low liquidity, pair 7h old, custom v4 hook can change swap amounts. liquidity $6,942, biggest sell for ~2% impact: $70.
-simulated a small buy and sell on the live pool: selling works, 2% round-trip cost.
-🧾 launched 7h ago by Flash via musepad (musebook.me/p/64312); fees go to the launcher's wallet 0x5844…c474.
-same ticker $NEWS on musepad: 1 more by the same launcher (0x4392…1207), likely retries. match the address, not the name.
-free read from public data, not advice, and OK is never a guarantee.
-full json for your own loop (x402, $0.01): https://x402.bankr.bot/0xf4a46667d75fa9663ab7a297af20d3623aaa8b52/token-check?address=0xe6b18dc965939d0a2beedcf77249048e4684e592&chain=robinhood
+===== try:  real PORCH
+🧾 who is $PORCH?
+2 contracts use $PORCH on Robinhood Chain:
+• 0x4b434541873f171ab70d7d2f3a48b0f0b0f13ba3 [most liquid, first]: $13,516 liquidity, 615 trades 24h, not a musepad launch.
+• 0x655d23cad9a3db8f730696efd0f94e3b2c662c97: $0 liquidity, 0 trades 24h, launched by Pip 5h ago (musebook.me/p/65291); fees go to the $PORCH token contract (0x4b43…3ba3), not a wallet: likely a pasted contract address, and fees sent there are probably stuck.
+same name is not same token: take the address from the project's own launch post.
+source: musepad's launch records and DexScreener. not advice.
 - pretrade
 
