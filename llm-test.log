@@ -1,7 +1,84 @@
-openrouter (deepseek/deepseek-v4-flash-0731:free) → HTTP 200 in 1732ms | reply:  pretrade analyst online | served: deepseek/deepseek-v4-flash-0731:free | cost: 0
-bankr (qwen3.8-flash) → HTTP 200 in 1688ms | reply: pretrade analyst online | served: qwen/qwen3.8-flash | cost: 0.00002774
+openrouter-qwen-free (qwen/qwen3.8-27b:free) → HTTP 429 in 211ms | reply: {"error":{"message":"Provider returned error","code":429,"metadata":{"raw":"qwen/qwen3.8-27b:free is temporarily rate-li | served: ? | cost: n/a
+openrouter-gemma-free (google/gemma-4-31b-it:free) → HTTP 429 in 116ms | reply: {"error":{"message":"Provider returned error","code":429,"metadata":{"raw":"google/gemma-4-31b-it:free is temporarily ra | served: ? | cost: n/a
+bankr (qwen3.8-flash) → HTTP 200 in 1723ms | reply: pretrade analyst online | served: qwen/qwen3.8-flash | cost: 0.00002633
+--- bankr /v1/models → HTTP 200
+claude-opus-5.5 | {"input":4,"output":20,"cache_read":0.2,"cache_write":5,"currency":"usd","unit":"million_tokens"}
+grok-4.7 | {"input":2,"output":6,"cache_read":0.5,"currency":"usd","unit":"million_tokens"}
+glm-5.3-flashx | {"input":0.37,"output":1.25,"cache_read":0.075,"currency":"usd","unit":"million_tokens"}
+deepseek-v4.1-flash | {"input":0.3,"output":1.2,"cache_read":0.006,"currency":"usd","unit":"million_tokens"}
+gpt-image-2.5-flare | {"input":5,"output":30,"cache_read":1.25,"image_output":30,"currency":"usd","unit":"million_tokens"}
+gpt-image-2.5-sunburst | {"input":5,"output":30,"cache_read":1.25,"image_output":30,"currency":"usd","unit":"million_tokens"}
+gpt-6-astra | {"input":10,"output":50,"cache_read":1,"cache_write":12.5,"currency":"usd","unit":"million_tokens"}
+gemini-3.8-flash | {"input":0.75,"output":3.75,"cache_read":0.075,"cache_write":0.04167,"currency":"usd","unit":"million_tokens"}
+claude-fable-5.1 | {"input":10,"output":50,"cache_read":0.25,"cache_write":12.5,"currency":"usd","unit":"million_tokens"}
+glm-5.3-flash | {"input":0.15,"output":0.5,"cache_read":0.03,"currency":"usd","unit":"million_tokens"}
+qwen3.8-flash | {"input":0.15,"output":0.47,"cache_read":0.016,"cache_write":0.2,"currency":"usd","unit":"million_tokens"}
+glm-5.3 | {"input":1.4,"output":4.4,"cache_read":0.26,"currency":"usd","unit":"million_tokens"}
+gemini-3.7-flash | {"input":0.75,"output":3.75,"cache_read":0.075,"cache_write":0.04167,"currency":"usd","unit":"million_tokens"}
+deepseek-v4-pro-0813 | {"input":1.32,"output":3.96,"cache_read":0.044,"currency":"usd","unit":"million_tokens"}
+grok-4.6 | {"input":2,"output":6,"cache_read":0.5,"currency":"usd","unit":"million_tokens"}
+qwen3.8-max | {"input":2,"output":6,"cache_read":0.25,"cache_write":2.5,"currency":"usd","unit":"million_tokens"}
+qwen3.7-flash | {"input":0.1,"output":0.4,"cache_read":0.02,"cache_write":0.125,"currency":"usd","unit":"million_tokens"}
+claude-opus-5 | {"input":5,"output":25,"cache_read":0.5,"cache_write":6.25,"currency":"usd","unit":"million_tokens"}
+gemini-3.6-flash | {"input":0.75,"output":3.75,"cache_read":0.075,"cache_write":0.04167,"currency":"usd","unit":"million_tokens"}
+kimi-k3 | {"input":3,"output":15,"cache_read":0.3,"currency":"usd","unit":"million_tokens"}
+gpt-5.6-luna | {"input":0.2,"output":1.2,"cache_read":0.02,"cache_write":0.25,"currency":"usd","unit":"million_tokens"}
+gpt-5.6-sol | {"input":4,"output":20,"cache_read":0.4,"cache_write":5,"currency":"usd","unit":"million_tokens"}
+gpt-5.6-terra | {"input":2,"output":12,"cache_read":0.2,"cache_write":2.5,"currency":"usd","unit":"million_tokens"}
+grok-4.5 | {"input":2,"output":6,"cache_read":0.3,"currency":"usd","unit":"million_tokens"}
+claude-sonnet-5 | {"input":2,"output":10,"cache_read":0.2,"cache_write":2.5,"currency":"usd","unit":"million_tokens"}
+glm-5.2 | {"input":1.4,"output":4.4,"cache_read":0.26,"currency":"usd","unit":"million_tokens"}
+kimi-k2.7-code | {"input":0.95,"output":4,"cache_read":0.19,"currency":"usd","unit":"million_tokens"}
+claude-fable-5 | {"input":10,"output":50,"cache_read":1,"cache_write":12.5,"currency":"usd","unit":"million_tokens"}
+qwen3.7-plus | {"input":0.4,"output":1.6,"cache_read":0.04,"currency":"usd","unit":"million_tokens"}
+minimax-m3 | {"input":0.3,"output":1.2,"cache_read":0.06,"currency":"usd","unit":"million_tokens"}
+claude-opus-4.8 | {"input":5,"output":25,"cache_read":0.5,"cache_write":6.25,"currency":"usd","unit":"million_tokens"}
+qwen3.7-max | {"input":2.5,"output":7.5,"cache_read":0.25,"currency":"usd","unit":"million_tokens"}
+gemini-3.5-flash | {"input":1.5,"output":9,"cache_read":0.15,"cache_write":0.08333,"currency":"usd","unit":"million_tokens"}
+grok-4.3 | {"input":1.25,"output":2.5,"cache_read":0.2,"currency":"usd","unit":"million_tokens"}
+qwen3.6-flash | {"input":0.1875,"output":1.125,"cache_write":0.234375,"currency":"usd","unit":"million_tokens"}
+deepseek-v4-flash | {"input":0.14,"output":0.28,"cache_read":0.0028,"currency":"usd","unit":"million_tokens"}
+deepseek-v4-pro | {"input":0.435,"output":0.87,"cache_read":0.003625,"currency":"usd","unit":"million_tokens"}
+gpt-5.5 | {"input":5,"output":30,"cache_read":0.5,"currency":"usd","unit":"million_tokens"}
+gpt-image-2 | {"input":5,"output":30,"cache_read":1.25,"image_output":30,"currency":"usd","unit":"million_tokens"}
+kimi-k2.6 | {"input":0.95,"output":4,"cache_read":0.16,"currency":"usd","unit":"million_tokens"}
+claude-opus-4.7 | {"input":5,"output":25,"cache_read":0.5,"cache_write":6.25,"currency":"usd","unit":"million_tokens"}
+glm-5.1 | {"input":1.4,"output":4.4,"cache_read":0.26,"currency":"usd","unit":"million_tokens"}
+gemma-4-26b-a4b-it | {"input":0.15,"output":0.6,"currency":"usd","unit":"million_tokens"}
+gemma-4-31b-it | {"input":0.14,"output":0.4,"currency":"usd","unit":"million_tokens"}
+grok-4.20 | {"input":1.25,"output":2.5,"cache_read":0.2,"currency":"usd","unit":"million_tokens"}
+minimax-m2.7 | {"input":0.3,"output":1.2,"cache_read":0.06,"currency":"usd","unit":"million_tokens"}
+minimax-m2.7-highspeed | {"input":0.6,"output":2.4,"cache_read":0.06,"currency":"usd","unit":"million_tokens"}
+gpt-5.4-mini | {"input":0.75,"output":4.5,"cache_read":0.075,"currency":"usd","unit":"million_tokens"}
+gpt-5.4-nano | {"input":0.2,"output":1.25,"cache_read":0.02,"currency":"usd","unit":"million_tokens"}
+glm-5-turbo | {"input":1.2,"output":4,"cache_read":0.24,"currency":"usd","unit":"million_tokens"}
+gpt-5.4 | {"input":2.5,"output":15,"cache_read":0.25,"currency":"usd","unit":"million_tokens"}
+qwen3.5-flash | {"input":0.065,"output":0.26,"currency":"usd","unit":"million_tokens"}
+gemini-3.1-pro | {"input":2,"output":12,"cache_read":0.2,"cache_write":0.375,"currency":"usd","unit":"million_tokens"}
+claude-sonnet-4.6 | {"input":3,"output":15,"cache_read":0.3,"cache_write":3.75,"currency":"usd","unit":"million_tokens"}
+qwen3.5-plus | {"input":0.26,"output":1.56,"currency":"usd","unit":"million_tokens"}
+minimax-m2.5 | {"input":0.3,"output":1.2,"cache_read":0.03,"currency":"usd","unit":"million_tokens"}
+glm-5 | {"input":1,"output":3.2,"cache_read":0.2,"currency":"usd","unit":"million_tokens"}
+claude-opus-4.6 | {"input":5,"output":25,"cache_read":0.5,"cache_write":6.25,"currency":"usd","unit":"million_tokens"}
+kimi-k2.5 | {"input":0.6,"output":3,"cache_read":0.1,"currency":"usd","unit":"million_tokens"}
+gpt-5.2-codex | {"input":1.75,"output":14,"cache_read":0.175,"currency":"usd","unit":"million_tokens"}
+gemini-3-flash | {"input":0.5,"output":3,"cache_read":0.05,"cache_write":0.0833,"currency":"usd","unit":"million_tokens"}
+gpt-5.2 | {"input":1.75,"output":14,"cache_read":0.175,"currency":"usd","unit":"million_tokens"}
+deepseek-v3.2 | {"input":0.26,"output":0.38,"cache_read":0.13,"currency":"usd","unit":"million_tokens"}
+claude-opus-4.5 | {"input":5,"output":25,"cache_read":0.5,"cache_write":6.25,"currency":"usd","unit":"million_tokens"}
+claude-haiku-4.5 | {"input":1,"output":5,"cache_read":0.1,"cache_write":1.25,"currency":"usd","unit":"million_tokens"}
+claude-sonnet-4.5 | {"input":3,"output":15,"cache_read":0.3,"cache_write":3.75,"currency":"usd","unit":"million_tokens"}
+gpt-5-mini | {"input":0.25,"output":2,"cache_read":0.025,"currency":"usd","unit":"million_tokens"}
+gpt-5-nano | {"input":0.05,"output":0.4,"cache_read":0.005,"currency":"usd","unit":"million_tokens"}
+qwen3-coder | {"input":0.3,"output":1.5,"cache_read":0.06,"currency":"usd","unit":"million_tokens"}
+bankr /v1/credits → HTTP 200 fields: object, balanceUsd, effectiveBalanceUsd, undeductedCostUsd
+bankr /v1/usage → HTTP 200 fields: object, days, startDate, endDate, totals, byModel
+bankr /v1/me → HTTP 404 fields: (not json)
+bankr /v1/key → HTTP 404 fields: (not json)
 --- realistic analyst note
-  analyst note by openrouter (deepseek/deepseek-v4-flash-0731:free)
-providers: openrouter:deepseek/deepseek-v4-flash-0731:free → bankr:qwen3.8-flash
-latency: 6746 ms
-note (437 chars): $300 is within the 1% impact threshold of $646, so it can be entered without moving price much, but the pair is only 60 hours old and the source is unverified, which is the main risk. Liquidity of $128k and a $239k market cap mean larger exits will slide quickly; a $3,368 sell would move price 5%. Watch whether volume and holder count hold up, and whether the unverified-source flag gets resolved, since that changes the whole picture.
+  analyst note: openrouter-qwen-free unavailable (429), trying next
+  analyst note: openrouter-gemma-free unavailable (429), trying next
+  analyst note by bankr (qwen3.8-flash)
+providers: openrouter-qwen-free:qwen/qwen3.8-27b:free → openrouter-gemma-free:google/gemma-4-31b-it:free → bankr:qwen3.8-flash
+latency: 20819 ms
+note (335 chars): by the listed impact numbers, $300 is small, but riskScore 25 with an unverified source keeps the caution verdict. watch whether 24h volume around $261k and liquidity around $128k persist, and whether top10 noncontract holders near 18.4% add sell pressure. the 60h pair age and recent +22% 24h move mean the picture can change quickly.
