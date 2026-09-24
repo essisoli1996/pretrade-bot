@@ -2329,12 +2329,14 @@ async function main() {
       if (toTime(root.created_at) && toTime(root.created_at) < since - 7 * 864e5) break; // older threads than this are done
     }
     let shown = 0;
-    for (const it of [...items.values()]) {
+    for (const it of [...items.values()].sort((a, b) => Number(a.id) - Number(b.id))) {
+      if (/^\s*\[(removed|deleted)\]\s*$/i.test(it.text)) continue; // taken down by its author or a mod: nothing to answer
       if (COMMAND_RE.test(it.text) || (addressesIn(it.text).length === 1 && !/\?/.test(it.text))) continue; // the engine answers these
       const { node, mine: answered, root } = await repliedByMe(it.id);
       if (answered || !node) continue;
       const created = node.created_at ? Date.parse(String(node.created_at).replace(" ", "T") + "Z") : it.created;
       if (created && created < since) continue;
+      if (/^\s*\[(removed|deleted)\]\s*$/i.test(String(node.text))) continue;
       shown++;
       console.log(`──── post ${it.id} · #${it.channel} · ${it.who} · ${it.why}${created ? ` · ${new Date(created).toISOString().slice(0, 16)}Z` : ""}`);
       if (root && String(root.id) !== String(it.id)) console.log(`thread started by ${root.name}: ${String(root.text).replace(/\s+/g, " ").slice(0, 300)}`);
@@ -2646,4 +2648,6 @@ async function main() {
   console.log("Commands: keygen | intro | bio | avatar | peek | note-test | run [--live] [--loop] | serve [--segment min] [--poll sec]");
 }
 
+// output piped into `head` or a closed terminal: stop quietly instead of crashing
+process.stdout.on("error", (e) => { if (e.code === "EPIPE") process.exit(0); throw e; });
 main();
