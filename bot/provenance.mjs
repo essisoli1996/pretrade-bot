@@ -36,9 +36,9 @@ export function feeRecipient(rec, reg, code, tokenSymbol = null) {
   const w = rec.wallet;
   if (!w) return { kind: "unknown", text: "fee wallet not recorded" };
   if (ZERO.test(w)) return { kind: "burn", text: "fees go to a burn address: nobody collects them" };
-  if (w === rec.address) return { kind: "self", text: "fees go to the token's own contract: probably nobody can collect them" };
+  if (w === rec.address) return { kind: "self", text: "fees go to the token's own contract, not a wallet: whether anyone can move them depends on what the contract allows" };
   const token = reg?.byAddr?.get(w) ?? (tokenSymbol ? { symbol: tokenSymbol, address: w } : null);
-  if (token) return { kind: "token-contract", token, text: `fees go to the $${token.symbol} token contract (${w.slice(0, 6)}…${w.slice(-4)}), not a wallet: likely a pasted contract address, and fees sent there are probably stuck` };
+  if (token) return { kind: "token-contract", token, text: `fees go to the $${token.symbol} token contract (${w.slice(0, 6)}…${w.slice(-4)}), not a wallet: whether anyone can move them depends on what that contract allows` };
   if (typeof code !== "string") return { kind: "wallet?", text: `fees go to ${w.slice(0, 6)}…${w.slice(-4)}` };
   if (code === "0x" || code.toLowerCase().startsWith("0xef0100")) return { kind: "wallet", text: `fees go to the launcher's wallet ${w.slice(0, 6)}…${w.slice(-4)}` };
   return { kind: "contract", text: `fees go to a contract (${w.slice(0, 6)}…${w.slice(-4)}), e.g. a treasury or splitter: check what it does before trusting fee claims` };

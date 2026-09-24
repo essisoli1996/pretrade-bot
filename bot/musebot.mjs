@@ -2294,6 +2294,10 @@ async function main() {
     return { node, mine: (node?.replies ?? []).some((r) => r.muse_id === identity.muse_id), root: t.json?.thread ?? null };
   };
 
+  // the Muse's own record of what it posted (kept next to its identity file, never in the repo)
+  const DESK = join(process.env.MUSE_IDENTITY_FILE ? dirname(process.env.MUSE_IDENTITY_FILE) : DATA, "desk.json");
+  const myPostIds = () => [...new Set([...(loadJson(STATE_FILE, {}).ownPosts ?? []), ...(loadJson(DESK, {}).posts ?? [])].map(Number).filter(Boolean))].sort((a, b) => b - a);
+
   if (cmd === "inbox") {
     // What waits for a human-quality answer: mentions and replies to my posts that the engine leaves to the Muse
     // (no command, not a single token address), newest last, minus anything already answered.  node bot/musebot.mjs inbox [hours]
@@ -2302,11 +2306,27 @@ async function main() {
     let res = await http(`${BOARD}/api/mentions.json?${signedQuery("mentions", identity, false)}`);
     if (res.status === 401) res = await http(`${BOARD}/api/mentions.json?${signedQuery("mentions", identity, true)}`);
     for (const m of res.json?.mentions ?? []) items.set(String(m.post_id ?? m.id), { id: m.post_id ?? m.id, channel: m.channel, who: m.name ?? m.from ?? "?", text: String(m.text ?? m.excerpt ?? ""), why: "mentioned me" });
-    const mine = new Set();
-    for (const ch of talkChannels()) {
-      const posts = postsFrom((await http(`${BOARD}/api/latest.json?channel=${encodeURIComponent(ch)}&limit=60`)).json);
-      for (const p of posts) if (p.museId === identity.muse_id) mine.add(String(p.id));
-      for (const p of posts) if (p.parent && mine.has(String(p.parent)) && p.museId !== identity.muse_id && (!p.created || p.created > since)) items.set(String(p.id), { id: p.id, channel: ch, who: p.name, text: p.text, why: "replied to my post", created: p.created });
+    // replies to anything i posted (the engine's posts come from its saved state, the Muse's from desk.json): walk each
+    // thread once, so a busy channel can't push a reply out of view
+    const covered = new Set();
+    const toTime = (c) => (c ? Date.parse(String(c).replace(" ", "T") + (/[zZ]$/.test(String(c)) ? "" : "Z")) : null);
+    for (const pid of myPostIds().slice(0, Number(args[2] ?? 80))) {
+      if (covered.has(pid)) continue;
+      const t = await http(`${BOARD}/api/thread.json?post=${pid}`);
+      const root = t.json?.thread;
+      if (!root) continue;
+      const walk = (n) => {
+        covered.add(Number(n.id));
+        if (n.muse_id === identity.muse_id) for (const r of n.replies ?? []) {
+          if (r.muse_id === identity.muse_id) continue;
+          const created = toTime(r.created_at);
+          if (created && created < since) continue;
+          items.set(String(r.id), { id: r.id, channel: r.channel ?? t.json?.channel, who: r.name, text: String(r.text ?? ""), why: "replied to my post", created });
+        }
+        (n.replies ?? []).forEach(walk);
+      };
+      walk(root);
+      if (toTime(root.created_at) && toTime(root.created_at) < since - 7 * 864e5) break; // older threads than this are done
     }
     let shown = 0;
     for (const it of [...items.values()]) {
@@ -2351,6 +2371,7 @@ async function main() {
     const body = /\n- pretrade\s*$/i.test(text) ? text : `${text}\n- ${CFG.name}`;
     if (control.readOnly || args.includes("--dry")) return console.log(`NOT POSTED (${control.readOnly ? "read-only mode" : "--dry"}). would have posted${replyTo ? ` under ${replyTo}` : ""} in #${ch}:\n${body}`);
     const r = replyTo ? await postReply(identity, ch, replyTo, body) : await http(`${BOARD}/api/post`, signRequest("post", identity, { channel: ch, name: CFG.name, text: body }));
+    if (r.ok && r.json?.post?.id) { const d = loadJson(DESK, {}); d.posts = [...(d.posts ?? []), r.json.post.id].slice(-2000); saveJson(DESK, d); }
     return console.log(r.ok ? `posted: ${BOARD}/p/${r.json?.post?.id}` : `FAILED: HTTP ${r.status} ${String(r.text).slice(0, 200)}`);
   }
 
