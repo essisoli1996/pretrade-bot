@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       addresses: { description: "Token addresses, space separated (empty = trading musepad tokens + the ledger)", required: false, default: "" }
-      command: { description: "hooks, simulate (bot), endpoints (paid handlers run locally, no payment), signprobe (pre-signing simulation per chain)", required: false, default: "hooks", type: choice, options: [hooks, simulate, endpoints, signprobe, fetch, try, launchreport, talkscan] }
+      command: { description: "hooks, simulate (bot), endpoints (paid handlers run locally, no payment), signprobe (pre-signing simulation per chain)", required: false, default: "hooks", type: choice, options: [hooks, simulate, endpoints, signprobe, fetch, try, launchreport, talkscan, townscan] }
 permissions: { contents: write }
 jobs:
   hooks:
@@ -22,6 +22,11 @@ jobs:
             for u in $ADDRS; do echo "===== $u"; curl -sSL -m 20 -A "Mozilla/5.0" "$u" | sed -e 's/<script[^>]*>.*<\/script>//g' -e 's/<[^>]*>/ /g' | tr -s ' \n' | head -c 20000; echo; done
             exit 0
           fi
+          if [ "$CMD" = "townscan" ]; then node scripts/townscan.mjs $ADDRS > townscan.txt 2>&1; echo "digest: $(wc -c < townscan.txt) bytes"
+            # research data goes to a throwaway branch, never main
+            git config user.name musebot; git config user.email musebot@users.noreply.github.com
+            git checkout -q --orphan research; git rm -rqf --cached .; git add -f townscan.txt; git commit -qm "town digest [skip ci]"; git push -qf origin research; fi
+          if [ "$CMD" = "townscan" ]; then exit 0; fi
           if [ "$CMD" = "try" ]; then
             # addresses input holds commands separated by ";", e.g. "stock TSLA; plan 0x… 250"
             IFS=';' read -ra CMDS <<< "$ADDRS"; for c in "${CMDS[@]}"; do echo "===== try: $c"; node bot/musebot.mjs try $c 2>&1; echo; done | tee hooks.log
