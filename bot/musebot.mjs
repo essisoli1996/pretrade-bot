@@ -1062,14 +1062,16 @@ async function townTokenWatch(identity, state, dry = false) {
 const CONFUSABLE = [["rn", "m"], ["vv", "w"], ["0", "o"], ["1", "l"], ["i", "l"], ["5", "s"], ["3", "e"], ["-", ""]];
 function skeleton(label) { let x = label.toLowerCase(); for (const [a, b] of CONFUSABLE) x = x.split(a).join(b); return x; }
 function lookalikeOf(dom) {
+  // an official domain is never its own lookalike, even when a sibling (musebook.lol / musebook.me) is also official
+  if (OFFICIAL_DOMAINS.has(dom) || [...OFFICIAL_DOMAINS].some((off) => dom.endsWith(`.${off}`))) return null;
   const [label, ...rest] = dom.split("."); const tld = rest.join(".");
+  const hits = [];
   for (const off of OFFICIAL_DOMAINS) {
-    if (dom === off) return null;
     const [ol, ...orest] = off.split(".");
-    if (skeleton(label) === skeleton(ol) || (lev(label, ol) === 1 && ol.length >= 5)) return off;
-    if (label === ol && tld !== orest.join(".")) return off;
+    if (skeleton(label) === skeleton(ol) || (lev(label, ol) === 1 && ol.length >= 5) || label === ol) hits.push({ off, sameTld: tld === orest.join(".") });
   }
-  return null;
+  // name the one it imitates most closely: same ending first (rnusebook.me → musebook.me)
+  return (hits.find((h) => h.sameTld) ?? hits[0])?.off ?? null;
 }
 const DRAIN_MARKERS = [
   [/setApprovalForAll/i, "NFT blanket approval call"], [/eth_signTypedData_v4/i, "typed-data signing (permits)"],
@@ -2058,8 +2060,9 @@ async function main() {
     check(dl.known && dl.isContract && !dl.delegatedTo, "7702 probe reads live code on base (WETH is a contract, not delegated)");
     const wc = await walletCheck("0x000000000000000000000000000000000000dEaD", gstate);
     check(!!wc.verdict, `wallet check runs end to end (${wc.verdict})`);
-    check(lookalikeOf("rnusebook.me") === "musebook.me", "link forensics: catches the homoglyph rnusebook.lol");
-    check(lookalikeOf("musebook.me") === null, "link forensics: the real domain is not flagged");
+    check(lookalikeOf("rnusebook.me") === "musebook.me", "link forensics: catches the homoglyph rnusebook.me");
+    check(lookalikeOf("musebook.me") === null && lookalikeOf("musebook.lol") === null && lookalikeOf("www.musebook.me") === null, "link forensics: the real domains (both) are not flagged");
+    check(lookalikeOf("musebook.xyz") === "musebook.me" || lookalikeOf("musebook.xyz") === "musebook.lol", "link forensics: same name on another ending is flagged");
     const pv = await vetOffer("hi, bankr support team here. your wallet has been flagged. to release your funds pay a small gas fee.", gstate);
     check(pv.verdict === "NO", `vet: fake-support + pay-to-withdraw → ${pv.verdict}`);
     const jobs = await vetOffer("we're hiring a solidity dev, great role. for the interview please clone our github repo and run npm install then npm start.", gstate);
