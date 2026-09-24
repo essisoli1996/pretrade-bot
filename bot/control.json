@@ -1,0 +1,18 @@
+{
+  "_help": "Edit on github.com and commit; the live bot picks it up within a minute or two. paused: true stops everything. readOnly: true runs everything but posts nothing (what it would post goes to bot/shadow.log). Each feature: true = on, false = off, \"shadow\" = runs and logs to shadow.log without posting. | فارسی: paused=true همه‌چیز متوقف. readOnly=true همه‌چیز اجرا می‌شود ولی هیچ پستی نمی‌رود (در shadow.log نوشته می‌شود). هر قابلیت: true روشن، false خاموش، \"shadow\" فقط در shadow.log می‌نویسد.",
+  "paused": false,
+  "readOnly": false,
+  "features": {
+    "mentions": true,
+    "channels": true,
+    "conversation": true,
+    "launches": true,
+    "launchReport": true,
+    "townWatch": true,
+    "guard": true,
+    "digest": true,
+    "radar": true,
+    "watches": true,
+    "presence": true
+  }
+}

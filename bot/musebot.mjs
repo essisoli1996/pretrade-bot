@@ -26,6 +26,7 @@ import { makeStocks } from "./stocks.mjs";
 import { makeApprovals } from "./approvals.mjs";
 import { makeTxSim, describeTxSim, parseTx } from "./txsim.mjs";
 import { TALK_INTENT, chainNamedIn, chainTheyMean, isPaymentUnit } from "./talk.mjs";
+import { makeControl, modeOf } from "./control.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const CFG = JSON.parse(readFileSync(join(HERE, "config.json"), "utf8"));
@@ -83,7 +84,23 @@ function signedQuery(endpoint, identity, trailingNewline) {
   return new URLSearchParams({ muse_id: identity.muse_id, timestamp, nonce, signature }).toString();
 }
 
+// The owner's switches (bot/control.json). FEATURE names the part of the bot that is running right now, so a post can
+// be held back per feature: in "shadow" mode it is written to shadow.log and reported as posted, exactly as if it went out.
+let CONTROL = { paused: false, readOnly: false, features: {} }, FEATURE = null;
+const CONTROL_SRC = makeControl({
+  fetchText: async () => { const r = await fetch(process.env.CONTROL_URL || "https://raw.githubusercontent.com/essisoli1996/pretrade-bot/main/bot/control.json", { signal: AbortSignal.timeout(8000) }); return r.ok ? r.text() : null; },
+  readLocal: async () => readFileSync(join(HERE, "control.json"), "utf8"),
+});
+function shadowed(url, body) {
+  if (!body || !/\/api\/post$/.test(url) || !FEATURE || modeOf(CONTROL, FEATURE) !== "shadow") return null;
+  const line = JSON.stringify({ t: new Date().toISOString(), feature: FEATURE, channel: body.channel, reply_to: body.parent_post_id ?? null, text: body.text });
+  writeFileSync(join(DATA, "shadow.log"), (existsSync(join(DATA, "shadow.log")) ? readFileSync(join(DATA, "shadow.log"), "utf8").split("\n").slice(-400).join("\n") : "") + line + "\n");
+  console.log(`  [shadow: ${FEATURE}] not posted, logged to shadow.log`);
+  return { ok: true, status: 299, json: { ok: true, post: { id: null, shadow: true } }, text: "shadow" };
+}
+
 async function http(url, body) {
+  const held = shadowed(url, body); if (held) return held;
   const ctrl = new AbortController();
   const t = setTimeout(() => ctrl.abort(), 12000);
   try {
@@ -1822,6 +1839,18 @@ async function main() {
     return;
   }
 
+  if (cmd === "shadowtest") {
+    // Offline: a post made by a feature in shadow mode never reaches the network and lands in shadow.log.
+    CONTROL = { paused: false, readOnly: false, features: { launchReport: "shadow" } };
+    FEATURE = "launchReport";
+    const r = await http(`${BOARD}/api/post`, { channel: "memecoins", text: "shadow test" });
+    FEATURE = "mentions";
+    const live = shadowed(`${BOARD}/api/post`, { channel: "memecoins", text: "x" });
+    const log = readFileSync(join(DATA, "shadow.log"), "utf8").trim().split("\n").pop();
+    const ok = r.status === 299 && r.ok && !live && JSON.parse(log).text === "shadow test";
+    console.log(ok ? "shadow test: PASS" : `shadow test: FAIL ${JSON.stringify(r)}`); process.exit(ok ? 0 : 1);
+  }
+
   if (cmd === "convprobe") {
     // Read-only: what the conversation model would answer to one post.  node bot/musebot.mjs convprobe <postId>
     const id = Number(args[1]);
@@ -2098,18 +2127,24 @@ async function main() {
       if (!(await boardHealthy())) { quiet("board unreachable on every known host, waiting"); await new Promise((r) => setTimeout(r, 30000)); continue; }
       console.log = (...a) => { if (!/^mentions: \d+ in inbox/.test(String(a[0]))) quiet(...a); }; // keep the log readable
       try {
-        const n1 = await handleMentions(identity, state); polls++;
+        const before = JSON.stringify(CONTROL);
+        CONTROL = await CONTROL_SRC.get();
+        if (JSON.stringify(CONTROL) !== before) quiet(`control (${CONTROL_SRC.source()}): ${CONTROL.paused ? "PAUSED" : CONTROL.readOnly ? "READ-ONLY, posts go to shadow.log" : "live"}${Object.keys(CONTROL.features).length ? `, ${Object.entries(CONTROL.features).map(([k, v]) => `${k}=${v === false ? "off" : v}`).join(", ")}` : ""}`);
+        if (CONTROL.paused) { console.log = quiet; await new Promise((r) => setTimeout(r, 60_000)); continue; }
+        // one part of the bot at a time, each behind its own switch
+        const step = async (feature, fn) => { if (modeOf(CONTROL, feature) === "off") return 0; FEATURE = feature; try { return (await fn()) ?? 0; } finally { FEATURE = null; } };
+        const n1 = await step("mentions", () => handleMentions(identity, state)); polls++;
         let n2 = 0;
-        if (due("presence", CFG.presence?.everyMinutes ?? 4)) { const pr = await setPresence(identity); if (!pr.ok) quiet(`presence: ${pr.status} ${pr.text.slice(0, 120)}`); }
-        if (due("channels", CFG.serve.channelMinutes)) n2 += await pass(identity, state, state.seen.length === 0);
-        if (due("launches", CFG.serve.launchMinutes ?? 2)) n2 += (await launchWatch(identity, state)).length;
-        if (due("launchreport", LR.everyMinutes ?? 15)) n2 += await launchReport(identity, state);
-        if (due("conversations", CV.everyMinutes ?? 1)) n2 += await conversations(identity, state);
-        if (due("townwatch", G.townWatchMinutes ?? 3)) n2 += await townTokenWatch(identity, state);
-        if (due("guard", G.everyMinutes ?? 15)) n2 += (await guardScan(identity, state)).length;
-        if (due("digest", 60)) n2 += await councilDigest(identity, state);
-        if (due("radar", CFG.radar?.everyMinutes ?? 10)) { RADAR = RADAR ?? makeRadar({ CFG, http, HERE: DATA }); n2 += await RADAR.tick(); }
-        if (due("watches", CFG.serve.watchMinutes)) n2 += await runWatches(identity, state);
+        if (due("presence", CFG.presence?.everyMinutes ?? 4) && modeOf(CONTROL, "presence") === "on") { const pr = await setPresence(identity); if (!pr.ok) quiet(`presence: ${pr.status} ${pr.text.slice(0, 120)}`); }
+        if (due("channels", CFG.serve.channelMinutes)) n2 += await step("channels", () => pass(identity, state, state.seen.length === 0));
+        if (due("launches", CFG.serve.launchMinutes ?? 2)) n2 += await step("launches", async () => (await launchWatch(identity, state)).length);
+        if (due("launchreport", LR.everyMinutes ?? 15)) n2 += await step("launchReport", () => launchReport(identity, state));
+        if (due("conversations", CV.everyMinutes ?? 1)) n2 += await step("conversation", () => conversations(identity, state));
+        if (due("townwatch", G.townWatchMinutes ?? 3)) n2 += await step("townWatch", () => townTokenWatch(identity, state));
+        if (due("guard", G.everyMinutes ?? 15)) n2 += await step("guard", async () => (await guardScan(identity, state)).length);
+        if (due("digest", 60)) n2 += await step("digest", () => councilDigest(identity, state));
+        if (due("radar", CFG.radar?.everyMinutes ?? 10)) n2 += await step("radar", () => { RADAR = RADAR ?? makeRadar({ CFG, http, HERE: DATA }); return RADAR.tick(); });
+        if (due("watches", CFG.serve.watchMinutes)) n2 += await step("watches", () => runWatches(identity, state));
         if (due("ledger", CFG.serve.ledgerMinutes)) await settleLedger(state);
         if (n1 + n2 > 0) { replies += n1 + n2; saveJson(STATE_FILE, state); }
         backoff = 0;

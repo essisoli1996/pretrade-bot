@@ -1,0 +1,20 @@
+name: tests   # every code push runs the full test suite; a red X on the commit means the live bot must not get it
+on:
+  push:
+    branches: [main]
+    paths-ignore: ["bot/.state.json", "bot/last-run.log", "bot/ledger/**", "bot/radar/**", "bot/*.log", "*.log", "deploy/host"]
+  workflow_dispatch: {}
+permissions: { contents: write }
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: npm install --no-audit --no-fund
+      - run: npm test
+      # the live bot runs only code that got here: this tag is what it deploys
+      - name: Mark as good for the live bot
+        run: git tag -f live-good "$GITHUB_SHA" && git push -qf origin live-good && echo "live-good → ${GITHUB_SHA:0:7}"
