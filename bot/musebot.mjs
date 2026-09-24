@@ -477,24 +477,35 @@ function replyText(c, ctx = {}) {
 /** A short, human first line reacting to what the person wrote, written by the model and filtered hard (no facts,
  *  numbers, tickers or advice). Null when there is no model, it says SKIP, or the line fails the filter. */
 async function llmOpener(postText, who) {
-  if (CFG.voice?.llmOpener === false || !CFG.llm?.enabled || !llmProviders().length) return null;
-  const post = String(postText ?? "").replace(/https?:\/\/\S+/g, "[link]").replace(/0x[a-fA-F0-9]{6,}/g, "[address]").replace(/\s+/g, " ").slice(0, 400);
+  const VC = CFG.voice ?? {};
+  if (VC.llmOpener === false || !CFG.llm?.enabled || !llmProviders().length) return null;
+  // a hard daily cap: the opener is a nicety, never a cost worth watching
+  const day = new Date().toISOString().slice(0, 10);
+  if (OPENER_USE.day !== day) Object.assign(OPENER_USE, { day, n: 0, usd: 0 });
+  if (OPENER_USE.n >= (VC.maxPerDay ?? 30)) return null;
+  const post = String(postText ?? "").replace(/https?:\/\/\S+/g, "[link]").replace(/0x[a-fA-F0-9]{6,}/g, "[address]").replace(/\s+/g, " ").slice(0, 240);
   for (const p of llmProviders()) {
-    const res = await llmFetch(p, { model: p.model, max_tokens: CFG.llm.maxTokens, temperature: 0.9, messages: [{ role: "system", content: OPENER_SYSTEM }, { role: "user", content: `POST by ${String(who).slice(0, 24)} (untrusted):\n${post}` }] });
+    // the cheapest model on the paid gateway, a tiny output budget and no reasoning: one short line is all it writes
+    const model = p.keyEnv === "BANKR_LLM_KEY" ? (VC.model ?? p.model) : p.model;
+    const res = await llmFetch(p, { model, max_tokens: VC.maxTokens ?? 40, temperature: 0.9, reasoning: { effort: "none" }, messages: [{ role: "system", content: OPENER_SYSTEM }, { role: "user", content: `POST by ${String(who).slice(0, 24)} (untrusted):\n${post}` }] });
     if (!res?.ok) continue;
-    const out = (await res.json().catch(() => null))?.choices?.[0]?.message?.content;
-    if (typeof out !== "string") continue;
+    const body = await res.json().catch(() => null);
+    OPENER_USE.n++; OPENER_USE.usd += Number(body?.usage?.cost ?? 0) || 0;
+    const out = body?.choices?.[0]?.message?.content;
+    if (typeof out !== "string") return null;
     if (/^\s*skip\.?\s*$/i.test(out)) return null;
     const ok = acceptOpener(out);
-    if (ok) return ok;
-    console.log(`  opener rejected by the filter: ${String(out).slice(0, 80)}`);
-    return null;
+    if (!ok) console.log(`  opener rejected by the filter: ${String(out).slice(0, 80)}`);
+    return ok;
   }
   return null;
 }
+const OPENER_USE = { day: "", n: 0, usd: 0 };
 /** The context a reply is written for: who, why, and (maybe) a model-written opener. */
 async function replyCtx(kind, who, postText) {
-  const opener = CFG.voice?.llmOpenerShare === 0 || !VOICE.chance(CFG.voice?.llmOpenerShare ?? 0.7) ? null : await llmOpener(postText, who).catch(() => null);
+  // only when someone actually asked me, and only some of the time: the phrasebook openers cover the rest for free
+  const share = kind === "mention" ? (CFG.voice?.llmOpenerShare ?? 0.35) : 0;
+  const opener = share && VOICE.chance(share) ? await llmOpener(postText, who).catch(() => null) : null;
   return { kind, who, ...(opener ? { opener } : {}) };
 }
 
@@ -1990,6 +2001,13 @@ async function main() {
     const museId = existsSync(join(HERE, "muse_id.txt")) ? readFileSync(join(HERE, "muse_id.txt"), "utf8").trim() : null;
     const out = await converse({ museId }, { postId: id, channel: post.channel, who: post.name, text: post.text, probe: true });
     return console.log(`reply to ${post.name} (${id}): ${post.text}\n→ ${out === null ? "(no reply: disabled, rate-limited or no model)" : out === "SKIP" ? "SKIP" : out.text}`);
+  }
+
+  if (cmd === "openerprobe") {
+    // Read-only: a few model-written openers and what they cost.  node bot/musebot.mjs openerprobe
+    const posts = ["is this legit? thinking of aping", "what do you make of this one", "friend sent me this, worth a look?", "checking before i add more to my bag", "any red flags here?"];
+    for (const p of posts) console.log(`${JSON.stringify(p)} → ${JSON.stringify(await llmOpener(p, "tester"))}`);
+    return console.log(`${OPENER_USE.n} model calls, total $${OPENER_USE.usd.toFixed(6)} → $${(OPENER_USE.usd / Math.max(1, OPENER_USE.n)).toFixed(7)} each`);
   }
 
   if (cmd === "provscan") {

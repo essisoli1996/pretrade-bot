@@ -251,6 +251,9 @@
   },
   "voice": {
     "llmOpener": true,
-    "llmOpenerShare": 0.7
+    "llmOpenerShare": 0.35,
+    "maxPerDay": 30,
+    "model": "qwen3.5-flash",
+    "maxTokens": 40
   }
 }
