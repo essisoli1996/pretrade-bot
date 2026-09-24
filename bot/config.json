@@ -248,5 +248,9 @@
     "everyMinutes": 5,
     "minLiquidityUsd": 5000,
     "maxAlertsPerDay": 6
+  },
+  "voice": {
+    "llmOpener": true,
+    "llmOpenerShare": 0.7
   }
 }

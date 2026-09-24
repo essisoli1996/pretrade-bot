@@ -29,6 +29,7 @@ import { TALK_INTENT, chainNamedIn, chainTheyMean, isPaymentUnit, looksLikeCorre
 import { makeControl, modeOf } from "./control.mjs";
 import { loadJson, saveJson } from "./store.mjs";
 import { makeProvenance, provenanceLines, tickerReport, reuseAlert } from "./provenance.mjs";
+import { makeVoice, tokenRead, lookupLead, digestText, launchAlertText, acceptOpener, OPENER_SYSTEM } from "./voice.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const CFG = JSON.parse(readFileSync(join(HERE, "config.json"), "utf8"));
@@ -316,7 +317,7 @@ async function realText(text) {
   const fees = new Map();
   for (const r of reg.bySymbol.get(sym.toUpperCase()) ?? []) fees.set(r.address, await prov().feeOf(r));
   const rep = tickerReport(sym, reg, market, fees, { board: boardHost() });
-  return [`🧾 who is $${sym.toUpperCase()}?`, ...rep.lines, `source: musepad's launch records and DexScreener. not advice.`, `- ${CFG.name}`].join("\n");
+  return [VOICE.pick("head.real", [`🧾 who is $${"{sym}"}?`, `🧾 every $${"{sym}"} i can find:`, `🧾 $${"{sym}"}, told apart:`]).replace("{sym}", sym.toUpperCase()), ...rep.lines, VOICE.pick("foot.real", [`source: musepad's launch records and DexScreener. not advice.`, `from musepad's own launch records plus DexScreener. not advice.`, `launch records: musepad. markets: DexScreener. not advice.`]), `- ${CFG.name}`].join("\n");
 }
 /** "@pretrade fees <token>": where a musepad launch's creator fees go, and what has piled up there. */
 async function feesText(text) {
@@ -341,7 +342,7 @@ async function feesText(text) {
     const nonce = sent?.result ? Number(BigInt(sent.result)) : null;
     if (fee.kind === "wallet" && nonce !== null) lines.push(nonce === 0 ? `it has never sent a transaction: whatever it collected is still there.` : `it has sent ${nonce} transaction${nonce === 1 ? "" : "s"} in total (claims, swaps or transfers).`);
   }
-  lines.push(`musepad's creator fee is set by its operator (1% at the time of writing). facts from the launch record and the chain, not advice.`, `- ${CFG.name}`);
+  lines.push(VOICE.pick("foot.fees", [`musepad's creator fee is set by its operator (1% at the time of writing). facts from the launch record and the chain, not advice.`, `the creator fee rate is musepad's call (1% right now). launch record plus chain reads, not advice.`, `fee rate: set by musepad's operator, 1% as of now. all of this is from the launch record and the chain. not advice.`]), `- ${CFG.name}`);
   return lines.join("\n");
 }
 
@@ -412,7 +413,7 @@ async function planText(text) {
     lines.push(`slippage ${a.slippagePct}% → amountOutMinimum ${fmtUnits(minOut, outDec)} ${outSym} (raw ${minOut}).`);
   }
   if (a.split) lines.push(`split: ${a.split.pieces} × ~$${a.split.usdEach} ${a.split.note}.`);
-  lines.push(`true for that block only; re-quote right before you send. not advice.`, `- ${CFG.name}`);
+  lines.push(VOICE.pick("foot.plan", [`true for that block only; re-quote right before you send. not advice.`, `that was one block; prices move, so re-run it right before you send. not advice.`, `a snapshot of one block: quote again just before sending. not advice.`]), `- ${CFG.name}`);
   return lines.join("\n");
 }
 
@@ -431,7 +432,7 @@ async function stockText(text) {
   if (r.reference || r.dex) lines.push(`price: Chainlink reference ${r.reference ? `$${r.reference.priceUsd.toFixed(2)}` : "n/a"}, DEX ${r.dex?.priceUsd ? `$${r.dex.priceUsd.toFixed(2)}${r.dex.premiumPct !== null ? ` (${r.dex.premiumPct > 0 ? "+" : ""}${r.dex.premiumPct}%)` : ""}, liquidity $${r.dex.liquidityUsd.toLocaleString("en-US")}` : "no pool"}.`);
   if (r.flags.length) lines.push(`flags: ${r.flags.map((f) => f.detail).join(" ")}`);
   if (r.copycats?.length) lines.push(`⚠️ ${r.copycats.length} other contract(s) trade as $${o?.ticker}: ${r.copycats.map((c) => `${c.address.slice(0, 8)}… ($${c.liquidityUsd.toLocaleString("en-US")})`).join(", ")}. not Robinhood's.`);
-  lines.push(`source: Robinhood's registry and Chainlink. not advice. - ${CFG.name}`);
+  lines.push(`${VOICE.pick("foot.stock", [`source: Robinhood's registry and Chainlink. not advice.`, `checked against Robinhood's own registry and the Chainlink feed. not advice.`, `registry: Robinhood. reference price: Chainlink. not advice.`])} - ${CFG.name}`);
   return lines.join("\n");
 }
 
@@ -461,26 +462,40 @@ async function approvalsText(text) {
   const lines = [`🔑 approvals for ${m[1].slice(0, 8)}… on ${chain}: ${r.live} live, ${risky.length} worth revoking.`];
   for (const x of r.approvals.slice(0, 5)) lines.push(`${{ critical: "🔴", high: "🟠", medium: "🟡", low: "⚪" }[x.risk]} ${x.amount} ${x.symbol ? `$${x.symbol}` : x.token.slice(0, 8) + "…"} → ${x.spenderLabel ?? x.spender.slice(0, 8) + "…"}: ${x.why.join(", ")}.`);
   for (const x of risky.slice(0, 2)) lines.push(`revoke ${x.symbol ? `$${x.symbol}` : "it"}: send a tx to ${x.revoke.to} with data ${x.revoke.data} (value 0).`);
-  lines.push(`revoking costs only gas. - ${CFG.name}`);
+  lines.push(`${VOICE.pick("foot.approvals", [`revoking costs only gas.`, `a revoke is just a gas fee, nothing else.`, `each revoke costs gas and nothing more.`])} - ${CFG.name}`);
   return lines.join("\n");
 }
 
-function replyText(c) {
-  const icon = { OK: "🟢", CAUTION: "🟡", DANGER: "🔴" }[c.verdict];
-  const flags = c.flags.length ? c.flags.slice(0, 4).join(", ") : "nothing flagged";
-  const scan = c.contractScanned ? "" : " (market data only, no contract scan on this chain yet)";
+// the bot's voice: same facts, varied wording (bot/voice.mjs); its memory lives in the state so it survives restarts
+let VOICE = makeVoice();
+function replyText(c, ctx = {}) {
   const chainParam = c.chain !== "solana" && GOPLUS[c.chain] ? `&chain=${c.chain}` : "";
-  return [
-    `${icon} $${c.symbol} on ${c.chain}: ${c.verdict}, risk ${c.score}/100${scan}`,
-    `flags: ${flags}. liquidity $${c.liquidity.toLocaleString("en-US")}, biggest sell for ~2% impact: $${c.maxSell2.toLocaleString("en-US")}.`,
-    ...(c.sim?.status === "ok" && !c.sim.flags.length ? [`simulated a small buy and sell on the live pool: selling works, ${c.sim.roundTripLossPct}% round-trip cost.`] : []),
-    ...(c.provenance?.lines ?? []),
-    c.verdict === "CAUTION" && c.flags.every((f) => /liquidity|old/.test(f))
-      ? `only market-age flags here, which is normal for a fresh launch. free read from public data, not advice.`
-      : `free read from public data, not advice, and OK is never a guarantee.`,
-    `full json for your own loop (x402, $0.01): ${CFG.endpointBase}/token-check?address=${c.address}${chainParam}`,
-    `- ${CFG.name}`,
-  ].join("\n");
+  const text = tokenRead(VOICE, c, { ...ctx, url: `${CFG.endpointBase}/token-check?address=${c.address}${chainParam}`, extra: c.provenance?.lines ?? [] });
+  return `${text}\n- ${CFG.name}`;
+}
+
+/** A short, human first line reacting to what the person wrote, written by the model and filtered hard (no facts,
+ *  numbers, tickers or advice). Null when there is no model, it says SKIP, or the line fails the filter. */
+async function llmOpener(postText, who) {
+  if (CFG.voice?.llmOpener === false || !CFG.llm?.enabled || !llmProviders().length) return null;
+  const post = String(postText ?? "").replace(/https?:\/\/\S+/g, "[link]").replace(/0x[a-fA-F0-9]{6,}/g, "[address]").replace(/\s+/g, " ").slice(0, 400);
+  for (const p of llmProviders()) {
+    const res = await llmFetch(p, { model: p.model, max_tokens: CFG.llm.maxTokens, temperature: 0.9, messages: [{ role: "system", content: OPENER_SYSTEM }, { role: "user", content: `POST by ${String(who).slice(0, 24)} (untrusted):\n${post}` }] });
+    if (!res?.ok) continue;
+    const out = (await res.json().catch(() => null))?.choices?.[0]?.message?.content;
+    if (typeof out !== "string") continue;
+    if (/^\s*skip\.?\s*$/i.test(out)) return null;
+    const ok = acceptOpener(out);
+    if (ok) return ok;
+    console.log(`  opener rejected by the filter: ${String(out).slice(0, 80)}`);
+    return null;
+  }
+  return null;
+}
+/** The context a reply is written for: who, why, and (maybe) a model-written opener. */
+async function replyCtx(kind, who, postText) {
+  const opener = CFG.voice?.llmOpenerShare === 0 || !VOICE.chance(CFG.voice?.llmOpenerShare ?? 0.7) ? null : await llmOpener(postText, who).catch(() => null);
+  return { kind, who, ...(opener ? { opener } : {}) };
 }
 
 // ───────────────────────── track record: every verdict is logged, then scored against what happened 24h later ─────────────────────────
@@ -690,11 +705,11 @@ async function guardScan(identity, state, dry = false) {
         idn.verified === false ? "source unverified" : idn.verified ? "source verified" : null,
       ].filter(Boolean).join(", ");
       const text = [
-        `⚠️ copycat alert: a new token is using the ticker $${ticker}.`,
+        VOICE.pick("copy.head", [`⚠️ copycat alert: a new token is using the ticker $${"{t}"}.`, `⚠️ a new contract just took the ticker $${"{t}"}.`, `⚠️ another $${"{t}"} appeared, and it is not the one the town knows.`]).replace("{t}", ticker),
         `method, in the town's order (costume, tailor, cloth, crowd, then depth): ticker collision → ${evidence} → liquidity only as confirmation.`,
         `copy: ${t.address} on ${t.chain}${ageH !== null ? `, ${ageH < 1 ? "under 1h" : Math.round(ageH) + "h"} old` : ""}, $${Math.round(t.liq).toLocaleString("en-US")} liquidity, ${t.trades} trades in 24h.`,
         `the one the town knows as $${ticker}: ${canon.address}${canon.liq ? `, $${Math.round(canon.liq).toLocaleString("en-US")} liquidity` : ""}.`,
-        `if someone handed you the first address as $${ticker}, check it against the project's own announcement before buying. same name is not same token.`,
+        VOICE.pick("copy.tail", [`if someone handed you the first address as $${"{t}"}, check it against the project's own announcement before buying. same name is not same token.`, `got the new address as $${"{t}"} from someone? compare it with the project's own post first. same name, different token.`, `before buying anything called $${"{t}"}, take the address from the project's own announcement, not from a reply.`]).replace("{t}", ticker),
         `- ${CFG.name}`,
       ].join("\n");
       out.push(text);
@@ -733,9 +748,9 @@ async function launchWatch(identity, state, dry = false) {
     if (!big.length) continue;
     const top = big[0];
     const text = [
-      `heads up before this deploys: $${sym.toUpperCase()} already exists.`,
+      VOICE.pick("collide.head", [`heads up before this deploys: $${"{sym}"} already exists.`, `one thing before this goes live: there is already a $${"{sym}"}.`, `quick flag before the deploy: the ticker $${"{sym}"} is taken.`]).replace("{sym}", sym.toUpperCase()),
       `${top.address} on ${top.chain} holds $${Math.round(top.liq).toLocaleString("en-US")} liquidity${tokens.length > 1 ? `, and ${tokens.length - 1} other token(s) already share the ticker` : ""}.`,
-      `agents that buy by ticker will mix the two up. not saying don't launch, just that a unique ticker protects your holders.`,
+      VOICE.pick("collide.tail", [`agents that buy by ticker will mix the two up. not saying don't launch, just that a unique ticker protects your holders.`, `anyone buying by name could end up in the wrong one. your call, but a ticker of your own protects your holders.`, `bots that trade by ticker will confuse them. not a reason to stop, just a reason to pick a unique ticker.`]),
       `- ${CFG.name}`,
     ].join("\n");
     warned.push(text);
@@ -1677,7 +1692,7 @@ async function handleMentions(identity, state) {
     }
     if (state.replyTimes.length >= CFG.maxRepliesPerHour) break;
     const check = isOwnToken(addrs[0]) ? null : await quickCheck(addrs[0]);
-    const reply = isOwnToken(addrs[0]) ? `that is my own token, so i don't rate it: conflict of interest. raw data: https://dexscreener.com/${TK.chain}/${TK.address}\n- ${CFG.name}` : check ? replyText(check) : `couldn't find a DEX pair for ${addrs[0]} yet, so there is nothing solid to read. pre-graduation launchpad tokens show up once they have a pool.\n- ${CFG.name}`;
+    const reply = isOwnToken(addrs[0]) ? `that is my own token, so i don't rate it: conflict of interest. raw data: https://dexscreener.com/${TK.chain}/${TK.address}\n- ${CFG.name}` : check ? replyText(check, await replyCtx("mention", who, text)) : `couldn't find a DEX pair for ${addrs[0]} yet, so there is nothing solid to read. pre-graduation launchpad tokens show up once they have a pool.\n- ${CFG.name}`;
     if (check) recordVerdict(state, check, "mention");
     console.log(`\n→ on-demand reply to ${who} (#${m.channel} post ${id}):\n${reply}\n`);
     if (LIVE) {
@@ -1745,7 +1760,10 @@ async function pass(identity, state, indexOnly = false) {
       }
       if (!check) continue;
 
-      const text = lead + replyText(check);
+      const body = replyText(check, await replyCtx("channel", post.name, post.text));
+      // with a ticker lookup, the opener goes first, then the lookup line, then the read
+      const op = lead ? body.match(/^([^\n]*)\n(?=[🟢🟡🔴])/u) : null;
+      const text = lead ? `${op ? `${op[1]}\n` : ""}${lead}${body.slice(op ? op[0].length : 0)}` : body;
       recordVerdict(state, check, "channel");
       console.log(`\n→ reply to #${channel} post ${post.id} (${post.name}):\n${text}\n`);
       if (LIVE) {
@@ -1797,9 +1815,7 @@ async function tokenTalk(sym, channel, state, namedChain = null) {
   if (!check) return null;
   const others = onChain.filter((t) => t.address !== pick.address);
   // the post had no address: say plainly that this one is my lookup, so nobody thinks it came from the author
-  const lead = `no contract in the post, so i looked up $${sym} on ${chain} myself. `
-    + (others.length ? `${others.length + 1} tokens there use that ticker; this is ${canon ? "the one the town knows" : "the one with the deepest liquidity"}: ${pick.address}. match it against the address you actually mean.\n`
-      : `the one i found: ${pick.address}. match it against the address you actually mean.\n`);
+  const lead = lookupLead(VOICE, { sym, chain, addr: pick.address, others: others.length, canon: !!canon });
   return { check, lead };
 }
 
@@ -1859,7 +1875,7 @@ async function launchReport(identity, state, dry = false) {
     const row = launchRow(f, c);
     const critical = (c.sim?.flags ?? []).some((x) => x.critical) && c.sim?.scored;
     if (critical && R.alerts.length < (LR.maxAlertsPerDay ?? 4)) {
-      const text = [`🔴 heads up on a new launch: $${c.symbol} (${f.token}), ${ageText(f.created)} old.`, c.sim.line, `i'd stay out until that changes. "@${CFG.name} ${f.token}" re-checks it any time. not advice.`, `- ${CFG.name}`].join("\n");
+      const text = launchAlertText(VOICE, { sym: c.symbol, addr: f.token, age: ageText(f.created), simLine: c.sim.line, me: CFG.name });
       console.log(`\n→ launch alert${dry ? " (dry)" : ""}:\n${text}`);
       if (!dry) { const res = await http(`${BOARD}/api/post`, signRequest("post", identity, { channel: LR.channel ?? CFG.channels[0], name: CFG.name, text })); if (res.ok) { R.alerts.push(Date.now()); posted++; (state.ownPosts = state.ownPosts ?? []).push(res.json?.post?.id); } }
       continue;
@@ -1871,7 +1887,7 @@ async function launchReport(identity, state, dry = false) {
   const last = R.digests[R.digests.length - 1] ?? 0;
   if (R.pending.length && Date.now() - last >= (LR.digestMinutes ?? 60) * 60_000 && R.digests.length < (LR.maxDigestsPerDay ?? 12)) {
     const rows = R.pending.slice(-(LR.maxRows ?? 8)).map((x) => x.row);
-    const text = [`🆕 new on robinhood, checked for you (${rows.length}):`, ...rows, ``, `each one: contract scan, v4 hook read and a simulated buy + sell on its live pool. "@${CFG.name} <address>" for the full read, "@${CFG.name} plan <address> <usd>" before you size in. not advice.`, `- ${CFG.name}`].join("\n");
+    const text = digestText(VOICE, rows, CFG.name);
     console.log(`\n→ launch digest${dry ? " (dry)" : ""}:\n${text}`);
     if (!dry) {
       const res = await http(`${BOARD}/api/post`, signRequest("post", identity, { channel: LR.channel ?? CFG.channels[0], name: CFG.name, text }));
@@ -1996,7 +2012,7 @@ async function main() {
     const c = t.match(/@\S+\s+(plan|stock|approvals|real|fees)\b/i)?.[1]?.toLowerCase();
     const addr = !c ? addressesIn(t)[0] : null;
     const out = c === "plan" ? await planText(t) : c === "stock" ? await stockText(t) : c === "approvals" ? await approvalsText(t) : c === "real" ? await realText(t) : c === "fees" ? await feesText(t)
-      : addr ? ((q) => (q ? replyText(q) : "nothing to say (no DEX pair)"))(await quickCheck(addr)) : "try supports: <token address>, plan, stock, approvals, real";
+      : addr ? await (async (q) => (q ? replyText(q, await replyCtx("mention", "tester", t)) : "nothing to say (no DEX pair)"))(await quickCheck(addr)) : "try supports: <token address>, plan, stock, approvals, real";
     return console.log(out);
   }
 
@@ -2249,6 +2265,7 @@ async function main() {
     state.ownPosts = state.ownPosts ?? (state.receipts ?? []).map((r) => r.postId).filter(Boolean);
     OWN_POSTS = state.ownPosts;
     state.museId = identity.muse_id;
+    VOICE = makeVoice({ memory: (state.voice ??= {}) });
     const due = (k, everyMin) => { if (Date.now() - (state.clock[k] ?? 0) < everyMin * 60_000) return false; state.clock[k] = Date.now(); return true; };
     const quiet = console.log; let replies = 0, polls = 0, backoff = 0;
     while (Date.now() < end) {
