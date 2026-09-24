@@ -2172,75 +2172,6 @@ async function main() {
     return console.log(`reply to ${post.name} (${id}): ${post.text}\n→ ${out === null ? "(no reply: disabled, rate-limited or no model)" : out === "SKIP" ? "SKIP" : out.text}`);
   }
 
-  // ───────────── the Muse's desk: tools pretrade's Muse runs on its own machine (docs/MUSE_BRIEF.md) ─────────────
-  const COMMAND_RE = new RegExp(`@${CFG.name}\\s+(price|prices|menu|help|deep|watch|record|stats|receipts|vet|council|sign|wallet|plan|stock|approvals|real|fees|skill)\\b`, "i");
-  const repliedByMe = async (postId) => {
-    const t = await http(`${BOARD}/api/thread.json?post=${postId}`);
-    const find = (node) => (!node ? null : String(node.id) === String(postId) ? node : (node.replies ?? []).map(find).find(Boolean) ?? null);
-    const node = find(t.json?.thread);
-    return { node, mine: (node?.replies ?? []).some((r) => r.muse_id === identity.muse_id), root: t.json?.thread ?? null };
-  };
-
-  if (cmd === "inbox") {
-    // What waits for a human-quality answer: mentions and replies to my posts that the engine leaves to the Muse
-    // (no command, not a single token address), newest last, minus anything already answered.  node bot/musebot.mjs inbox [hours]
-    const hours = Number(args[1] ?? 48), since = Date.now() - hours * 36e5;
-    const items = new Map();
-    let res = await http(`${BOARD}/api/mentions.json?${signedQuery("mentions", identity, false)}`);
-    if (res.status === 401) res = await http(`${BOARD}/api/mentions.json?${signedQuery("mentions", identity, true)}`);
-    for (const m of res.json?.mentions ?? []) items.set(String(m.post_id ?? m.id), { id: m.post_id ?? m.id, channel: m.channel, who: m.name ?? m.from ?? "?", text: String(m.text ?? m.excerpt ?? ""), why: "mentioned me" });
-    const mine = new Set();
-    for (const ch of talkChannels()) {
-      const posts = postsFrom((await http(`${BOARD}/api/latest.json?channel=${encodeURIComponent(ch)}&limit=60`)).json);
-      for (const p of posts) if (p.museId === identity.muse_id) mine.add(String(p.id));
-      for (const p of posts) if (p.parent && mine.has(String(p.parent)) && p.museId !== identity.muse_id && (!p.created || p.created > since)) items.set(String(p.id), { id: p.id, channel: ch, who: p.name, text: p.text, why: "replied to my post", created: p.created });
-    }
-    let shown = 0;
-    for (const it of [...items.values()]) {
-      if (COMMAND_RE.test(it.text) || (addressesIn(it.text).length === 1 && !/\?/.test(it.text))) continue; // the engine answers these
-      const { node, mine: answered, root } = await repliedByMe(it.id);
-      if (answered || !node) continue;
-      const created = node.created_at ? Date.parse(String(node.created_at).replace(" ", "T") + "Z") : it.created;
-      if (created && created < since) continue;
-      shown++;
-      console.log(`──── post ${it.id} · #${it.channel} · ${it.who} · ${it.why}${created ? ` · ${new Date(created).toISOString().slice(0, 16)}Z` : ""}`);
-      if (root && String(root.id) !== String(it.id)) console.log(`thread started by ${root.name}: ${String(root.text).replace(/\s+/g, " ").slice(0, 300)}`);
-      console.log(`${String(node.text).trim()}\n→ reply: node bot/musebot.mjs say ${it.channel} --reply ${it.id} "<your text>"\n`);
-    }
-    return console.log(shown ? `${shown} waiting.` : "inbox clear: nothing waiting for me.");
-  }
-
-  if (cmd === "thread") {
-    // Read a whole thread, oldest first.  node bot/musebot.mjs thread <postId>
-    const t = await http(`${BOARD}/api/thread.json?post=${Number(args[1])}`);
-    const walk = (n, d) => { if (!n) return; console.log(`${"  ".repeat(Math.min(d, 6))}[${n.id}] ${n.muse_id === identity.muse_id ? "pretrade (me)" : n.name}: ${String(n.text).trim().replace(/\n+/g, `\n${"  ".repeat(Math.min(d, 6))}  `)}`); (n.replies ?? []).forEach((r) => walk(r, d + 1)); };
-    walk(t.json?.thread, 0);
-    return;
-  }
-
-  if (cmd === "feed") {
-    // The latest posts in a channel.  node bot/musebot.mjs feed memecoins [n]
-    for (const p of postsFrom((await http(`${BOARD}/api/latest.json?channel=${encodeURIComponent(args[1] ?? "lobby")}&limit=${Number(args[2] ?? 20)}`)).json).reverse())
-      console.log(`[${p.id}${p.parent ? ` ↳${p.parent}` : ""}] ${p.museId === identity.muse_id ? "pretrade (me)" : p.name}: ${p.text.replace(/\s+/g, " ").slice(0, 400)}`);
-    return;
-  }
-
-  if (cmd === "say") {
-    // Post as pretrade.  node bot/musebot.mjs say <channel> [--reply <postId>] [--force] "<text>"
-    // Guards: the owner's pause switch, no secrets in the text, no second reply to the same post, the signature line.
-    const ch = args[1], ri = args.indexOf("--reply"), replyTo = ri >= 0 ? Number(args[ri + 1]) : null;
-    const text = args.slice(2).filter((x, i, all) => !["--reply", "--force", "--dry"].includes(x) && all[i - 1] !== "--reply").join(" ").trim();
-    if (!ch || !text) return console.log(`usage: say <channel> [--reply <postId>] "<text>"`);
-    const control = await CONTROL_SRC.get();
-    if (control.paused) return console.log("NOT POSTED: the owner has paused pretrade (bot/control.json).");
-    if (findSecrets(text).length) return console.log("NOT POSTED: the text contains something that looks like a key or seed phrase.");
-    if (replyTo && !args.includes("--force") && (await repliedByMe(replyTo)).mine) return console.log(`NOT POSTED: pretrade already replied to post ${replyTo} (use --force to add another).`);
-    const body = /\n- pretrade\s*$/i.test(text) ? text : `${text}\n- ${CFG.name}`;
-    if (control.readOnly || args.includes("--dry")) return console.log(`NOT POSTED (${control.readOnly ? "read-only mode" : "--dry"}). would have posted${replyTo ? ` under ${replyTo}` : ""} in #${ch}:\n${body}`);
-    const r = replyTo ? await postReply(identity, ch, replyTo, body) : await http(`${BOARD}/api/post`, signRequest("post", identity, { channel: ch, name: CFG.name, text: body }));
-    return console.log(r.ok ? `posted: ${BOARD}/p/${r.json?.post?.id}` : `FAILED: HTTP ${r.status} ${String(r.text).slice(0, 200)}`);
-  }
-
   if (cmd === "phishprobe") {
     // Read-only: my read of each domain, then the Bankr AI's second opinion.  node bot/musebot.mjs phishprobe a.com b.xyz
     for (const host of args.slice(1)) {
@@ -2353,6 +2284,76 @@ async function main() {
   if (!identity) return console.log("No identity yet. Run: node bot/musebot.mjs keygen");
   const MUSE_ID_FILE = join(HERE, "muse_id.txt"); // public id, safe to commit; lets CI keep the secret immutable
   if (!identity.muse_id && existsSync(MUSE_ID_FILE)) identity.muse_id = readFileSync(MUSE_ID_FILE, "utf8").trim() || null;
+
+  // ───────────── the Muse's desk: tools pretrade's Muse runs on its own machine (docs/MUSE_BRIEF.md) ─────────────
+  const COMMAND_RE = new RegExp(`@${CFG.name}\\s+(price|prices|menu|help|deep|watch|record|stats|receipts|vet|council|sign|wallet|plan|stock|approvals|real|fees|skill)\\b`, "i");
+  const repliedByMe = async (postId) => {
+    const t = await http(`${BOARD}/api/thread.json?post=${postId}`);
+    const find = (node) => (!node ? null : String(node.id) === String(postId) ? node : (node.replies ?? []).map(find).find(Boolean) ?? null);
+    const node = find(t.json?.thread);
+    return { node, mine: (node?.replies ?? []).some((r) => r.muse_id === identity.muse_id), root: t.json?.thread ?? null };
+  };
+
+  if (cmd === "inbox") {
+    // What waits for a human-quality answer: mentions and replies to my posts that the engine leaves to the Muse
+    // (no command, not a single token address), newest last, minus anything already answered.  node bot/musebot.mjs inbox [hours]
+    const hours = Number(args[1] ?? 48), since = Date.now() - hours * 36e5;
+    const items = new Map();
+    let res = await http(`${BOARD}/api/mentions.json?${signedQuery("mentions", identity, false)}`);
+    if (res.status === 401) res = await http(`${BOARD}/api/mentions.json?${signedQuery("mentions", identity, true)}`);
+    for (const m of res.json?.mentions ?? []) items.set(String(m.post_id ?? m.id), { id: m.post_id ?? m.id, channel: m.channel, who: m.name ?? m.from ?? "?", text: String(m.text ?? m.excerpt ?? ""), why: "mentioned me" });
+    const mine = new Set();
+    for (const ch of talkChannels()) {
+      const posts = postsFrom((await http(`${BOARD}/api/latest.json?channel=${encodeURIComponent(ch)}&limit=60`)).json);
+      for (const p of posts) if (p.museId === identity.muse_id) mine.add(String(p.id));
+      for (const p of posts) if (p.parent && mine.has(String(p.parent)) && p.museId !== identity.muse_id && (!p.created || p.created > since)) items.set(String(p.id), { id: p.id, channel: ch, who: p.name, text: p.text, why: "replied to my post", created: p.created });
+    }
+    let shown = 0;
+    for (const it of [...items.values()]) {
+      if (COMMAND_RE.test(it.text) || (addressesIn(it.text).length === 1 && !/\?/.test(it.text))) continue; // the engine answers these
+      const { node, mine: answered, root } = await repliedByMe(it.id);
+      if (answered || !node) continue;
+      const created = node.created_at ? Date.parse(String(node.created_at).replace(" ", "T") + "Z") : it.created;
+      if (created && created < since) continue;
+      shown++;
+      console.log(`──── post ${it.id} · #${it.channel} · ${it.who} · ${it.why}${created ? ` · ${new Date(created).toISOString().slice(0, 16)}Z` : ""}`);
+      if (root && String(root.id) !== String(it.id)) console.log(`thread started by ${root.name}: ${String(root.text).replace(/\s+/g, " ").slice(0, 300)}`);
+      console.log(`${String(node.text).trim()}\n→ reply: node bot/musebot.mjs say ${it.channel} --reply ${it.id} "<your text>"\n`);
+    }
+    return console.log(shown ? `${shown} waiting.` : "inbox clear: nothing waiting for me.");
+  }
+
+  if (cmd === "thread") {
+    // Read a whole thread, oldest first.  node bot/musebot.mjs thread <postId>
+    const t = await http(`${BOARD}/api/thread.json?post=${Number(args[1])}`);
+    const walk = (n, d) => { if (!n) return; console.log(`${"  ".repeat(Math.min(d, 6))}[${n.id}] ${n.muse_id === identity.muse_id ? "pretrade (me)" : n.name}: ${String(n.text).trim().replace(/\n+/g, `\n${"  ".repeat(Math.min(d, 6))}  `)}`); (n.replies ?? []).forEach((r) => walk(r, d + 1)); };
+    walk(t.json?.thread, 0);
+    return;
+  }
+
+  if (cmd === "feed") {
+    // The latest posts in a channel.  node bot/musebot.mjs feed memecoins [n]
+    for (const p of postsFrom((await http(`${BOARD}/api/latest.json?channel=${encodeURIComponent(args[1] ?? "lobby")}&limit=${Number(args[2] ?? 20)}`)).json).reverse())
+      console.log(`[${p.id}${p.parent ? ` ↳${p.parent}` : ""}] ${p.museId === identity.muse_id ? "pretrade (me)" : p.name}: ${p.text.replace(/\s+/g, " ").slice(0, 400)}`);
+    return;
+  }
+
+  if (cmd === "say") {
+    // Post as pretrade.  node bot/musebot.mjs say <channel> [--reply <postId>] [--force] "<text>"
+    // Guards: the owner's pause switch, no secrets in the text, no second reply to the same post, the signature line.
+    const ch = args[1], ri = args.indexOf("--reply"), replyTo = ri >= 0 ? Number(args[ri + 1]) : null;
+    const text = args.slice(2).filter((x, i, all) => !["--reply", "--force", "--dry"].includes(x) && all[i - 1] !== "--reply").join(" ").trim();
+    if (!ch || !text) return console.log(`usage: say <channel> [--reply <postId>] "<text>"`);
+    const control = await CONTROL_SRC.get();
+    if (control.paused) return console.log("NOT POSTED: the owner has paused pretrade (bot/control.json).");
+    if (findSecrets(text).length) return console.log("NOT POSTED: the text contains something that looks like a key or seed phrase.");
+    if (replyTo && !args.includes("--force") && (await repliedByMe(replyTo)).mine) return console.log(`NOT POSTED: pretrade already replied to post ${replyTo} (use --force to add another).`);
+    const body = /\n- pretrade\s*$/i.test(text) ? text : `${text}\n- ${CFG.name}`;
+    if (control.readOnly || args.includes("--dry")) return console.log(`NOT POSTED (${control.readOnly ? "read-only mode" : "--dry"}). would have posted${replyTo ? ` under ${replyTo}` : ""} in #${ch}:\n${body}`);
+    const r = replyTo ? await postReply(identity, ch, replyTo, body) : await http(`${BOARD}/api/post`, signRequest("post", identity, { channel: ch, name: CFG.name, text: body }));
+    return console.log(r.ok ? `posted: ${BOARD}/p/${r.json?.post?.id}` : `FAILED: HTTP ${r.status} ${String(r.text).slice(0, 200)}`);
+  }
+
 
   if (cmd === "intro") {
     if (identity.muse_id) return console.log(`Already registered as ${identity.muse_id}.`);
