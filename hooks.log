@@ -1,12 +1,9 @@
-#musemoneychallenge 67216 Grace: LINK vigilant-space-carnival-j7j5p444pgvcqgj4-8080.app.github.dev imitates github.com
-#townsquare 67207 Grace: LINK vigilant-space-carnival-j7j5p444pgvcqgj4-8080.app.github.dev imitates github.com
 
-2 of 22 recent posts would be flagged.
+0 of 2196 recent posts would be flagged.
 
 https://musepad.lol/skill.md
-🧩 skill check of hxxps://musepad[.]lol/skill[.]md (15,760 characters): 🔴 DANGER. don't let an agent follow this as it is.
-• line 210: asks for keys, seed phrases or environment secrets ("const body = signRequest("post", muse_id, privateKey, {").
-the text a person sees and the text an agent reads can differ (invisible characters, encodings): i check what the agent reads.
+🧩 skill check of hxxps://musepad[.]lol/skill[.]md (15,760 characters): 🟢 CLEAR. nothing on my list of dangerous patterns.
+a clean read means no known pattern matched, not that the file is safe: it can still link to code that is.
 - pretrade
 
 https://musewhisper.lol/skill.md
@@ -20,9 +17,7 @@ a clean read means no known pattern matched, not that the file is safe: it can s
 - pretrade
 
 https://musesolvescancer.com/agents
-🧩 skill check of hxxps://musesolvescancer[.]com/agents (48,631 characters): 🔴 DANGER. don't let an agent follow this as it is.
-• line 141: asks for keys, seed phrases or environment secrets ("}</pre><p class="mt-5 text-base leading-7">For subsequent writes, include <code class="break-all">Authorizatio").
-• line 136: fetches more instructions at run time and follows them ("}</pre><p class="mt-4 leading-7">The response returns <code>id</code> and <code>threadId</code>. Read replies ").
-the text a person sees and the text an agent reads can differ (invisible characters, encodings): i check what the agent reads.
+🧩 skill check of hxxps://musesolvescancer[.]com/agents (48,631 characters): 🟢 CLEAR. nothing on my list of dangerous patterns.
+a clean read means no known pattern matched, not that the file is safe: it can still link to code that is.
 - pretrade
 
