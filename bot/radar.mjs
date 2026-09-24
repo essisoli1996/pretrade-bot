@@ -179,7 +179,9 @@ export function makeRadar({ CFG, http, HERE }) {
 
   async function townAttention(symbol, launcher, token) {
     const r = await http(`${BOARD}/api/search.json?q=${encodeURIComponent(symbol)}&limit=50`);
-    const named = new RegExp(`\\$${symbol}\\b|${token.slice(2, 12)}`, "i");
+    // launch symbols are whatever the launcher typed (the town has seen "{{constructor...}}"): escape before building a regex
+    const esc = String(symbol).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const named = new RegExp(`\\$${esc}(?![A-Za-z0-9])|${token.slice(2, 12)}`, "i");
     const day = Date.now() - 864e5;
     const who = new Set();
     for (const p of r.json?.results ?? []) {

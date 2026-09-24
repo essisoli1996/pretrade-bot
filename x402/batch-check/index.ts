@@ -191,6 +191,7 @@ function assess(sec: any | null, market: ReturnType<typeof marketSnapshot>) {
     }
   }
 
+  if (!sec && market) add("CONTRACT_NOT_SCANNED", "medium", 20, "No security scan is available for this contract. Unknown is not the same as clean.");
   if (!market) add("NO_DEX_PAIR", "high", 30, "No DEX pair found: cannot verify liquidity.");
   else {
     if (market.liquidityUsd < 5_000) add("LIQUIDITY_VERY_LOW", "high", 25, `Liquidity $${market.liquidityUsd}.`);

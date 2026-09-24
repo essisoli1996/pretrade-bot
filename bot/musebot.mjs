@@ -27,6 +27,7 @@ import { makeApprovals } from "./approvals.mjs";
 import { makeTxSim, describeTxSim, parseTx } from "./txsim.mjs";
 import { TALK_INTENT, chainNamedIn, chainTheyMean, isPaymentUnit, looksLikeCorrection } from "./talk.mjs";
 import { makeControl, modeOf } from "./control.mjs";
+import { loadJson, saveJson } from "./store.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const CFG = JSON.parse(readFileSync(join(HERE, "config.json"), "utf8"));
@@ -39,10 +40,12 @@ const STATE_FILE = join(DATA, ".state.json");
 const BOARDS = CFG.boards ?? ["https://musebook.me", "https://musebook.lol"];
 let BOARD = BOARDS[0];
 /** The town moved domain once already; if the current host stops answering, fail over instead of going silent. */
+let BOARD_OK_AT = 0;
 async function boardHealthy() {
+  if (Date.now() - BOARD_OK_AT < 120_000) return true; // answered recently: don't spend a request on every poll
   for (const b of BOARDS) {
     const r = await http(`${b}/api/stats.json`);
-    if (r.ok) { if (b !== BOARD) console.log(`board host switched to ${b}`); BOARD = b; return true; }
+    if (r.ok) { if (b !== BOARD) console.log(`board host switched to ${b}`); BOARD = b; BOARD_OK_AT = Date.now(); return true; }
   }
   return false;
 }
@@ -54,8 +57,7 @@ const LIVE = args.includes("--live");
 const LOOP = args.includes("--loop");
 
 // ───────────────────────── identity + signing (musebook-v1) ─────────────────────────
-const loadJson = (f, fallback) => (existsSync(f) ? JSON.parse(readFileSync(f, "utf8")) : fallback);
-const saveJson = (f, v) => writeFileSync(f, JSON.stringify(v, null, 2));
+
 
 function privateKeyFrom(identity) {
   return createPrivateKey({ key: { kty: "OKP", crv: "Ed25519", x: identity.public_key, d: identity.secret }, format: "jwk" });
@@ -186,6 +188,7 @@ async function quickCheck(address, { light = false, chain: onlyChain = null } = 
     if (yes(sec.transfer_pausable)) add("pausable", 15);
     if (yes(sec.is_proxy)) add("proxy", 10);
   }
+  if (!sol && !sec) add("contract not scanned", 20); // unknown is not the same as clean: without a scan, never say OK
   if (liquidity < 5000) add("very low liquidity", 25);
   else if (liquidity < 25000) add("low liquidity", 10);
   if (ageH !== null && ageH < 24) add(`pair ${ageH < 1 ? "<1h" : Math.round(ageH) + "h"} old`, ageH < 1 ? 15 : 10);
@@ -415,6 +418,9 @@ function recordVerdict(state, c, source) {
 async function settleLedger(state) {
   const due = (state.ledger ?? []).filter((e) => !e.out && e.t < Date.now() - 24 * 36e5).slice(0, 5);
   for (const e of due) {
+    // a failed request is not a rug: only settle when DexScreener actually answered (no pairs at all = pool gone)
+    const probe = await http(`https://api.dexscreener.com/latest/dex/search?q=${e.token}`);
+    if (!probe.ok || !Array.isArray(probe.json?.pairs)) { console.log(`track record: DexScreener didn't answer for ${e.symbol}, settling later`); break; }
     const c = await quickCheck(e.token, { light: true }); // only liquidity and price are needed here
     const liqChg = c && e.liq > 0 ? c.liquidity / e.liq - 1 : -1;
     const priceChg = c && e.price && c.price ? c.price / e.price - 1 : null;
