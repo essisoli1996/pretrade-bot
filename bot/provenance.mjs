@@ -28,15 +28,16 @@ export function indexLaunches(items) {
   return { byAddr, bySymbol, size: byAddr.size };
 }
 
-/** Where the creator fees of a launch go. `code` is eth_getCode of the fee wallet ("0x" for a plain wallet). */
-export function feeRecipient(rec, reg, code) {
+/** Where the creator fees of a launch go. `code` is eth_getCode of the fee wallet ("0x" for a plain wallet);
+ *  `tokenSymbol` is what symbol() answers at that address, when it is a token musepad didn't launch. */
+export function feeRecipient(rec, reg, code, tokenSymbol = null) {
   if (!rec) return null;
   if (rec.custodial) return { kind: "custodial", text: "fees go to a wallet musepad holds for the launcher (paid out off-chain via PayPal): the launcher can't move them on-chain" };
   const w = rec.wallet;
   if (!w) return { kind: "unknown", text: "fee wallet not recorded" };
   if (ZERO.test(w)) return { kind: "burn", text: "fees go to a burn address: nobody collects them" };
   if (w === rec.address) return { kind: "self", text: "fees go to the token's own contract: probably nobody can collect them" };
-  const token = reg?.byAddr?.get(w);
+  const token = reg?.byAddr?.get(w) ?? (tokenSymbol ? { symbol: tokenSymbol, address: w } : null);
   if (token) return { kind: "token-contract", token, text: `fees go to the $${token.symbol} token contract (${w.slice(0, 6)}…${w.slice(-4)}), not a wallet: likely a pasted contract address, and fees sent there are probably stuck` };
   if (typeof code !== "string") return { kind: "wallet?", text: `fees go to ${w.slice(0, 6)}…${w.slice(-4)}` };
   if (code === "0x" || code.toLowerCase().startsWith("0xef0100")) return { kind: "wallet", text: `fees go to the launcher's wallet ${w.slice(0, 6)}…${w.slice(-4)}` };
@@ -103,7 +104,13 @@ export function tickerReport(symbol, reg, market, fees = new Map(), { now = Date
 /** A new launch that reuses a ticker already in town: the facts worth posting, or null when it is not news
  *  (the same launcher retrying, or the existing token is dead). */
 export function reuseAlert(rec, reg, market, fee, { minLiquidityUsd = 5000, board = "musebook.me" } = {}) {
+  // earlier tokens with this ticker: musepad's own launches, plus anything else trading on the chain (launched elsewhere)
   const prior = siblingsOf(rec, reg).filter((s) => s.earlier);
+  for (const m of market ?? []) {
+    if (m.address === rec.address || prior.some((x) => x.address === m.address) || reg?.byAddr?.has(m.address)) continue;
+    if (m.created && rec.launchedAt && m.created >= rec.launchedAt) continue;
+    prior.push({ address: m.address, launcher: "a launch outside musepad", relation: "other-launcher", earlier: true });
+  }
   const liqOf = (a) => market?.find((m) => m.address === a)?.liq ?? 0;
   const live = prior.filter((p) => liqOf(p.address) >= minLiquidityUsd);
   const others = live.filter((p) => p.relation === "other-launcher");
@@ -136,6 +143,19 @@ export function makeProvenance({ http, rpc = null, everyMs = 10 * 60_000, now = 
     if (items.length) { reg = indexLaunches(items); at = now(); }
     return reg;
   }
+  const symCache = new Map();
+  /** symbol() at an address, when it is an ERC-20 (null for wallets and non-token contracts). */
+  async function symbolAt(addr) {
+    if (!rpc || !addr) return null;
+    if (symCache.has(addr)) return symCache.get(addr);
+    const r = await rpc("eth_call", [{ to: addr, data: "0x95d89b41" }, "latest"]).catch(() => null);
+    let sym = null;
+    const hex = typeof r?.result === "string" ? r.result.slice(2) : "";
+    if (hex.length >= 192) { const len = parseInt(hex.slice(64, 128), 16); if (len > 0 && len <= 32) sym = Buffer.from(hex.slice(128, 128 + len * 2), "hex").toString("utf8").replace(/[^\x20-\x7e]/g, "") || null; }
+    else if (hex.length === 64) sym = Buffer.from(hex, "hex").toString("utf8").replace(/\0+$/, "").replace(/[^\x20-\x7e]/g, "") || null;
+    if (r) symCache.set(addr, sym);
+    return sym;
+  }
   async function codeAt(addr) {
     if (!rpc || !addr) return null;
     if (codeCache.has(addr)) return codeCache.get(addr);
@@ -144,6 +164,11 @@ export function makeProvenance({ http, rpc = null, everyMs = 10 * 60_000, now = 
     if (code !== null) codeCache.set(addr, code);
     return code;
   }
+  async function feeOf(rec) {
+    const code = await codeAt(rec.wallet);
+    const isContract = typeof code === "string" && code !== "0x" && !code.toLowerCase().startsWith("0xef0100");
+    return feeRecipient(rec, reg, code, isContract ? await symbolAt(rec.wallet) : null);
+  }
   return {
     refresh,
     registry: () => reg,
@@ -151,9 +176,9 @@ export function makeProvenance({ http, rpc = null, everyMs = 10 * 60_000, now = 
       await refresh();
       const rec = reg.byAddr.get(lc(address)) ?? null;
       if (!rec) return null;
-      return { rec, fee: feeRecipient(rec, reg, await codeAt(rec.wallet)) };
+      return { rec, fee: await feeOf(rec) };
     },
-    async feeOf(rec) { return feeRecipient(rec, reg, await codeAt(rec.wallet)); },
+    feeOf,
     /** Launches not seen before (the first call only primes, so a restart never reports old launches). */
     async fresh() {
       await refresh(true);

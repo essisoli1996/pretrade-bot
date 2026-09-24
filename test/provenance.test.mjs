@@ -25,6 +25,13 @@ check(feeRecipient(reg.byAddr.get("0x2222222222222222222222222222222222222222"),
 check(feeRecipient(reg.byAddr.get(REAL_PORCH), reg, "0x").kind === "wallet", "plain wallet (no code)");
 check(feeRecipient(reg.byAddr.get(REAL_PORCH), reg, "0xef0100" + "ab".repeat(20)).kind === "wallet", "EIP-7702 delegated wallet is still a wallet");
 check(feeRecipient(reg.byAddr.get(REAL_PORCH), reg, "0x6080604052").kind === "contract", "some other contract: named as a contract, not judged");
+// the real $PORCH was launched outside musepad: the directory doesn't know it, symbol() does
+const outside = indexLaunches(items.filter((x) => x.contractAddress !== REAL_PORCH.replace(/^0x4b43/, "0x4B43") && String(x.contractAddress).toLowerCase() !== REAL_PORCH));
+const p2o = outside.byAddr.get(PORCH2);
+check(feeRecipient(p2o, outside, "0x6080", "PORCH").kind === "token-contract", "fee wallet is a token musepad didn't launch: recognised by its symbol()");
+const outsideMarket = [{ address: REAL_PORCH, liq: 14109, trades: 610, created: Date.parse("2026-09-23T18:07:53Z") }, { address: PORCH2, liq: 0, trades: 0, created: Date.parse("2026-09-24T06:09:30Z") }];
+const oa = reuseAlert(p2o, outside, outsideMarket, feeRecipient(p2o, outside, "0x6080", "PORCH"));
+check(oa && /already trading: 0x4b43.*a launch outside musepad/.test(oa.join(" ")), "reuse alert also counts an earlier token launched outside musepad");
 
 const news1 = reg.byAddr.get("0xe6b18dc965939d0a2beedcf77249048e4684e592");
 check(siblingsOf(news1, reg)[0].relation === "same-launcher", "two $NEWS by Flash: same launcher (a retry), not a copycat");
@@ -48,7 +55,8 @@ check(reuseAlert(reg.byAddr.get("0x43922a8718eac5e867f346e2c77a8e5b43481207"), r
 let calls = 0, fail = false;
 const pages = { 1: items.slice(0, 3), 2: items.slice(3) };
 const http = async (url) => { calls++; if (fail) return { ok: false, json: null }; const pg = Number(url.match(/page=(\d+)/)[1]); return { ok: true, json: { items: pages[pg] ?? [], totalPages: 2 } }; };
-const P = makeProvenance({ http, rpc: async () => ({ result: "0x6080" }) });
+const sym = (t) => "0x" + (32).toString(16).padStart(64, "0") + t.length.toString(16).padStart(64, "0") + Buffer.from(t).toString("hex").padEnd(64, "0");
+const P = makeProvenance({ http, rpc: async (m) => ({ result: m === "eth_getCode" ? "0x6080" : sym("PORCH") }) });
 check((await P.fresh()).length === 0 && P.registry().size === 5, "first fresh() reads both pages and only primes");
 pages[1] = [{ ...items[0], contractAddress: "0x3333333333333333333333333333333333333333", launchedAt: "2026-09-24T08:00:00Z" }, ...pages[1]];
 check((await P.fresh()).map((r) => r.address).join() === "0x3333333333333333333333333333333333333333", "the next fresh() returns only the new launch");
