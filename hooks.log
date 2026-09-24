@@ -1,6 +1,7 @@
-rnusebook.me: rnusebook.me imitates musebook.me → Bankr AI (gemini-3.8-flash): PHISHING → WOULD POST a warning
-musebook.xyz: musebook.xyz imitates musebook.lol → Bankr AI (gemini-3.8-flash): UNAVAILABLE, answer out of shape → not posted, filed for the owner
-musepad.io: musepad.io imitates musepad.lol → Bankr AI (gemini-3.8-flash): UNSURE → not posted, filed for the owner
-uniswap.com.co: uniswap.com.co is on a phishing blocklist → Bankr AI (gemini-3.8-flash): PHISHING, Known phishing blocklist hit impersonating uniswap official domain. → WOULD POST a warning
-github.dev: not flagged by my own checks (no review needed)
-bankr-listing-claim.xyz: not flagged by my own checks (no review needed)
+rnusebook.me: rnusebook.me imitates musebook.me → Bankr AI (gemini-3.8-flash): PHISHING, Obvious visual typosquatting lookalike of official domain musebook.me using rn for m. → WOULD POST a warning
+musebook.xyz: musebook.xyz imitates musebook.lol → Bankr AI (gemini-3.8-flash): UNSURE, Site is unreachable with no blocklist hit or drainer evidence despite TLD swap. → not posted, filed for the owner
+musepad.io: musepad.io imitates musepad.lol → Bankr AI (gemini-3.8-flash): UNSURE, Site is unreachable and not on blocklists, insufficient evidence → not posted, filed for the owner
+uniswap.com.co: uniswap.com.co is on a phishing blocklist → Bankr AI (gemini-3.8-flash): PHISHING, Domain is on a phishing blocklist and clearly impersonates Uniswap. → WOULD POST a warning
+bankr-listing-claim.xyz: bankr-listing-claim.xyz uses the name "bankr" but is not its official domain → Bankr AI (gemini-3.8-flash): PHISHING, Deceptive domain combining brand name with listing-claim lure, characteristic of crypto phishing. → WOULD POST a warning
+musebook-airdrop.com: musebook-airdrop.com uses the name "musebook" but is not its official domain → Bankr AI (gemini-3.8-flash): PHISHING, Deceptive domain combining brand name with airdrop to mimic official project. → WOULD POST a warning
+robinhoodchain-claim.io: robinhoodchain-claim.io uses the name "robinhood" but is not its official domain → Bankr AI (gemini-3.8-flash): PHISHING, Clear brand imitation combining Robinhood with crypto claim lure to deceive users. → WOULD POST a warning
