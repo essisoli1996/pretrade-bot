@@ -257,8 +257,7 @@ async function quickCheck(address, { light = false, chain: onlyChain = null } = 
   if (top10Pct !== null && top10Pct >= 50) add(`top 10 holders own ${Math.round(top10Pct)}%`, 30);
   else if (top10Pct !== null && top10Pct >= 30) add(`top 10 holders own ${Math.round(top10Pct)}%`, 20);
   if (!liqKnown) add("no liquidity figure (bonding curve or unindexed pool)", 0);
-  else if (liquidity < 5000) add("very low liquidity", 25);
-  else if (liquidity < 25000) add("low liquidity", 10);
+  const liqAt = flags.length; // the low-liquidity flag goes here once the exit is known (measured on v4 pools, below)
   if (ageH !== null && ageH < 24) add(`pair ${ageH < 1 ? "<1h" : Math.round(ageH) + "h"} old`, ageH < 1 ? 15 : 10);
   const hook = light ? null : await v4HookRead(p);
   // capped: a hook that CAN change amounts is not proof that it does. alone it reads CAUTION; with other flags it can reach DANGER
@@ -268,12 +267,20 @@ async function quickCheck(address, { light = false, chain: onlyChain = null } = 
   const prov = !light && chain === "robinhood" ? await provenanceRead(a) : null;
   for (const f of sim?.scored ? sim.flags : []) add(f.text, f.pts, !!f.critical);
 
-  score = Math.min(100, score);
-  const verdict = critical || score >= 60 ? "DANGER" : score >= 20 ? "CAUTION" : "OK";
   const deepest = n(p.liquidity?.usd) ?? 0;
   const formula2 = Math.floor((0.02 * (deepest / 2)) / 0.98);
   // on a v4 pool the exit is measured by selling on the live pool: a full-position figure (Doppler multicurve) overstates it
   const exit = sim?.status === "ok" && hook?.key ? await exitRead(p, hook.key, a, formula2) : null;
+  // "low liquidity" judges what a seller can reach: with a measured exit, the depth that exit implies (2% size × 98),
+  // not the listed figure ($musemini: $9,987 listed read "low", ~$2k reachable is "very low")
+  if (liqKnown) {
+    const reach = exit ? Math.min(liquidity, exit.atLeast ? Infinity : exit.usd * 98) : liquidity;
+    const f = reach < 5000 ? ["very low liquidity", 25] : reach < 25000 ? ["low liquidity", 10] : null;
+    if (f) { flags.splice(liqAt, 0, f[0]); score += f[1]; }
+  }
+
+  score = Math.min(100, score);
+  const verdict = critical || score >= 60 ? "DANGER" : score >= 20 ? "CAUTION" : "OK";
   const k = exit && formula2 > 0 ? exit.usd / formula2 : 1;
   const maxSell2 = exit ? exit.usd : formula2;
   const sellMax = (i) => Math.floor(((i * (deepest / 2)) / (1 - i)) * k);
