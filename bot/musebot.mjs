@@ -161,10 +161,10 @@ async function infraHolders(addrs) {
     const code = codeKind(r.json.result);
     const src = code.kind === "contract" || code.target ? await etherscanSource(addr, { fetchJson: async (u) => (await http(u)).json }) : null;
     if (src && !src.ok) continue; // no answer from the explorer: don't cache a guess
-    cache[addr] = holderKind(code, src?.name ?? null); dirty = true;
+    cache[addr] = holderKind(code, src?.name ?? null, src?.sourceText ?? null); dirty = true;
   }
   if (dirty) saveJson(HOLDER_KINDS, cache);
-  return addrs.filter((x) => known.has(x) || /^(lock or vesting|pool or router)/.test(cache[x] ?? ""));
+  return addrs.filter((x) => known.has(x) || /^(lock or vesting|permanent lock|pool or router)/.test(cache[x] ?? ""));
 }
 
 async function quickCheck(address, { light = false, chain: onlyChain = null } = {}) {
@@ -2363,8 +2363,8 @@ async function main() {
       const addr = String(h.address).toLowerCase();
       const code = codeKind((await http(rpc, { jsonrpc: "2.0", id: 1, method: "eth_getCode", params: [addr, "latest"] })).json?.result);
       const src = code.kind === "contract" || code.target ? await etherscanSource(addr, { fetchJson: async (u) => (await http(u)).json }) : null;
-      const kind = addr === a ? "the token itself" : poolish.includes(addr) ? "pool / pool manager (left out)" : holderKind(code, src?.ok ? src.name : null);
-      if (/^(lock or vesting|pool or router)/.test(kind) || (CFG.infraHolders ?? []).map((x) => x.toLowerCase()).includes(addr)) leftOut.push(addr);
+      const kind = addr === a ? "the token itself" : poolish.includes(addr) ? "pool / pool manager (left out)" : holderKind(code, src?.ok ? src.name : null, src?.ok ? src.sourceText : null);
+      if (/^(lock or vesting|permanent lock|pool or router)/.test(kind) || (CFG.infraHolders ?? []).map((x) => x.toLowerCase()).includes(addr)) leftOut.push(addr);
       console.log(`  ${(Number(h.percent) * 100).toFixed(2).padStart(6)}%  ${addr}  ${kind}${leftOut.includes(addr) ? " (left out)" : ""}`);
     }
     // the same rule as the free read: pools, the token, burns, locks and routers are not holders

@@ -24,6 +24,11 @@ check(holderKind(codeKind("0xef0100e6cae83bde06e4c305530e199d7217f42808555b")) =
 check(holderKind(codeKind("0x6080"), "GnosisSafeProxy").startsWith("multisig"), "a Safe proxy: multisig");
 check(holderKind(codeKind("0x6080"), "TokenVesting").startsWith("lock or vesting"), "a vesting contract: lock or vesting");
 check(holderKind(codeKind("0x6080"), "RelayRouterV3").startsWith("pool or router"), "a router: pool or router");
+// permanent vs releasable locks, from the verified source (Turbo's bucket, #lobby 77392)
+const pons = "contract PonsV2LaunchLocker { function setFactory(address f) external {} function lockPosition(uint id) external {} function lockTokenSupply(uint a) external {} function isLocked(uint id) view returns (bool) {} }";
+check(holderKind(codeKind("0x6080"), "PonsV2LaunchLocker", pons).startsWith("permanent lock"), "a locker with no release function: permanent lock");
+check(holderKind(codeKind("0x6080"), "TokenVesting", "contract TokenVesting { function release(address t) public {} }").includes("releasable: release"), "a vesting contract with release(): releasable, and says which function");
+check(holderKind(codeKind("0x6080"), "TeamLock").startsWith("lock or vesting"), "no source in hand: plain lock, no claim either way");
 check(holderKind(codeKind("0x6080")) === "contract (unverified)", "unknown code and no name: unverified contract");
 console.log(bad ? `\n${bad} FAILED` : "\nall passed");
 process.exit(bad ? 1 : 0);

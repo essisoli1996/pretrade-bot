@@ -1,3 +1,4 @@
+import { releaseFunctions } from "./archive.mjs";
 // Holder concentration for the token read.
 const n = (v) => (v === null || v === undefined || v === "" || !Number.isFinite(Number(v)) ? null : Number(v));
 const yes = (v) => v === "1" || v === 1 || v === true;
@@ -14,12 +15,16 @@ export function top10Share(holders, poolish = []) {
 
 /** What kind of holder an address is, from its runtime code (codeKind from archive.mjs) and, for contracts, the
  *  verified contract name. Plain words for a read: wallet, smart wallet, multisig, lock/vesting, pool/router, proxy… */
-export function holderKind(code, name = null) {
+export function holderKind(code, name = null, sourceText = null) {
   if (code.kind === "no code") return "wallet";
   if (code.kind === "EIP-7702 wallet") return "smart wallet (7702)";
   const nm = String(name ?? "");
   if (/safe|gnosis|multisig/i.test(nm)) return `multisig (${nm})`;
-  if (/lock|vest|timelock|escrow/i.test(nm)) return `lock or vesting (${nm})`;
+  if (/lock|vest|timelock|escrow/i.test(nm)) {
+    // with the verified source in hand: a lock with no release-type function never gives the tokens back
+    if (sourceText) { const fns = releaseFunctions(sourceText); return fns.length ? `lock or vesting (${nm}), releasable: ${fns.slice(0, 3).join(", ")}` : `permanent lock (${nm}), no release function in verified source`; }
+    return `lock or vesting (${nm})`;
+  }
   if (/pool|pair|router|manager|vault/i.test(nm)) return `pool or router (${nm})`;
   if (/account|wallet/i.test(nm)) return `smart wallet (${nm})`;
   if (code.target) return `${code.kind.replace(/ \(.*\)/, "")} → ${code.target.slice(0, 6)}…${code.target.slice(-4)}${nm ? ` (${nm})` : ""}`;

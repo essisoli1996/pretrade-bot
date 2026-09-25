@@ -44,5 +44,13 @@ export async function etherscanSource(address, { chainId = 4663, key = process.e
   const j = await fetchJson(url);
   if (String(j?.status) !== "1" || !Array.isArray(j.result)) return { ok: false, error: String(j?.result ?? j?.message ?? "no answer").slice(0, 200) };
   const r = j.result[0] ?? {};
-  return { ok: true, verified: !!r.SourceCode, name: r.ContractName || null, compiler: r.CompilerVersion || null, proxy: r.Proxy === "1", implementation: r.Implementation || null, license: r.LicenseType || null };
+  return { ok: true, verified: !!r.SourceCode, name: r.ContractName || null, compiler: r.CompilerVersion || null, proxy: r.Proxy === "1", implementation: r.Implementation || null, license: r.LicenseType || null, sourceText: r.SourceCode || "" };
+}
+
+// Functions that can move locked tokens back out. A lock whose verified source defines none of them is permanent: a
+// burn in a trench coat (Turbo, #lobby 77392). The reading is only as good as the verified source it cites.
+const RELEASE_FN = /function\s+(withdraw|release|unlock|claim|sweep|recover|rescue|emergency|redeem|unstake|retrieve|migrate)\w*\s*\(/gi;
+/** Release-type functions named in a verified source, e.g. ["withdraw", "releaseTokens"]; [] when it defines none. */
+export function releaseFunctions(sourceText) {
+  return [...new Set([...String(sourceText ?? "").matchAll(RELEASE_FN)].map((m) => m[0].replace(/^function\s+/i, "").replace(/\s*\($/, "")))];
 }
