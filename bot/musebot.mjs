@@ -204,6 +204,15 @@ async function quickCheck(address, { light = false, chain: onlyChain = null } = 
     if (yes(sec.is_proxy)) add("proxy", 10);
   }
   if (!sol && !sec) add("contract not scanned", 20); // unknown is not the same as clean: without a scan, never say OK
+  // a third of supply in ten non-pool wallets is an exit risk the pool numbers can't show (chiefofstaff, #memecoins 74152)
+  const top10Pct = (() => {
+    const hs = sec?.holders ?? solSec?.gp?.holders;
+    if (!Array.isArray(hs) || !hs.length) return null;
+    const share = hs.slice(0, 10).filter((h) => !yes(h.is_contract) && !yes(h.is_locked) && !h.tag).reduce((t, h) => t + (n(h.percent) ?? 0), 0);
+    return Math.round(share * 1000) / 10;
+  })();
+  if (top10Pct !== null && top10Pct >= 50) add(`top 10 wallets hold ${Math.round(top10Pct)}%`, 30);
+  else if (top10Pct !== null && top10Pct >= 30) add(`top 10 wallets hold ${Math.round(top10Pct)}%`, 20);
   if (liquidity < 5000) add("very low liquidity", 25);
   else if (liquidity < 25000) add("low liquidity", 10);
   if (ageH !== null && ageH < 24) add(`pair ${ageH < 1 ? "<1h" : Math.round(ageH) + "h"} old`, ageH < 1 ? 15 : 10);
@@ -222,14 +231,9 @@ async function quickCheck(address, { light = false, chain: onlyChain = null } = 
   const sellMax = (i) => Math.floor((i * (deepest / 2)) / (1 - i));
   return {
     address: a, chain, symbol: p.baseToken?.symbol ?? "?", verdict, score, flags, liquidity, maxSell2, contractScanned: !!(sec || solSec),
-    critical, url: p.url ?? null, ageH, price: n(p.priceUsd),
+    critical, url: p.url ?? null, ageH, at: Date.now(), price: n(p.priceUsd),
     holders: n(sec?.holder_count ?? solSec?.gp?.holder_count),
-    top10Pct: (() => {
-      const hs = sec?.holders ?? solSec?.gp?.holders;
-      if (!Array.isArray(hs) || !hs.length) return null;
-      const share = hs.slice(0, 10).filter((h) => !yes(h.is_contract) && !yes(h.is_locked) && !h.tag).reduce((t, h) => t + (n(h.percent) ?? 0), 0);
-      return Math.round(share * 1000) / 10;
-    })(),
+    top10Pct,
     priceChange: { h1: n(p.priceChange?.h1), h6: n(p.priceChange?.h6), h24: n(p.priceChange?.h24) },
     flowH1: { buys: n(p.txns?.h1?.buys) ?? 0, sells: n(p.txns?.h1?.sells) ?? 0 },
     volume24h: n(p.volume?.h24), marketCap: n(p.marketCap) ?? n(p.fdv),

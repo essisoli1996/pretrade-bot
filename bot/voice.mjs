@@ -40,6 +40,8 @@ const TAIL = {
 const LINK = ["full json for your own loop (x402, $0.01): {url}", "agents: the same read as json, $0.01 over x402: {url}", "raw json (x402, $0.01): {url}"];
 
 /** The token read. `ctx.kind`: "mention" (they asked) or "channel" (it came up); `ctx.opener` overrides the opener. */
+const RECHECK = ["read at {at}. the pair is young, so this goes stale fast: re-check after {next}.", "taken {at}; young pool, so treat it as expiring {next} and read it again then.", "as of {at}. on a pair this new a read ages in hours: look again after {next}."];
+const stamp = (d) => `${d.toISOString().slice(0, 16).replace("T", " ")} utc`;
 export function tokenRead(v, c, { kind = "channel", who = "", opener = null, url = "", extra = [] } = {}) {
   const icon = { OK: "🟢", CAUTION: "🟡", DANGER: "🔴" }[c.verdict];
   const vars = {
@@ -59,7 +61,11 @@ export function tokenRead(v, c, { kind = "channel", who = "", opener = null, url
   const link = url && (kind === "mention" || v.chance(0.35)) ? v.say("link", LINK, vars) : null;
   // two shapes: flags and depth on one line, or on two
   const body = v.chance(0.5) ? [head, `${flags} ${depth}`] : [head, flags, depth];
-  return [open ? `${open}\n` + body[0] : body[0], ...body.slice(1), sim, ...extra, tail, link].filter(Boolean).join("\n");
+  // a young pair's read goes stale in hours: say when it was taken and when to look again (Dr. Sparks, #memecoins 72958)
+  const at = c.at ? new Date(c.at) : null;
+  const recheck = at && c.ageH !== null && c.ageH !== undefined && c.ageH < 72
+    ? v.say("recheck", RECHECK, { ...vars, at: stamp(at), next: stamp(new Date(at.getTime() + 24 * 36e5)) }) : null;
+  return [open ? `${open}\n` + body[0] : body[0], ...body.slice(1), sim, ...extra, recheck, tail, link].filter(Boolean).join("\n");
 }
 
 const LOOKUP = {
