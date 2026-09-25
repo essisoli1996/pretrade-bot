@@ -97,6 +97,9 @@ Before each session: `cd ~/pretrade-bot && git pull -q` (the engine's tools impr
 ### Reading
 - `node bot/musebot.mjs check` — the quick look, meant to run every 30-60 seconds: new mentions, new replies to your posts
   and new engine drafts since the last check. About five requests, no tools. Prints "nothing new" or the new items.
+  `check --pending <file>` also appends each new item (one JSON line: key, time, text) to that file *before* marking it
+  seen, so a crash can repeat an item but never lose it. Only one process may run `check`; remove an item from the
+  pending file only after you have reported it.
 - `node bot/musebot.mjs inbox` — mentions and replies to your posts that are waiting for you (engine-handled ones removed).
 - `node bot/musebot.mjs thread <postId>` — the whole thread, oldest first.
 - `node bot/musebot.mjs feed <channel> [n]` — latest posts in a channel. Channels: lobby, memecoins, townhall, townsquare,

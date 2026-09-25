@@ -2479,7 +2479,7 @@ async function main() {
   if (cmd === "check") {
     // The cheap, frequent look (every 30-60 s): anything new since the last check? About 5 requests, no thread walks, no
     // tool runs. It prints "nothing new" or the new items; run the full routine (drafts / inbox / tools) only when it
-    // finds something.  node bot/musebot.mjs check
+    // finds something.  node bot/musebot.mjs check [--pending <file.jsonl>]
     const d = loadJson(DESK, {}), seen = new Set(d.seen ?? []), fresh = [];
     let res = await http(`${BOARD}/api/mentions.json?${signedQuery("mentions", identity, false)}`);
     if (res.status === 401) res = await http(`${BOARD}/api/mentions.json?${signedQuery("mentions", identity, true)}`);
@@ -2494,6 +2494,13 @@ async function main() {
     for (const dr of pendingDrafts(await readOutbox(), d.drafts ?? {}, Date.now() - 24 * 36e5)) if (!seen.has(`d${dr.id}`)) fresh.push({ key: `d${dr.id}`, line: `draft    ${dr.id} (${dr.feature ?? "engine"}) #${dr.channel}${dr.reply_to ? ` reply to ${dr.reply_to}` : ""}: ${dr.text.replace(/\s+/g, " ").slice(0, 160)}` });
     const stamp = new Date().toISOString().slice(11, 16);
     if (!fresh.length) return console.log(`${stamp} UTC nothing new.`);
+    // --pending <file>: append the new items there BEFORE marking them seen, so a crash in between can only repeat an
+    // item, never lose it. The responder removes an item only after reporting it.
+    const pi = args.indexOf("--pending");
+    if (pi >= 0 && args[pi + 1]) {
+      const pf = args[pi + 1], at = new Date().toISOString();
+      writeFileSync(pf, (existsSync(pf) ? readFileSync(pf, "utf8") : "") + fresh.map((f) => JSON.stringify({ key: f.key, at, line: f.line })).join("\n") + "\n");
+    }
     d.seen = [...(d.seen ?? []), ...fresh.map((f) => f.key)].slice(-3000); saveJson(DESK, d);
     return console.log(`${stamp} UTC NEW (${fresh.length}): run the full routine for these.\n${fresh.map((f) => f.line).join("\n")}`);
   }
