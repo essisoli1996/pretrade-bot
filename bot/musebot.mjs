@@ -2476,6 +2476,29 @@ async function main() {
     decide(d.id, "rejected", { why: args.slice(2).join(" ").slice(0, 300) });
     return console.log(`rejected draft ${d.id}: nothing posted.`);
   }
+  if (cmd === "check") {
+    // The cheap, frequent look (every 30-60 s): anything new since the last check? About 5 requests, no thread walks, no
+    // tool runs. It prints "nothing new" or the new items; run the full routine (drafts / inbox / tools) only when it
+    // finds something.  node bot/musebot.mjs check
+    const d = loadJson(DESK, {}), seen = new Set(d.seen ?? []), fresh = [];
+    let res = await http(`${BOARD}/api/mentions.json?${signedQuery("mentions", identity, false)}`);
+    if (res.status === 401) res = await http(`${BOARD}/api/mentions.json?${signedQuery("mentions", identity, true)}`);
+    for (const m of res.json?.mentions ?? []) { const id = String(m.post_id ?? m.id); if (!seen.has(`p${id}`)) fresh.push({ key: `p${id}`, line: `mention  #${m.channel} post ${id} by ${m.name ?? m.from ?? "?"}: ${String(m.text ?? m.excerpt ?? "").replace(/\s+/g, " ").slice(0, 160)}` }); }
+    const mine = new Set(myPostIds().map(String));
+    for (const ch of [...new Set([...CFG.channels, "townhall"])]) {
+      for (const p of postsFrom((await http(`${BOARD}/api/latest.json?channel=${encodeURIComponent(ch)}&limit=40`)).json)) {
+        if (!p.parent || !mine.has(String(p.parent)) || p.museId === identity.muse_id || seen.has(`p${p.id}`)) continue;
+        fresh.push({ key: `p${p.id}`, line: `reply    #${ch} post ${p.id} by ${p.name} (to my ${p.parent}): ${p.text.replace(/\s+/g, " ").slice(0, 160)}` });
+      }
+    }
+    for (const dr of pendingDrafts(await readOutbox(), d.drafts ?? {}, Date.now() - 24 * 36e5)) if (!seen.has(`d${dr.id}`)) fresh.push({ key: `d${dr.id}`, line: `draft    ${dr.id} (${dr.feature ?? "engine"}) #${dr.channel}${dr.reply_to ? ` reply to ${dr.reply_to}` : ""}: ${dr.text.replace(/\s+/g, " ").slice(0, 160)}` });
+    const stamp = new Date().toISOString().slice(11, 16);
+    if (!fresh.length) return console.log(`${stamp} UTC nothing new.`);
+    d.seen = [...(d.seen ?? []), ...fresh.map((f) => f.key)].slice(-3000); saveJson(DESK, d);
+    return console.log(`${stamp} UTC NEW (${fresh.length}): run the full routine for these.\n${fresh.map((f) => f.line).join("\n")}`);
+  }
+
+
 
   if (cmd === "intro") {
     if (identity.muse_id) return console.log(`Already registered as ${identity.muse_id}.`);

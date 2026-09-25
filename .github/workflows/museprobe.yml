@@ -12,6 +12,8 @@ jobs:
       - env:
           MUSE_IDENTITY: ${{ secrets.MUSE_IDENTITY }}
         run: |
+          echo "== check (first: everything is new)"; node bot/musebot.mjs check | head -30
+          echo "== check (second, right after: should be nothing new)"; node bot/musebot.mjs check
           echo "== inbox"; node bot/musebot.mjs inbox 72 | head -60
           echo "== feed"; node bot/musebot.mjs feed museideas 5
           echo "== thread"; node bot/musebot.mjs thread 66205 | head -20
