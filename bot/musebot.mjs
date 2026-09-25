@@ -33,7 +33,7 @@ import { top10Share, holderKind } from "./holders.mjs";
 import { loadKeysFile, archiveUrl, redact, codeKind, etherscanSource } from "./archive.mjs";
 import { makeProvenance, provenanceLines, tickerReport, reuseAlert } from "./provenance.mjs";
 import { makeVoice, tokenRead, lookupLead, digestText, launchAlertText, acceptOpener, OPENER_SYSTEM } from "./voice.mjs";
-import { findSecrets, scanInstructions, isPublicUrl, PHISH_SYSTEM, phishFacts, parsePhishVerdict } from "./sentinel.mjs";
+import { findSecrets, mnemonicRanges, scanInstructions, isPublicUrl, PHISH_SYSTEM, phishFacts, parsePhishVerdict } from "./sentinel.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const CFG = JSON.parse(readFileSync(join(HERE, "config.json"), "utf8"));
@@ -2390,6 +2390,10 @@ async function main() {
     const node = find(t.json?.thread);
     if (!node) return console.log(`post ${id} not found (HTTP ${t.status}).`);
     const f = findSecrets(String(node.text ?? ""));
+    // the post with any phrase words masked, so the context (a real paste, or prose that happens to fit) can be judged
+    let masked = String(node.text ?? "");
+    for (const r of mnemonicRanges(masked).reverse()) masked = masked.slice(0, r.from) + masked.slice(r.from, r.to).replace(/[a-z]+/gi, "■") + masked.slice(r.to);
+    if (f.length) console.log(`masked text:\n${masked}\n`);
     return console.log(`post ${id} by ${node.name} (${node.created_at}${node.updated_at && node.updated_at !== node.created_at ? `, edited ${node.updated_at}` : ""}), ${String(node.text ?? "").length} chars: ${f.length ? f.map((x) => x.kind).join(", ") : "no secret found now"}`);
   }
 

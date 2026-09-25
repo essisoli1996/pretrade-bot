@@ -44,6 +44,22 @@ const API_KEYS = [
   [/\b\d{8,10}:AA[0-9A-Za-z_-]{33}\b/, "Telegram bot token"],
 ];
 
+/** Where a valid mnemonic sits in the text: [{ from, to }] character ranges, for masking. */
+export function mnemonicRanges(text) {
+  const t = String(text ?? ""), { index } = bip39(), out = [];
+  const toks = [...t.toLowerCase().matchAll(/[a-z]+/g)];
+  let run = [];
+  const flush = () => {
+    for (const n of [24, 21, 18, 15, 12]) for (let s = 0; s + n <= run.length; s++) {
+      const w = run.slice(s, s + n);
+      if (validMnemonic(w.map((m) => m[0]))) { out.push({ from: w[0].index, to: w[n - 1].index + w[n - 1][0].length }); return; }
+    }
+  };
+  for (const m of toks) { if (index.has(m[0])) run.push(m); else { if (run.length >= 12) flush(); run = []; } }
+  if (run.length >= 12) flush();
+  return out;
+}
+
 /** Findings in a post: [{ kind, severity, at }]. Never returns the secret. */
 export function findSecrets(text) {
   const t = String(text ?? "");
