@@ -148,6 +148,25 @@ const GOPLUS = { base: "8453", ethereum: "1", bsc: "56", arbitrum: "42161", opti
 const n = (v) => (v === null || v === undefined || v === "" || !Number.isFinite(Number(v)) ? null : Number(v));
 const yes = (v) => v === "1" || v === 1 || v === true;
 
+// Holder addresses that are infrastructure (a lock, a vesting contract, a pool, a router), cached for good in
+// holderkinds.json: code never changes kind, and a verified name doesn't either.
+const HOLDER_KINDS = join(DATA, "holderkinds.json");
+async function infraHolders(addrs) {
+  const cache = loadJson(HOLDER_KINDS, {}), known = new Set((CFG.infraHolders ?? []).map((x) => x.toLowerCase()));
+  let dirty = false;
+  for (const addr of addrs) {
+    if (cache[addr] || known.has(addr)) continue;
+    const r = await http(CFG.token?.rpc, { jsonrpc: "2.0", id: 1, method: "eth_getCode", params: [addr, "latest"] });
+    if (r.json?.result === undefined) continue; // unreadable now: try again next time, count it meanwhile
+    const code = codeKind(r.json.result);
+    const src = code.kind === "contract" || code.target ? await etherscanSource(addr, { fetchJson: async (u) => (await http(u)).json }) : null;
+    if (src && !src.ok) continue; // no answer from the explorer: don't cache a guess
+    cache[addr] = holderKind(code, src?.name ?? null); dirty = true;
+  }
+  if (dirty) saveJson(HOLDER_KINDS, cache);
+  return addrs.filter((x) => known.has(x) || /^(lock or vesting|pool or router)/.test(cache[x] ?? ""));
+}
+
 async function quickCheck(address, { light = false, chain: onlyChain = null } = {}) {
   const sol = isSol(address);
   const a = sol ? address : address.toLowerCase();
@@ -211,10 +230,13 @@ async function quickCheck(address, { light = false, chain: onlyChain = null } = 
   }
   if (!sol && !sec) add("contract not scanned", 20); // unknown is not the same as clean: without a scan, never say OK
   // a third of supply in ten non-pool wallets is an exit risk the pool numbers can't show (chiefofstaff, #memecoins 74152)
-  const top10Pct = (() => {
+  const top10Pct = await (async () => {
     const hs = sec?.holders ?? solSec?.gp?.holders;
     if (!Array.isArray(hs) || !hs.length) return null;
-    return top10Share(hs, [a, p.pairAddress, ...(sec?.dex ?? []).flatMap((d) => [d.pool_manager, d.pair])]);
+    // on robinhood, holders are classified by code and verified name: launch lockers and routers are not holders
+    // ($MDOG: 8.2% sat in PonsV2LaunchLocker and was counted as concentration)
+    const infra = chain === "robinhood" && !light ? await infraHolders(hs.slice(0, 12).map((h) => String(h.address).toLowerCase())) : [];
+    return top10Share(hs, [a, p.pairAddress, ...(sec?.dex ?? []).flatMap((d) => [d.pool_manager, d.pair]), ...infra]);
   })();
   if (top10Pct !== null && top10Pct >= 50) add(`top 10 holders own ${Math.round(top10Pct)}%`, 30);
   else if (top10Pct !== null && top10Pct >= 30) add(`top 10 holders own ${Math.round(top10Pct)}%`, 20);

@@ -15,6 +15,9 @@ check(top10Share(mdog, []) > 45, "without the pool list the pool manager would c
 check(top10Share([{ address: "0x000000000000000000000000000000000000dEaD", percent: "0.5" }, { address: "0x" + "1".repeat(40), percent: "0.1" }]) === 10, "burned supply is not a holder");
 check(top10Share([{ address: "0x" + "2".repeat(40), percent: "0.4", is_locked: 1 }, { address: "0x" + "3".repeat(40), percent: "0.3", tag: "UniswapV2 pair" }, { address: "0x" + "4".repeat(40), percent: "0.05" }]) === 5, "locked and pool-tagged holders are left out");
 
+const locker = "0x267444D099b10fB5Ed7c3Cc7B7c767AdcA574952".toLowerCase();
+const noLock = top10Share(mdog, [pm.toLowerCase(), locker]);
+check(Math.abs(noLock - 26.5) < 0.1, `$MDOG without the PonsV2LaunchLocker (8.2%) reads ${noLock}%, under the 30% flag`);
 // classifying holders by their code and verified name
 check(holderKind(codeKind("0x")) === "wallet", "no code: a plain wallet");
 check(holderKind(codeKind("0xef0100e6cae83bde06e4c305530e199d7217f42808555b")) === "smart wallet (7702)", "a 7702 delegation: a smart wallet (0xFcDE)");
