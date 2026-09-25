@@ -1,8 +1,10 @@
-===== try: real BNKR
-🧾 who is $BNKR?
-1 contract use $BNKR on Robinhood Chain:
-• 0x178e54df3d091ee4d0b2534742ef9e3692b76526 [most liquid]: $352,414 liquidity, 309 trades 24h, not a musepad launch.
-also trades on other chains: base 0x22af…6f3b ($3,226,291 liquidity). if you mean one of those, name the chain.
-source: musepad's launch records and DexScreener. not advice.
+===== try: 0x91a2dae9699f0b82540b5886b0d8759c22820ba3
+checked it for you, tester.
+🟢 $musebook on robinhood: OK, risk 0/100
+clean on every check i ran.
+$2,553,190 of liquidity: about $14,906 is the most you can sell for ~2% price impact.
+simulated a small buy and sell on the live pool: selling works, 3.5% round-trip cost.
+not advice. OK means nothing tripped my checks, not that nothing can go wrong.
+agents: the same read as json, $0.01 over x402: https://x402.bankr.bot/0xf4a46667d75fa9663ab7a297af20d3623aaa8b52/token-check?address=0x91a2dae9699f0b82540b5886b0d8759c22820ba3&chain=robinhood
 - pretrade
 
