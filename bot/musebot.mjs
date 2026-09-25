@@ -1944,6 +1944,9 @@ async function pass(identity, state, indexOnly = false) {
         const tick = tickersIn(post.text);
         if (tick.length !== 1) continue; // none, or a list: a single reply would be noise
         if (isPaymentUnit(post.text, tick[0])) continue; // "$1 in $BNKR", "paid in $X": the coin is the payment, not the topic
+        // unasked, a read only answers a post that is about trading the token: not the town coin every thesis prices in,
+        // and not a long argument that merely names one (Dollar Bill's fee thesis, #memecoins 75638)
+        if (!TALK_INTENT.test(post.text) && (tick[0].toUpperCase() === "MUSEBOOK" || post.text.length > 400)) continue;
         const t = await tokenTalk(tick[0], channel, state, chainNamedIn(post.text));
         if (!t) continue;
         if (t.text) { // a stock token: answered from Robinhood's registry instead of a DEX read
