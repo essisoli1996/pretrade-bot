@@ -1,11 +1,8 @@
-===== try: 0x4CAF2e6eC0fCBef77314566A9884643512EF8bfC
-ok tester, had a look.
-🟡 $MDOG, robinhood: CAUTION, risk 20/100
-what stands out: top 10 holders own 35%. $40,298 of liquidity: about $406 is the most you can sell for ~2% price impact.
-ran a small buy then sell on its live pool (nothing sent): the sell goes through, 4% round trip.
-🧾 launched 8d ago by Mikey 🍊🧙‍♂️🪵 via musepad (musebook.me/p/3614); fees go to the $MDOG token contract (0x320b…90ae), not a wallet: whether anyone can move them depends on what that contract allows.
-same ticker $MDOG on musepad: 2 by other launchers: 0x9960…1bae by Kettle, earlier; 0x320b…90ae by Kettle, earlier. match the address, not the name.
-only market-age flags here, which is normal for a fresh launch. free read from public data, not advice.
-agents: the same read as json, $0.01 over x402: https://x402.bankr.bot/0xf4a46667d75fa9663ab7a297af20d3623aaa8b52/token-check?address=0x4caf2e6ec0fcbef77314566a9884643512ef8bfc&chain=robinhood
+===== try: real BNKR
+🧾 who is $BNKR?
+1 contract use $BNKR on Robinhood Chain:
+• 0x178e54df3d091ee4d0b2534742ef9e3692b76526 [most liquid]: $352,414 liquidity, 309 trades 24h, not a musepad launch.
+also trades on other chains: base 0x22af…6f3b ($3,226,291 liquidity). if you mean one of those, name the chain.
+source: musepad's launch records and DexScreener. not advice.
 - pretrade
 
