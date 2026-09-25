@@ -30,6 +30,7 @@ import { makeControl, modeOf, needsApproval } from "./control.mjs";
 import { toDraft, parseOutbox, appendDraft, pendingDrafts } from "./outbox.mjs";
 import { loadJson, saveJson } from "./store.mjs";
 import { top10Share } from "./holders.mjs";
+import { loadKeysFile, archiveUrl, redact, codeKind, etherscanSource } from "./archive.mjs";
 import { makeProvenance, provenanceLines, tickerReport, reuseAlert } from "./provenance.mjs";
 import { makeVoice, tokenRead, lookupLead, digestText, launchAlertText, acceptOpener, OPENER_SYSTEM } from "./voice.mjs";
 import { findSecrets, scanInstructions, isPublicUrl, PHISH_SYSTEM, phishFacts, parsePhishVerdict } from "./sentinel.mjs";
@@ -42,6 +43,8 @@ const ID_FILE = join(HERE, ".identity.json");
 const DATA = process.env.PRETRADE_DATA || HERE;
 if (!existsSync(DATA)) mkdirSync(DATA, { recursive: true });
 const STATE_FILE = join(DATA, ".state.json");
+// API keys (archive RPC, Etherscan): environment first, else a keys file next to the Muse's identity. Never in the repo.
+loadKeysFile(process.env.PRETRADE_KEYS_FILE || (process.env.MUSE_IDENTITY_FILE ? join(dirname(process.env.MUSE_IDENTITY_FILE), "keys.env") : null));
 const BOARDS = CFG.boards ?? ["https://musebook.me", "https://musebook.lol"];
 let BOARD = BOARDS[0];
 /** The town moved domain once already; if the current host stops answering, fail over instead of going silent. */
@@ -2300,13 +2303,40 @@ async function main() {
     return;
   }
 
+  if (cmd === "codeat") {
+    // Read-only. The code at an address on Robinhood Chain, at a past block (archive) or latest, and what kind it is.
+    //   node bot/musebot.mjs codeat <address> [block|latest]
+    const addr = args[1], blk = args[2] ?? "latest";
+    if (!/^0x[0-9a-fA-F]{40}$/.test(addr ?? "")) return console.log("usage: codeat <address> [block number|latest]");
+    const tag = blk === "latest" ? "latest" : "0x" + Number(blk).toString(16);
+    const url = blk === "latest" ? (archiveUrl() ?? CFG.token?.rpc) : archiveUrl();
+    if (!url) return console.log("needs NODEFLARE_KEY (or ARCHIVE_RPC_URL) for a past block: set it in the environment or in keys.env next to the identity file.");
+    const r = await http(url, { jsonrpc: "2.0", id: 1, method: "eth_getCode", params: [addr, tag] });
+    if (r.json?.result === undefined) return console.log(redact(`FAILED at ${blk}: HTTP ${r.status} ${JSON.stringify(r.json?.error ?? r.text).slice(0, 200)}`));
+    const k = codeKind(r.json.result), hash = createHash("sha256").update(Buffer.from(r.json.result.slice(2), "hex")).digest("hex").slice(0, 16);
+    return console.log(`code at ${addr} @ ${blk}: ${k.kind}, ${k.size} bytes${k.target ? `, target ${k.target}` : ""}, sha256 ${hash}\n${r.json.result.length <= 200 ? r.json.result : r.json.result.slice(0, 200) + "…"}`);
+  }
+
+  if (cmd === "source") {
+    // Read-only. Verified source facts from Etherscan (RobinScan) for a contract.  node bot/musebot.mjs source <address> [chainId]
+    const addr = args[1];
+    if (!/^0x[0-9a-fA-F]{40}$/.test(addr ?? "")) return console.log("usage: source <address> [chainId, default 4663]");
+    const r = await etherscanSource(addr, { chainId: Number(args[2] ?? 4663), fetchJson: async (u) => (await http(u)).json });
+    if (!r) return console.log("needs ETHERSCAN_KEY: set it in the environment or in keys.env next to the identity file.");
+    if (!r.ok) return console.log(redact(`FAILED: ${r.error}`));
+    return console.log(`${addr}: ${r.verified ? `verified source, contract ${r.name}, ${r.compiler}${r.license ? `, ${r.license}` : ""}` : "no verified source"}${r.proxy ? `, proxy → ${r.implementation}` : ""}`);
+  }
+
   if (cmd === "rpcprobe") {
     // Read-only. Which Robinhood Chain RPCs serve archive state? For each URL: chain id, head block, and the code of the
     // real $PORCH at block 71733378 (the Patch packet's block).  node bot/musebot.mjs rpcprobe <url> [url ...]
     const PORCH = "0x4B434541873f171aB70D7d2F3a48b0f0b0f13ba3", AT = "0x" + (71733378).toString(16);
-    for (const url of args.slice(1)) {
+    const urls = [...args.slice(1)];
+    if (process.env.NODEFLARE_KEY) urls.push(`https://rpc.nodeflare.app/robinhood/${process.env.NODEFLARE_KEY}`, `https://rpc.nodeflare.app/robinhood?apikey=${process.env.NODEFLARE_KEY}`, `https://rpc.nodeflare.app/${process.env.NODEFLARE_KEY}/robinhood`);
+    for (const url of urls) {
+      console.log(redact(`== ${url}`));
       const call = async (method, params) => { const t0 = Date.now(); const r = await http(url, { jsonrpc: "2.0", id: 1, method, params }); return `${r.json?.result !== undefined ? JSON.stringify(r.json.result).slice(0, 70) : `ERR ${r.status} ${JSON.stringify(r.json?.error ?? r.text).slice(0, 120)}`} (${Date.now() - t0} ms)`; };
-      console.log(`== ${url}\n  chainId: ${await call("eth_chainId", [])}\n  head:    ${await call("eth_blockNumber", [])}\n  code at 71733378: ${await call("eth_getCode", [PORCH, AT])}\n  code at block 1000000: ${await call("eth_getCode", [PORCH, "0xf4240"])}`);
+      console.log(redact(`  chainId: ${await call("eth_chainId", [])}\n  head:    ${await call("eth_blockNumber", [])}\n  code at 71733378: ${await call("eth_getCode", [PORCH, AT])}\n  code at block 1000000: ${await call("eth_getCode", [PORCH, "0xf4240"])}`));
     }
     return;
   }

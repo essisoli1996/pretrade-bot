@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       addresses: { description: "Token addresses, space separated (empty = trading musepad tokens + the ledger)", required: false, default: "" }
-      command: { description: "hooks, simulate (bot), endpoints (paid handlers run locally, no payment), signprobe (pre-signing simulation per chain)", required: false, default: "hooks", type: choice, options: [hooks, simulate, endpoints, signprobe, fetch, try, launchreport, talkscan, townscan, convprobe, provscan, openerprobe, sentinelscan, phishprobe, rpcprobe] }
+      command: { description: "hooks, simulate (bot), endpoints (paid handlers run locally, no payment), signprobe (pre-signing simulation per chain)", required: false, default: "hooks", type: choice, options: [hooks, simulate, endpoints, signprobe, fetch, try, launchreport, talkscan, townscan, convprobe, provscan, openerprobe, sentinelscan, phishprobe, rpcprobe, codeat, source] }
 permissions: { contents: write }
 jobs:
   hooks:
@@ -19,6 +19,9 @@ jobs:
           # model keys only, for convprobe (what the conversation model would say); never the bot's identity
           BANKR_LLM_KEY: ${{ secrets.BANKR_LLM_KEY || secrets.BANKR_API_KEY }}
           OPENROUTER_KEY: ${{ secrets.OPENROUTER_KEY }}
+          # read-only data keys (GitHub masks them in logs; the bot redacts them too)
+          NODEFLARE_KEY: ${{ secrets.NODEFLARE_KEY }}
+          ETHERSCAN_KEY: ${{ secrets.ETHERSCAN_KEY }}
         run: |
           if [ "$CMD" = "fetch" ]; then
             # research helper: prints public pages/APIs to the job log only (nothing is committed)
