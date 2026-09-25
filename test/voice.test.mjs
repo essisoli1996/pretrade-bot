@@ -22,6 +22,8 @@ check(outs.some((o) => /Monty/.test(o)) && outs.some((o) => !/Monty/.test(o)), "
 
 const ok = tokenRead(v, { ...c, verdict: "OK", score: 0, flags: [], sim: null }, { kind: "channel", url });
 check(/OK/.test(ok) && /0\/100/.test(ok) && /guarantee|promise|not that nothing can go wrong/i.test(ok), `OK read keeps its not-a-guarantee line: ${ok.split("\n").pop()}`);
+const concentrated = Array.from({ length: 20 }, () => tokenRead(v, { ...c, verdict: "CAUTION", score: 20, flags: ["top 10 holders own 35%"], sim: null }, { kind: "mention", who: "x", url }));
+check(concentrated.every((t) => !/market-age|just about age|young-token flags only/.test(t)), "a holder-concentration flag is not called a market-age flag");
 const at = Date.parse("2026-09-25T10:00:00Z");
 const youngRead = tokenRead(v, { ...c, ageH: 20, at }, { kind: "mention", who: "x", url });
 check(/2026-09-25 10:00 utc/.test(youngRead) && /2026-09-26 10:00 utc/.test(youngRead), "a young pair's read carries its time and a re-check time 24h on");

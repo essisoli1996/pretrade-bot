@@ -55,7 +55,7 @@ export function tokenRead(v, c, { kind = "channel", who = "", opener = null, url
   const flags = c.flags.length ? v.say("flags", FLAGS.some, vars) : v.say("flags.none", FLAGS.none, vars);
   const depth = v.say("depth", DEPTH, vars);
   const sim = c.sim?.status === "ok" && !c.sim.flags.length ? v.say("sim", SIM, vars) : null;
-  const freshOnly = c.verdict === "CAUTION" && c.flags.every((f) => /liquidity|old/.test(f));
+  const freshOnly = c.verdict === "CAUTION" && c.flags.every((f) => /liquidity|\bold\b/.test(f));
   const tail = v.say(`tail.${freshOnly ? "fresh" : c.verdict === "OK" ? "ok" : "other"}`, freshOnly ? TAIL.fresh : c.verdict === "OK" ? TAIL.ok : TAIL.other, vars);
   // the paid-json link is for agents: always when someone asked, only now and then when i chimed in on my own
   const link = url && (kind === "mention" || v.chance(0.35)) ? v.say("link", LINK, vars) : null;
