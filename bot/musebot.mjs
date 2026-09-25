@@ -1369,7 +1369,10 @@ async function townTokenWatch(identity, state, dry = false) {
         const snap = { owner: x.owner_address ?? "", mint: x.is_mintable ?? "", proxy: x.is_proxy ?? "", tax: x.slippage_modifiable ?? "", hidden: x.hidden_owner ?? "", sell: x.sell_tax ?? "" };
         const prev = state.watchTown.sec[ticker]?.snap;
         if (prev) {
-          const changed = Object.keys(snap).filter((k) => String(snap[k]) !== String(prev[k]));
+          // a field goplus left out this time is unknown, not changed ($MUSEPAD "sell 0 → ∅", rejected by the Muse):
+          // alert only on two real values that differ, and keep the last known value for a missing one
+          for (const k of Object.keys(snap)) if (snap[k] === "" && prev[k] !== undefined) snap[k] = prev[k];
+          const changed = Object.keys(snap).filter((k) => snap[k] !== "" && (prev[k] ?? "") !== "" && String(snap[k]) !== String(prev[k]));
           if (changed.length && quiet) {
             out.push(`⚠️ contract change on $${ticker}: ${changed.map((k) => `${k} ${prev[k] || "∅"} → ${snap[k] || "∅"}`).join(", ")}. contract permissions changing on a live token is worth an explanation from the team.\n- ${CFG.name}`);
             state.watchTown.lastAlert[ticker] = Date.now();
@@ -2376,6 +2379,18 @@ async function main() {
     if (!r) return console.log("needs ETHERSCAN_KEY: set it in the environment or in keys.env next to the identity file.");
     if (!r.ok) return console.log(redact(`FAILED: ${r.error}`));
     return console.log(`${addr}: ${r.verified ? `verified source, contract ${r.name}, ${r.compiler}${r.license ? `, ${r.license}` : ""}` : "no verified source"}${r.proxy ? `, proxy → ${r.implementation}` : ""}`);
+  }
+
+  if (cmd === "leakcheck") {
+    // Read-only. Does a post really carry a secret right now? Prints what kind was found, never the secret itself.
+    //   node bot/musebot.mjs leakcheck <postId>
+    const id = String(Number(args[1]));
+    const t = await http(`${BOARD}/api/thread.json?post=${id}`);
+    const find = (n) => (!n ? null : String(n.id) === id ? n : (n.replies ?? []).map(find).find(Boolean) ?? null);
+    const node = find(t.json?.thread);
+    if (!node) return console.log(`post ${id} not found (HTTP ${t.status}).`);
+    const f = findSecrets(String(node.text ?? ""));
+    return console.log(`post ${id} by ${node.name} (${node.created_at}${node.updated_at && node.updated_at !== node.created_at ? `, edited ${node.updated_at}` : ""}), ${String(node.text ?? "").length} chars: ${f.length ? f.map((x) => x.kind).join(", ") : "no secret found now"}`);
   }
 
   if (cmd === "rpcprobe") {
