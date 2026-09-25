@@ -177,6 +177,9 @@ async function quickCheck(address, { light = false, chain: onlyChain = null } = 
   const p = pairs[0];
   const chain = p.chainId;
   const liquidity = Math.round(pairs.reduce((s, q) => s + (n(q.liquidity?.usd) ?? 0), 0));
+  // DexScreener gives no liquidity for a pump.fun bonding curve (or an unindexed pool): that is "unknown", not $0
+  // ($moose, #lobby 77591: the draft said "liquidity $0" and "LP 0% locked" to the token's own launcher)
+  const liqKnown = pairs.some((q) => n(q.liquidity?.usd) !== null);
   const ageH = n(p.pairCreatedAt) ? (Date.now() - n(p.pairCreatedAt)) / 36e5 : null;
 
   let sec = null, solSec = null;
@@ -210,7 +213,7 @@ async function quickCheck(address, { light = false, chain: onlyChain = null } = 
       add(String(r.name ?? "rugcheck risk").toLowerCase(), 20);
     }
     const lp = n(solSec.rc?.lpLockedPct);
-    if (young && lp !== null && lp < 50) add(`LP ${lp.toFixed(0)}% locked`, 10);
+    if (young && liqKnown && lp !== null && lp < 50) add(`LP ${lp.toFixed(0)}% locked`, 10); // a curve has no LP to lock
   }
   if (sec) {
     if (yes(sec.honeypot_with_same_creator)) add("creator has honeypot history", 35);
@@ -240,7 +243,8 @@ async function quickCheck(address, { light = false, chain: onlyChain = null } = 
   })();
   if (top10Pct !== null && top10Pct >= 50) add(`top 10 holders own ${Math.round(top10Pct)}%`, 30);
   else if (top10Pct !== null && top10Pct >= 30) add(`top 10 holders own ${Math.round(top10Pct)}%`, 20);
-  if (liquidity < 5000) add("very low liquidity", 25);
+  if (!liqKnown) add("no liquidity figure (bonding curve or unindexed pool)", 0);
+  else if (liquidity < 5000) add("very low liquidity", 25);
   else if (liquidity < 25000) add("low liquidity", 10);
   if (ageH !== null && ageH < 24) add(`pair ${ageH < 1 ? "<1h" : Math.round(ageH) + "h"} old`, ageH < 1 ? 15 : 10);
   const hook = light ? null : await v4HookRead(p);
@@ -257,7 +261,7 @@ async function quickCheck(address, { light = false, chain: onlyChain = null } = 
   const maxSell2 = Math.floor((0.02 * (deepest / 2)) / 0.98);
   const sellMax = (i) => Math.floor((i * (deepest / 2)) / (1 - i));
   return {
-    address: a, chain, symbol: p.baseToken?.symbol ?? "?", verdict, score, flags, liquidity, maxSell2, contractScanned: !!(sec || solSec),
+    address: a, chain, symbol: p.baseToken?.symbol ?? "?", verdict, score, flags, liquidity, liqKnown, maxSell2, contractScanned: !!(sec || solSec),
     critical, url: p.url ?? null, ageH, at: Date.now(), price: n(p.priceUsd),
     holders: n(sec?.holder_count ?? solSec?.gp?.holder_count),
     top10Pct,
@@ -1970,7 +1974,7 @@ async function pass(identity, state, indexOnly = false) {
       const allAddrs = addressesIn(post.text);
       const addrs = allAddrs.filter((x) => !state.tokens.includes(x) && !isOwnToken(x) && !filed.has(x.toLowerCase()));
       let check = null, lead = "";
-      if (addrs.length === 1) check = await quickCheck(addrs[0]);
+      if (addrs.length === 1) { check = await quickCheck(addrs[0]); if (check?.liqKnown === false) continue; } // unasked, and no liquidity figure: nothing solid to say
       else if (!allAddrs.length) {
         // no address: someone talking about a token by its $TICKER
         // outside the trading channel, only when the post is actually about the token, not a passing mention
