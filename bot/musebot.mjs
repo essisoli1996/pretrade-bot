@@ -168,9 +168,11 @@ async function infraHolders(addrs) {
   return addrs.filter((x) => known.has(x) || /^(lock or vesting|permanent lock|pool or router)/.test(cache[x] ?? ""));
 }
 
-const noPairText = (a) => FORK_SKIPPED.has(a.toLowerCase())
-  ? `${a} is an ${FORK_SKIPPED.get(a.toLowerCase())} contract, and the only pools i found for it are on a chain that copied ${FORK_SKIPPED.get(a.toLowerCase())}'s state, so they are not its market. no read from me on that.\n- ${CFG.name}`
-  : `couldn't find a DEX pair for ${a} yet, so there is nothing solid to read. pre-graduation launchpad tokens show up once they have a pool.\n- ${CFG.name}`;
+const noPairText = (a) => { const f = FORK_SKIPPED.get(a.toLowerCase()); return f
+  ? f.unsure
+    ? `the only pools i found for ${a} are on a chain that copied ${f.chain}'s state, and i couldn't confirm right now whether it is the ${f.chain} original or a token born on the copy. no read from me until i can.\n- ${CFG.name}`
+    : `${a} is an ${f.chain} contract, and the only pools i found for it are on a chain that copied ${f.chain}'s state, so they are not its market. no read from me on that.\n- ${CFG.name}`
+  : `couldn't find a DEX pair for ${a} yet, so there is nothing solid to read. pre-graduation launchpad tokens show up once they have a pool.\n- ${CFG.name}`; };
 const FORK_SKIPPED = new Map(); // address → original chain, when only fork-copy pools were found
 async function quickCheck(address, { light = false, chain: onlyChain = null } = {}) {
   const sol = isSol(address);
@@ -181,7 +183,7 @@ async function quickCheck(address, { light = false, chain: onlyChain = null } = 
   if (!sol && pairs.length) {
     const fork = await dropForkCopies(pairs, async (c) => { const r = await rpcFor(c)?.("eth_getCode", [a, "latest"]).catch(() => null); return r?.result === undefined ? null : r.result !== "0x"; });
     pairs = fork.pairs;
-    if (fork.forkOf) FORK_SKIPPED.set(a, fork.forkOf);
+    if (fork.forkOf) FORK_SKIPPED.set(a, { chain: fork.forkOf, unsure: fork.unsure });
   }
   if (!pairs.length) return null; // wallet, pre-graduation token or unknown → stay silent
   pairs.sort((x, y) => (n(y.liquidity?.usd) ?? 0) - (n(x.liquidity?.usd) ?? 0));

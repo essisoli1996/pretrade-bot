@@ -29,14 +29,21 @@ export const LURE_TALK = /\b(lure|phish\w*|drainer|drain(?:s|ed|ing)? wallets?|s
 export const FORK_COPIES = { pulsechain: "ethereum", ethereumpow: "ethereum", ethw: "ethereum" };
 
 /** Drops pairs on a fork-copy chain when the address is a contract on the chain it was copied from.
- *  hasCodeOn(chain) → true / false / null (unknown). Returns { pairs, forkOf } — forkOf names the original chain when
- *  copies were dropped. */
+ *  hasCodeOn(chain) → true / false / null (unknown, retried once; still unknown drops the copies too). Returns
+ *  { pairs, forkOf, unsure } — forkOf names the original chain when copies were dropped, unsure when that was unconfirmed. */
 export async function dropForkCopies(pairs, hasCodeOn) {
   const copies = [...new Set(pairs.map((p) => p.chainId).filter((c) => FORK_COPIES[c]))];
   if (!copies.length) return { pairs, forkOf: null };
   const origins = [...new Set(copies.map((c) => FORK_COPIES[c]))];
-  const real = [];
-  for (const o of origins) if ((await hasCodeOn(o)) === true) real.push(o);
-  if (!real.length) return { pairs, forkOf: null }; // a token born on the copy chain itself: keep it
-  return { pairs: pairs.filter((p) => !real.includes(FORK_COPIES[p.chainId])), forkOf: real[0] };
+  const real = [], unsure = [];
+  for (const o of origins) {
+    // one retry: a single failed read on the original chain let the copy's rating through (Muse's first try, USDT)
+    let has = await hasCodeOn(o);
+    if (has === null) has = await hasCodeOn(o);
+    if (has === true) real.push(o); else if (has === null) unsure.push(o);
+  }
+  // unknown is not "born on the copy": no read beats a read on the wrong chain
+  const drop = [...real, ...unsure];
+  if (!drop.length) return { pairs, forkOf: null, unsure: false }; // a token born on the copy chain itself: keep it
+  return { pairs: pairs.filter((p) => !drop.includes(FORK_COPIES[p.chainId])), forkOf: (real[0] ?? unsure[0]), unsure: !real.length };
 }

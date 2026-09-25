@@ -25,7 +25,13 @@ assert.equal(r.forkOf, "ethereum");
 r = await dropForkCopies([{ chainId: "pulsechain" }], async () => false);
 assert.deepEqual(r.pairs.map((p) => p.chainId), ["pulsechain"]);
 assert.equal(r.forkOf, null);
-r = await dropForkCopies([{ chainId: "pulsechain" }], async () => null); // unknown: keep, don't guess
+// the original chain can't be read even after a retry: drop the copy rather than rate it (no read beats a wrong one)
+let calls = 0;
+r = await dropForkCopies([{ chainId: "pulsechain" }], async () => { calls++; return null; });
+assert.equal(r.pairs.length, 0); assert.equal(r.unsure, true); assert.equal(calls, 2);
+// one failed read, then an answer: the retry decides
+let first = true;
+r = await dropForkCopies([{ chainId: "pulsechain" }], async () => (first ? ((first = false), null) : false));
 assert.equal(r.pairs.length, 1);
 r = await dropForkCopies([{ chainId: "robinhood" }], async () => { throw new Error("not called"); });
 assert.equal(r.pairs.length, 1);
