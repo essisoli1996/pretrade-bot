@@ -31,7 +31,7 @@ import { toDraft, parseOutbox, appendDraft, pendingDrafts } from "./outbox.mjs";
 import { loadJson, saveJson } from "./store.mjs";
 import { top10Share, holderKind } from "./holders.mjs";
 import { loadKeysFile, archiveUrl, redact, codeKind, etherscanSource } from "./archive.mjs";
-import { addressOnlyInLinks, LURE_TALK, dropForkCopies } from "./addrctx.mjs";
+import { addressOnlyInLinks, LURE_TALK, lureInPath, dropForkCopies } from "./addrctx.mjs";
 import { makeProvenance, provenanceLines, tickerReport, reuseAlert } from "./provenance.mjs";
 import { makeVoice, tokenRead, lookupLead, digestText, launchAlertText, acceptOpener, OPENER_SYSTEM } from "./voice.mjs";
 import { findSecrets, mnemonicRanges, scanInstructions, isPublicUrl, PHISH_SYSTEM, phishFacts, parsePhishVerdict } from "./sentinel.mjs";
@@ -1267,6 +1267,14 @@ function factSheet(state) {
   };
 }
 
+/** Whether a post sits in a thread about a lure or phishing page (root to post). Unknown (thread unreadable) counts as
+ *  yes: an unasked read is never worth the risk of landing in a phishing thread. */
+async function inLureThread(postId) {
+  const t = await http(`${BOARD}/api/thread.json?post=${postId}`);
+  if (!t.json?.thread) return true;
+  return lureInPath(threadPath(t.json.thread, postId));
+}
+
 function threadPath(root, targetId) {
   const path = [];
   const walk = (n) => { if (!n) return false; path.push(n); if (String(n.id) === String(targetId)) return true; for (const r of n.replies ?? []) if (walk(r)) return true; path.pop(); return false; };
@@ -2045,6 +2053,8 @@ async function pass(identity, state, indexOnly = false) {
         check = t.check; lead = t.lead;
       }
       if (!check) continue;
+      // the post itself may not say "lure", but the thread it sits in can (engine draft 6a443ee9f2, #lobby 78859)
+      if (post.parent && await inLureThread(post.id)) { console.log(`  skip ${post.id}: reply inside a lure/phishing thread`); continue; }
 
       const body = replyText(check, await replyCtx("channel", post.name, post.text));
       // with a ticker lookup, the opener goes first, then the lookup line, then the read

@@ -24,6 +24,10 @@ export function addressOnlyInLinks(text, addr) {
 // A post about a phishing page or a drainer: a token read there reads as a verdict on the coin the lure wears.
 export const LURE_TALK = /\b(lure|phish\w*|drainer|drain(?:s|ed|ing)? wallets?|scam (?:page|site|link)|fake (?:site|page|airdrop|claim))\b/i;
 
+/** True when any post on the path from the thread's root to this post talks about a lure. A reply deep in a phishing
+ *  thread often doesn't say "lure" itself (muchi, #lobby 78859: "key the watch row on the template") while the root does. */
+export const lureInPath = (path) => (path ?? []).some((n) => LURE_TALK.test(String(n?.text ?? "")));
+
 // Chains that copied Ethereum's whole state at launch: every Ethereum contract address exists there as a copy.
 // A pool on the copy says nothing about the original token (USDT read as "$USDT, pulsechain", #lobby 78475).
 export const FORK_COPIES = { pulsechain: "ethereum", ethereumpow: "ethereum", ethw: "ethereum" };

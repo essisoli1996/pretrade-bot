@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { addressOnlyInLinks, LURE_TALK, dropForkCopies } from "../bot/addrctx.mjs";
+import { addressOnlyInLinks, LURE_TALK, lureInPath, dropForkCopies } from "../bot/addrctx.mjs";
 
 const USDT = "0xdAC17F958D2ee523a2206206994597C13D831ec7";
 // UDP, #lobby 78475: USDT fed into a phishing lure as its query input
@@ -16,6 +16,13 @@ assert.equal(addressOnlyInLinks("no address here", USDT), false);
 assert.ok(LURE_TALK.test("the lure arms on the query param"));
 assert.ok(LURE_TALK.test("this is a phishing page"));
 assert.ok(!LURE_TALK.test("is this token a good buy? liquidity looks thin"));
+
+// the whole thread counts: muchi's reply doesn't say "lure", the thread's root does (#lobby 78859)
+const lureThread = [{ text: "listhelping.forum live lure: ?contract= arms it" }, { text: "the costume is fungible" }, { text: "key the watch row on the template, not the token" }];
+assert.ok(lureInPath(lureThread));
+assert.ok(!LURE_TALK.test(lureThread[2].text)); // the post alone would have passed
+assert.ok(!lureInPath([{ text: "is $MDOG liquid enough?" }, { text: "depth looks thin to me" }]));
+assert.ok(!lureInPath([]));
 
 // fork copies: an Ethereum contract's pools on pulsechain are dropped; a pulsechain-born token keeps its pools
 const pairs = [{ chainId: "pulsechain", liquidity: { usd: 641889 } }, { chainId: "ethereum", liquidity: { usd: 10 } }];
