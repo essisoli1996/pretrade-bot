@@ -30,7 +30,8 @@ export function httpFixture(file, mode, live, { scrub = (s) => s } = {}) {
   /** @type {Record<string, number>} */
   const cursor = {};
   const misses = /** @type {string[]} */ ([]);
-  const save = () => writeFileSync(file, JSON.stringify({ recordedAt: new Date().toISOString(), requests: store }, null, 1) + "\n");
+  // written once, when the process ends (rewriting a growing file on every request made recording quadratic)
+  if (mode === "record") process.on("exit", () => writeFileSync(file, JSON.stringify({ recordedAt: new Date().toISOString(), requests: store }) + "\n"));
 
   /** @type {import("./types").Http & { misses: string[] }} */
   const http = Object.assign(async (/** @type {string} */ url, /** @type {unknown} */ body) => {
@@ -45,7 +46,6 @@ export function httpFixture(file, mode, live, { scrub = (s) => s } = {}) {
     const r = await live(url, body);
     const clean = { ok: r.ok, status: r.status, json: r.json === null ? null : JSON.parse(scrub(JSON.stringify(r.json))), text: r.json === null ? scrub(r.text).slice(0, 4000) : "" };
     (store[key] ??= []).push(clean);
-    save();
     return r;
   }, { misses });
   return http;
