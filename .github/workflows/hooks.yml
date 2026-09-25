@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       addresses: { description: "Token addresses, space separated (empty = trading musepad tokens + the ledger)", required: false, default: "" }
-      command: { description: "hooks, simulate (bot), endpoints (paid handlers run locally, no payment), signprobe (pre-signing simulation per chain)", required: false, default: "hooks", type: choice, options: [hooks, simulate, endpoints, signprobe, fetch, try, launchreport, talkscan, townscan, convprobe, provscan, openerprobe, sentinelscan, phishprobe, rpcprobe, codeat, source, holders, leakcheck] }
+      command: { description: "hooks, simulate (bot), endpoints (paid handlers run locally, no payment), signprobe (pre-signing simulation per chain)", required: false, default: "hooks", type: choice, options: [hooks, simulate, endpoints, signprobe, fetch, try, launchreport, talkscan, townscan, convprobe, provscan, openerprobe, sentinelscan, phishprobe, rpcprobe, codeat, source, holders, leakcheck, recordcheck] }
 permissions: { contents: write }
 jobs:
   hooks:
@@ -33,6 +33,13 @@ jobs:
             git config user.name musebot; git config user.email musebot@users.noreply.github.com
             git checkout -q --orphan research; git rm -rqf --cached .; git add -f townscan.txt; git commit -qm "town digest [skip ci]"; git push -qf origin research; fi
           if [ "$CMD" = "townscan" ]; then exit 0; fi
+          if [ "$CMD" = "recordcheck" ]; then
+            # offline test fixtures (name=address ...): recorded, replay-verified, pushed to a side branch for review
+            rc=0; scripts/recordcheck.sh $ADDRS || rc=$?
+            for k in "$ETHERSCAN_KEY" "$NODEFLARE_KEY"; do [ -n "$k" ] && grep -rlF "$k" test/fixtures/replay && { echo "a key leaked into a fixture: not pushing"; exit 1; }; done
+            git config user.name musebot; git config user.email musebot@users.noreply.github.com
+            git checkout -q --orphan fixtures; git rm -rqf --cached .; git add -f test/fixtures/replay; git commit -qm "check fixtures [skip ci]"; git push -qf origin fixtures; exit $rc
+          fi
           if [ "$CMD" = "try" ]; then
             # addresses input holds commands separated by ";", e.g. "stock TSLA; plan 0x… 250"
             IFS=';' read -ra CMDS <<< "$ADDRS"; for c in "${CMDS[@]}"; do echo "===== try: $c"; node bot/musebot.mjs try $c 2>&1; echo; done | tee hooks.log

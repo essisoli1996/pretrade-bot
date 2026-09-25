@@ -3,11 +3,12 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node scripts/inline-shared.mjs --check && node scripts/bundle-x402.mjs --check && tsx test/mock.test.mts && tsx test/x402-v4.test.mts && node test/v4hooks.test.mjs && node test/sim.test.mjs && node test/txsim.test.mjs && node test/features.test.mjs && node test/talk.test.mjs && node test/control.test.mjs && node test/outbox.test.mjs && node test/holders.test.mjs && node test/archive.test.mjs && node test/addrctx.test.mjs && node test/store.test.mjs && npm run -s shadowtest && node test/provenance.test.mjs && node test/voice.test.mjs && node test/sentinel.test.mjs",
-    "typecheck": "tsc -p .",
+    "test": "npm run -s typecheck && node scripts/inline-shared.mjs --check && node scripts/bundle-x402.mjs --check && tsx test/mock.test.mts && tsx test/x402-v4.test.mts && node test/v4hooks.test.mjs && node test/sim.test.mjs && node test/txsim.test.mjs && node test/features.test.mjs && node test/talk.test.mjs && node test/control.test.mjs && node test/outbox.test.mjs && node test/holders.test.mjs && node test/archive.test.mjs && node test/addrctx.test.mjs && node test/store.test.mjs && npm run -s shadowtest && node test/provenance.test.mjs && node test/voice.test.mjs && node test/sentinel.test.mjs",
+    "typecheck": "tsc -p tsconfig.core.json",
     "shadowtest": "MUSE_IDENTITY='{\"public_key\":\"x\",\"secret\":\"y\",\"muse_id\":\"muse_test\"}' PRETRADE_DATA=$(mktemp -d) node bot/musebot.mjs shadowtest"
   },
   "devDependencies": {
+    "@types/node": "^22.20.4",
     "tsx": "^4.23.13",
     "typescript": "^5.9.3"
   }

@@ -32,6 +32,9 @@ import { loadJson, saveJson } from "./store.mjs";
 import { top10Share, holderKind } from "./holders.mjs";
 import { loadKeysFile, archiveUrl, redact, codeKind, etherscanSource } from "./archive.mjs";
 import { addressOnlyInLinks, LURE_TALK, lureInPath, dropForkCopies } from "./addrctx.mjs";
+import { isSol, GOPLUS, n, yes } from "./core/util.mjs";
+import { makeQuickCheck } from "./core/check.mjs";
+import { httpFixture } from "./core/httpfixture.mjs";
 import { makeProvenance, provenanceLines, tickerReport, reuseAlert } from "./provenance.mjs";
 import { makeVoice, tokenRead, lookupLead, digestText, launchAlertText, acceptOpener, OPENER_SYSTEM } from "./voice.mjs";
 import { findSecrets, mnemonicRanges, scanInstructions, isPublicUrl, PHISH_SYSTEM, phishFacts, parsePhishVerdict } from "./sentinel.mjs";
@@ -123,8 +126,17 @@ function heldForApproval(url, body) {
   return { ok: true, status: 299, json: { ok: true, post: { id: null, draft: draft.id } }, text: "draft" };
 }
 
+// every external read goes through here; tests record / replay it (bot/core/httpfixture.mjs, PRETRADE_HTTP_FIXTURE)
+let HTTPFX = null;
 async function http(url, body) {
   const held = shadowed(url, body) ?? heldForApproval(url, body); if (held) return held;
+  if (process.env.PRETRADE_HTTP_FIXTURE) {
+    HTTPFX ??= httpFixture(process.env.PRETRADE_HTTP_FIXTURE, process.env.PRETRADE_HTTP_MODE === "record" ? "record" : "replay", httpLive, { scrub: redact });
+    return HTTPFX(url, body);
+  }
+  return httpLive(url, body);
+}
+async function httpLive(url, body) {
   const ctrl = new AbortController();
   const t = setTimeout(() => ctrl.abort(), 12000);
   try {
@@ -144,10 +156,8 @@ async function http(url, body) {
 
 // ───────────────────────── token check (same heuristics as the paid endpoint, condensed) ─────────────────────────
 const SOL_ADDR = /(?<![A-Za-z0-9])[1-9A-HJ-NP-Za-km-z]{32,44}(?![A-Za-z0-9])/g;
-const isSol = (a) => !a.startsWith("0x");
-const GOPLUS = { base: "8453", ethereum: "1", bsc: "56", arbitrum: "42161", optimism: "10", polygon: "137", robinhood: "4663" };
-const n = (v) => (v === null || v === undefined || v === "" || !Number.isFinite(Number(v)) ? null : Number(v));
-const yes = (v) => v === "1" || v === 1 || v === true;
+// fixed clock for replay tests (PRETRADE_NOW, ms); the live bot uses the real one
+const CLOCK = () => (process.env.PRETRADE_NOW ? Number(process.env.PRETRADE_NOW) : Date.now());
 
 // Holder addresses that are infrastructure (a lock, a vesting contract, a pool, a router), cached for good in
 // holderkinds.json: code never changes kind, and a verified name doesn't either.
@@ -174,127 +184,14 @@ const noPairText = (a) => { const f = FORK_SKIPPED.get(a.toLowerCase()); return 
     : `${a} is an ${f.chain} contract, and the only pools i found for it are on a chain that copied ${f.chain}'s state, so they are not its market. no read from me on that.\n- ${CFG.name}`
   : `couldn't find a DEX pair for ${a} yet, so there is nothing solid to read. pre-graduation launchpad tokens show up once they have a pool.\n- ${CFG.name}`; };
 const FORK_SKIPPED = new Map(); // address → original chain, when only fork-copy pools were found
-async function quickCheck(address, { light = false, chain: onlyChain = null } = {}) {
-  const sol = isSol(address);
-  const a = sol ? address : address.toLowerCase();
-  const found = await http(`https://api.dexscreener.com/latest/dex/search?q=${a}`);
-  let pairs = (found.json?.pairs ?? []).filter((p) => (sol ? p?.baseToken?.address === a && p.chainId === "solana" : p?.baseToken?.address?.toLowerCase() === a) && (!onlyChain || p.chainId === onlyChain));
-  // a pool on a chain that copied Ethereum's state (pulsechain) is not the market of the Ethereum token at that address
-  if (!sol && pairs.length) {
-    const fork = await dropForkCopies(pairs, async (c) => { const r = await rpcFor(c)?.("eth_getCode", [a, "latest"]).catch(() => null); return r?.result === undefined ? null : r.result !== "0x"; });
-    pairs = fork.pairs;
-    if (fork.forkOf) FORK_SKIPPED.set(a, { chain: fork.forkOf, unsure: fork.unsure });
-  }
-  if (!pairs.length) return null; // wallet, pre-graduation token or unknown → stay silent
-  pairs.sort((x, y) => (n(y.liquidity?.usd) ?? 0) - (n(x.liquidity?.usd) ?? 0));
-  const p = pairs[0];
-  const chain = p.chainId;
-  const liquidity = Math.round(pairs.reduce((s, q) => s + (n(q.liquidity?.usd) ?? 0), 0));
-  // DexScreener gives no liquidity for a pump.fun bonding curve (or an unindexed pool): that is "unknown", not $0
-  // ($moose, #lobby 77591: the draft said "liquidity $0" and "LP 0% locked" to the token's own launcher)
-  const liqKnown = pairs.some((q) => n(q.liquidity?.usd) !== null);
-  const ageH = n(p.pairCreatedAt) ? (Date.now() - n(p.pairCreatedAt)) / 36e5 : null;
-
-  let sec = null, solSec = null;
-  if (sol) {
-    const [g, r] = await Promise.all([
-      http(`https://api.gopluslabs.io/api/v1/solana/token_security?contract_addresses=${a}`),
-      http(`https://api.rugcheck.xyz/v1/tokens/${a}/report/summary`),
-    ]);
-    const gp = g.json?.result?.[a] ?? null;
-    const rc = Array.isArray(r.json?.risks) ? r.json : null;
-    if (gp || rc) solSec = { gp, rc };
-  } else if (GOPLUS[chain]) {
-    const g = await http(`https://api.gopluslabs.io/api/v1/token_security/${GOPLUS[chain]}?contract_addresses=${a}`);
-    sec = g.json?.result?.[a] ?? null;
-  }
-
-  const flags = [];
-  let score = 0, critical = false;
-  const add = (label, pts, crit = false) => { flags.push(label); score += pts; critical ||= crit; };
-  const young = ageH === null || ageH < 24 * 30;
-  if (solSec) {
-    const st = (x) => yes(x?.status);
-    const gp = solSec.gp ?? {};
-    if (st(gp.balance_mutable_authority)) add("balances mutable", 100, true);
-    if (yes(gp.non_transferable)) add("non-transferable", 100, true);
-    if (st(gp.freezable)) add("freeze authority active", 30);
-    if (st(gp.mintable)) add("mint authority active", 25);
-    if (st(gp.closable)) add("closable", 25);
-    for (const r of (solSec.rc?.risks ?? []).filter((x) => x?.level === "danger").slice(0, 2)) {
-      if (/mint|freeze/i.test(r.name ?? "")) continue;
-      add(String(r.name ?? "rugcheck risk").toLowerCase(), 20);
-    }
-    const lp = n(solSec.rc?.lpLockedPct);
-    if (young && liqKnown && lp !== null && lp < 50) add(`LP ${lp.toFixed(0)}% locked`, 10); // a curve has no LP to lock
-  }
-  if (sec) {
-    if (yes(sec.honeypot_with_same_creator)) add("creator has honeypot history", 35);
-    if (yes(sec.is_honeypot)) add("honeypot", 100, true);
-    if (yes(sec.cannot_sell_all)) add("cannot sell all", 100, true);
-    if (yes(sec.owner_change_balance)) add("owner can edit balances", 100, true);
-    const st = n(sec.sell_tax), bt = n(sec.buy_tax);
-    if (st !== null && st >= 0.5) add(`sell tax ${(st * 100).toFixed(0)}%`, 100, true);
-    else if (st !== null && st > 0.1) add(`sell tax ${(st * 100).toFixed(0)}%`, 30);
-    if (bt !== null && bt > 0.1) add(`buy tax ${(bt * 100).toFixed(0)}%`, 15);
-    if (sec.is_open_source !== undefined && !yes(sec.is_open_source)) add("unverified source", 25);
-    if (yes(sec.hidden_owner)) add("hidden owner", 25);
-    if (yes(sec.slippage_modifiable)) add("tax modifiable", 25);
-    if (yes(sec.is_mintable)) add("mintable", 15);
-    if (yes(sec.transfer_pausable)) add("pausable", 15);
-    if (yes(sec.is_proxy)) add("proxy", 10);
-  }
-  if (!sol && !sec) add("contract not scanned", 20); // unknown is not the same as clean: without a scan, never say OK
-  // a third of supply in ten non-pool wallets is an exit risk the pool numbers can't show (chiefofstaff, #memecoins 74152)
-  const top10Pct = await (async () => {
-    const hs = sec?.holders ?? solSec?.gp?.holders;
-    if (!Array.isArray(hs) || !hs.length) return null;
-    // on robinhood, holders are classified by code and verified name: launch lockers and routers are not holders
-    // ($MDOG: 8.2% sat in PonsV2LaunchLocker and was counted as concentration)
-    const infra = chain === "robinhood" && !light ? await infraHolders(hs.slice(0, 12).map((h) => String(h.address).toLowerCase())) : [];
-    return top10Share(hs, [a, p.pairAddress, ...(sec?.dex ?? []).flatMap((d) => [d.pool_manager, d.pair]), ...infra]);
-  })();
-  if (top10Pct !== null && top10Pct >= 50) add(`top 10 holders own ${Math.round(top10Pct)}%`, 30);
-  else if (top10Pct !== null && top10Pct >= 30) add(`top 10 holders own ${Math.round(top10Pct)}%`, 20);
-  if (!liqKnown) add("no liquidity figure (bonding curve or unindexed pool)", 0);
-  const liqAt = flags.length; // the low-liquidity flag goes here once the exit is known (measured on v4 pools, below)
-  if (ageH !== null && ageH < 24) add(`pair ${ageH < 1 ? "<1h" : Math.round(ageH) + "h"} old`, ageH < 1 ? 15 : 10);
-  const hook = light ? null : await v4HookRead(p);
-  // capped: a hook that CAN change amounts is not proof that it does. alone it reads CAUTION; with other flags it can reach DANGER
-  let hookBudget = V4CFG.maxPoints ?? 50;
-  for (const r of hook?.scored ? hook.risk : []) { const pts = Math.min(r.pts, hookBudget); hookBudget -= pts; add(r.text, pts); }
-  const sim = hook?.key ? await simRead(p, hook.key, a) : null;
-  const prov = !light && chain === "robinhood" ? await provenanceRead(a) : null;
-  for (const f of sim?.scored ? sim.flags : []) add(f.text, f.pts, !!f.critical);
-
-  const deepest = n(p.liquidity?.usd) ?? 0;
-  const formula2 = Math.floor((0.02 * (deepest / 2)) / 0.98);
-  // on a v4 pool the exit is measured by selling on the live pool: a full-position figure (Doppler multicurve) overstates it
-  const exit = sim?.status === "ok" && hook?.key ? await exitRead(p, hook.key, a, formula2) : null;
-  // "low liquidity" judges what a seller can reach: with a measured exit, the depth that exit implies (2% size × 98),
-  // not the listed figure ($musemini: $9,987 listed read "low", ~$2k reachable is "very low")
-  if (liqKnown) {
-    const reach = exit ? Math.min(liquidity, exit.atLeast ? Infinity : exit.usd * 98) : liquidity;
-    const f = reach < 5000 ? ["very low liquidity", 25] : reach < 25000 ? ["low liquidity", 10] : null;
-    if (f) { flags.splice(liqAt, 0, f[0]); score += f[1]; }
-  }
-
-  score = Math.min(100, score);
-  const verdict = critical || score >= 60 ? "DANGER" : score >= 20 ? "CAUTION" : "OK";
-  const k = exit && formula2 > 0 ? exit.usd / formula2 : 1;
-  const maxSell2 = exit ? exit.usd : formula2;
-  const sellMax = (i) => Math.floor(((i * (deepest / 2)) / (1 - i)) * k);
-  return {
-    address: a, chain, symbol: p.baseToken?.symbol ?? "?", verdict, score, flags, liquidity, liqKnown, maxSell2, exit, contractScanned: !!(sec || solSec),
-    critical, url: p.url ?? null, ageH, at: Date.now(), price: n(p.priceUsd),
-    holders: n(sec?.holder_count ?? solSec?.gp?.holder_count),
-    top10Pct,
-    priceChange: { h1: n(p.priceChange?.h1), h6: n(p.priceChange?.h6), h24: n(p.priceChange?.h24) },
-    flowH1: { buys: n(p.txns?.h1?.buys) ?? 0, sells: n(p.txns?.h1?.sells) ?? 0 },
-    volume24h: n(p.volume?.h24), marketCap: n(p.marketCap) ?? n(p.fdv),
-    sellMax: { p1: sellMax(0.01), p2: sellMax(0.02), p5: sellMax(0.05) },
-    hook, sim, provenance: prov,
-  };
+let QC = null; // built on first use: the v4 / sim / provenance helpers below are defined later in this file
+/** @type {import("./core/types").QuickCheck} */
+async function quickCheck(address, opts = {}) {
+  QC ??= makeQuickCheck({
+    http, rpcFor, now: CLOCK, hookMaxPoints: () => V4CFG.maxPoints ?? 50, infraHolders, v4HookRead, simRead, exitRead, provenanceRead,
+    onForkSkipped: (a, info) => FORK_SKIPPED.set(a, info),
+  });
+  return QC(address, opts);
 }
 
 // ───────────────────────── Uniswap v4 hook read (musepad pools are v4; a hook is code that runs inside every swap) ─────────────────────────
@@ -2361,6 +2258,14 @@ async function main() {
     return;
   }
 
+  if (cmd === "checkjson") {
+    // the raw check result as JSON (no text, no posting): what fixtures record and replay tests compare
+    const c = await quickCheck(String(args[1] ?? ""));
+    const { at, ...stable } = c ?? { at: 0 };
+    console.log(JSON.stringify(c ? stable : null, null, 1));
+    if (HTTPFX?.misses?.length) console.error(`fixture misses: ${HTTPFX.misses.length}\n${HTTPFX.misses.slice(0, 5).join("\n")}`);
+    return;
+  }
   if (cmd === "try") {
     // Read-only: runs one command exactly as a mention would, prints the reply, posts nothing.
     //   node bot/musebot.mjs try "plan 0x… 250"   |   try "stock TSLA"   |   try "approvals 0x… base"
