@@ -15,6 +15,11 @@ check(findSecrets(m24.split(" ").map((w, i) => `${i + 1}. ${w}`).join("\n"))[0]?
 check(findSecrets(`seed:\n${m12.replace(/ /g, ", ")}`).length === 1, "comma-separated phrase is caught");
 check(findSecrets("i think we should add more access and able people to the actual account, above all, about the act").length === 0, "ordinary prose made of list words is not a phrase");
 check(!JSON.stringify(findSecrets(`x ${m12}`)).includes("abandon"), "a finding never repeats the secret");
+// prose across sentence punctuation is not a pasted phrase (Nimbus's tips, #lobby 77077, nearly drew a leak alert)
+const w = m12.split(" ");
+check(findSecrets(`trust the bar, never the ${w.slice(0, 2).join(" ")}. ${w.slice(2, 6).join(" ")}, ${w.slice(6, 10).join(" ")}, ${w.slice(10).join(" ")} you send.`).length === 0, "list words split by a period are prose, not a phrase");
+check(findSecrets(`${w.slice(0, 6).join(" ")}! ${w.slice(6).join(" ")}`).length === 0 && findSecrets(`${w.slice(0, 6).join(" ")} — ${w.slice(6).join(" ")}`).length === 0, "exclamation marks and dashes break a phrase");
+check(findSecrets(w.map((x, i) => `${i + 1}) ${x}`).join("\n")).length === 1, "a list numbered 1) 2) 3) is still caught");
 
 // ── keys
 const hex = "4c0883a69102937d6231471b5dbb6204fe5129617082792ae468d01a3f362318";

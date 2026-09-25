@@ -44,7 +44,12 @@ const API_KEYS = [
   [/\b\d{8,10}:AA[0-9A-Za-z_-]{33}\b/, "Telegram bot token"],
 ];
 
-/** Where a valid mnemonic sits in the text: [{ from, to }] character ranges, for masking. */
+// Between two words of a pasted phrase there are only spaces, commas, line breaks or list numbering ("1.", "2)").
+// Sentence punctuation (". ! ? ; :", dashes, quotes, apostrophes) means prose: Nimbus's security tips (#lobby 77077)
+// held 12 list words across a period and commas that passed the checksum by chance, and nearly drew a leak alert.
+const PHRASE_GAP = /^[\s,]*(?:\d{1,2}\s*[.):]\s*)?[\s,]*$/;
+
+/** Where a valid mnemonic sits in the text: [{ from, to, n }] character ranges (for masking), never the words. */
 export function mnemonicRanges(text) {
   const t = String(text ?? ""), { index } = bip39(), out = [];
   const toks = [...t.toLowerCase().matchAll(/[a-z]+/g)];
@@ -52,10 +57,16 @@ export function mnemonicRanges(text) {
   const flush = () => {
     for (const n of [24, 21, 18, 15, 12]) for (let s = 0; s + n <= run.length; s++) {
       const w = run.slice(s, s + n);
-      if (validMnemonic(w.map((m) => m[0]))) { out.push({ from: w[0].index, to: w[n - 1].index + w[n - 1][0].length }); return; }
+      if (validMnemonic(w.map((m) => m[0]))) { out.push({ from: w[0].index, to: w[n - 1].index + w[n - 1][0].length, n }); return; }
     }
   };
-  for (const m of toks) { if (index.has(m[0])) run.push(m); else { if (run.length >= 12) flush(); run = []; } }
+  let prev = null;
+  for (const m of toks) {
+    const joined = prev && PHRASE_GAP.test(t.slice(prev.index + prev[0].length, m.index));
+    if (!index.has(m[0])) { if (run.length >= 12) flush(); run = []; prev = null; continue; }
+    if (run.length && !joined) { if (run.length >= 12) flush(); run = []; }
+    run.push(m); prev = m;
+  }
   if (run.length >= 12) flush();
   return out;
 }
@@ -64,19 +75,8 @@ export function mnemonicRanges(text) {
 export function findSecrets(text) {
   const t = String(text ?? "");
   const out = [];
-  // recovery phrases: runs of list words, any separators (spaces, commas, numbering, line breaks)
-  const { index } = bip39();
-  const toks = [...t.toLowerCase().matchAll(/[a-z]+/g)];
-  let run = [];
-  const flush = () => {
-    for (const n of [24, 21, 18, 15, 12]) {
-      for (let s = 0; s + n <= run.length; s++) {
-        if (validMnemonic(run.slice(s, s + n).map((m) => m[0]))) { out.push({ kind: `recovery phrase (${n} words)`, severity: "critical", at: run[s].index }); return; }
-      }
-    }
-  };
-  for (const m of toks) { if (index.has(m[0])) run.push(m); else { if (run.length >= 12) flush(); run = []; } }
-  if (run.length >= 12) flush();
+  // recovery phrases: runs of list words joined only by spaces, commas, line breaks or numbering (see PHRASE_GAP)
+  for (const r of mnemonicRanges(t)) out.push({ kind: `recovery phrase (${r.n} words)`, severity: "critical", at: r.from });
   // private keys: 64 hex next to a word that says so (bare 64-hex is usually a tx hash or a sha256)
   const pk = t.match(/(private[\s_-]*key|priv[\s_-]*key|secret[\s_-]*key|signing[\s_-]*key|wallet[\s_-]*key|\bpk\b|"privateKey")["'\s:=]{0,6}(0x)?[0-9a-fA-F]{64}(?![0-9a-fA-F])/i);
   if (pk) out.push({ kind: "private key", severity: "critical", at: pk.index });
