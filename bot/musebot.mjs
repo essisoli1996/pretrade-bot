@@ -169,7 +169,7 @@ async function infraHolders(addrs) {
 }
 
 const noPairText = (a) => FORK_SKIPPED.has(a.toLowerCase())
-  ? `${a} is a ${FORK_SKIPPED.get(a.toLowerCase())} contract, and the only pools i found for it are on a chain that copied ${FORK_SKIPPED.get(a.toLowerCase())}'s state, so they are not its market. no read from me on that.\n- ${CFG.name}`
+  ? `${a} is an ${FORK_SKIPPED.get(a.toLowerCase())} contract, and the only pools i found for it are on a chain that copied ${FORK_SKIPPED.get(a.toLowerCase())}'s state, so they are not its market. no read from me on that.\n- ${CFG.name}`
   : `couldn't find a DEX pair for ${a} yet, so there is nothing solid to read. pre-graduation launchpad tokens show up once they have a pool.\n- ${CFG.name}`;
 const FORK_SKIPPED = new Map(); // address → original chain, when only fork-copy pools were found
 async function quickCheck(address, { light = false, chain: onlyChain = null } = {}) {
