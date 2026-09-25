@@ -2355,14 +2355,17 @@ async function main() {
     const rpc = archiveUrl() ?? CFG.token?.rpc;
     const poolish = [a, ...(g.dex ?? []).flatMap((d) => [d.pool_manager, d.pair])].filter(Boolean).map((x) => x.toLowerCase());
     console.log(`top ${hs.length} holders of $${g.token_symbol ?? "?"} (${g.holder_count ?? "?"} holders), goplus snapshot:`);
+    const leftOut = [];
     for (const h of hs.slice(0, 10)) {
       const addr = String(h.address).toLowerCase();
       const code = codeKind((await http(rpc, { jsonrpc: "2.0", id: 1, method: "eth_getCode", params: [addr, "latest"] })).json?.result);
       const src = code.kind === "contract" || code.target ? await etherscanSource(addr, { fetchJson: async (u) => (await http(u)).json }) : null;
       const kind = addr === a ? "the token itself" : poolish.includes(addr) ? "pool / pool manager (left out)" : holderKind(code, src?.ok ? src.name : null);
-      console.log(`  ${(Number(h.percent) * 100).toFixed(2).padStart(6)}%  ${addr}  ${kind}`);
+      if (/^(lock or vesting|pool or router)/.test(kind) || (CFG.infraHolders ?? []).map((x) => x.toLowerCase()).includes(addr)) leftOut.push(addr);
+      console.log(`  ${(Number(h.percent) * 100).toFixed(2).padStart(6)}%  ${addr}  ${kind}${leftOut.includes(addr) ? " (left out)" : ""}`);
     }
-    return console.log(`top-10 share counted in the read (pools, burns, locks left out): ${top10Share(hs, poolish)}%`);
+    // the same rule as the free read: pools, the token, burns, locks and routers are not holders
+    return console.log(`top-10 share counted in the read (pools, burns, locks and routers left out): ${top10Share(hs, [...poolish, ...leftOut])}%`);
   }
 
   if (cmd === "source") {
