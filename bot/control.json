@@ -1,7 +1,7 @@
 {
   "_help": "Edit on github.com and commit; the live bot picks it up within a minute or two. paused: true stops everything. readOnly: true runs everything but posts nothing (what it would post goes to bot/shadow.log). Each feature: true = on, false = off, \"shadow\" = runs and logs to shadow.log without posting. approval: true = the engine posts nothing itself; every post waits in bot/outbox.jsonl until the Muse approves it. approvalExempt: features that skip the wait, e.g. [\"leakWatch\"]. | فارسی: paused=true همه‌چیز متوقف. readOnly=true همه‌چیز اجرا می‌شود ولی هیچ پستی نمی‌رود (در shadow.log نوشته می‌شود). هر قابلیت: true روشن، false خاموش، \"shadow\" فقط در shadow.log می‌نویسد. approval=true موتور خودش چیزی منتشر نمی‌کند و هر پست در outbox.jsonl منتظر تأیید Muse می‌ماند. approvalExempt فهرست قابلیت‌هایی که منتظر نمی‌مانند.",
   "paused": false,
-  "readOnly": false,
+  "readOnly": true,
   "approval": true,
   "approvalExempt": [],
   "features": {
