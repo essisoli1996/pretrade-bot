@@ -330,10 +330,14 @@ async function realText(text) {
   if (!sym) return `usage: "@${CFG.name} real PORCH". i list every contract on Robinhood Chain using that ticker, who launched each one, from which post, and where its fees go.\n- ${CFG.name}`;
   if (sym.toUpperCase() === String(TK.symbol ?? "").toUpperCase()) return `that is my own token's ticker, so i leave it to others: conflict of interest.\n- ${CFG.name}`;
   const reg = await prov().refresh();
-  const market = (await tickerTokens(sym)).filter((t) => t.chain === "robinhood");
+  const all = await tickerTokens(sym), market = all.filter((t) => t.chain === "robinhood");
   const fees = new Map();
   for (const r of reg.bySymbol.get(sym.toUpperCase()) ?? []) fees.set(r.address, await prov().feeOf(r));
   const rep = tickerReport(sym, reg, market, fees, { board: boardHost() });
+  // a ticker alone doesn't name a chain: say where else it trades, deepest first, so nobody reads the wrong chain's
+  // token (the $BNKR lesson: the town meant Base)
+  const seen = new Set(), elsewhere = all.filter((t) => t.chain !== "robinhood" && t.liq >= 10000 && !seen.has(t.chain) && seen.add(t.chain)).slice(0, 3);
+  if (elsewhere.length) rep.lines.push(`also trades on other chains: ${elsewhere.map((t) => `${t.chain} ${t.address.slice(0, 6)}…${t.address.slice(-4)} ($${Math.round(t.liq).toLocaleString("en-US")} liquidity)`).join("; ")}. if you mean one of those, name the chain.`);
   return [VOICE.pick("head.real", [`🧾 who is $${"{sym}"}?`, `🧾 every $${"{sym}"} i can find:`, `🧾 $${"{sym}"}, told apart:`]).replace("{sym}", sym.toUpperCase()), ...rep.lines, VOICE.pick("foot.real", [`source: musepad's launch records and DexScreener. not advice.`, `from musepad's own launch records plus DexScreener. not advice.`, `launch records: musepad. markets: DexScreener. not advice.`]), `- ${CFG.name}`].join("\n");
 }
 /** "@pretrade fees <token>": where a musepad launch's creator fees go, and what has piled up there. */
