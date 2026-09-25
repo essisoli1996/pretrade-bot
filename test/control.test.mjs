@@ -6,7 +6,11 @@ let bad = 0;
 const check = (ok, label) => { console.log(`${ok ? "PASS" : "FAIL"}  ${label}`); if (!ok) bad++; };
 
 const shipped = normalize(JSON.parse(readFileSync(new URL("../bot/control.json", import.meta.url), "utf8")));
-check(!shipped.paused && !shipped.readOnly && FEATURES.every((f) => modeOf(shipped, f) === (["tickerWatch", "threatWatch"].includes(f) ? "shadow" : f === "conversation" ? "off" : "on")), "the shipped control.json: the Muse talks (engine conversation off), new watches in shadow");
+// the owner flips these switches at will, so the test only checks the file is well-formed, never which way they point
+const raw = JSON.parse(readFileSync(new URL("../bot/control.json", import.meta.url), "utf8"));
+check(["paused", "readOnly", "approval"].every((k) => typeof raw[k] === "boolean") && Object.entries(raw.features ?? {}).every(([f, v]) => FEATURES.includes(f) && [true, false, "shadow"].includes(v)) && FEATURES.every((f) => f in (raw.features ?? {})),
+  "the shipped control.json is well-formed: every switch set, every feature known, every value true / false / \"shadow\"");
+check(typeof shipped.paused === "boolean", "the shipped control.json normalizes");
 check(modeOf(normalize({ paused: true }), "mentions") === "off", "paused: everything off");
 check(FEATURES.every((f) => modeOf(normalize({ readOnly: true }), f) === "shadow"), "readOnly: everything runs in shadow");
 check(modeOf(normalize({ readOnly: true, features: { radar: false } }), "radar") === "off", "readOnly keeps a feature that is switched off, off");
