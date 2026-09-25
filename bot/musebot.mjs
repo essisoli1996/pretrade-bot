@@ -31,6 +31,7 @@ import { toDraft, parseOutbox, appendDraft, pendingDrafts } from "./outbox.mjs";
 import { loadJson, saveJson } from "./store.mjs";
 import { top10Share, holderKind } from "./holders.mjs";
 import { loadKeysFile, archiveUrl, redact, codeKind, etherscanSource } from "./archive.mjs";
+import { addressOnlyInLinks, LURE_TALK, dropForkCopies } from "./addrctx.mjs";
 import { makeProvenance, provenanceLines, tickerReport, reuseAlert } from "./provenance.mjs";
 import { makeVoice, tokenRead, lookupLead, digestText, launchAlertText, acceptOpener, OPENER_SYSTEM } from "./voice.mjs";
 import { findSecrets, mnemonicRanges, scanInstructions, isPublicUrl, PHISH_SYSTEM, phishFacts, parsePhishVerdict } from "./sentinel.mjs";
@@ -167,11 +168,21 @@ async function infraHolders(addrs) {
   return addrs.filter((x) => known.has(x) || /^(lock or vesting|permanent lock|pool or router)/.test(cache[x] ?? ""));
 }
 
+const noPairText = (a) => FORK_SKIPPED.has(a.toLowerCase())
+  ? `${a} is a ${FORK_SKIPPED.get(a.toLowerCase())} contract, and the only pools i found for it are on a chain that copied ${FORK_SKIPPED.get(a.toLowerCase())}'s state, so they are not its market. no read from me on that.\n- ${CFG.name}`
+  : `couldn't find a DEX pair for ${a} yet, so there is nothing solid to read. pre-graduation launchpad tokens show up once they have a pool.\n- ${CFG.name}`;
+const FORK_SKIPPED = new Map(); // address → original chain, when only fork-copy pools were found
 async function quickCheck(address, { light = false, chain: onlyChain = null } = {}) {
   const sol = isSol(address);
   const a = sol ? address : address.toLowerCase();
   const found = await http(`https://api.dexscreener.com/latest/dex/search?q=${a}`);
-  const pairs = (found.json?.pairs ?? []).filter((p) => (sol ? p?.baseToken?.address === a && p.chainId === "solana" : p?.baseToken?.address?.toLowerCase() === a) && (!onlyChain || p.chainId === onlyChain));
+  let pairs = (found.json?.pairs ?? []).filter((p) => (sol ? p?.baseToken?.address === a && p.chainId === "solana" : p?.baseToken?.address?.toLowerCase() === a) && (!onlyChain || p.chainId === onlyChain));
+  // a pool on a chain that copied Ethereum's state (pulsechain) is not the market of the Ethereum token at that address
+  if (!sol && pairs.length) {
+    const fork = await dropForkCopies(pairs, async (c) => { const r = await rpcFor(c)?.("eth_getCode", [a, "latest"]).catch(() => null); return r?.result === undefined ? null : r.result !== "0x"; });
+    pairs = fork.pairs;
+    if (fork.forkOf) FORK_SKIPPED.set(a, fork.forkOf);
+  }
   if (!pairs.length) return null; // wallet, pre-graduation token or unknown → stay silent
   pairs.sort((x, y) => (n(y.liquidity?.usd) ?? 0) - (n(x.liquidity?.usd) ?? 0));
   const p = pairs[0];
@@ -1926,7 +1937,7 @@ async function handleMentions(identity, state) {
     }
     if (state.replyTimes.length >= CFG.maxRepliesPerHour) break;
     const check = isOwnToken(addrs[0]) ? null : await quickCheck(addrs[0]);
-    const reply = isOwnToken(addrs[0]) ? `that is my own token, so i don't rate it: conflict of interest. raw data: https://dexscreener.com/${TK.chain}/${TK.address}\n- ${CFG.name}` : check ? replyText(check, await replyCtx("mention", who, text)) : `couldn't find a DEX pair for ${addrs[0]} yet, so there is nothing solid to read. pre-graduation launchpad tokens show up once they have a pool.\n- ${CFG.name}`;
+    const reply = isOwnToken(addrs[0]) ? `that is my own token, so i don't rate it: conflict of interest. raw data: https://dexscreener.com/${TK.chain}/${TK.address}\n- ${CFG.name}` : check ? replyText(check, await replyCtx("mention", who, text)) : noPairText(addrs[0]);
     if (check) recordVerdict(state, check, "mention");
     console.log(`\n→ on-demand reply to ${who} (#${m.channel} post ${id}):\n${reply}\n`);
     if (LIVE) {
@@ -1972,7 +1983,9 @@ async function pass(identity, state, indexOnly = false) {
       if (post.parent && state.ownPosts.includes(post.parent)) continue;
       const filed = new Set(Object.values(state.guard?.known ?? {}).flat().map((x) => String(x).toLowerCase()));
       const allAddrs = addressesIn(post.text);
-      const addrs = allAddrs.filter((x) => !state.tokens.includes(x) && !isOwnToken(x) && !filed.has(x.toLowerCase()));
+      // an address fed into a link (?contract=0x…) is someone's test input, and a phishing thread is no place for a token read
+      const addrs = allAddrs.filter((x) => !state.tokens.includes(x) && !isOwnToken(x) && !filed.has(x.toLowerCase()) && !addressOnlyInLinks(post.text, x));
+      if (LURE_TALK.test(post.text)) continue;
       let check = null, lead = "";
       if (addrs.length === 1) { check = await quickCheck(addrs[0]); if (check?.liqKnown === false) continue; } // unasked, and no liquidity figure: nothing solid to say
       else if (!allAddrs.length) {
@@ -2312,7 +2325,7 @@ async function main() {
     const c = t.match(/@\S+\s+(plan|stock|approvals|real|fees|skill)\b/i)?.[1]?.toLowerCase();
     const addr = !c ? addressesIn(t)[0] : null;
     const out = c === "plan" ? await planText(t) : c === "stock" ? await stockText(t) : c === "approvals" ? await approvalsText(t) : c === "real" ? await realText(t) : c === "fees" ? await feesText(t) : c === "skill" ? await skillText(t)
-      : addr ? await (async (q) => (q ? replyText(q, await replyCtx("mention", "tester", t)) : "nothing to say (no DEX pair)"))(await quickCheck(addr)) : "try supports: <token address>, plan, stock, approvals, real";
+      : addr ? await (async (q) => (q ? replyText(q, await replyCtx("mention", "tester", t)) : noPairText(addr)))(await quickCheck(addr)) : "try supports: <token address>, plan, stock, approvals, real";
     return console.log(out);
   }
 
