@@ -34,9 +34,15 @@ and explain the result to me in two sentences.
 ## قدم ۴: کار روزمره
 به Muse بگو هر ۲۰ تا ۳۰ دقیقه این کارها را بکند:
 ```
-Every 20-30 minutes: git pull, run inbox, answer what's waiting (check facts with "try" first),
+Every 20-30 minutes: git pull, run drafts (approve, edit or reject each), then inbox, answer what's waiting (check facts with "try" first),
 and send me a short summary of what you answered and any paid work offered.
 ```
+
+## تأیید پست‌ها (approval)
+در `bot/control.json` مقدار `"approval": true` روشن است. یعنی موتور هیچ پستی را خودش منتشر نمی‌کند. هر پستی که بخواهد بگذارد، به‌صورت «پیش‌نویس» در `bot/outbox.jsonl` می‌ماند تا Muse آن را با `drafts` ببیند و با `approve` منتشر کند، با `approve <id> --text "..."` اصلاح و منتشر کند، یا با `reject` کنار بگذارد.
+- **خاموش کردن:** `"approval": false`، تا موتور مثل قبل خودش پست بگذارد.
+- **استثنا برای هشدارهای فوری:** `"approvalExempt": ["leakWatch"]`، تا هشدار نشت کلید بدون معطلی منتشر شود.
+- پیش‌نویس‌ها تا وقتی Muse سر نزند منتظر می‌مانند. پس هر چه Muse زودتر سر بزند، جواب‌ها زودتر منتشر می‌شوند.
 
 ## کنترل‌ها همچنان دست توست
 - **توقف کامل هر دو (موتور و Muse):** در `bot/control.json` مقدار `"paused": true`. فرمان `say` در Muse هم این را رعایت می‌کند.

@@ -45,8 +45,10 @@ jobs:
             PRETRADE_DATA="$PWD/bot" node /tmp/code/bot/musebot.mjs serve --live --segment 5 --poll 20 2>&1 | tee /tmp/seg.log || sleep 30
             cat /tmp/seg.log >> bot/last-run.log; tail -n 300 bot/last-run.log > /tmp/l && mv /tmp/l bot/last-run.log; fi
             NOW=$(date +%s)
-            if ! grep -q " 0 replies\." /tmp/seg.log || [ $(( NOW - LAST_PUSH )) -ge 1800 ]; then
-              git add -f bot/.state.json bot/last-run.log; test -d bot/ledger && git add -f bot/ledger; test -d bot/radar && git add -f bot/radar; test -f bot/mentions.log && git add -f bot/mentions.log; test -f bot/shadow.log && git add -f bot/shadow.log; test -f bot/corrections.log && git add -f bot/corrections.log
+            OB=$(md5sum bot/outbox.jsonl 2>/dev/null)   # a new draft for the Muse goes out right away
+            if ! grep -q " 0 replies\." /tmp/seg.log || [ "$OB" != "${LAST_OB:-}" ] || [ $(( NOW - LAST_PUSH )) -ge 1800 ]; then
+              LAST_OB=$OB
+              git add -f bot/.state.json bot/last-run.log; test -d bot/ledger && git add -f bot/ledger; test -d bot/radar && git add -f bot/radar; test -f bot/mentions.log && git add -f bot/mentions.log; test -f bot/shadow.log && git add -f bot/shadow.log; test -f bot/outbox.jsonl && git add -f bot/outbox.jsonl; test -f bot/corrections.log && git add -f bot/corrections.log
               git diff --cached --quiet || { git commit -qm "state [skip ci]"; git pull -q --rebase -X theirs || git rebase --abort || true; git push -q || true; }
               LAST_PUSH=$NOW
             fi

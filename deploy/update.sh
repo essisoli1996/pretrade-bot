@@ -10,7 +10,7 @@ NEW=$(G rev-parse origin/main); CUR=$(G rev-parse HEAD)
 TMP=$(mktemp -d); trap 'rm -rf "$TMP"' EXIT
 G archive "$NEW" | tar -x -C "$TMP"
 cd "$TMP"
-for t in test/v4hooks.test.mjs test/sim.test.mjs test/txsim.test.mjs test/features.test.mjs test/talk.test.mjs test/control.test.mjs test/store.test.mjs test/provenance.test.mjs test/voice.test.mjs test/sentinel.test.mjs; do
+for t in test/v4hooks.test.mjs test/sim.test.mjs test/txsim.test.mjs test/features.test.mjs test/talk.test.mjs test/control.test.mjs test/outbox.test.mjs test/store.test.mjs test/provenance.test.mjs test/voice.test.mjs test/sentinel.test.mjs; do
   [ -f "$t" ] || continue
   if ! node "$t" >/tmp/pretrade-test.log 2>&1; then echo "update to ${NEW:0:7} refused: $t failed"; tail -5 /tmp/pretrade-test.log; exit 0; fi
 done

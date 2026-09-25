@@ -26,7 +26,8 @@ import { makeStocks } from "./stocks.mjs";
 import { makeApprovals } from "./approvals.mjs";
 import { makeTxSim, describeTxSim, parseTx } from "./txsim.mjs";
 import { TALK_INTENT, chainNamedIn, chainTheyMean, isPaymentUnit, looksLikeCorrection } from "./talk.mjs";
-import { makeControl, modeOf } from "./control.mjs";
+import { makeControl, modeOf, needsApproval } from "./control.mjs";
+import { toDraft, parseOutbox, appendDraft, pendingDrafts } from "./outbox.mjs";
 import { loadJson, saveJson } from "./store.mjs";
 import { makeProvenance, provenanceLines, tickerReport, reuseAlert } from "./provenance.mjs";
 import { makeVoice, tokenRead, lookupLead, digestText, launchAlertText, acceptOpener, OPENER_SYSTEM } from "./voice.mjs";
@@ -103,9 +104,20 @@ function shadowed(url, body) {
   console.log(`  [shadow: ${FEATURE}] not posted, logged to shadow.log`);
   return { ok: true, status: 299, json: { ok: true, post: { id: null, shadow: true } }, text: "shadow" };
 }
+// With approval on, a post the engine makes waits in outbox.jsonl for pretrade's Muse (drafts / approve / reject).
+// DESK_POSTING marks the Muse's own posting (say, approve), which is the approval itself.
+let DESK_POSTING = false;
+const OUTBOX = join(DATA, "outbox.jsonl");
+function heldForApproval(url, body) {
+  if (!body || !/\/api\/post$/.test(url) || DESK_POSTING || !needsApproval(CONTROL, FEATURE)) return null;
+  const draft = toDraft(body, FEATURE);
+  writeFileSync(OUTBOX, appendDraft(existsSync(OUTBOX) ? readFileSync(OUTBOX, "utf8") : "", draft));
+  console.log(`  [approval] draft ${draft.id} (${FEATURE ?? "engine"}) waits for the Muse in outbox.jsonl`);
+  return { ok: true, status: 299, json: { ok: true, post: { id: null, draft: draft.id } }, text: "draft" };
+}
 
 async function http(url, body) {
-  const held = shadowed(url, body); if (held) return held;
+  const held = shadowed(url, body) ?? heldForApproval(url, body); if (held) return held;
   const ctrl = new AbortController();
   const t = setTimeout(() => ctrl.abort(), 12000);
   try {
@@ -2157,7 +2169,17 @@ async function main() {
     const live = shadowed(`${BOARD}/api/post`, { channel: "memecoins", text: "x" });
     const log = readFileSync(join(DATA, "shadow.log"), "utf8").trim().split("\n").pop();
     const ok = r.status === 299 && r.ok && !live && JSON.parse(log).text === "shadow test";
-    console.log(ok ? "shadow test: PASS" : `shadow test: FAIL ${JSON.stringify(r)}`); process.exit(ok ? 0 : 1);
+    console.log(ok ? "shadow test: PASS" : `shadow test: FAIL ${JSON.stringify(r)}`);
+    // approval: an engine post becomes a draft in outbox.jsonl; the Muse's own posting is never held; exempt features pass
+    CONTROL = { paused: false, readOnly: false, approval: true, approvalExempt: ["leakWatch"], features: {} };
+    FEATURE = "mentions";
+    const a = await http(`${BOARD}/api/post`, { channel: "lobby", parent_post_id: 7, text: "approval test", signature: "never-stored" });
+    const draft = parseOutbox(readFileSync(OUTBOX, "utf8")).pop();
+    DESK_POSTING = true; const desk = heldForApproval(`${BOARD}/api/post`, { channel: "lobby", text: "y" }); DESK_POSTING = false;
+    FEATURE = "leakWatch"; const exempt = heldForApproval(`${BOARD}/api/post`, { channel: "lobby", text: "z" });
+    const ok2 = a.status === 299 && a.json.post.draft === draft?.id && draft.reply_to === 7 && draft.text === "approval test" && !JSON.stringify(draft).includes("never-stored") && !desk && !exempt;
+    console.log(ok2 ? "approval test: PASS" : `approval test: FAIL ${JSON.stringify({ a, draft, desk, exempt })}`);
+    process.exit(ok && ok2 ? 0 : 1);
   }
 
   if (cmd === "convprobe") {
@@ -2282,6 +2304,7 @@ async function main() {
   // the identity: MUSE_IDENTITY (CI secret), MUSE_IDENTITY_FILE (a file kept outside the repo, e.g. on the Muse's VM), or bot/.identity.json
   const identity = process.env.MUSE_IDENTITY ? JSON.parse(process.env.MUSE_IDENTITY) : process.env.MUSE_IDENTITY_FILE ? loadJson(process.env.MUSE_IDENTITY_FILE, null) : loadJson(ID_FILE, null);
   if (!identity) return console.log("No identity yet. Run: node bot/musebot.mjs keygen");
+  CONTROL = await CONTROL_SRC.get(); // every command that can post honours the owner's switches (approval included)
   const MUSE_ID_FILE = join(HERE, "muse_id.txt"); // public id, safe to commit; lets CI keep the secret immutable
   if (!identity.muse_id && existsSync(MUSE_ID_FILE)) identity.muse_id = readFileSync(MUSE_ID_FILE, "utf8").trim() || null;
 
@@ -2360,23 +2383,80 @@ async function main() {
     return;
   }
 
-  if (cmd === "say") {
-    // Post as pretrade.  node bot/musebot.mjs say <channel> [--reply <postId>] [--force] "<text>"
-    // Guards: the owner's pause switch, no secrets in the text, no second reply to the same post, the signature line.
-    const ch = args[1], ri = args.indexOf("--reply"), replyTo = ri >= 0 ? Number(args[ri + 1]) : null;
-    const text = args.slice(2).filter((x, i, all) => !["--reply", "--force", "--dry"].includes(x) && all[i - 1] !== "--reply").join(" ").trim();
-    if (!ch || !text) return console.log(`usage: say <channel> [--reply <postId>] "<text>"`);
-    const control = await CONTROL_SRC.get();
-    if (control.paused) return console.log("NOT POSTED: the owner has paused pretrade (bot/control.json).");
-    if (findSecrets(text).length) return console.log("NOT POSTED: the text contains something that looks like a key or seed phrase.");
-    if (replyTo && !args.includes("--force") && (await repliedByMe(replyTo)).mine) return console.log(`NOT POSTED: pretrade already replied to post ${replyTo} (use --force to add another).`);
+  // Posting as pretrade from the Muse's desk. Guards: the owner's pause and read-only switches, no secrets in the text,
+  // no second reply to the same post, the signature line. Returns the post id, or null with the reason printed.
+  const deskPost = async (ch, replyTo, text, { force = false, dry = false } = {}) => {
+    if (CONTROL.paused) return console.log("NOT POSTED: the owner has paused pretrade (bot/control.json)."), null;
+    if (findSecrets(text).length) return console.log("NOT POSTED: the text contains something that looks like a key or seed phrase."), null;
+    if (replyTo && !force && (await repliedByMe(replyTo)).mine) return console.log(`NOT POSTED: pretrade already replied to post ${replyTo} (use --force to add another).`), null;
     const body = /\n- pretrade\s*$/i.test(text) ? text : `${text}\n- ${CFG.name}`;
-    if (control.readOnly || args.includes("--dry")) return console.log(`NOT POSTED (${control.readOnly ? "read-only mode" : "--dry"}). would have posted${replyTo ? ` under ${replyTo}` : ""} in #${ch}:\n${body}`);
-    const r = replyTo ? await postReply(identity, ch, replyTo, body) : await http(`${BOARD}/api/post`, signRequest("post", identity, { channel: ch, name: CFG.name, text: body }));
-    if (r.ok && r.json?.post?.id) { const d = loadJson(DESK, {}); d.posts = [...(d.posts ?? []), r.json.post.id].slice(-2000); saveJson(DESK, d); }
-    return console.log(r.ok ? `posted: ${BOARD}/p/${r.json?.post?.id}` : `FAILED: HTTP ${r.status} ${String(r.text).slice(0, 200)}`);
+    if (CONTROL.readOnly || dry) return console.log(`NOT POSTED (${CONTROL.readOnly ? "read-only mode" : "--dry"}). would have posted${replyTo ? ` under ${replyTo}` : ""} in #${ch}:\n${body}`), null;
+    DESK_POSTING = true;
+    try {
+      const r = replyTo ? await postReply(identity, ch, replyTo, body) : await http(`${BOARD}/api/post`, signRequest("post", identity, { channel: ch, name: CFG.name, text: body }));
+      const id = r.ok ? r.json?.post?.id : null;
+      if (id) { const d = loadJson(DESK, {}); d.posts = [...(d.posts ?? []), id].slice(-2000); saveJson(DESK, d); }
+      console.log(id ? `posted: ${BOARD}/p/${id}` : `FAILED: HTTP ${r.status} ${String(r.text).slice(0, 200)}`);
+      return id;
+    } finally { DESK_POSTING = false; }
+  };
+  const flagArgs = (from) => args.slice(from).filter((x, i, all) => !["--reply", "--force", "--dry", "--text"].includes(x) && all[i - 1] !== "--reply");
+
+  if (cmd === "say") {
+    // Post as pretrade.  node bot/musebot.mjs say <channel> [--reply <postId>] [--force] [--dry] "<text>"
+    const ch = args[1], ri = args.indexOf("--reply"), replyTo = ri >= 0 ? Number(args[ri + 1]) : null;
+    const text = flagArgs(2).join(" ").trim();
+    if (!ch || !text) return console.log(`usage: say <channel> [--reply <postId>] "<text>"`);
+    await deskPost(ch, replyTo, text, { force: args.includes("--force"), dry: args.includes("--dry") });
+    return;
   }
 
+  // ── the approval outbox: what the engine wanted to post, waiting for the Muse (bot/outbox.mjs)
+  const readOutbox = async () => {
+    try { const r = await fetch(process.env.OUTBOX_URL || "https://raw.githubusercontent.com/essisoli1996/pretrade-bot/main/bot/outbox.jsonl", { signal: AbortSignal.timeout(10000) }); if (r.ok) return parseOutbox(await r.text()); } catch {}
+    return parseOutbox(existsSync(OUTBOX) ? readFileSync(OUTBOX, "utf8") : "");
+  };
+  const decide = (id, decision, extra = {}) => { const d = loadJson(DESK, {}); d.drafts = { ...(d.drafts ?? {}), [id]: { decision, at: new Date().toISOString(), ...extra } }; saveJson(DESK, d); };
+  const findDraft = async (id) => (await readOutbox()).find((d) => d.id === id) ?? null;
+
+  if (cmd === "drafts") {
+    // Engine posts waiting for approval, oldest first.  node bot/musebot.mjs drafts [hours]
+    const hours = Number(args[1] ?? 24), all = await readOutbox();
+    const waiting = pendingDrafts(all, loadJson(DESK, {}).drafts ?? {}, Date.now() - hours * 36e5);
+    if (!CONTROL.approval) console.log("(approval is OFF in bot/control.json: the engine is posting on its own right now)\n");
+    for (const d of waiting) {
+      const ageMin = Math.round((Date.now() - Date.parse(d.t)) / 6e4);
+      console.log(`──── draft ${d.id} · ${d.feature ?? "engine"} · #${d.channel}${d.reply_to ? ` · reply to ${d.reply_to}` : " · new post"} · ${ageMin < 90 ? `${ageMin} min` : `${Math.round(ageMin / 60)} h`} old`);
+      if (d.reply_to) {
+        const { node, mine } = await repliedByMe(d.reply_to);
+        if (mine) { decide(d.id, "moot", { why: "already replied there" }); console.log("(pretrade already replied there: marked moot)\n"); continue; }
+        if (node) console.log(`answering ${node.name}: ${String(node.text).replace(/\s+/g, " ").slice(0, 300)}`);
+      }
+      if (ageMin > 60 && /liquidity|impact|\$[\d,]+|risk \d/i.test(d.text)) console.log("⚠ numbers in this draft may have moved: re-run try before approving.");
+      console.log(`${d.text.trim()}\n→ approve ${d.id}   |   approve ${d.id} --text "<edited text>"   |   reject ${d.id} "<why>"\n`);
+    }
+    return console.log(waiting.length ? `${waiting.length} draft(s) waiting (of ${all.length} in the outbox).` : "no drafts waiting.");
+  }
+
+  if (cmd === "approve") {
+    // Publish a draft as-is or edited.  node bot/musebot.mjs approve <id> [--text "<edited text>"] [--dry]
+    const d = await findDraft(args[1]);
+    if (!d) return console.log(`no draft ${args[1]} in the outbox (git pull, or it scrolled out).`);
+    const prior = (loadJson(DESK, {}).drafts ?? {})[d.id];
+    if (prior && !args.includes("--force")) return console.log(`draft ${d.id} was already decided: ${prior.decision} at ${prior.at} (use --force to post anyway).`);
+    const ti = args.indexOf("--text"), edited = ti >= 0 ? args.slice(ti + 1).filter((x) => !["--dry", "--force"].includes(x)).join(" ").trim() : "";
+    const id = await deskPost(d.channel, d.reply_to, edited || d.text, { dry: args.includes("--dry") });
+    if (id) decide(d.id, edited ? "edited" : "approved", { post: id });
+    return;
+  }
+
+  if (cmd === "reject") {
+    // Drop a draft; nothing is posted.  node bot/musebot.mjs reject <id> "<why>"
+    const d = await findDraft(args[1]);
+    if (!d) return console.log(`no draft ${args[1]} in the outbox.`);
+    decide(d.id, "rejected", { why: args.slice(2).join(" ").slice(0, 300) });
+    return console.log(`rejected draft ${d.id}: nothing posted.`);
+  }
 
   if (cmd === "intro") {
     if (identity.muse_id) return console.log(`Already registered as ${identity.muse_id}.`);
