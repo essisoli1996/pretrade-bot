@@ -2300,6 +2300,17 @@ async function main() {
     return;
   }
 
+  if (cmd === "rpcprobe") {
+    // Read-only. Which Robinhood Chain RPCs serve archive state? For each URL: chain id, head block, and the code of the
+    // real $PORCH at block 71733378 (the Patch packet's block).  node bot/musebot.mjs rpcprobe <url> [url ...]
+    const PORCH = "0x4B434541873f171aB70D7d2F3a48b0f0b0f13ba3", AT = "0x" + (71733378).toString(16);
+    for (const url of args.slice(1)) {
+      const call = async (method, params) => { const t0 = Date.now(); const r = await http(url, { jsonrpc: "2.0", id: 1, method, params }); return `${r.json?.result !== undefined ? JSON.stringify(r.json.result).slice(0, 70) : `ERR ${r.status} ${JSON.stringify(r.json?.error ?? r.text).slice(0, 120)}`} (${Date.now() - t0} ms)`; };
+      console.log(`== ${url}\n  chainId: ${await call("eth_chainId", [])}\n  head:    ${await call("eth_blockNumber", [])}\n  code at 71733378: ${await call("eth_getCode", [PORCH, AT])}\n  code at block 1000000: ${await call("eth_getCode", [PORCH, "0xf4240"])}`);
+    }
+    return;
+  }
+
   if (cmd === "hooks") {
     // Read-only. Shows the v4 hook of $PTRD and of recent musepad launches, and which of them match the standard
     // launchpad hook. Run it before trusting the hook score:  node bot/musebot.mjs hooks [address ...]
