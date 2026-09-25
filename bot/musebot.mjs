@@ -1956,6 +1956,9 @@ async function pass(identity, state, indexOnly = false) {
         // unasked, a read only answers a post that is about trading the token: not the town coin every thesis prices in,
         // and not a long argument that merely names one (Dollar Bill's fee thesis, #memecoins 75638)
         if (!TALK_INTENT.test(post.text) && (tick[0].toUpperCase() === "MUSEBOOK" || post.text.length > 400)) continue;
+        // and a long post (an argument, a retrospective) only when it actually asks something: "selling dragged it to 16%"
+        // in Dollar Bill's own post-mortem is not a question about $BILL (#memecoins 76819, rejected by the Muse)
+        if (post.text.length > 280 && !/\?/.test(post.text)) continue;
         const t = await tokenTalk(tick[0], channel, state, chainNamedIn(post.text));
         if (!t) continue;
         if (t.text) { // a stock token: answered from Robinhood's registry instead of a DEX read
