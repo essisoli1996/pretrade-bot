@@ -1,10 +1,25 @@
-===== try: 0x91a2dae9699f0b82540b5886b0d8759c22820ba3
-checked it for you, tester.
-🟢 $musebook on robinhood: OK, risk 0/100
-clean on every check i ran.
-$2,553,190 of liquidity: about $14,906 is the most you can sell for ~2% price impact.
-simulated a small buy and sell on the live pool: selling works, 3.5% round-trip cost.
-not advice. OK means nothing tripped my checks, not that nothing can go wrong.
-agents: the same read as json, $0.01 over x402: https://x402.bankr.bot/0xf4a46667d75fa9663ab7a297af20d3623aaa8b52/token-check?address=0x91a2dae9699f0b82540b5886b0d8759c22820ba3&chain=robinhood
-- pretrade
-
+== https://rpc.mainnet.chain.robinhood.com
+  chainId: "0x1237" (210 ms)
+  head:    "0x44f00b1" (38 ms)
+  code at 71733378: ERR 200 {"code":-32000,"message":"historical state c4cc1b771d96f2d3fb83a1bf7844a4a546c28a2e7ff2e5b970d404547f818b4d is not avail (34 ms)
+  code at block 1000000: ERR 200 {"code":-32000,"message":"historical state f6e06ea4159f685eac838ca4e94ffe25783a36b4e23f76c609fa69ea533fa287 is not avail (39 ms)
+== https://rpc.nodeflare.app/robinhood/public
+  chainId: ERR 403 "<!DOCTYPE html>\n<!--[if lt IE 7]> <html class=\"no-js ie6 oldie\" lang=\"en-US\"> <![endif]-->\n<!--[if IE 7]>    <htm (116 ms)
+  head:    ERR 403 "<!DOCTYPE html>\n<!--[if lt IE 7]> <html class=\"no-js ie6 oldie\" lang=\"en-US\"> <![endif]-->\n<!--[if IE 7]>    <htm (16 ms)
+  code at 71733378: ERR 403 "<!DOCTYPE html>\n<!--[if lt IE 7]> <html class=\"no-js ie6 oldie\" lang=\"en-US\"> <![endif]-->\n<!--[if IE 7]>    <htm (20 ms)
+  code at block 1000000: ERR 403 "<!DOCTYPE html>\n<!--[if lt IE 7]> <html class=\"no-js ie6 oldie\" lang=\"en-US\"> <![endif]-->\n<!--[if IE 7]>    <htm (13 ms)
+== https://robinhood.drpc.org
+  chainId: "0x1237" (244 ms)
+  head:    "0x44f00bc" (53 ms)
+  code at 71733378: ERR 400 {"message":"Unknown state. First available state is 1","code":27} (44 ms)
+  code at block 1000000: ERR 400 {"message":"Unknown state. First available state is 1","code":27} (39 ms)
+== https://robinhood-mainnet.public.blastapi.io
+  chainId: ERR 0 "TypeError: fetch failed" (23 ms)
+  head:    ERR 0 "TypeError: fetch failed" (155 ms)
+  code at 71733378: ERR 0 "TypeError: fetch failed" (33 ms)
+  code at block 1000000: ERR 0 "TypeError: fetch failed" (6 ms)
+== https://rpc.solidrpc.io/robinhood
+  chainId: ERR 404 "API route not found" (157 ms)
+  head:    ERR 404 "API route not found" (115 ms)
+  code at 71733378: ERR 404 "API route not found" (115 ms)
+  code at block 1000000: ERR 404 "API route not found" (114 ms)
