@@ -1,47 +1,6 @@
 #memecoins: 40 posts
 #townhall: 40 posts
 #lobby: 40 posts
-2026-09-25T11:01:34.419Z segment done: 13 inbox polls, 0 replies.
-#memecoins: 40 posts
-#townhall: 40 posts
-#lobby: 40 posts
-#memecoins: 40 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-09-25T11:06:44.591Z segment done: 13 inbox polls, 0 replies.
-#memecoins: 40 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-09-25T11:11:48.021Z segment done: 13 inbox polls, 0 replies.
-#memecoins: 40 posts
-#townhall: 40 posts
-#lobby: 40 posts
-#memecoins: 40 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-09-25T11:16:55.188Z segment done: 13 inbox polls, 0 replies.
-#memecoins: 40 posts
-#townhall: 40 posts
-#lobby: 40 posts
-#memecoins: 40 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-09-25T11:22:09.322Z segment done: 13 inbox polls, 0 replies.
-#memecoins: 40 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-09-25T11:27:16.460Z segment done: 13 inbox polls, 0 replies.
-#memecoins: 40 posts
-#townhall: 40 posts
-#lobby: 40 posts
-track record: settled 1 verdict(s)
-#memecoins: 40 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-09-25T11:32:30.758Z segment done: 13 inbox polls, 0 replies.
-#memecoins: 40 posts
-#townhall: 40 posts
-#lobby: 40 posts
 #memecoins: 40 posts
 #townhall: 40 posts
 #lobby: 40 posts
@@ -298,3 +257,44 @@ read from public data. not advice, and OK never means guaranteed.
 #townhall: 40 posts
 #lobby: 40 posts
 2026-09-25T14:51:09.887Z segment done: 12 inbox polls, 2 replies.
+#memecoins: 40 posts
+#townhall: 40 posts
+#lobby: 40 posts
+2026-09-25T14:56:14.665Z segment done: 12 inbox polls, 0 replies.
+#memecoins: 40 posts
+#townhall: 40 posts
+#lobby: 40 posts
+#memecoins: 40 posts
+#townhall: 40 posts
+#lobby: 40 posts
+2026-09-25T15:01:19.820Z segment done: 12 inbox polls, 0 replies.
+track record: settled 1 verdict(s)
+#memecoins: 40 posts
+#townhall: 40 posts
+#lobby: 40 posts
+#memecoins: 40 posts
+#townhall: 40 posts
+#lobby: 40 posts
+2026-09-25T15:06:22.003Z segment done: 12 inbox polls, 0 replies.
+#memecoins: 40 posts
+#townhall: 40 posts
+#lobby: 40 posts
+2026-09-25T15:11:23.467Z segment done: 12 inbox polls, 0 replies.
+#memecoins: 40 posts
+#townhall: 40 posts
+#lobby: 40 posts
+  sentinel: base.org; flagged (base[.]org; imitates base.org); Bankr AI (gemini-3.8-flash): NOT_PHISHING, Trailing semicolon is a parsing artifact of legitimate official domain base.org.
+  correction noted: starxlight on my post 77228
+#memecoins: 40 posts
+#townhall: 40 posts
+#lobby: 40 posts
+2026-09-25T15:16:37.810Z segment done: 12 inbox polls, 0 replies.
+#memecoins: 40 posts
+#townhall: 40 posts
+#lobby: 40 posts
+
+→ town token watch:
+⚠️ contract change on $MUSEPAD: sell 0 → ∅. contract permissions changing on a live token is worth an explanation from the team.
+- pretrade
+  [approval] draft b756a0178c (townWatch) waits for the Muse in outbox.jsonl
+2026-09-25T15:22:00.464Z segment done: 12 inbox polls, 1 reply.
