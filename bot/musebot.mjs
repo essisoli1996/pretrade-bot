@@ -93,21 +93,23 @@ function signedQuery(endpoint, identity, trailingNewline) {
 
 // The owner's switches (bot/control.json). FEATURE names the part of the bot that is running right now, so a post can
 // be held back per feature: in "shadow" mode it is written to shadow.log and reported as posted, exactly as if it went out.
-let CONTROL = { paused: false, readOnly: false, features: {} }, FEATURE = null;
+let CONTROL = { paused: false, readOnly: false, features: {} }, FEATURE = null, DESK_POSTING = false;
 const CONTROL_SRC = makeControl({
   fetchText: async () => { const r = await fetch(process.env.CONTROL_URL || "https://raw.githubusercontent.com/essisoli1996/pretrade-bot/main/bot/control.json", { signal: AbortSignal.timeout(8000) }); return r.ok ? r.text() : null; },
   readLocal: async () => readFileSync(join(HERE, "control.json"), "utf8"),
 });
 function shadowed(url, body) {
   if (!body || !/\/api\/post$/.test(url) || !FEATURE || modeOf(CONTROL, FEATURE) !== "shadow") return null;
+  // read-only with approval on: the post still goes to the Muse's outbox (which never posts by itself), so the Muse keeps
+  // reviewing real drafts while posting is off. A feature switched to "shadow" on its own stays in shadow.log.
+  if (CONTROL.readOnly && needsApproval(CONTROL, FEATURE) && CONTROL.features?.[FEATURE] !== "shadow" && !DESK_POSTING) return null;
   const line = JSON.stringify({ t: new Date().toISOString(), feature: FEATURE, channel: body.channel, reply_to: body.parent_post_id ?? null, text: body.text });
   writeFileSync(join(DATA, "shadow.log"), (existsSync(join(DATA, "shadow.log")) ? readFileSync(join(DATA, "shadow.log"), "utf8").split("\n").slice(-400).join("\n") : "") + line + "\n");
   console.log(`  [shadow: ${FEATURE}] not posted, logged to shadow.log`);
   return { ok: true, status: 299, json: { ok: true, post: { id: null, shadow: true } }, text: "shadow" };
 }
 // With approval on, a post the engine makes waits in outbox.jsonl for pretrade's Muse (drafts / approve / reject).
-// DESK_POSTING marks the Muse's own posting (say, approve), which is the approval itself.
-let DESK_POSTING = false;
+// DESK_POSTING (declared above) marks the Muse's own posting (say, approve), which is the approval itself.
 const OUTBOX = join(DATA, "outbox.jsonl");
 function heldForApproval(url, body) {
   if (!body || !/\/api\/post$/.test(url) || DESK_POSTING || !needsApproval(CONTROL, FEATURE)) return null;
@@ -2188,7 +2190,13 @@ async function main() {
     const draft = parseOutbox(readFileSync(OUTBOX, "utf8")).pop();
     DESK_POSTING = true; const desk = heldForApproval(`${BOARD}/api/post`, { channel: "lobby", text: "y" }); DESK_POSTING = false;
     FEATURE = "leakWatch"; const exempt = heldForApproval(`${BOARD}/api/post`, { channel: "lobby", text: "z" });
-    const ok2 = a.status === 299 && a.json.post.draft === draft?.id && draft.reply_to === 7 && draft.text === "approval test" && !JSON.stringify(draft).includes("never-stored") && !desk && !exempt;
+    // read-only + approval: engine posts still reach the outbox; a feature in its own shadow mode stays in shadow.log
+    CONTROL = { paused: false, readOnly: true, approval: true, approvalExempt: [], features: { tickerWatch: "shadow" } };
+    FEATURE = "channels"; const ro = await http(`${BOARD}/api/post`, { channel: "memecoins", text: "read-only draft" });
+    FEATURE = "tickerWatch"; const sh = await http(`${BOARD}/api/post`, { channel: "memecoins", text: "shadow only" });
+    const roOk = ro.json.post.draft && parseOutbox(readFileSync(OUTBOX, "utf8")).some((d) => d.text === "read-only draft") && sh.json.post.shadow && !parseOutbox(readFileSync(OUTBOX, "utf8")).some((d) => d.text === "shadow only");
+    console.log(roOk ? "read-only drafts test: PASS" : `read-only drafts test: FAIL ${JSON.stringify({ ro, sh })}`);
+    const ok2 = roOk && a.status === 299 && a.json.post.draft === draft?.id && draft.reply_to === 7 && draft.text === "approval test" && !JSON.stringify(draft).includes("never-stored") && !desk && !exempt;
     console.log(ok2 ? "approval test: PASS" : `approval test: FAIL ${JSON.stringify({ a, draft, desk, exempt })}`);
     process.exit(ok && ok2 ? 0 : 1);
   }
