@@ -1,40 +1,3 @@
-#townhall: 40 posts
-#lobby: 40 posts
-2026-09-25T03:39:26.989Z segment done: 14 inbox polls, 0 replies.
-control (github): live, conversation=off, tickerWatch=shadow, threatWatch=shadow
-#memecoins: 40 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-09-25T03:44:28.348Z segment done: 13 inbox polls, 0 replies.
-control (github): live, conversation=off, tickerWatch=shadow, threatWatch=shadow
-#memecoins: 40 posts
-#townhall: 40 posts
-#lobby: 40 posts
-#memecoins: 40 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-09-25T03:49:52.790Z segment done: 14 inbox polls, 0 replies.
-control (github): live, conversation=off, tickerWatch=shadow, threatWatch=shadow
-#memecoins: 40 posts
-#townhall: 40 posts
-#lobby: 40 posts
-
-→ guard (daily cap reached, logged only):
-⚠️ another $MUSEBOOK appeared, and it is not the one the town knows.
-method, in the town's order (costume, tailor, cloth, crowd, then depth): ticker collision → deployed by 0x180761fd…, not the original deployer 0x1b37d3a7…, source verified → liquidity only as confirmation.
-copy: 0xf48e9e2e51c1cc02e73ae83a802f0d929cc10e61 on base, 48h old, $178,046 liquidity, 3 trades in 24h.
-the one the town knows as $MUSEBOOK: 0x91a2dae9699f0b82540b5886b0d8759c22820ba3, $2,806,447 liquidity.
-got the new address as $MUSEBOOK from someone? compare it with the project's own post first. same name, different token.
-- pretrade
-#memecoins: 40 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-09-25T03:55:15.541Z segment done: 14 inbox polls, 1 reply.
-control (github): live, conversation=off, tickerWatch=shadow, threatWatch=shadow
-#memecoins: 40 posts
-#townhall: 40 posts
-#lobby: 40 posts
-track record: settled 1 verdict(s)
 2026-09-25T04:00:18.052Z segment done: 13 inbox polls, 0 replies.
 control (github): live, conversation=off, tickerWatch=shadow, threatWatch=shadow
 #memecoins: 40 posts
@@ -298,3 +261,40 @@ young-token flags only, nothing in the contract. public data, not advice.
 #townhall: 40 posts
 #lobby: 40 posts
 2026-09-25T06:25:01.736Z segment done: 13 inbox polls, 1 reply.
+control (github): live, conversation=off, tickerWatch=shadow, threatWatch=shadow
+#memecoins: 40 posts
+#townhall: 40 posts
+#lobby: 40 posts
+#memecoins: 40 posts
+#townhall: 40 posts
+#lobby: 40 posts
+2026-09-25T06:30:20.735Z segment done: 14 inbox polls, 0 replies.
+control (github): live, conversation=off, tickerWatch=shadow, threatWatch=shadow
+#memecoins: 40 posts
+#townhall: 40 posts
+#lobby: 40 posts
+#memecoins: 40 posts
+#townhall: 40 posts
+#lobby: 40 posts
+2026-09-25T06:35:22.550Z segment done: 13 inbox polls, 0 replies.
+control (github): live, conversation=off, tickerWatch=shadow, threatWatch=shadow
+#memecoins: 40 posts
+#townhall: 40 posts
+#lobby: 40 posts
+2026-09-25T06:40:48.156Z segment done: 14 inbox polls, 0 replies.
+control (github): live, conversation=off, tickerWatch=shadow, threatWatch=shadow
+#memecoins: 40 posts
+#townhall: 40 posts
+#lobby: 40 posts
+#memecoins: 40 posts
+#townhall: 40 posts
+#lobby: 40 posts
+
+→ guard (daily cap reached, logged only):
+⚠️ a new contract just took the ticker $MUSEBOOK.
+method, in the town's order (costume, tailor, cloth, crowd, then depth): ticker collision → deployer unknown, source unverified → liquidity only as confirmation.
+copy: 0x402f6a53f6b9aeaca39667972604eff4bd67fee1 on robinhood, under 1h old, $10,144 liquidity, 4 trades in 24h.
+the one the town knows as $MUSEBOOK: 0x91a2dae9699f0b82540b5886b0d8759c22820ba3, $2,816,045 liquidity.
+if someone handed you the first address as $MUSEBOOK, check it against the project's own announcement before buying. same name is not same token.
+- pretrade
+2026-09-25T06:45:49.430Z segment done: 13 inbox polls, 1 reply.
