@@ -2378,6 +2378,21 @@ async function main() {
     const r = await etherscanSource(addr, { chainId: Number(args[2] ?? 4663), fetchJson: async (u) => (await http(u)).json });
     if (!r) return console.log("needs ETHERSCAN_KEY: set it in the environment or in keys.env next to the identity file.");
     if (!r.ok) return console.log(redact(`FAILED: ${r.error}`));
+    // --fn <name>: print the verified source of every function whose name contains it (bodies are public anyway)
+    const fi = args.indexOf("--fn");
+    if (fi >= 0 && args[fi + 1] && r.sourceText) {
+      let src = r.sourceText; try { const j = JSON.parse(src.replace(/^\{\{/, "{").replace(/\}\}$/, "}")); src = Object.entries(j.sources ?? j).map(([f, v]) => `// ==== ${f}\n${v.content ?? v}`).join("\n"); } catch {}
+      const lines = src.split("\n"), want = new RegExp(`function\\s+\\w*${args[fi + 1]}\\w*\\s*\\(`, "i");
+      let file = "";
+      for (let i = 0; i < lines.length; i++) {
+        if (lines[i].startsWith("// ==== ")) file = lines[i].slice(8);
+        if (!want.test(lines[i])) continue;
+        let depth = 0, j = i, seen = false; const out = [];
+        for (; j < lines.length && j < i + 80; j++) { out.push(lines[j]); for (const ch of lines[j]) { if (ch === "{") { depth++; seen = true; } if (ch === "}") depth--; } if ((seen && depth <= 0) || (!seen && /;\s*$/.test(lines[j]))) break; }
+        console.log(`---- ${file || "source"} line ${i + 1}\n${out.join("\n")}\n`);
+      }
+      return;
+    }
     return console.log(`${addr}: ${r.verified ? `verified source, contract ${r.name}, ${r.compiler}${r.license ? `, ${r.license}` : ""}` : "no verified source"}${r.proxy ? `, proxy → ${r.implementation}` : ""}`);
   }
 
