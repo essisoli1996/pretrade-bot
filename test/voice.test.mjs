@@ -48,5 +48,11 @@ for (const bad2 of ["looks safe to me!", "this one is a rug", "check 0x1234", "u
 check(fill("{a} and {b}.", { a: 1 }) === "1 and.", "fill drops missing slots cleanly");
 check(acceptOpener("glad you asked about this address") === "glad you asked about this address.", "an opener without an ending gets a full stop");
 
+// a measured exit replaces the liquidity-figure estimate ($musemini, #memecoins 78374)
+{
+  const m = tokenRead(v, { ...c, liquidity: 9987, maxSell2: 22, exit: { usd: 22, atLeast: false, block: 1, formulaUsd: 101 } }, { kind: "mention", who: "x", url });
+  check(/\$9,987 of liquidity listed; selling on the live pool, about \$22 is the most/.test(m) && !/\$101/.test(m), "measured exit shown, full-position estimate dropped");
+}
+
 console.log(bad ? `\n${bad} FAILED` : "\nall passed");
 process.exit(bad ? 1 : 0);

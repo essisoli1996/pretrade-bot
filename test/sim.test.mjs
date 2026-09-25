@@ -2,7 +2,7 @@
 // The contract itself was tested against a real v4 PoolManager on anvil (clean pool, honeypot, cooldown,
 // 30% skim hook, native ETH pool, transfer-tax token, broken control); this covers the bot-side logic.
 // Run: node test/sim.test.mjs
-import { encodeRoundTrip, decodeResult, revertReason, classify } from "../bot/sim.mjs";
+import { encodeRoundTrip, decodeResult, revertReason, classify, searchExit } from "../bot/sim.mjs";
 
 let bad = 0;
 const check = (ok, label) => { console.log(`${ok ? "PASS" : "FAIL"}  ${label}`); if (!ok) bad++; };
@@ -40,6 +40,26 @@ check(classify({ ok: true, block: 7, quoteIn: ONE, main: { stage: 0, revertData:
 check(classify({ ok: false, why: "x" }).status === "unavailable", "no result: unavailable");
 const taxed = classify({ ok: true, block: 7, quoteIn: ONE, main: { stage: 2, tokenOwed: 100n, tokenGot: 80n, quoteBack: ONE / 2n } });
 check(taxed.buyTaxPct === 20 && taxed.flags.some((f) => /buy tax 20%/.test(f.text)), "20% of bought tokens missing: buy tax flag");
+
+// measured exit size: a constant-product pool with a 1% fee; 2% impact sits at x = 0.02·X/0.98
+{
+  const X = 1_000_000n * ONE, Y = 50n * ONE;
+  const pool = (reserve) => async (x) => (Y * x * 99n) / ((reserve + x) * 100n);
+  const r = await searchExit({ sellOut: pool(X), refIn: ONE, guessIn: 100_000n * ONE });
+  const want = (0.02 * 1_000_000) / 0.98, got = Number(r.amountIn / ONE);
+  check(r && !r.atLeast && got <= want && got > want * 0.95, `exit search lands just under the 2% size (${got} vs ${Math.round(want)})`);
+  check(r.impact < 0.02 && r.calls <= 15, `fees cancel out against the reference sell, ${r.calls} simulated sells`);
+  // the full-position guess overstates tenfold (Doppler multicurve): the search still finds the in-range size
+  const thin = await searchExit({ sellOut: pool(X / 10n), refIn: ONE, guessIn: 20_000n * ONE });
+  check(Math.abs(Number(thin.amountIn / ONE) - want / 10) < want / 10 * 0.05, "a guess 10x too big is searched down to the real exit");
+  // a guess too small grows until it crosses 2%
+  const grown = await searchExit({ sellOut: pool(X), refIn: ONE, guessIn: 1000n * ONE });
+  check(Math.abs(Number(grown.amountIn / ONE) - want) < want * 0.05, "a guess too small grows until impact crosses 2%");
+  // a sell that reverts above some size counts as full impact
+  const capped = await searchExit({ sellOut: async (x) => (x > 5000n * ONE ? null : pool(X)(x)), refIn: ONE, guessIn: 100_000n * ONE });
+  check(Number(capped.amountIn / ONE) <= 5000, "sizes that revert are never reported as an exit");
+  check((await searchExit({ sellOut: async () => null, refIn: ONE, guessIn: ONE * 10n })) === null, "no reference sell: no exit figure");
+}
 
 console.log(bad ? `\n${bad} FAILED` : "\nall passed");
 process.exit(bad ? 1 : 0);

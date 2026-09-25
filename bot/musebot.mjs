@@ -269,10 +269,14 @@ async function quickCheck(address, { light = false, chain: onlyChain = null } = 
   score = Math.min(100, score);
   const verdict = critical || score >= 60 ? "DANGER" : score >= 20 ? "CAUTION" : "OK";
   const deepest = n(p.liquidity?.usd) ?? 0;
-  const maxSell2 = Math.floor((0.02 * (deepest / 2)) / 0.98);
-  const sellMax = (i) => Math.floor((i * (deepest / 2)) / (1 - i));
+  const formula2 = Math.floor((0.02 * (deepest / 2)) / 0.98);
+  // on a v4 pool the exit is measured by selling on the live pool: a full-position figure (Doppler multicurve) overstates it
+  const exit = sim?.status === "ok" && hook?.key ? await exitRead(p, hook.key, a, formula2) : null;
+  const k = exit && formula2 > 0 ? exit.usd / formula2 : 1;
+  const maxSell2 = exit ? exit.usd : formula2;
+  const sellMax = (i) => Math.floor(((i * (deepest / 2)) / (1 - i)) * k);
   return {
-    address: a, chain, symbol: p.baseToken?.symbol ?? "?", verdict, score, flags, liquidity, liqKnown, maxSell2, contractScanned: !!(sec || solSec),
+    address: a, chain, symbol: p.baseToken?.symbol ?? "?", verdict, score, flags, liquidity, liqKnown, maxSell2, exit, contractScanned: !!(sec || solSec),
     critical, url: p.url ?? null, ageH, at: Date.now(), price: n(p.priceUsd),
     holders: n(sec?.holder_count ?? solSec?.gp?.holder_count),
     top10Pct,
@@ -354,6 +358,26 @@ async function simRead(pair, key, token) {
   } catch (e) {
     return { status: "unavailable", line: `🧪 trade simulation unavailable (${String(e.message ?? e).slice(0, 60)}).`, flags: [], scored: false };
   }
+}
+
+/** Measured ~2% exit on the live v4 pool, in USD at the pair's price. Never throws; null when it can't be measured. */
+async function exitRead(pair, key, token, formulaUsd) {
+  if (SIMCFG.exit === false) return null;
+  const price = n(pair.priceUsd);
+  if (!price || !(formulaUsd > 0)) return null;
+  try {
+    SIM ??= makeSim({ rpc: v4().rpc, control: simControl });
+    const go = async () => {
+      const dec = await SIM.decimals(token, "latest");
+      if (dec === null) return null;
+      const units = (usd) => BigInt(Math.max(1, Math.floor((usd / price) * 1e6))) * 10n ** BigInt(dec) / 1000000n;
+      const r = await SIM.exitSize({ key, token, refIn: units(Math.min(2, formulaUsd / 100)), guessIn: units(formulaUsd) });
+      if (!r) return null;
+      return { usd: Math.floor((Number(r.amountIn) / 10 ** dec) * price), atLeast: r.atLeast, block: r.block, formulaUsd };
+    };
+    const timeout = new Promise((_, no) => setTimeout(() => no(new Error("timed out")), SIMCFG.exitTimeoutMs ?? 30000).unref());
+    return await Promise.race([go(), timeout]);
+  } catch { return null; }
 }
 
 // ───────────────────────── launch provenance (see bot/provenance.mjs): who launched it, from which post, where fees go ─────────────────────────

@@ -178,7 +178,46 @@ export function makeSim({ rpc, control = null }) {
     };
   }
 
-  return { run, plan, roundTrip, balanceSlot, decimals, block: async () => (await rpc("eth_blockNumber", [])).result };
+  /**
+   * Measured exit size: the biggest single sell (token base units) whose price impact stays under `target`, found by
+   * selling as a plain holder on the live pool at one block. Counts only what the pool really pays: for a Doppler v4
+   * multicurve that is the in-range liquidity, not the out-of-range, single-sided part a full-position figure includes.
+   */
+  async function exitSize({ key, token, refIn, guessIn, target = 0.02 }) {
+    const head = (await rpc("eth_blockNumber", [])).result;
+    if (typeof head !== "string") return null;
+    const sellOut = async (amount) => { const r = await roundTrip({ key, token, amount, sellOnly: true, block: head }); return r.stage === 2 ? r.quoteBack : null; };
+    const r = await searchExit({ sellOut, refIn, guessIn, target });
+    return r ? { ...r, block: parseInt(head, 16) } : null;
+  }
+
+  return { run, plan, roundTrip, exitSize, balanceSlot, decimals, block: async () => (await rpc("eth_blockNumber", [])).result };
+}
+
+/**
+ * Searches for the largest sell whose price impact (average price vs a small reference sell in the same block, so pool
+ * and hook fees cancel out) stays under `target`. sellOut(amount) → quote received, or null when the sell reverts.
+ * Pure apart from sellOut, so it is unit tested. Returns { amountIn, impact, atLeast, calls } or null (no reference).
+ * atLeast: even the largest size tried stayed under target, so the real exit size is bigger than amountIn.
+ */
+export async function searchExit({ sellOut, refIn, guessIn, target = 0.02, steps = 8, maxGrow = 4 }) {
+  let calls = 0;
+  const out = async (x) => { calls++; return sellOut(x); };
+  const refOut = await out(refIn);
+  if (!refOut || refOut <= 0n || refIn <= 0n) return null;
+  const rateRef = Number((refOut * 10n ** 18n) / refIn) / 1e18;
+  const impactAt = async (x) => { const o = await out(x); return o === null ? 1 : Math.max(0, 1 - Number((o * 10n ** 18n) / x) / 1e18 / rateRef); };
+  let lo = refIn, loImpact = 0, hi = guessIn > refIn ? guessIn : refIn * 10n;
+  let hiImpact = await impactAt(hi);
+  for (let g = 0; hiImpact < target && g < maxGrow; g++) { lo = hi; loImpact = hiImpact; hi *= 4n; hiImpact = await impactAt(hi); }
+  if (hiImpact < target) return { amountIn: hi, impact: hiImpact, atLeast: true, calls };
+  for (let i = 0; i < steps; i++) {
+    const mid = BigInt(Math.floor(Math.sqrt(Number(lo) * Number(hi))));
+    if (mid <= lo || mid >= hi) break;
+    const m = await impactAt(mid);
+    if (m < target) { lo = mid; loImpact = m; } else hi = mid;
+  }
+  return { amountIn: lo, impact: loImpact, atLeast: false, calls };
 }
 
 /**
