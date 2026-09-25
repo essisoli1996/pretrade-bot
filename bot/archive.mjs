@@ -49,8 +49,10 @@ export async function etherscanSource(address, { chainId = 4663, key = process.e
 
 // Functions that can move locked tokens back out. A lock whose verified source defines none of them is permanent: a
 // burn in a trench coat (Turbo, #lobby 77392). The reading is only as good as the verified source it cites.
-const RELEASE_FN = /function\s+(withdraw|release|unlock|claim|sweep|recover|rescue|emergency|redeem|unstake|retrieve|migrate)\w*\s*\(/gi;
+// Only implemented functions count: an interface declaration ends in ";" and runs no code (PonsV2LaunchLocker's
+// source bundles ILaunchpadV2, which declares claim/claimToken/sweepFees for the launchpad, not the locker).
+const RELEASE_FN = /function\s+(withdraw|release|unlock|claim|sweep|recover|rescue|emergency|redeem|unstake|retrieve|migrate)\w*\s*\([^;{]*\)[^;{]*\{/gi;
 /** Release-type functions named in a verified source, e.g. ["withdraw", "releaseTokens"]; [] when it defines none. */
 export function releaseFunctions(sourceText) {
-  return [...new Set([...String(sourceText ?? "").matchAll(RELEASE_FN)].map((m) => m[0].replace(/^function\s+/i, "").replace(/\s*\($/, "")))];
+  return [...new Set([...String(sourceText ?? "").matchAll(RELEASE_FN)].map((m) => m[0].match(/^function\s+(\w+)/i)[1]))];
 }

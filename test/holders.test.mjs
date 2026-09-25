@@ -29,6 +29,10 @@ const pons = "contract PonsV2LaunchLocker { function setFactory(address f) exter
 check(holderKind(codeKind("0x6080"), "PonsV2LaunchLocker", pons).startsWith("permanent lock"), "a locker with no release function: permanent lock");
 check(holderKind(codeKind("0x6080"), "TokenVesting", "contract TokenVesting { function release(address t) public {} }").includes("releasable: release"), "a vesting contract with release(): releasable, and says which function");
 check(holderKind(codeKind("0x6080"), "TeamLock").startsWith("lock or vesting"), "no source in hand: plain lock, no claim either way");
+const withIface = pons + " interface ILaunchpadV2 { function claim() external returns (uint256 amount); function claimToken(address token) external returns (uint256); function sweepFees(uint256 minOut) external; }";
+check(holderKind(codeKind("0x6080"), "PonsV2LaunchLocker", withIface).startsWith("permanent lock"), "functions only declared in a bundled interface don't make a lock releasable");
+check(holderKind(codeKind("0x6080"), "Vault", "contract Vault {\n  function withdraw(\n    uint256 amount\n  ) external onlyOwner {\n    token.transfer(msg.sender, amount);\n  }\n}").startsWith("contract"), "a non-lock name stays a plain contract");
+check(holderKind(codeKind("0x6080"), "TeamLock", "contract TeamLock {\n  function withdraw(\n    uint256 amount\n  ) external onlyOwner {\n  }\n}").includes("releasable: withdraw"), "an implemented multi-line withdraw() makes a lock releasable");
 check(holderKind(codeKind("0x6080")) === "contract (unverified)", "unknown code and no name: unverified contract");
 console.log(bad ? `\n${bad} FAILED` : "\nall passed");
 process.exit(bad ? 1 : 0);
