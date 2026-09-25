@@ -21,7 +21,7 @@ writeFileSync(join(dir, "keys.env"), "# keys\nNODEFLARE_KEY=nf_test_123\nETHERSC
 delete process.env.NODEFLARE_KEY; delete process.env.ETHERSCAN_KEY;
 const loaded = loadKeysFile(join(dir, "keys.env"));
 check(loaded.join() === "NODEFLARE_KEY,ETHERSCAN_KEY" && process.env.ETHERSCAN_KEY === "ES456", "keys.env loads KEY=value lines, quotes stripped");
-check(archiveUrl() === "https://rpc.nodeflare.app/robinhood/nf_test_123", "the NodeFlare key makes the archive URL");
+check(archiveUrl() === "https://rpc.nodeflare.app/robinhood/v1/nf_test_123", "the NodeFlare key makes the archive URL");
 check(!redact(`GET ${archiveUrl()} failed, key ES456`).includes("nf_test_123") && !redact("ES456").includes("ES456"), "keys never reach printed text");
 check(loadKeysFile(join(dir, "missing.env")).length === 0, "a missing keys file is fine");
 

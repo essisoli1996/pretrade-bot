@@ -14,7 +14,7 @@ export function loadKeysFile(path) {
 }
 
 /** The archive RPC for Robinhood Chain: ARCHIVE_RPC_URL as given, else NodeFlare's keyed endpoint. */
-export const archiveUrl = (env = process.env) => env.ARCHIVE_RPC_URL || (env.NODEFLARE_KEY ? `https://rpc.nodeflare.app/robinhood/${env.NODEFLARE_KEY}` : null);
+export const archiveUrl = (env = process.env) => env.ARCHIVE_RPC_URL || (env.NODEFLARE_KEY ? `https://rpc.nodeflare.app/robinhood/v1/${env.NODEFLARE_KEY}` : null);
 
 /** Hides any key in a URL or message before it is printed. */
 export const redact = (text, env = process.env) => [env.NODEFLARE_KEY, env.ETHERSCAN_KEY, env.ARCHIVE_RPC_URL].filter(Boolean).reduce((t, k) => t.split(k).join("<key>"), String(text));

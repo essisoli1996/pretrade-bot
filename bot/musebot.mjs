@@ -2335,7 +2335,7 @@ async function main() {
     // real $PORCH at block 71733378 (the Patch packet's block).  node bot/musebot.mjs rpcprobe <url> [url ...]
     const PORCH = "0x4B434541873f171aB70D7d2F3a48b0f0b0f13ba3", AT = "0x" + (71733378).toString(16);
     const urls = [...args.slice(1)];
-    if (process.env.NODEFLARE_KEY) urls.push(`https://rpc.nodeflare.app/robinhood/${process.env.NODEFLARE_KEY}`, `https://rpc.nodeflare.app/robinhood?apikey=${process.env.NODEFLARE_KEY}`, `https://rpc.nodeflare.app/${process.env.NODEFLARE_KEY}/robinhood`);
+    if (archiveUrl()) urls.push(archiveUrl());
     for (const url of urls) {
       console.log(redact(`== ${url}`));
       const call = async (method, params) => { const t0 = Date.now(); const r = await http(url, { jsonrpc: "2.0", id: 1, method, params }); return `${r.json?.result !== undefined ? JSON.stringify(r.json.result).slice(0, 70) : `ERR ${r.status} ${JSON.stringify(r.json?.error ?? r.text).slice(0, 120)}`} (${Date.now() - t0} ms)`; };
