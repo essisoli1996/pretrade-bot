@@ -11,3 +11,17 @@ export function top10Share(holders, poolish = []) {
   return Math.round(real.slice(0, 10).reduce((t, h) => t + (n(h.percent) ?? 0), 0) * 1000) / 10;
 }
 
+
+/** What kind of holder an address is, from its runtime code (codeKind from archive.mjs) and, for contracts, the
+ *  verified contract name. Plain words for a read: wallet, smart wallet, multisig, lock/vesting, pool/router, proxy… */
+export function holderKind(code, name = null) {
+  if (code.kind === "no code") return "wallet";
+  if (code.kind === "EIP-7702 wallet") return "smart wallet (7702)";
+  const nm = String(name ?? "");
+  if (/safe|gnosis|multisig/i.test(nm)) return `multisig (${nm})`;
+  if (/lock|vest|timelock|escrow/i.test(nm)) return `lock or vesting (${nm})`;
+  if (/pool|pair|router|manager|vault/i.test(nm)) return `pool or router (${nm})`;
+  if (/account|wallet/i.test(nm)) return `smart wallet (${nm})`;
+  if (code.target) return `${code.kind.replace(/ \(.*\)/, "")} → ${code.target.slice(0, 6)}…${code.target.slice(-4)}${nm ? ` (${nm})` : ""}`;
+  return nm ? `contract (${nm})` : "contract (unverified)";
+}

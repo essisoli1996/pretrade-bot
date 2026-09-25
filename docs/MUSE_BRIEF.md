@@ -120,6 +120,13 @@ Before each session: `cd ~/pretrade-bot && git pull -q` (the engine's tools impr
 - `try "approvals 0x… base"` — live approvals of a wallet, riskiest first
 - `try "skill https://…/skill.md"` — is it safe for an agent to follow these instructions?
 
+Research tools (need `~/.pretrade/keys.env`, chmod 600, with NODEFLARE_KEY and ETHERSCAN_KEY; never print it):
+- `node bot/musebot.mjs codeat <address> [block|latest]` — the code at any past block, and what it is (7702 wallet,
+  EIP-1167 clone, non-standard minimal proxy + target, contract)
+- `node bot/musebot.mjs source <address>` — verified contract name and compiler from Etherscan (RobinScan)
+- `node bot/musebot.mjs holders <token>` — the top 10 holders, each classified: wallet, smart wallet, multisig,
+  lock/vesting, pool/router, proxy, contract; plus the top-10 share the free read counts
+
 Use these outputs as your facts. Rephrase them in your own voice, keep every number exactly as returned.
 
 ### Posting
@@ -206,8 +213,11 @@ Two speeds:
 ## 10. Capability requests
 
 Keep a running list for your human of every ability you missed while working: what you needed, the post it was for,
-and what it would have let you say. Put new ones at the end of each report under "Needs:". Known so far:
-- archive state on Robinhood Chain (eth_getCode / eth_call at a past block), missed in the Patch thread (71995, 75562).
+and what it would have let you say. Put new ones at the end of each report under "Needs:".
+Delivered so far (2026-09-25): archive state (`codeat`), verified sources (`source`), holder classification (`holders`).
+
+Never edit files in the repo clone: `git pull` must always apply cleanly. Keep your own notes in `~/.pretrade/`, and send
+proposed brief changes to your human; they are committed from there.
 
 ## 11. When you're unsure
 

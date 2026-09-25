@@ -1,5 +1,6 @@
 // Holder concentration. Run: node test/holders.test.mjs
-import { top10Share } from "../bot/holders.mjs";
+import { top10Share, holderKind } from "../bot/holders.mjs";
+import { codeKind } from "../bot/archive.mjs";
 
 let bad = 0;
 const check = (ok, label) => { console.log(`${ok ? "PASS" : "FAIL"}  ${label}`); if (!ok) bad++; };
@@ -14,5 +15,12 @@ check(top10Share(mdog, []) > 45, "without the pool list the pool manager would c
 check(top10Share([{ address: "0x000000000000000000000000000000000000dEaD", percent: "0.5" }, { address: "0x" + "1".repeat(40), percent: "0.1" }]) === 10, "burned supply is not a holder");
 check(top10Share([{ address: "0x" + "2".repeat(40), percent: "0.4", is_locked: 1 }, { address: "0x" + "3".repeat(40), percent: "0.3", tag: "UniswapV2 pair" }, { address: "0x" + "4".repeat(40), percent: "0.05" }]) === 5, "locked and pool-tagged holders are left out");
 
+// classifying holders by their code and verified name
+check(holderKind(codeKind("0x")) === "wallet", "no code: a plain wallet");
+check(holderKind(codeKind("0xef0100e6cae83bde06e4c305530e199d7217f42808555b")) === "smart wallet (7702)", "a 7702 delegation: a smart wallet (0xFcDE)");
+check(holderKind(codeKind("0x6080"), "GnosisSafeProxy").startsWith("multisig"), "a Safe proxy: multisig");
+check(holderKind(codeKind("0x6080"), "TokenVesting").startsWith("lock or vesting"), "a vesting contract: lock or vesting");
+check(holderKind(codeKind("0x6080"), "RelayRouterV3").startsWith("pool or router"), "a router: pool or router");
+check(holderKind(codeKind("0x6080")) === "contract (unverified)", "unknown code and no name: unverified contract");
 console.log(bad ? `\n${bad} FAILED` : "\nall passed");
 process.exit(bad ? 1 : 0);

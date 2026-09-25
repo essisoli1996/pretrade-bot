@@ -29,7 +29,7 @@ import { TALK_INTENT, chainNamedIn, chainTheyMean, isPaymentUnit, looksLikeCorre
 import { makeControl, modeOf, needsApproval } from "./control.mjs";
 import { toDraft, parseOutbox, appendDraft, pendingDrafts } from "./outbox.mjs";
 import { loadJson, saveJson } from "./store.mjs";
-import { top10Share } from "./holders.mjs";
+import { top10Share, holderKind } from "./holders.mjs";
 import { loadKeysFile, archiveUrl, redact, codeKind, etherscanSource } from "./archive.mjs";
 import { makeProvenance, provenanceLines, tickerReport, reuseAlert } from "./provenance.mjs";
 import { makeVoice, tokenRead, lookupLead, digestText, launchAlertText, acceptOpener, OPENER_SYSTEM } from "./voice.mjs";
@@ -2314,10 +2314,33 @@ async function main() {
     const tag = blk === "latest" ? "latest" : "0x" + Number(blk).toString(16);
     const url = blk === "latest" ? (archiveUrl() ?? CFG.token?.rpc) : archiveUrl();
     if (!url) return console.log("needs NODEFLARE_KEY (or ARCHIVE_RPC_URL) for a past block: set it in the environment or in keys.env next to the identity file.");
-    const r = await http(url, { jsonrpc: "2.0", id: 1, method: "eth_getCode", params: [addr, tag] });
+    let r = await http(url, { jsonrpc: "2.0", id: 1, method: "eth_getCode", params: [addr, tag] });
+    if (r.status === 0) r = await http(url, { jsonrpc: "2.0", id: 1, method: "eth_getCode", params: [addr, tag] }); // one retry on a network blip
     if (r.json?.result === undefined) return console.log(redact(`FAILED at ${blk}: HTTP ${r.status} ${JSON.stringify(r.json?.error ?? r.text).slice(0, 200)}`));
     const k = codeKind(r.json.result), hash = createHash("sha256").update(Buffer.from(r.json.result.slice(2), "hex")).digest("hex").slice(0, 16);
     return console.log(`code at ${addr} @ ${blk}: ${k.kind}, ${k.size} bytes${k.target ? `, target ${k.target}` : ""}, sha256 ${hash}\n${r.json.result.length <= 200 ? r.json.result : r.json.result.slice(0, 200) + "…"}`);
+  }
+
+  if (cmd === "holders") {
+    // Read-only. The 10 biggest holders of a Robinhood Chain token, each classified by its code (and verified name when
+    // there is an Etherscan key): wallet, smart wallet, multisig, lock/vesting, pool/router, proxy, contract.
+    //   node bot/musebot.mjs holders <token address>
+    const a = String(args[1] ?? "").toLowerCase();
+    if (!/^0x[0-9a-f]{40}$/.test(a)) return console.log("usage: holders <token address>");
+    const g = (await http(`https://api.gopluslabs.io/api/v1/token_security/4663?contract_addresses=${a}`)).json?.result?.[a];
+    const hs = g?.holders ?? [];
+    if (!hs.length) return console.log(`no holder list for ${a} from goplus right now.`);
+    const rpc = archiveUrl() ?? CFG.token?.rpc;
+    const poolish = [a, ...(g.dex ?? []).flatMap((d) => [d.pool_manager, d.pair])].filter(Boolean).map((x) => x.toLowerCase());
+    console.log(`top ${hs.length} holders of $${g.token_symbol ?? "?"} (${g.holder_count ?? "?"} holders), goplus snapshot:`);
+    for (const h of hs.slice(0, 10)) {
+      const addr = String(h.address).toLowerCase();
+      const code = codeKind((await http(rpc, { jsonrpc: "2.0", id: 1, method: "eth_getCode", params: [addr, "latest"] })).json?.result);
+      const src = code.kind === "contract" || code.target ? await etherscanSource(addr, { fetchJson: async (u) => (await http(u)).json }) : null;
+      const kind = addr === a ? "the token itself" : poolish.includes(addr) ? "pool / pool manager (left out)" : holderKind(code, src?.ok ? src.name : null);
+      console.log(`  ${(Number(h.percent) * 100).toFixed(2).padStart(6)}%  ${addr}  ${kind}`);
+    }
+    return console.log(`top-10 share counted in the read (pools, burns, locks left out): ${top10Share(hs, poolish)}%`);
   }
 
   if (cmd === "source") {
