@@ -1,0 +1,18 @@
+// Holder concentration. Run: node test/holders.test.mjs
+import { top10Share } from "../bot/holders.mjs";
+
+let bad = 0;
+const check = (ok, label) => { console.log(`${ok ? "PASS" : "FAIL"}  ${label}`); if (!ok) bad++; };
+
+// $MDOG on robinhood as GoPlus returned it (2026-09-25): the v4 pool manager first, then mostly contract wallets
+const pm = "0x8366a39CC670B4001A1121B8F6A443A643e40951";
+const mdog = [[pm, 1, 0.108794], ["0x267444D099b10fB5Ed7c3Cc7B7c767AdcA574952", 1, 0.081633], ["0x676C240e33A100F59b64Ac03058695D839C5Ce8e", 1, 0.050616], ["0xec21f1D1aF91F821B03DC6AdFFe115886c8e15a3", 1, 0.048699], ["0xFcDE40257f71fCA2586368DE911db231879BBF3e", 1, 0.036479], ["0x0d359d1c73A0Be602BFd4c3028B2545c06CE2Bce", 1, 0.035936], ["0x067A0F68d45B05cd9F864c1b8cf9bB55ebc8b8f1", 1, 0.030469], ["0x1b97d73585491F9ED247dE561ee64e8a5a84e5ff", 1, 0.024531], ["0x09278F0a4bC120f3F6baca779284c74a8784C963", 0, 0.020204], ["0x7CC9630a67F1200AF3F8af072f72242048AC398B", 1, 0.018347]]
+  .map(([address, is_contract, percent]) => ({ address, is_contract, percent: String(percent), tag: "", is_locked: 0 }));
+const share = top10Share(mdog, [pm.toLowerCase()]);
+check(Math.abs(share - 34.7) < 0.1, `$MDOG: contract wallets count, the pool manager doesn't (${share}%, chiefofstaff re-walked 34.1%)`);
+check(top10Share(mdog, []) > 45, "without the pool list the pool manager would count");
+check(top10Share([{ address: "0x000000000000000000000000000000000000dEaD", percent: "0.5" }, { address: "0x" + "1".repeat(40), percent: "0.1" }]) === 10, "burned supply is not a holder");
+check(top10Share([{ address: "0x" + "2".repeat(40), percent: "0.4", is_locked: 1 }, { address: "0x" + "3".repeat(40), percent: "0.3", tag: "UniswapV2 pair" }, { address: "0x" + "4".repeat(40), percent: "0.05" }]) === 5, "locked and pool-tagged holders are left out");
+
+console.log(bad ? `\n${bad} FAILED` : "\nall passed");
+process.exit(bad ? 1 : 0);

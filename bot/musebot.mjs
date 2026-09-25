@@ -29,6 +29,7 @@ import { TALK_INTENT, chainNamedIn, chainTheyMean, isPaymentUnit, looksLikeCorre
 import { makeControl, modeOf, needsApproval } from "./control.mjs";
 import { toDraft, parseOutbox, appendDraft, pendingDrafts } from "./outbox.mjs";
 import { loadJson, saveJson } from "./store.mjs";
+import { top10Share } from "./holders.mjs";
 import { makeProvenance, provenanceLines, tickerReport, reuseAlert } from "./provenance.mjs";
 import { makeVoice, tokenRead, lookupLead, digestText, launchAlertText, acceptOpener, OPENER_SYSTEM } from "./voice.mjs";
 import { findSecrets, scanInstructions, isPublicUrl, PHISH_SYSTEM, phishFacts, parsePhishVerdict } from "./sentinel.mjs";
@@ -208,11 +209,10 @@ async function quickCheck(address, { light = false, chain: onlyChain = null } = 
   const top10Pct = (() => {
     const hs = sec?.holders ?? solSec?.gp?.holders;
     if (!Array.isArray(hs) || !hs.length) return null;
-    const share = hs.slice(0, 10).filter((h) => !yes(h.is_contract) && !yes(h.is_locked) && !h.tag).reduce((t, h) => t + (n(h.percent) ?? 0), 0);
-    return Math.round(share * 1000) / 10;
+    return top10Share(hs, [a, p.pairAddress, ...(sec?.dex ?? []).flatMap((d) => [d.pool_manager, d.pair])]);
   })();
-  if (top10Pct !== null && top10Pct >= 50) add(`top 10 wallets hold ${Math.round(top10Pct)}%`, 30);
-  else if (top10Pct !== null && top10Pct >= 30) add(`top 10 wallets hold ${Math.round(top10Pct)}%`, 20);
+  if (top10Pct !== null && top10Pct >= 50) add(`top 10 holders own ${Math.round(top10Pct)}%`, 30);
+  else if (top10Pct !== null && top10Pct >= 30) add(`top 10 holders own ${Math.round(top10Pct)}%`, 20);
   if (liquidity < 5000) add("very low liquidity", 25);
   else if (liquidity < 25000) add("low liquidity", 10);
   if (ageH !== null && ageH < 24) add(`pair ${ageH < 1 ? "<1h" : Math.round(ageH) + "h"} old`, ageH < 1 ? 15 : 10);
@@ -1689,7 +1689,7 @@ async function deepText(c, question) {
     `🚪 exit: biggest single sell for ~1% / 2% / 5% impact: $${c.sellMax.p1.toLocaleString("en-US")} / $${c.sellMax.p2.toLocaleString("en-US")} / $${c.sellMax.p5.toLocaleString("en-US")}. liquidity $${c.liquidity.toLocaleString("en-US")}.`,
     `📈 momentum: 1h ${pc(c.priceChange.h1)}, 6h ${pc(c.priceChange.h6)}, 24h ${pc(c.priceChange.h24)}. last hour: ${flow}. 24h volume $${Math.round(c.volume24h ?? 0).toLocaleString("en-US")}.`,
     `👯 copycats: ${twinLine}.`,
-    ...(c.holders !== null || c.top10Pct !== null ? [`👥 holders: ${c.holders?.toLocaleString("en-US") ?? "n/a"}. top 10 wallets (pools and contracts excluded) hold ${c.top10Pct ?? "n/a"}%.`] : []),
+    ...(c.holders !== null || c.top10Pct !== null ? [`👥 holders: ${c.holders?.toLocaleString("en-US") ?? "n/a"}. top 10 holders (pools and burns excluded) hold ${c.top10Pct ?? "n/a"}%.`] : []),
     ...(note ? [`🧠 analyst note: ${note}`] : []),
     `estimates from public data, not advice. ${c.url ?? ""}`,
     `- ${CFG.name}`,
