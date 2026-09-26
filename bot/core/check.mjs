@@ -5,10 +5,11 @@
 import { isSol, GOPLUS, n, yes } from "./util.mjs";
 import { top10Share } from "../holders.mjs";
 import { dropForkCopies } from "../addrctx.mjs";
+import { recognizedQuote } from "./quotes.mjs";
 
 /** @param {import("./types").CheckDeps} deps */
 export function makeQuickCheck(deps) {
-  const { http, rpcFor, now, hookMaxPoints, infraHolders, v4HookRead, simRead, exitRead, provenanceRead, onForkSkipped } = deps;
+  const { http, rpcFor, now, hookMaxPoints, infraHolders, v4HookRead, simRead, exitRead, provenanceRead, onForkSkipped, stockToken } = deps;
   /** @type {import("./types").QuickCheck} */
   return async function quickCheck(address, { light = false, chain: onlyChain = null } = {}) {
     const sol = isSol(address);
@@ -22,6 +23,12 @@ export function makeQuickCheck(deps) {
       if (fork.forkOf) onForkSkipped(a, { chain: fork.forkOf, unsure: !!fork.unsure });
     }
     if (!pairs.length) return null; // wallet, pre-graduation token or unknown → stay silent
+    // liquidity counts only against a recognized quote (see core/quotes.mjs): a pool against a token nobody can price
+    // independently can list depth no seller reaches. With no recognized pool at all, the read keeps the pools but says so.
+    const known = await Promise.all(pairs.map((q) => recognizedQuote(q.chainId, q.quoteToken?.address, stockToken)));
+    const trusted = pairs.filter((_, i) => known[i] !== false);
+    const quoteUnknown = trusted.length === 0;
+    if (!quoteUnknown) pairs = trusted;
     pairs.sort((x, y) => (n(y.liquidity?.usd) ?? 0) - (n(x.liquidity?.usd) ?? 0));
     const p = pairs[0];
     const chain = p.chainId;
@@ -121,6 +128,7 @@ export function makeQuickCheck(deps) {
     // read at CAUTION at least. it lifts OK only; an unknown is not a finding, so it never pushes a read to DANGER.
     const gaps = [];
     if (top10Pct === null) gaps.push("holder list not read");
+    if (quoteUnknown) gaps.push("liquidity only against an unrecognized quote token");
     if (hook?.key && (!sim || sim.status === "unavailable" || sim.status === "inconclusive")) gaps.push("sell not simulated");
     for (const g of gaps) flags.push(g);
     if (gaps.length) score = Math.max(score, 20);

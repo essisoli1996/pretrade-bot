@@ -67,6 +67,8 @@ export interface CheckDeps {
   simRead: (pair: any, key: V4Key, token: string) => Promise<SimRead | null>;
   exitRead: (pair: any, key: V4Key, token: string, formulaUsd: number) => Promise<ExitRead | null>;
   provenanceRead: (address: string) => Promise<unknown>;
+  /** Robinhood Chain: is this a Robinhood Stock Token (Robinhood's registry)? null when the registry is unreachable. */
+  stockToken: (address: string) => Promise<boolean | null>;
   /** Called when only fork-copy pools were found for an address (the reply explains instead of rating). */
   onForkSkipped: (address: string, info: { chain: string; unsure: boolean }) => void;
 }

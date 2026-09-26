@@ -22,7 +22,7 @@ import { fileURLToPath } from "node:url";
 import { makeRadar } from "./radar.mjs";
 import { makeV4Hooks, isV4, hookLine } from "./v4hooks.mjs";
 import { makeSim, classify, planAdvice } from "./sim.mjs";
-import { makeStocks } from "./stocks.mjs";
+import { makeStocks, indexRegistry } from "./stocks.mjs";
 import { makeApprovals } from "./approvals.mjs";
 import { makeTxSim, describeTxSim, parseTx } from "./txsim.mjs";
 import { TALK_INTENT, chainNamedIn, chainTheyMean, isPaymentUnit, looksLikeCorrection } from "./talk.mjs";
@@ -189,7 +189,7 @@ let QC = null; // built on first use: the v4 / sim / provenance helpers below ar
 async function quickCheck(address, opts = {}) {
   QC ??= makeQuickCheck({
     http, rpcFor, now: CLOCK, hookMaxPoints: () => V4CFG.maxPoints ?? 50, infraHolders, v4HookRead, simRead, exitRead, provenanceRead,
-    onForkSkipped: (a, info) => FORK_SKIPPED.set(a, info),
+    onForkSkipped: (a, info) => FORK_SKIPPED.set(a, info), stockToken,
   });
   return QC(address, opts);
 }
@@ -267,6 +267,18 @@ async function simRead(pair, key, token) {
 }
 
 /** Measured ~2% exit on the live v4 pool, in USD at the pair's price. Never throws; null when it can't be measured. */
+/** Robinhood Chain: is this address a Robinhood Stock Token? Registry cached 30 minutes; null when unreachable. */
+let STOCK_REG = null; // { t, p }: one registry load shared by every pool of a read
+async function stockToken(addr) {
+  if (!STOCK_REG || CLOCK() - STOCK_REG.t > 30 * 60 * 1000) {
+    const t = CLOCK(), p = http("https://api.robinhood.com/rhj/assets").then((r) => (r.json?.assets ? indexRegistry(r.json).byAddr : null)).catch(() => null);
+    STOCK_REG = { t, p };
+    p.then((m) => { if (!m && STOCK_REG?.p === p) STOCK_REG = null; }); // an unreachable registry is retried next read
+  }
+  const byAddr = await STOCK_REG.p;
+  return byAddr ? byAddr.has(String(addr).toLowerCase()) : null;
+}
+
 async function exitRead(pair, key, token, formulaUsd) {
   if (SIMCFG.exit === false) return null;
   const price = n(pair.priceUsd);
