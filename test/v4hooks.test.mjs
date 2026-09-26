@@ -80,5 +80,23 @@ const unknownPool = await v4b.inspect({ ...pair(pools.evil, TOKEN, "X"), pairAdd
 check(unknownPool.readable === false && hookLine(unknownPool).includes("not checked"), "unreadable pool → 'not checked', never a guess");
 
 console.log("\n" + [hookLine(std), hookLine(evil), hookLine(plain)].join("\n"));
+// pools DexScreener hasn't listed: found from Initialize logs, priced from the pool's own sqrtPrice
+{
+  const { discoverV4Pools, poolIdOf: pid, INIT_TOPIC: IT, priceFromSqrt } = await import("../bot/v4hooks.mjs");
+  const TOK = "0x" + "1".repeat(40), MB = "0x91a2dae9699f0b82540b5886b0d8759c22820ba3", PM = "0x" + "9".repeat(40);
+  const key = { currency0: TOK, currency1: MB, fee: 8388608, tickSpacing: 200, hooks: "0x" + "0".repeat(40) };
+  const id = pid(key);
+  const t = (a) => "0x" + a.slice(2).padStart(64, "0");
+  const w = (v) => BigInt(v).toString(16).padStart(64, "0");
+  const log = { address: PM, blockNumber: "0x10", topics: [IT, id, t(TOK), t(MB)], data: "0x" + w(key.fee) + w(key.tickSpacing) + w(0) + w(0) + w(0) };
+  const sqrt = 2n ** 96n;
+  const rpc = async (m, p) => m === "eth_getLogs" ? { result: p[0].topics[2] === t(TOK) ? [log] : [] } : m === "eth_call" ? { result: "0x" + w(sqrt) } : {};
+  const got = await discoverV4Pools(rpc, TOK);
+  check(got.length === 1 && got[0].poolId === id && got[0].key.poolManager === PM && got[0].sqrtPriceX96 === sqrt, "a v4 pool is found from its Initialize log, with its live sqrtPrice");
+  check(priceFromSqrt(sqrt, 18, 18, true) === 1 && priceFromSqrt(2n ** 96n * 2n, 18, 6, true) === 4e12, "price from sqrtPrice honors both decimals");
+  const none = await discoverV4Pools(async (m) => (m === "eth_getLogs" ? { result: [log] } : { result: "0x" + w(0) }), TOK);
+  check(none.length === 0, "an uninitialized pool (sqrtPrice 0) is left out");
+}
+
 console.log(bad ? `\n${bad} FAILED` : "\nall passed");
 process.exit(bad ? 1 : 0);

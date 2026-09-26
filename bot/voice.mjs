@@ -47,7 +47,7 @@ export function tokenRead(v, c, { kind = "channel", who = "", opener = null, url
   const vars = {
     icon, sym: `$${c.symbol}`, chain: c.chain, score: c.score, who: String(who).slice(0, 24),
     scan: c.contractScanned ? "" : " (market data only, no contract scan on this chain yet)",
-    flags: c.flags.filter((f) => !/^no liquidity figure/.test(f)).slice(0, 4).join(", "), liq: `$${c.liquidity.toLocaleString("en-US")}`, max2: `$${c.maxSell2.toLocaleString("en-US")}`,
+    flags: c.flags.filter((f) => !/^no liquidity figure|^pool found on-chain/.test(f)).slice(0, 4).join(", "), liq: `$${c.liquidity.toLocaleString("en-US")}`, max2: `$${c.maxSell2.toLocaleString("en-US")}`,
     rt: c.sim?.roundTripLossPct, url,
   };
   const open = opener ?? v.say(`open.${kind}`, OPENERS[kind] ?? [""], vars);
@@ -55,7 +55,8 @@ export function tokenRead(v, c, { kind = "channel", who = "", opener = null, url
   const flags = vars.flags ? v.say("flags", FLAGS.some, vars) : v.say("flags.none", FLAGS.none, vars); // the depth line says "no liquidity figure"
   // a measured exit (sold on the live pool, see sim.exitSize) beats the liquidity figure: on a Doppler v4 multicurve the
   // figure counts out-of-range tokens no seller can reach ($musemini, #memecoins 78374: $9,987 listed, ~$1.1k in range)
-  const depth = c.liqKnown === false ? "no liquidity figure for this pool (a bonding curve or an unindexed pool), so no exit size either."
+  const depth = c.liqKnown === false && c.exit ? `${c.flags.includes("pool found on-chain, not listed on DexScreener yet") ? "found its v4 pool on-chain (DexScreener hasn't listed it yet), so " : ""}no listed liquidity figure; selling on the live pool, ${c.exit.atLeast ? "more than " : "about "}${vars.max2} is the most one sell gets out for ~2% price impact.`
+    : c.liqKnown === false ? "no liquidity figure for this pool (a bonding curve or an unindexed pool), so no exit size either."
     : c.flags.some((f) => /^exit size irregular/.test(f)) ? `${vars.liq} of liquidity listed, but selling on the live pool, the price impact doesn't rise with sell size, so there is no single exit size to give.`
     : c.exit ? `${vars.liq} of liquidity listed; selling on the live pool, ${c.exit.atLeast ? "more than " : "about "}${vars.max2} is the most one sell gets out for ~2% price impact.`
     : v.say("depth", DEPTH, vars);

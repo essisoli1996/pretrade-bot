@@ -242,3 +242,44 @@ export function hookLine(h) {
   if (h.standard) return `🪝 v4 hook ${short}: ${h.standard}. ${fee}, ${upg}.`;
   return `🪝 v4 hook ${short}: custom. swap powers: ${powers.length ? powers.join(", ") : "none"}. ${fee}, ${upg}${c.owner ? `, owned by ${c.owner.slice(0, 6)}…${c.owner.slice(-4)}` : ""}.`;
 }
+
+// ── pools DexScreener hasn't indexed: found from the PoolManager's own Initialize logs
+const topicOf = (a) => "0x" + String(a).toLowerCase().replace(/^0x/, "").padStart(64, "0");
+
+/** Storage slot of a pool's Slot0 inside the PoolManager (StateLibrary: pools mapping at slot 6). */
+export function slot0SlotOf(poolId) {
+  return keccak256(hexBytes(String(poolId).replace(/^0x/, "").padStart(64, "0") + "6".padStart(64, "0")));
+}
+
+/** Token price in quote units from a pool's sqrtPriceX96 (currency1 per currency0, raw), with both decimals. Pure. */
+export function priceFromSqrt(sqrtPriceX96, dec0, dec1, tokenIs0) {
+  const s = Number(BigInt(sqrtPriceX96)) / 2 ** 96;
+  const p1per0 = s * s * 10 ** (dec0 - dec1); // whole currency1 per whole currency0
+  if (!(p1per0 > 0) || !Number.isFinite(p1per0)) return null;
+  return tokenIs0 ? p1per0 : 1 / p1per0;
+}
+
+/**
+ * Every v4 pool the chain's PoolManagers initialized with this token on either side, with its live sqrtPrice.
+ * rpc(method, params) → JSON-RPC response. → [{ poolId, key, sqrtPriceX96 }] (uninitialized or unreadable pools left out).
+ */
+export async function discoverV4Pools(rpc, token) {
+  const t = topicOf(token);
+  const logs = [];
+  for (const topics of [[INIT_TOPIC, null, t], [INIT_TOPIC, null, null, t]]) {
+    const r = await rpc("eth_getLogs", [{ topics, fromBlock: "0x0", toBlock: "latest" }]);
+    if (Array.isArray(r?.result)) logs.push(...r.result);
+  }
+  const out = [], seen = new Set();
+  for (const l of logs) {
+    const key = keyFromLog(l);
+    const poolId = String(l.topics?.[1] ?? "").toLowerCase();
+    if (!key || seen.has(poolId)) continue;
+    seen.add(poolId);
+    const s = await rpc("eth_call", [{ to: key.poolManager, data: "0x1e2eaeaf" + slot0SlotOf(poolId).slice(2) }, "latest"]); // extsload(bytes32)
+    const word0 = typeof s?.result === "string" && s.result.length >= 66 ? BigInt(s.result.slice(0, 66)) : 0n;
+    const sqrtPriceX96 = word0 & ((1n << 160n) - 1n);
+    if (sqrtPriceX96 > 0n) out.push({ poolId, key, sqrtPriceX96 });
+  }
+  return out;
+}

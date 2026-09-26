@@ -59,6 +59,12 @@ check(acceptOpener("glad you asked about this address") === "glad you asked abou
   check(/no single exit size/.test(m) && !/\$101/.test(m), "irregular exit: said plainly, no figure");
 }
 
+// a pool found on-chain: no listed liquidity, but the measured exit is given, and where the pool came from is said
+{
+  const m = tokenRead(v, { ...c, liqKnown: false, liquidity: 0, maxSell2: 100, exit: { usd: 100, atLeast: false, block: 1, formulaUsd: 500 }, flags: ["pool found on-chain, not listed on DexScreener yet", "low liquidity"] }, { kind: "mention", who: "x", url });
+  check(/found its v4 pool on-chain/.test(m) && /about \$100 is the most one sell/.test(m) && !/\$0 of liquidity|liquidity \$0/.test(m) && !/pool found on-chain, not listed/.test(m), "on-chain pool: exit given, no $0 liquidity, flag said once in plain words");
+}
+
 // the thread already named the contract: the lead says whose post it came from, never "no contract in the post"
 {
   const pl = lookupLead(v, { sym: "MUSECHAT", chain: "robinhood", addr: "0x29913b9527a824f39848d174cea3353a6af55ba3", others: 1, pinned: { who: "Demetra", postId: 82061 } });

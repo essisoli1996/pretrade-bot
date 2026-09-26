@@ -73,6 +73,8 @@ export interface CheckDeps {
   stockToken: (address: string) => Promise<boolean | null>;
   /** Holder list from the chain's explorer when GoPlus has none (GoPlus shape: address + percent as a fraction). */
   /** The chain explorer's verified-source answer: true verified, false not, null unknown (no key, no answer). */
+  /** Robinhood v4 pools DexScreener hasn't listed, from PoolManager logs, in DexScreener's pair shape (onchain: true). */
+  onchainPools: (address: string) => Promise<any[]>;
   verifiedSource: (address: string, chain: string) => Promise<boolean | null>;
   holdersFallback: (address: string, chain: string) => Promise<{ address: string; percent: string }[] | null>;
   /** Called when only fork-copy pools were found for an address (the reply explains instead of rating). */
@@ -82,6 +84,8 @@ export interface CheckDeps {
 export interface CheckOptions {
   light?: boolean;
   chain?: string | null;
+  /** Diagnostic: ignore DexScreener's pools and read the v4 pool found on-chain. */
+  onchainOnly?: boolean;
 }
 
 export interface CheckResult {

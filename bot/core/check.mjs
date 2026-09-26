@@ -9,9 +9,9 @@ import { recognizedQuote } from "./quotes.mjs";
 
 /** @param {import("./types").CheckDeps} deps */
 export function makeQuickCheck(deps) {
-  const { http, rpcFor, now, hookMaxPoints, infraHolders, v4HookRead, simRead, exitRead, provenanceRead, onForkSkipped, stockToken, holdersFallback, verifiedSource } = deps;
+  const { http, rpcFor, now, hookMaxPoints, infraHolders, v4HookRead, simRead, exitRead, provenanceRead, onForkSkipped, stockToken, holdersFallback, verifiedSource, onchainPools } = deps;
   /** @type {import("./types").QuickCheck} */
-  return async function quickCheck(address, { light = false, chain: onlyChain = null } = {}) {
+  return async function quickCheck(address, { light = false, chain: onlyChain = null, onchainOnly = false } = {}) {
     const sol = isSol(address);
     const a = sol ? address : address.toLowerCase();
     const found = await http(`https://api.dexscreener.com/latest/dex/search?q=${a}`);
@@ -22,6 +22,11 @@ export function makeQuickCheck(deps) {
       pairs = fork.pairs;
       if (fork.forkOf) onForkSkipped(a, { chain: fork.forkOf, unsure: !!fork.unsure });
     }
+    // not listed yet: on robinhood, look for a v4 pool the PoolManager initialized with this token (Green Chain,
+    // MuseCreatorlol: live pools DexScreener hadn't indexed). A full read only, never in light scans.
+    let onchain = false;
+    if (onchainOnly) pairs = []; // diagnostic: read the pool from the chain even when DexScreener lists it
+    if (!pairs.length && !sol && !light && (!onlyChain || onlyChain === "robinhood")) { pairs = await onchainPools(a); onchain = pairs.length > 0; }
     if (!pairs.length) return null; // wallet, pre-graduation token or unknown → stay silent
     // liquidity counts only against a recognized quote (see core/quotes.mjs): a pool against a token nobody can price
     // independently can list depth no seller reaches. With no recognized pool at all, the read keeps the pools but says so.
@@ -106,7 +111,8 @@ export function makeQuickCheck(deps) {
     })();
     if (top10Pct !== null && top10Pct >= 50) add(`top 10 holders own ${Math.round(top10Pct)}%`, 30);
     else if (top10Pct !== null && top10Pct >= 30) add(`top 10 holders own ${Math.round(top10Pct)}%`, 20);
-    if (!liqKnown) add("no liquidity figure (bonding curve or unindexed pool)", 0);
+    if (onchain) add("pool found on-chain, not listed on DexScreener yet", 0);
+    else if (!liqKnown) add("no liquidity figure (bonding curve or unindexed pool)", 0);
     const liqAt = flags.length; // the low-liquidity flag goes here once the exit is known (measured on v4 pools, below)
     if (ageH !== null && ageH < 24) add(`pair ${ageH < 1 ? "<1h" : Math.round(ageH) + "h"} old`, ageH < 1 ? 15 : 10);
     const hook = light ? null : await v4HookRead(p);
@@ -120,15 +126,17 @@ export function makeQuickCheck(deps) {
     const deepest = n(p.liquidity?.usd) ?? 0;
     const formula2 = Math.floor((0.02 * (deepest / 2)) / 0.98);
     // on a v4 pool the exit is measured by selling on the live pool: a full-position figure (Doppler multicurve) overstates it
-    const measured = sim?.status === "ok" && hook?.key ? await exitRead(p, hook.key, a, formula2) : null;
+    // an on-chain pool has no listed depth to start the search from: begin at $500 and let the search grow or shrink it
+    const measured = sim?.status === "ok" && hook?.key ? await exitRead(p, hook.key, a, formula2 > 0 ? formula2 : onchain ? 500 : 0) : null;
     // an irregular pool (impact not rising with size) has no honest single exit figure: no number from it, and the
     // listed-liquidity formula isn't trusted either, so the read says so and never reads OK
     const irregularExit = !!measured?.irregular;
     const exit = irregularExit ? null : measured;
     // "low liquidity" judges what a seller can reach: with a measured exit, the depth that exit implies (2% size × 98),
     // not the listed figure ($musemini: $9,987 listed read "low", ~$2k reachable is "very low")
-    if (liqKnown) {
-      const reach = exit ? Math.min(liquidity, exit.atLeast ? Infinity : exit.usd * 98) : liquidity;
+    // an on-chain pool with no listed figure is judged by its measured exit alone
+    if (liqKnown || (onchain && exit && !exit.atLeast)) {
+      const reach = !liqKnown && exit ? exit.usd * 98 : exit ? Math.min(liquidity, exit.atLeast ? Infinity : exit.usd * 98) : liquidity;
       /** @type {[string, number] | null} */
       const f = reach < 5000 ? ["very low liquidity", 25] : reach < 25000 ? ["low liquidity", 10] : null;
       if (f) { flags.splice(liqAt, 0, f[0]); score += f[1]; }

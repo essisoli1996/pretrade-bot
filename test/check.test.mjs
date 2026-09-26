@@ -8,17 +8,17 @@ const NOW = 1_790_000_000_000;
 const holders = [{ address: "0x2222222222222222222222222222222222222222", percent: "0.05" }];
 
 /** A token on base with deep liquidity and a clean scan; each case changes one thing. */
-function deps({ verified = null, fallback = null, extra = [], stock = async () => null, chain = "base", addr = T, quote = chain === "solana" ? "So11111111111111111111111111111111111111112" : "0x4200000000000000000000000000000000000006", sec = { is_open_source: "1", holders }, solSec = null, hook = null, sim = null } = {}) {
+function deps({ onchainList = [], noDex = false, verified = null, fallback = null, extra = [], stock = async () => null, chain = "base", addr = T, quote = chain === "solana" ? "So11111111111111111111111111111111111111112" : "0x4200000000000000000000000000000000000006", sec = { is_open_source: "1", holders }, solSec = null, hook = null, sim = null } = {}) {
   const pair = { chainId: chain, baseToken: { address: addr, symbol: "TST" }, pairAddress: "0xpair", quoteToken: { address: quote }, liquidity: { usd: 500000 }, pairCreatedAt: NOW - 90 * 864e5, priceUsd: "1" };
   return makeQuickCheck({
     http: async (url) => {
-      if (url.includes("dexscreener")) return { ok: true, status: 200, json: { pairs: [pair, ...extra.map((e) => ({ ...pair, ...e }))] }, text: "" };
+      if (url.includes("dexscreener")) return { ok: true, status: 200, json: { pairs: noDex ? [] : [pair, ...extra.map((e) => ({ ...pair, ...e }))] }, text: "" };
       if (url.includes("gopluslabs") && url.includes("solana")) return solSec ? { ok: true, status: 200, json: { result: { [addr]: solSec } }, text: "" } : { ok: false, status: 503, json: null, text: "" };
       if (url.includes("gopluslabs")) return sec ? { ok: true, status: 200, json: { result: { [addr]: sec } }, text: "" } : { ok: false, status: 503, json: null, text: "" };
       return { ok: false, status: 503, json: null, text: "" }; // rugcheck down
     },
     rpcFor: () => null, now: () => NOW, hookMaxPoints: () => 50, infraHolders: async () => [],
-    v4HookRead: async () => hook, simRead: async () => sim, exitRead: async () => null, provenanceRead: async () => null, onForkSkipped: () => {}, stockToken: stock, holdersFallback: async () => fallback, verifiedSource: async () => verified,
+    v4HookRead: async () => hook, simRead: async () => sim, exitRead: async () => null, provenanceRead: async () => null, onForkSkipped: () => {}, stockToken: stock, holdersFallback: async () => fallback, verifiedSource: async () => verified, onchainPools: async () => onchainList,
   });
 }
 const KEY = { currency0: "0x0", currency1: T, fee: 0, tickSpacing: 1, hooks: "0x0" };
@@ -102,5 +102,25 @@ r = await deps({ sec: { is_open_source: "0", holders }, verified: null })(T);
 assert.ok(r.flags.includes("unverified source"), "explorer unknown: GoPlus's flag stands");
 r = await deps({ sec: { is_open_source: "0", holders }, verified: false })(T);
 assert.ok(r.flags.includes("unverified source"));
+
+// not listed on DexScreener: a v4 pool found on-chain is read (robinhood), with the measured exit as its depth
+{
+  const MB = "0x91a2dae9699f0b82540b5886b0d8759c22820ba3";
+  const onchainPair = { chainId: "robinhood", dexId: "uniswap", pairAddress: "0x" + "ab".repeat(32), onchain: true, liquidity: undefined, url: null, pairCreatedAt: null, baseToken: { address: T, symbol: "NEW" }, quoteToken: { address: MB, symbol: "MUSEBOOK" }, priceNative: "0.5", priceUsd: "0.001" };
+  const mk = (exit) => makeQuickCheck({
+    http: async (url) => url.includes("dexscreener") ? { ok: true, status: 200, json: { pairs: [] }, text: "" } : url.includes("gopluslabs") ? { ok: true, status: 200, json: { result: { [T]: { is_open_source: "1", holders } } }, text: "" } : { ok: false, status: 503, json: null, text: "" },
+    rpcFor: () => null, now: () => NOW, hookMaxPoints: () => 50, infraHolders: async () => [],
+    v4HookRead: async () => ({ key: KEY, scored: true, risk: [] }), simRead: async () => simOk, exitRead: async (p, k, a, f) => (f === 500 ? exit : null),
+    provenanceRead: async () => null, onForkSkipped: () => {}, stockToken: async () => null, holdersFallback: async () => null, verifiedSource: async () => null,
+    onchainPools: async () => [onchainPair],
+  });
+  let o = await mk({ usd: 100, atLeast: false, block: 1, formulaUsd: 500 })(T); // ~$9,800 reachable: low
+  assert.equal(o.symbol, "NEW"); assert.equal(o.liqKnown, false); assert.equal(o.maxSell2, 100);
+  assert.ok(o.flags.includes("pool found on-chain, not listed on DexScreener yet") && o.flags.includes("low liquidity"), o.flags.join());
+  assert.equal(o.verdict, "OK", "an on-chain pool with a measured exit and nothing else is judged like any other read");
+  o = await mk(null)(T);
+  assert.equal(o.maxSell2, 0); assert.ok(!o.flags.includes("low liquidity"), "no exit measured: no depth claim either way");
+  assert.equal(await deps({ noDex: true, onchainList: [] })(T), null, "nothing listed and nothing on-chain: silent");
+}
 
 console.log("check: ok");

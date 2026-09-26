@@ -20,7 +20,7 @@ import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { makeRadar } from "./radar.mjs";
-import { makeV4Hooks, isV4, hookLine } from "./v4hooks.mjs";
+import { makeV4Hooks, isV4, hookLine, discoverV4Pools, priceFromSqrt } from "./v4hooks.mjs";
 import { makeSim, classify, planAdvice } from "./sim.mjs";
 import { makeStocks, indexRegistry } from "./stocks.mjs";
 import { makeExplorer, blockscoutHolders } from "./explorer.mjs";
@@ -200,7 +200,7 @@ let QC = null; // built on first use: the v4 / sim / provenance helpers below ar
 async function quickCheck(address, opts = {}) {
   QC ??= makeQuickCheck({
     http, rpcFor, now: CLOCK, hookMaxPoints: () => V4CFG.maxPoints ?? 50, infraHolders, v4HookRead, simRead, exitRead, provenanceRead,
-    onForkSkipped: (a, info) => FORK_SKIPPED.set(a, info), stockToken,
+    onForkSkipped: (a, info) => FORK_SKIPPED.set(a, info), stockToken, onchainPools,
     verifiedSource: async (a, chain) => {
       const id = Number(GOPLUS[chain]);
       if (!id) return null;
@@ -244,6 +244,49 @@ const decimalsOf = async (currency) => {
   const r = await v4().rpc("eth_call", [{ to: currency, data: "0x313ce567" }, "latest"]);
   try { const d = Number(BigInt(r.result)); return d <= 36 ? d : null; } catch { return null; }
 };
+/** symbol() of a token contract, or null. */
+async function symbolOf(token) {
+  const r = await v4().rpc("eth_call", [{ to: token, data: "0x95d89b41" }, "latest"]).catch(() => null);
+  const h = String(r?.result ?? "").replace(/^0x/, "");
+  try {
+    if (h.length >= 192) return new TextDecoder().decode(Uint8Array.from(h.slice(128, 128 + 2 * parseInt(h.slice(64, 128), 16)).match(/../g).map((b) => parseInt(b, 16)))).trim() || null;
+  } catch {}
+  return null;
+}
+const QUOTE_USD = new Map(); // quote token → { t, usd }: one DexScreener price per quote per 10 minutes
+async function quoteUsd(quote) {
+  const q = /^0x0{40}$/.test(quote) ? "0x0bd7d308f8e1639fab988df18a8011f41eacad73" : quote; // native ETH priced as WETH
+  const hit = QUOTE_USD.get(q);
+  if (hit && CLOCK() - hit.t < 10 * 60000) return hit.usd;
+  const r = await http(`https://api.dexscreener.com/tokens/v1/robinhood/${q}`);
+  const ps = (Array.isArray(r.json) ? r.json : []).filter((p) => String(p?.baseToken?.address ?? "").toLowerCase() === q);
+  ps.sort((x, y) => (n(y.liquidity?.usd) ?? 0) - (n(x.liquidity?.usd) ?? 0));
+  const usd = n(ps[0]?.priceUsd);
+  if (usd) QUOTE_USD.set(q, { t: CLOCK(), usd });
+  return usd ?? null;
+}
+/** v4 pools for a Robinhood token that DexScreener hasn't listed, found from the PoolManager's Initialize logs, priced
+ *  from each pool's own sqrtPrice and its quote's DexScreener price, in the pair shape the check reads. */
+async function onchainPools(a) {
+  if (V4CFG.onchainDiscovery === false) return [];
+  const found = await discoverV4Pools(v4().rpc, a).catch(() => []);
+  const out = [];
+  for (const f of found.slice(0, 5)) {
+    const tokenIs0 = f.key.currency0 === a, quote = tokenIs0 ? f.key.currency1 : f.key.currency0;
+    const dT = await decimalsOf(a), dQ = await decimalsOf(quote);
+    if (dT === null || dQ === null) continue;
+    const pn = priceFromSqrt(f.sqrtPriceX96, tokenIs0 ? dT : dQ, tokenIs0 ? dQ : dT, tokenIs0);
+    const qUsd = pn ? await quoteUsd(quote) : null;
+    if (!pn || !qUsd) continue;
+    out.push({
+      chainId: "robinhood", dexId: "uniswap", pairAddress: f.poolId, onchain: true, url: null, pairCreatedAt: null, liquidity: undefined,
+      baseToken: { address: a, symbol: (await symbolOf(a)) ?? "?" },
+      quoteToken: { address: quote, symbol: /^0x0{40}$/.test(quote) ? "ETH" : (await symbolOf(quote)) ?? "?" },
+      priceNative: String(pn), priceUsd: String(pn * qUsd),
+    });
+  }
+  return out;
+}
 /** How much of the pool's quote currency buys `usd` worth, from DexScreener's two prices for the pair. */
 async function quoteAmount(pair, key, token, usd) {
   const pUsd = n(pair.priceUsd), pNative = n(pair.priceNative);
@@ -267,8 +310,9 @@ async function simControl() {
 async function simRead(pair, key, token) {
   if (SIMCFG.enabled === false) return null;
   const liq = n(pair.liquidity?.usd) ?? 0;
-  if (liq < (SIMCFG.minLiquidityUsd ?? 2000)) return null;
-  const sizeUsd = Math.min(SIMCFG.sizeUsd ?? 25, liq * 0.002);
+  // a pool found on-chain has no listed liquidity: simulate a small fixed size instead of skipping it
+  if (!pair.onchain && liq < (SIMCFG.minLiquidityUsd ?? 2000)) return null;
+  const sizeUsd = pair.onchain ? SIMCFG.onchainSizeUsd ?? 5 : Math.min(SIMCFG.sizeUsd ?? 25, liq * 0.002);
   try {
     SIM ??= makeSim({ rpc: v4().rpc, control: simControl, seed: process.env.PRETRADE_HTTP_FIXTURE ? "fixture" : null });
     const go = async () => {
@@ -2303,7 +2347,8 @@ async function main() {
 
   if (cmd === "checkjson") {
     // the raw check result as JSON (no text, no posting): what fixtures record and replay tests compare
-    const c = await quickCheck(String(args[1] ?? ""));
+    // --onchain: ignore DexScreener's pools and read the v4 pool found on-chain (diagnostic for unlisted tokens)
+    const c = await quickCheck(String(args[1] ?? ""), { onchainOnly: args.includes("--onchain") });
     const { at, ...stable } = c ?? { at: 0 };
     console.log(JSON.stringify(c ? stable : null, null, 1));
     if (HTTPFX?.misses?.length) console.error(`fixture misses: ${HTTPFX.misses.length}\n${HTTPFX.misses.slice(0, 5).join("\n")}`);
