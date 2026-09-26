@@ -14,7 +14,7 @@
  "exit": {
   "usd": 189,
   "atLeast": false,
-  "block": 73158860,
+  "block": 73159651,
   "formulaUsd": 500
  },
  "contractScanned": true,
@@ -77,7 +77,7 @@
  },
  "sim": {
   "status": "ok",
-  "line": "🧪 simulated $5.00 buy then sell on the real pool: 4% round-trip cost (pool fee ~0%, the rest goes to the pool's hook). block 73158810.",
+  "line": "🧪 simulated $5.00 buy then sell on the real pool: 4% round-trip cost (pool fee ~0%, the rest goes to the pool's hook). block 73159595.",
   "flags": [],
   "roundTripLossPct": 4,
   "buyTaxPct": 0,
