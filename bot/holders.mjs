@@ -1,4 +1,4 @@
-import { releaseFunctions } from "./archive.mjs";
+import { releaseFunctions, generalPaths } from "./archive.mjs";
 // Holder concentration for the token read.
 const n = (v) => (v === null || v === undefined || v === "" || !Number.isFinite(Number(v)) ? null : Number(v));
 const yes = (v) => v === "1" || v === 1 || v === true;
@@ -21,8 +21,16 @@ export function holderKind(code, name = null, sourceText = null) {
   const nm = String(name ?? "");
   if (/safe|gnosis|multisig/i.test(nm)) return `multisig (${nm})`;
   if (/lock|vest|timelock|escrow/i.test(nm)) {
-    // with the verified source in hand: a lock with no release-type function never gives the tokens back
-    if (sourceText) { const fns = releaseFunctions(sourceText); return fns.length ? `lock or vesting (${nm}), releasable: ${fns.slice(0, 3).join(", ")}` : `permanent lock (${nm}), no release function in verified source`; }
+    // with the verified source in hand: releasable, or no VISIBLE release path. Never "permanent": a proxy can be
+    // upgraded, and a generic call or a transfer under another name can still move what's inside (RT-17)
+    if (code.target) return `lock or vesting (${nm}), behind a proxy: its code can change`;
+    if (sourceText) {
+      const fns = releaseFunctions(sourceText);
+      if (fns.length) return `lock or vesting (${nm}), releasable: ${fns.slice(0, 3).join(", ")}`;
+      const other = generalPaths(sourceText);
+      if (other.length) return `lock or vesting (${nm}), no release function but other ways to move tokens: ${other.slice(0, 3).join(", ")}`;
+      return `lock (${nm}), no visible release path in verified source`;
+    }
     return `lock or vesting (${nm})`;
   }
   if (/pool|pair|router|manager|vault/i.test(nm)) return `pool or router (${nm})`;

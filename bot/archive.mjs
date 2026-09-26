@@ -47,11 +47,22 @@ export async function etherscanSource(address, { chainId = 4663, key = process.e
   return { ok: true, verified: !!r.SourceCode, name: r.ContractName || null, compiler: r.CompilerVersion || null, proxy: r.Proxy === "1", implementation: r.Implementation || null, license: r.LicenseType || null, sourceText: r.SourceCode || "" };
 }
 
-// Functions that can move locked tokens back out. A lock whose verified source defines none of them is permanent: a
-// burn in a trench coat (Turbo, #lobby 77392). The reading is only as good as the verified source it cites.
+// Functions that can move locked tokens back out. A lock whose verified source defines none of them has no VISIBLE
+// release path (Turbo, #lobby 77392); that is not proof it is permanent: a generic call, a delegatecall, a transfer
+// under another name or an upgradeable proxy can still move the tokens (see generalPaths). The reading is only as good
+// as the verified source it cites.
 // Only implemented functions count: an interface declaration ends in ";" and runs no code (PonsV2LaunchLocker's
 // source bundles ILaunchpadV2, which declares claim/claimToken/sweepFees for the launchpad, not the locker).
 const RELEASE_FN = /function\s+(withdraw|release|unlock|claim|sweep|recover|rescue|emergency|redeem|unstake|retrieve|migrate)\w*\s*\([^;{]*\)[^;{]*\{/gi;
+/** Ways to move tokens that aren't named like a release: an implemented execute/multicall/transfer/approve/upgrade
+ *  function, or a low-level call, delegatecall or selfdestruct anywhere in the source. [] when there are none. */
+const GENERAL_FN = /function\s+(execute|exec|call|multicall|delegate|transfer|approve|upgrade|setImplementation|arbitrary|batch)\w*\s*\([^;{]*\)[^;{]*\{/gi;
+export function generalPaths(sourceText) {
+  const src = String(sourceText ?? "");
+  const fns = [...src.matchAll(GENERAL_FN)].map((m) => m[0].match(/^function\s+(\w+)/i)[1]);
+  const low = [["delegatecall", /\.delegatecall\s*\(/], ["low-level call", /\.call\s*(\{[^}]*\})?\s*\(/], ["selfdestruct", /\bselfdestruct\s*\(/]].filter(([, re]) => re.test(src)).map(([n]) => n);
+  return [...new Set([...fns, ...low])];
+}
 /** Release-type functions named in a verified source, e.g. ["withdraw", "releaseTokens"]; [] when it defines none. */
 export function releaseFunctions(sourceText) {
   return [...new Set([...String(sourceText ?? "").matchAll(RELEASE_FN)].map((m) => m[0].match(/^function\s+(\w+)/i)[1]))];

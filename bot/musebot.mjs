@@ -175,7 +175,7 @@ async function infraHolders(addrs) {
     cache[addr] = holderKind(code, src?.name ?? null, src?.sourceText ?? null); dirty = true;
   }
   if (dirty) saveJson(HOLDER_KINDS, cache);
-  return addrs.filter((x) => known.has(x) || /^(lock or vesting|permanent lock|pool or router)/.test(cache[x] ?? ""));
+  return addrs.filter((x) => known.has(x) || /^(lock or vesting|lock \(|permanent lock|pool or router)/.test(cache[x] ?? ""));
 }
 
 const noPairText = (a) => { const f = FORK_SKIPPED.get(a.toLowerCase()); return f
@@ -2341,7 +2341,7 @@ async function main() {
       const code = codeKind((await http(rpc, { jsonrpc: "2.0", id: 1, method: "eth_getCode", params: [addr, "latest"] })).json?.result);
       const src = code.kind === "contract" || code.target ? await etherscanSource(addr, { fetchJson: async (u) => (await http(u)).json }) : null;
       const kind = addr === a ? "the token itself" : poolish.includes(addr) ? "pool / pool manager (left out)" : holderKind(code, src?.ok ? src.name : null, src?.ok ? src.sourceText : null);
-      if (/^(lock or vesting|permanent lock|pool or router)/.test(kind) || (CFG.infraHolders ?? []).map((x) => x.toLowerCase()).includes(addr)) leftOut.push(addr);
+      if (/^(lock or vesting|lock \(|permanent lock|pool or router)/.test(kind) || (CFG.infraHolders ?? []).map((x) => x.toLowerCase()).includes(addr)) leftOut.push(addr);
       console.log(`  ${(Number(h.percent) * 100).toFixed(2).padStart(6)}%  ${addr}  ${kind}${leftOut.includes(addr) ? " (left out)" : ""}`);
     }
     // the same rule as the free read: pools, the token, burns, locks and routers are not holders
