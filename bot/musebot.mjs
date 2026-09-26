@@ -2474,8 +2474,12 @@ async function main() {
     console.log(`${sym} (${token.toLowerCase()}) at ${who.toLowerCase()} on ${chain} (via ${r.via}${r.capped ? `, first ${r.seen} transfers only: there are more` : ""}):`);
     console.log(`  in:  ${r.in.count} transfer(s), ${r.in.total} total`);
     console.log(`  out: ${r.out.count} transfer(s), ${r.out.total} total`);
+    const day = (t) => new Date(t * 1000).toISOString().slice(0, 16) + "Z";
+    if (r.out.count) console.log(`  outgoing, oldest ${day(r.out.rows[0].time)}, newest ${day(r.out.rows[r.out.count - 1].time)}${r.capped ? " (of the transfers read)" : ""}`);
+    if (r.in.count) console.log(`  incoming, oldest ${day(r.in.rows[0].time)}, newest ${day(r.in.rows[r.in.count - 1].time)}`);
+    if (r.out.count > 20) console.log(`  the ${Math.min(20, r.out.count)} newest outgoing (every one was read; older ones are left off the screen only):`);
     for (const t of r.out.rows.slice(-20)) console.log(`    out ${t.amount} → ${t.counterparty}  ${new Date(t.time * 1000).toISOString().slice(0, 16)}Z  tx ${t.hash}`);
-    if (r.out.count > 20) console.log(`    (${r.out.count - 20} earlier outgoing transfers not shown)`);
+    if (r.out.count > 20) console.log(`    (${r.out.count - 20} older outgoing transfers counted above, not listed)`);
     if (!r.out.count) console.log(`  no outgoing ${sym} transfer from this address in what the explorer returned.`);
     return;
   }
