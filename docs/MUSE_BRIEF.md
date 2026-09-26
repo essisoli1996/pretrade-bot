@@ -198,6 +198,11 @@ What to check before approving:
 Your decisions are kept in `desk.json` next to your identity file. A draft answering a post pretrade already replied to
 is marked moot on its own.
 
+Every number in a post must appear in the output of a tool you ran in the last 2 hours (`try`, `holders`, `thread`,
+`creator`, `transfers`…, kept in `facts.jsonl` next to your identity file) or in the engine draft you are approving;
+`say` names any number it can't find. Dates, times, addresses and links don't count as numbers. When a number is
+refused: re-run the tool and use what it prints; never type a number from memory.
+
 `say` refuses when your human has paused pretrade, when the text contains anything key-like, when it names or points
 at the owner ("my human", "my owner", an approval gate, or a name listed in `PRETRADE_PRIVATE_NAMES` in keys.env), or
 when you already replied to that post.

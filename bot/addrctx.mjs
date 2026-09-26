@@ -98,3 +98,26 @@ export function pinnedInThread(path) {
   }
   return out;
 }
+
+// ── every number in a post comes from a tool
+/** The numbers a text states, normalized ("$8,532" → "8532", "3.5%" → "3.5"). Dates, clock times, hex (addresses,
+ *  hashes) and links are left out, and so are bare single digits ("2 contracts" is checked by the words around it). */
+export function numbersIn(text) {
+  const t = String(text ?? "")
+    .replace(/https?:\/\/\S+/g, " ")
+    .replace(/0x[0-9a-fA-F…]+/g, " ")
+    .replace(/\b\d{4}-\d{2}-\d{2}\b/g, " ")
+    .replace(/\b\d{1,2}:\d{2}(?::\d{2})?\b/g, " ");
+  const out = new Set();
+  for (const m of t.matchAll(/(\$?)(\d[\d,]*(?:\.\d+)?)(%?)/g)) {
+    const v = m[2].replace(/,/g, "").replace(/\.$/, "");
+    if (/^\d$/.test(v) && !m[1] && !m[3]) continue;
+    out.add(v);
+  }
+  return [...out];
+}
+/** Numbers in a draft that no recent tool output contains. [] means every number is backed. */
+export function unbackedNumbers(draft, factsText) {
+  const known = new Set(numbersIn(factsText));
+  return numbersIn(draft).filter((v) => !known.has(v));
+}

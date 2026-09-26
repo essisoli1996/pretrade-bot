@@ -82,3 +82,15 @@ console.log("addrctx: ok");
   assert.deepEqual(pinnedInThread([{ id: 1, text: `the post itself: ${MC}` }]), [], "the post's own text isn't an ancestor");
   console.log("pinnedInThread: ok");
 }
+
+// ── every number in a post comes from a tool
+{
+  const { numbersIn, unbackedNumbers } = await import("../bot/addrctx.mjs");
+  assert.deepEqual(numbersIn("$8,532 listed; about $18 moves it ~2%. risk 35/100, 3.5% round trip"), ["8532", "18", "2", "35", "100", "3.5"]);
+  assert.deepEqual(numbersIn("read 2026-09-26 07:42 utc, pair 0x9411c47143071458c26b5fcd00198a3fcf1d69aa934d032e0f9b577a98a11c7f https://x.io/p/82061"), [], "dates, times, hex and links are not claims");
+  assert.deepEqual(numbersIn("2 contracts, q3, 624 holders"), ["624"], "bare single digits are left out");
+  const facts = "🟡 $MUSECHAT reads CAUTION at 35/100\nflags: very low liquidity. $8,532 of liquidity listed; about $18 ... ~2% price impact. 3.5% round-trip cost";
+  assert.deepEqual(unbackedNumbers("caution 35/100, $8,532 listed, ~$18 exit at ~2%, 3.5% round trip", facts), []);
+  assert.deepEqual(unbackedNumbers("caution 40/100, $8,532 listed", facts), ["40"], "a number no tool returned is caught (the stale 40)");
+  console.log("numbers: ok");
+}

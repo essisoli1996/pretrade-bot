@@ -16,7 +16,7 @@
 // Mentions without an address are never auto-answered: they are saved to bot/mentions.log for the human.
 
 import { generateKeyPairSync, createPrivateKey, sign, randomBytes, randomUUID, createHash } from "node:crypto";
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
+import { readFileSync, writeFileSync, existsSync, mkdirSync, appendFileSync, statSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { makeRadar } from "./radar.mjs";
@@ -32,7 +32,7 @@ import { toDraft, parseOutbox, appendDraft, pendingDrafts } from "./outbox.mjs";
 import { loadJson, saveJson } from "./store.mjs";
 import { top10Share, holderKind } from "./holders.mjs";
 import { loadKeysFile, archiveUrl, redact, codeKind, etherscanSource } from "./archive.mjs";
-import { addressOnlyInLinks, LURE_TALK, lureInPath, dropForkCopies, ownerTalk, privateNames, postHash, pinnedInThread } from "./addrctx.mjs";
+import { addressOnlyInLinks, LURE_TALK, lureInPath, dropForkCopies, ownerTalk, privateNames, postHash, pinnedInThread, unbackedNumbers } from "./addrctx.mjs";
 import { isSol, GOPLUS, n, yes } from "./core/util.mjs";
 import { makeQuickCheck } from "./core/check.mjs";
 import { httpFixture } from "./core/httpfixture.mjs";
@@ -68,6 +68,27 @@ const args = process.argv.slice(2);
 const cmd = args[0];
 const LIVE = args.includes("--live");
 const LOOP = args.includes("--loop");
+
+// The Muse's facts log: everything its read tools print is kept (next to the identity file) so say can check that
+// every number in a post came from a tool run in the last hours. Output still goes to the screen as before.
+const FACTS = join(process.env.MUSE_IDENTITY_FILE ? dirname(process.env.MUSE_IDENTITY_FILE) : DATA, "facts.jsonl");
+const FACT_CMDS = new Set(["try", "checkjson", "holders", "thread", "feed", "source", "codeat", "creator", "transfers", "posthash", "inbox", "drafts"]);
+if (FACT_CMDS.has(cmd) && process.env.MUSE_IDENTITY_FILE && !process.env.PRETRADE_HTTP_FIXTURE) { // the Muse's desk only, never CI or the engine
+  const lines = [], print = console.log.bind(console);
+  console.log = (...a) => { lines.push(a.map(String).join(" ")); print(...a); };
+  process.on("exit", () => {
+    try {
+      if (!lines.length) return;
+      appendFileSync(FACTS, JSON.stringify({ t: Date.now(), cmd: args.join(" ").slice(0, 200), text: redact(lines.join("\n")).slice(0, 60000) }) + "\n");
+      if (statSync(FACTS).size > 8e6) writeFileSync(FACTS, readFileSync(FACTS, "utf8").split("\n").slice(-400).join("\n")); // keep it small
+    } catch {}
+  });
+}
+/** Everything the read tools printed in the last `hours`. */
+const recentFacts = (hours = 2) => {
+  try { return readFileSync(FACTS, "utf8").split("\n").filter(Boolean).map((l) => JSON.parse(l)).filter((e) => Date.now() - e.t < hours * 36e5).map((e) => e.text).join("\n"); }
+  catch { return ""; }
+};
 
 // ───────────────────────── identity + signing (musebook-v1) ─────────────────────────
 
@@ -2636,9 +2657,14 @@ async function main() {
   // nothing naming or pointing at the owner,
   // no second reply to the same post, the signature line. Returns the post id, or null with the reason printed.
   const signed = (text) => (/\n- pretrade\s*$/i.test(text) ? text : `${text}\n- ${CFG.name}`);
-  const deskPost = async (ch, replyTo, text, { force = false, dry = false, expect = null } = {}) => {
+  const deskPost = async (ch, replyTo, text, { force = false, dry = false, expect = null, engineText = null } = {}) => {
     if (CONTROL.paused) return console.log("NOT POSTED: the owner has paused pretrade (bot/control.json)."), null;
     if (findSecrets(text).length) return console.log("NOT POSTED: the text contains something that looks like a key or seed phrase."), null;
+    // every number in the post comes from a tool the Muse ran in the last 2 hours (or from the engine's own draft)
+    if (CONTROL.numberCheck !== false) {
+      const missing = unbackedNumbers(text, `${recentFacts(2)}\n${engineText ?? ""}`);
+      if (missing.length) return console.log(`NOT POSTED: no tool output from the last 2 hours contains ${missing.map((x) => `"${x}"`).join(", ")}. run the tool (try, holders, thread…) and use the numbers it prints.`), null;
+    }
     const owner = ownerTalk(text, privateNames());
     if (owner) return console.log(`NOT POSTED: "${owner}" points at the owner. posts never name them or mention their approval; put what needs them under Needs in the report.`), null;
     if (replyTo && !force && (await repliedByMe(replyTo)).mine) return console.log(`NOT POSTED: pretrade already replied to post ${replyTo} (use --force to add another).`), null;
@@ -2703,7 +2729,7 @@ async function main() {
     const prior = (loadJson(DESK, {}).drafts ?? {})[d.id];
     if (prior && !args.includes("--force")) return console.log(`draft ${d.id} was already decided: ${prior.decision} at ${prior.at} (use --force to post anyway).`);
     const ti = args.indexOf("--text"), edited = ti >= 0 ? args.slice(ti + 1).filter((x, i, all) => !["--dry", "--force", "--expect"].includes(x) && all[i - 1] !== "--expect").join(" ").trim() : "";
-    const id = await deskPost(d.channel, d.reply_to, edited || d.text, { dry: args.includes("--dry"), expect: expectArg() });
+    const id = await deskPost(d.channel, d.reply_to, edited || d.text, { dry: args.includes("--dry"), expect: expectArg(), engineText: d.text });
     if (id) decide(d.id, edited ? "edited" : "approved", { post: id });
     return;
   }
