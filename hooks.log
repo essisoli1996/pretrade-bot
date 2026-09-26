@@ -1,24 +1,123 @@
-$MUSEGOD (0x0379e228f6887c6f18bf394042ecaf81b308cb2e) at 0xaafc482d0757a705c8f3c41f375c1d79832d8975 on robinhood (via etherscan):
-  in:  515 transfer(s), 36025745.532709 total
-  out: 471 transfer(s), 4279233.977404 total
-    out 2610.169961 → 0x0be6dd8f1aa0c6f4c8d28cf852f53552c6e24c86  2026-09-26T10:38Z  tx 0x17259d41ba3b547e2caaa19fcb42498dd6d901a423e0d5044c5f146ff4caf42a
-    out 226.637656 → 0xc0c9fccc0b4116d8613b0de095b82d21f45a9c0c  2026-09-26T10:41Z  tx 0x138682e1f99487f993d6aa11cd81ed47db5d2b0a7b955f9cbd56b81b612e15f2
-    out 152.180268 → 0x406dcb7a4606965fff4ad786e9394f36c72bc67b  2026-09-26T11:01Z  tx 0xff1741e82bd72e38f493ec3ad86494dfbaf8670d84b9334b465fca22e1ea1779
-    out 42.748631 → 0x4a82be2ea3727e595ba3139ac183010589387fce  2026-09-26T11:14Z  tx 0xb3a0e9c7f0d11df213aabf4c56f3537a68dd223c2325a62fc61415b60778c1fd
-    out 158401.073769 → 0x4a82be2ea3727e595ba3139ac183010589387fce  2026-09-26T11:14Z  tx 0x8b952671ad28111df66989cdc09f29cd377fe76708a7f927eb5332c654abf57b
-    out 204.373872 → 0x0be6dd8f1aa0c6f4c8d28cf852f53552c6e24c86  2026-09-26T11:24Z  tx 0xf99057f1b5173cbc566111bd40ebe9798afa57a6a53f4775a9b5b95b3a4b9e52
-    out 2573.862775 → 0x0be6dd8f1aa0c6f4c8d28cf852f53552c6e24c86  2026-09-26T11:24Z  tx 0xfd4889307e0a59a1f55af10e6054fa3e1ada0aff7d64f240248d51554a09a879
-    out 458.451104 → 0x3a244465572f913949c1d4a67cf4217203c77850  2026-09-26T11:51Z  tx 0x2a5c407bf407f096fe61fb3b56ca556427452ac0f0cfcccc18ad2c1a3d786c0d
-    out 838.224433 → 0xb203faa6207ce9384d46fa5b9f397d304f17943c  2026-09-26T11:57Z  tx 0x0ef8a2a35980d7a9ce956818ed0d74cefddcd99793dfd1b10fe2330296bbe4c5
-    out 70.480276 → 0xb203faa6207ce9384d46fa5b9f397d304f17943c  2026-09-26T11:57Z  tx 0x765248c328ec17a90f5e0a424ec38aa7a563ab31e3f6b620bfba3589f4a125ea
-    out 88415.687725 → 0x22a676b52392591bc6c7caf51c14b38f5e0f3716  2026-09-26T12:22Z  tx 0x2d129a354f2dfd80e1b046371763faae98887efb43c09c25ab14d797b9076637
-    out 74.849513 → 0x0be6dd8f1aa0c6f4c8d28cf852f53552c6e24c86  2026-09-26T12:34Z  tx 0x9149f43fd605a1698f4c58f1095afd1619fa8e538bc8b0b0badfd63d8c8a3a71
-    out 3964.879067 → 0x0be6dd8f1aa0c6f4c8d28cf852f53552c6e24c86  2026-09-26T12:34Z  tx 0xbb2cd2be2d29810258eb7d9335fad392d279ef728ebc2002cc1187861caecd86
-    out 61.246330 → 0x71c08fd6cadc6f594fe47b32289c584dc6497ca0  2026-09-26T12:40Z  tx 0x8832deeb8042a5e940afcd18535d4078dbe1b4a82410b07bc20cf986632837e0
-    out 4713.505898 → 0x71c08fd6cadc6f594fe47b32289c584dc6497ca0  2026-09-26T12:40Z  tx 0xe932ea335fe7f2581a93e03a679fc73e677a1b65fd5da709f1396a87e0750afe
-    out 10.008438 → 0xcdb4c77649a2fc659a9cdfa72fe1d7feeb603c02  2026-09-26T12:45Z  tx 0xeac6995fa3e61347460284a0f2082fdd9508f1e0caa707cc278cba9fae7ab2ab
-    out 237.382692 → 0x0be6dd8f1aa0c6f4c8d28cf852f53552c6e24c86  2026-09-26T13:09Z  tx 0x0f6a0e4b1d90d801e7e587845d113a068589a4d40b0a58273d5f94b6737381bf
-    out 2015.040008 → 0x0be6dd8f1aa0c6f4c8d28cf852f53552c6e24c86  2026-09-26T13:09Z  tx 0xe30ad903643a19e3473ad12c99e43122f6da21bb894beef0820af386eb097917
-    out 76402.978927 → 0x0ed8b7861f31ce84d2a7b64a3083f3c7572ad6cb  2026-09-26T13:11Z  tx 0x145143cabfa4982a797450ada20134a12f167c9d9b5f495c3491b0abf9346fa3
-    out 154.062833 → 0x17e738d9056cf0926ffdb0ff15da4fe64661c867  2026-09-26T13:47Z  tx 0x4566bcaecd78b6e14466da51e6f5758294ab57830946150d5ec12f33616d4065
-    (451 earlier outgoing transfers not shown)
+{
+ "address": "0x4caf2e6ec0fcbef77314566a9884643512ef8bfc",
+ "chain": "robinhood",
+ "symbol": "MDOG",
+ "verdict": "OK",
+ "score": 10,
+ "flags": [
+  "pool found on-chain, not listed on DexScreener yet",
+  "low liquidity"
+ ],
+ "liquidity": 0,
+ "liqKnown": false,
+ "maxSell2": 189,
+ "exit": {
+  "usd": 189,
+  "atLeast": false,
+  "block": 73158860,
+  "formulaUsd": 500
+ },
+ "contractScanned": true,
+ "critical": false,
+ "url": null,
+ "ageH": null,
+ "price": 0.0000420832086117631,
+ "holders": 375,
+ "top10Pct": 24.8,
+ "priceChange": {
+  "h1": null,
+  "h6": null,
+  "h24": null
+ },
+ "flowH1": {
+  "buys": 0,
+  "sells": 0
+ },
+ "volume24h": null,
+ "marketCap": null,
+ "sellMax": {
+  "p1": 0,
+  "p2": 0,
+  "p5": 0
+ },
+ "hook": {
+  "poolId": "0xd1fc0038c1422034f23e35bbab6b265574733c2c64ee6514f2849d3b0fb23665",
+  "readable": true,
+  "key": {
+   "currency0": "0x4caf2e6ec0fcbef77314566a9884643512ef8bfc",
+   "currency1": "0xc0d6457c16cc70d6790dd43521c899c87ce02f35",
+   "fee": 0,
+   "tickSpacing": 200,
+   "hooks": "0xe5e702641ea86f4ae6cc3cdaed2b886f976be044",
+   "poolManager": "0x8366a39cc670b4001a1121b8f6a443a643e40951",
+   "block": 66474358
+  },
+  "hook": "0xe5e702641ea86f4ae6cc3cdaed2b886f976be044",
+  "perms": [
+   "beforeInitialize",
+   "afterSwap",
+   "afterSwapReturnsDelta"
+  ],
+  "dynamicFee": false,
+  "feePct": 0,
+  "poolManager": "0x8366a39cc670b4001a1121b8f6a443a643e40951",
+  "standard": "standard musepad launch hook",
+  "contract": {
+   "known": true,
+   "hasCode": true,
+   "clone": null,
+   "upgradeable": false,
+   "implementation": null,
+   "beacon": null,
+   "owner": "0x263ed295dafae1d9aadd6e56c4b6f9f38ee019dd"
+  },
+  "risk": [],
+  "points": 0,
+  "scored": true
+ },
+ "sim": {
+  "status": "ok",
+  "line": "🧪 simulated $5.00 buy then sell on the real pool: 4% round-trip cost (pool fee ~0%, the rest goes to the pool's hook). block 73158810.",
+  "flags": [],
+  "roundTripLossPct": 4,
+  "buyTaxPct": 0,
+  "scored": true
+ },
+ "provenance": {
+  "rec": {
+   "address": "0x4caf2e6ec0fcbef77314566a9884643512ef8bfc",
+   "symbol": "MDOG",
+   "name": "Muse Dog",
+   "launcher": "Mikey 🍊🧙‍♂️🪵",
+   "wallet": "0x320bac255b0a42753fcd711bd8895b92ccd290ae",
+   "custodial": false,
+   "launchedAt": 1789629930841,
+   "post": 3614,
+   "channel": "#memecoins",
+   "launchpad": "pons",
+   "platform": "musebook"
+  },
+  "fee": {
+   "kind": "token-contract",
+   "token": {
+    "address": "0x320bac255b0a42753fcd711bd8895b92ccd290ae",
+    "symbol": "MDOG",
+    "name": "Muse Dog",
+    "launcher": "Kettle",
+    "wallet": "0x0d3862f8490c67fa7b42028dcd7a58af2fc27338",
+    "custodial": false,
+    "launchedAt": 1789628410511,
+    "post": 64,
+    "channel": "#musepad",
+    "launchpad": "pons",
+    "platform": "musegram"
+   },
+   "sameTicker": true,
+   "text": "fees go to a different contract that also calls itself $MDOG (0x320b…90ae, launched by Kettle), not to this token and not to a wallet: whether anyone can move them depends on what that contract allows"
+  },
+  "lines": [
+   "🧾 launched 9d ago by Mikey 🍊🧙‍♂️🪵 via musepad (musebook.me/p/3614); fees go to a different contract that also calls itself $MDOG (0x320b…90ae, launched by Kettle), not to this token and not to a wallet: whether anyone can move them depends on what that contract allows.",
+   "same ticker $MDOG on musepad: 2 by other launchers: 0x9960…1bae by Kettle, earlier; 0x320b…90ae by Kettle, earlier. match the address, not the name."
+  ]
+ }
+}
