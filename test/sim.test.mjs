@@ -2,7 +2,7 @@
 // The contract itself was tested against a real v4 PoolManager on anvil (clean pool, honeypot, cooldown,
 // 30% skim hook, native ETH pool, transfer-tax token, broken control); this covers the bot-side logic.
 // Run: node test/sim.test.mjs
-import { encodeRoundTrip, decodeResult, revertReason, classify, searchExit } from "../bot/sim.mjs";
+import { encodeRoundTrip, decodeResult, revertReason, classify, searchExit, makeSim } from "../bot/sim.mjs";
 
 let bad = 0;
 const check = (ok, label) => { console.log(`${ok ? "PASS" : "FAIL"}  ${label}`); if (!ok) bad++; };
@@ -59,6 +59,35 @@ check(taxed.buyTaxPct === 20 && taxed.flags.some((f) => /buy tax 20%/.test(f.tex
   const capped = await searchExit({ sellOut: async (x) => (x > 5000n * ONE ? null : pool(X)(x)), refIn: ONE, guessIn: 100_000n * ONE });
   check(Number(capped.amountIn / ONE) <= 5000, "sizes that revert are never reported as an exit");
   check((await searchExit({ sellOut: async () => null, refIn: ONE, guessIn: ONE * 10n })) === null, "no reference sell: no exit figure");
+}
+
+// the simulator can't be recognised (RT-20/24): new addresses every block, a real gas price on every call
+{
+  const calls = [];
+  let head = 100;
+  const rpc = async (method, params) => {
+    calls.push({ method, params });
+    if (method === "eth_blockNumber") return { result: "0x" + (head++).toString(16) };
+    if (method === "eth_gasPrice") return { result: "0x989680" };
+    if (method === "eth_createAccessList") return { result: { accessList: [] } };
+    return { result: "0x" };
+  };
+  const key = { poolManager: "0x" + "44".repeat(20), currency0: "0x0000000000000000000000000000000000000000", currency1: "0x" + "11".repeat(20), fee: 0, tickSpacing: 60, hooks: "0x0000000000000000000000000000000000000000" };
+  const simA = makeSim({ rpc }), simB = makeSim({ rpc });
+  await simA.run({ key, token: key.currency1, quoteIn: 1000n });
+  await simA.run({ key, token: key.currency1, quoteIn: 1000n });
+  await simB.run({ key, token: key.currency1, quoteIn: 1000n });
+  const ethCalls = calls.filter((c) => c.method === "eth_call");
+  const froms = ethCalls.map((c) => c.params[0].from), tos = ethCalls.map((c) => c.params[0].to);
+  check(ethCalls.length === 3 && new Set(froms).size === 3 && new Set(tos).size === 3, "a new simulator and sender every block, and per process");
+  check(!froms.concat(tos).some((a) => /5117/.test(a)), "no fixed 0x5117… address left");
+  check(ethCalls.every((c) => c.params[0].gasPrice === "0x989680"), "every eth_call carries the chain's gas price");
+  check(ethCalls.every((c) => c.params[2][c.params[0].from]?.balance), "the sender is funded for that gas");
+  const s1 = makeSim({ rpc, seed: "fixture" }), s2 = makeSim({ rpc, seed: "fixture" });
+  calls.length = 0; head = 7; await s1.run({ key, token: key.currency1, quoteIn: 1n });
+  const first = calls.find((c) => c.method === "eth_call").params[0];
+  calls.length = 0; head = 7; await s2.run({ key, token: key.currency1, quoteIn: 1n });
+  check(calls.find((c) => c.method === "eth_call").params[0].from === first.from, "a fixed seed (recorded fixtures) asks the same questions");
 }
 
 console.log(bad ? `\n${bad} FAILED` : "\nall passed");

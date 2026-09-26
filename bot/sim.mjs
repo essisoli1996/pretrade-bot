@@ -10,14 +10,15 @@
 //   (balance set directly, no buy first). If the holder can sell, it's a cooldown, not a honeypot.
 // - a fresh pool with thin liquidity: not simulated below a liquidity floor.
 // - a result is only true for that block: the block number travels with every result.
+// - a token that recognises the simulator (a fixed scratch address, a known tx.origin, the gas price of 0 an eth_call
+//   uses by default) could let the simulation sell and block real buyers: the simulator and sender addresses are new
+//   for every block, derived from a secret per-process seed, and every call carries the chain's real gas price.
 //
 // Zero dependencies. Rebuild the runtime after editing bot/Sim.sol with solc 0.8.26 (evm cancun, via-ir,
 // optimizer 200 runs, no metadata hash) and paste the deployed bytecode into bot/sim-runtime.mjs.
 import { keccak256 } from "./v4hooks.mjs";
 import { SIM_RUNTIME } from "./sim-runtime.mjs";
 
-const SIM_ADDR = "0x5117000000000000000000000000000000005117";
-const FROM = "0x5117000000000000000000000000000000000001";
 const ZERO = "0x0000000000000000000000000000000000000000";
 const DYNAMIC_FEE = 0x800000;
 const SEL_ROUND_TRIP = "0x7f70be11";
@@ -79,14 +80,32 @@ function candidateSlots(holder) {
 /**
  * rpc(method, params) → JSON-RPC response object ({result} or {error}).
  * control: optional async () => ({ key, token, quoteIn }) for a known-good pool, used to validate a failed sell.
+ * seed: secret the per-block simulator and sender addresses derive from (random per process; fixed only for recorded
+ * test fixtures, so a replay asks the same questions).
  */
-export function makeSim({ rpc, control = null }) {
+export function makeSim({ rpc, control = null, seed = null }) {
   const slotCache = new Map();
   const decCache = new Map();
+  const secret = seed ?? Array.from(globalThis.crypto.getRandomValues(new Uint8Array(16)), (b) => b.toString(16).padStart(2, "0")).join("");
+  const derive = (tag, block) => "0x" + keccak256(new TextEncoder().encode(`${secret}:${tag}:${block}`)).slice(-40);
+  /** Simulator and sender addresses for one block: unpredictable, and different every block. */
+  const actors = (block) => ({ sim: derive("sim", block), from: derive("from", block) });
+  const gasCache = new Map();
+  /** The chain's gas price for this block (never 0: a token can tell an eth_call from a real transaction by that). */
+  async function gasPrice(block) {
+    if (!gasCache.has(block)) {
+      const r = await rpc("eth_gasPrice", []).catch(() => null);
+      const g = typeof r?.result === "string" && BigInt(r.result) > 0n ? r.result : "0x3b9aca00"; // 1 gwei if unreadable
+      gasCache.clear(); gasCache.set(block, g);
+    }
+    return gasCache.get(block);
+  }
 
   async function call(to, data, block, overrides) {
-    const r = await rpc("eth_call", [{ from: FROM, to, data, gas: "0x1c9c380" }, block, overrides]);
-    return r;
+    const { from } = actors(block);
+    // the sender pays real gas, so it is given the ETH to cover it (and nothing else changes about it)
+    const over = { ...overrides, [from]: { ...(overrides?.[from] ?? {}), balance: "0xc9f2c9cd04674edea40000000" } };
+    return rpc("eth_call", [{ from, to, data, gas: "0x1c9c380", gasPrice: await gasPrice(block) }, block, over]);
   }
 
   async function decimals(token, block) {
@@ -104,7 +123,7 @@ export function makeSim({ rpc, control = null }) {
     if (slotCache.has(k)) return slotCache.get(k);
     const data = SEL_BALANCE_OF + addr32(holder);
     let keys = [];
-    const al = await rpc("eth_createAccessList", [{ from: FROM, to: token, data }, block]);
+    const al = await rpc("eth_createAccessList", [{ from: actors(block).from, to: token, data }, block]);
     for (const e of al.result?.accessList ?? []) if (String(e.address).toLowerCase() === token) keys.push(...(e.storageKeys ?? []));
     keys = [...new Set([...keys, ...candidateSlots(holder)])];
     const marker = 0x5117_5117_5117n;
@@ -116,11 +135,12 @@ export function makeSim({ rpc, control = null }) {
     return null;
   }
 
-  /** Builds the override: Sim code at SIM_ADDR, plus `amount` of `currency` in its balance. Null if it can't be funded. */
+  /** Builds the override: Sim code at this block's simulator address, plus `amount` of `currency` in its balance. Null if it can't be funded. */
   async function funded(currency, amount, block) {
-    const o = { [SIM_ADDR]: { code: SIM_RUNTIME } };
-    if (currency === ZERO) { o[SIM_ADDR].balance = toHexQty(amount); return o; }
-    const slot = await balanceSlot(currency, SIM_ADDR, block);
+    const { sim } = actors(block);
+    const o = { [sim]: { code: SIM_RUNTIME } };
+    if (currency === ZERO) { o[sim].balance = toHexQty(amount); return o; }
+    const slot = await balanceSlot(currency, sim, block);
     if (!slot) return null;
     o[currency] = { stateDiff: { [slot]: "0x" + hex32(amount) } };
     return o;
@@ -132,7 +152,7 @@ export function makeSim({ rpc, control = null }) {
     const quote = tokenIs0 ? key.currency1 : key.currency0;
     const over = await funded(sellOnly ? token : quote, amount, block);
     if (!over) return { stage: -1, why: `couldn't find the balance slot of ${sellOnly ? "the token" : "the quote currency"}` };
-    const r = await call(SIM_ADDR, encodeRoundTrip(key.poolManager, key, tokenIs0, sellOnly ? 0n : amount, sellOnly, sellOnly ? amount : 0n), block, over);
+    const r = await call(actors(block).sim, encodeRoundTrip(key.poolManager, key, tokenIs0, sellOnly ? 0n : amount, sellOnly, sellOnly ? amount : 0n), block, over);
     if (r.error) return { stage: -1, why: `eth_call failed: ${String(r.error.message ?? r.error.code).slice(0, 100)}` };
     try { return decodeResult(r.result); } catch { return { stage: -1, why: "unreadable simulator output" }; }
   }

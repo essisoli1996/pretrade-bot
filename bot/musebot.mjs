@@ -252,7 +252,7 @@ async function simRead(pair, key, token) {
   if (liq < (SIMCFG.minLiquidityUsd ?? 2000)) return null;
   const sizeUsd = Math.min(SIMCFG.sizeUsd ?? 25, liq * 0.002);
   try {
-    SIM ??= makeSim({ rpc: v4().rpc, control: simControl });
+    SIM ??= makeSim({ rpc: v4().rpc, control: simControl, seed: process.env.PRETRADE_HTTP_FIXTURE ? "fixture" : null });
     const go = async () => {
       const quoteIn = await quoteAmount(pair, key, token, sizeUsd);
       if (!quoteIn) return { status: "unavailable", line: "🧪 trade simulation unavailable (no price for the quote currency).", flags: [] };
@@ -284,7 +284,7 @@ async function exitRead(pair, key, token, formulaUsd) {
   const price = n(pair.priceUsd);
   if (!price || !(formulaUsd > 0)) return null;
   try {
-    SIM ??= makeSim({ rpc: v4().rpc, control: simControl });
+    SIM ??= makeSim({ rpc: v4().rpc, control: simControl, seed: process.env.PRETRADE_HTTP_FIXTURE ? "fixture" : null });
     const go = async () => {
       const dec = await SIM.decimals(token, "latest");
       if (dec === null) return null;
@@ -556,7 +556,7 @@ async function planText(text) {
   if (!p) return `exact simulation works on Robinhood Chain v4 pools, and i found none for ${addr}. "@${CFG.name} ${addr}" still gives the free read.\n- ${CFG.name}`;
   const key = await v4().poolKey(p.pairAddress, p.pairCreatedAt, null);
   if (!key) return `couldn't read that pool's key right now. try again in a minute.\n- ${CFG.name}`;
-  SIM ??= makeSim({ rpc: v4().rpc, control: simControl });
+  SIM ??= makeSim({ rpc: v4().rpc, control: simControl, seed: process.env.PRETRADE_HTTP_FIXTURE ? "fixture" : null });
   const tokenDec = await decimalsOf(addr);
   let amount, ref;
   if (side === "buy") { amount = await quoteAmount(p, key, addr, usd); ref = await quoteAmount(p, key, addr, Math.min(1, usd)); }
