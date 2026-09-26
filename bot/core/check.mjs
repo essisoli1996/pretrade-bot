@@ -2,7 +2,7 @@
 // The token check behind every read: one address in, one verdict out. Everything it needs from outside (HTTP, RPC,
 // the v4 hook read, the trade simulation, the exit measurement, provenance, the clock) comes in as `deps`, so the
 // whole pipeline can run offline against recorded fixtures (test/replay.test.mjs) and the bot wires in the live ones.
-import { isSol, GOPLUS, n, yes } from "./util.mjs";
+import { isSol, GOPLUS, n, yes, cleanSymbol } from "./util.mjs";
 import { top10Share } from "../holders.mjs";
 import { dropForkCopies } from "../addrctx.mjs";
 import { recognizedQuote } from "./quotes.mjs";
@@ -145,7 +145,7 @@ export function makeQuickCheck(deps) {
     const maxSell2 = exit ? exit.usd : formula2;
     const sellMax = (i) => Math.floor(((i * (deepest / 2)) / (1 - i)) * k);
     return {
-      address: a, chain, symbol: p.baseToken?.symbol ?? "?", verdict, score, flags, liquidity, liqKnown, maxSell2, exit, contractScanned: !!(sec || solSec),
+      address: a, chain, symbol: cleanSymbol(p.baseToken?.symbol), verdict, score, flags, liquidity, liqKnown, maxSell2, exit, contractScanned: !!(sec || solSec),
       critical, url: p.url ?? null, ageH, at: now(), price: n(p.priceUsd),
       holders: n(sec?.holder_count ?? solSec?.gp?.holder_count),
       top10Pct,

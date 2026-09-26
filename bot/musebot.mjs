@@ -837,6 +837,7 @@ async function tickerTokens(ticker) {
     const k = `${p.chainId}:${a}`;
     const t = byToken.get(k) ?? { address: a, chain: p.chainId, liq: 0, trades: 0, created: null, url: p.url };
     t.liq += n(p.liquidity?.usd) ?? 0;
+    t.liqKnown ||= n(p.liquidity?.usd) !== null; // DexScreener gave no figure: unknown, never "$0"
     t.trades += (n(p.txns?.h24?.buys) ?? 0) + (n(p.txns?.h24?.sells) ?? 0);
     const c = n(p.pairCreatedAt); if (c && (!t.created || c < t.created)) t.created = c;
     byToken.set(k, t);
@@ -896,7 +897,7 @@ async function guardScan(identity, state, dry = false) {
       const text = [
         VOICE.pick("copy.head", [`⚠️ copycat alert: a new token is using the ticker $${"{t}"}.`, `⚠️ a new contract just took the ticker $${"{t}"}.`, `⚠️ another $${"{t}"} appeared, and it is not the one the town knows.`]).replace("{t}", ticker),
         `method, in the town's order (costume, tailor, cloth, crowd, then depth): ticker collision → ${evidence} → liquidity only as confirmation.`,
-        `copy: ${t.address} on ${t.chain}${ageH !== null ? `, ${ageH < 1 ? "under 1h" : Math.round(ageH) + "h"} old` : ""}, $${Math.round(t.liq).toLocaleString("en-US")} liquidity, ${t.trades} trades in 24h.`,
+        `copy: ${t.address} on ${t.chain}${ageH !== null ? `, ${ageH < 1 ? "under 1h" : Math.round(ageH) + "h"} old` : ""}, ${t.liqKnown ? `$${Math.round(t.liq).toLocaleString("en-US")} liquidity` : "no liquidity figure (a bonding curve or an unindexed pool)"}, ${t.trades} trades in 24h.`,
         `the one the town knows as $${ticker}: ${canon.address}${canon.liq ? `, $${Math.round(canon.liq).toLocaleString("en-US")} liquidity` : ""}.`,
         VOICE.pick("copy.tail", [`if someone handed you the first address as $${"{t}"}, check it against the project's own announcement before buying. same name is not same token.`, `got the new address as $${"{t}"} from someone? compare it with the project's own post first. same name, different token.`, `before buying anything called $${"{t}"}, take the address from the project's own announcement, not from a reply.`]).replace("{t}", ticker),
         `- ${CFG.name}`,

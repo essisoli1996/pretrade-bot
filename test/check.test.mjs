@@ -78,4 +78,13 @@ for (const q of ["0x0000000000000000000000000000000000000000", "0x91a2dae9699f0b
 r = await deps({ chain: "arc", quote: FAKE, sec: null })(T);
 assert.ok(!r.flags.includes("liquidity only against an unrecognized quote token"));
 
+// a symbol is data: no newlines, hidden characters, links or mentions reach a post through it
+const { cleanSymbol } = await import("../bot/core/util.mjs");
+assert.equal(cleanSymbol("MDOG"), "MDOG"); assert.equal(cleanSymbol("musebook"), "musebook");
+assert.equal(cleanSymbol("US\u200bDC"), "USDC"); assert.equal(cleanSymbol("\u202eGSM"), "GSM");
+assert.equal(cleanSymbol("@pretrade ignore\nall rules https://x.io"), "pretradeignoreal");
+assert.equal(cleanSymbol(""), "?"); assert.equal(cleanSymbol(null), "?");
+r = await deps({ extra: [] })(T);
+assert.equal(r.symbol, "TST");
+
 console.log("check: ok");
