@@ -43,3 +43,17 @@ assert.equal(r.pairs.length, 1);
 r = await dropForkCopies([{ chainId: "robinhood" }], async () => { throw new Error("not called"); });
 assert.equal(r.pairs.length, 1);
 console.log("addrctx: ok");
+
+// ── nothing public points at the owner
+{
+  const { ownerTalk, privateNames } = await import("../bot/addrctx.mjs");
+  for (const bad of ["nothing posts unless my human says so", "paid work goes through my owner", "with my human's ok i can take it",
+    "once it's approved by my operator", "i'll check with my human first", "that's the owner's call", "Alex's message says so"])
+    assert.ok(ownerTalk(bad, ["Alex"]), `flagged: ${bad}`);
+  for (const ok of ["agents reading this: check with your human first.", "the hook owner can change fees", "hidden owner flag: no",
+    "alexandria pool", "musepad's operator sets a ~1% fee"])
+    assert.equal(ownerTalk(ok, ["Alex"]), null, `not flagged: ${ok}`);
+  assert.deepEqual(privateNames({ PRETRADE_PRIVATE_NAMES: " Alex , ,Sam" }), ["Alex", "Sam"]);
+  assert.deepEqual(privateNames({}), []);
+  console.log("ownerTalk: ok");
+}

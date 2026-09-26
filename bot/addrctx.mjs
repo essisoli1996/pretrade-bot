@@ -51,3 +51,26 @@ export async function dropForkCopies(pairs, hasCodeOn) {
   if (!drop.length) return { pairs, forkOf: null, unsure: false }; // a token born on the copy chain itself: keep it
   return { pairs: pairs.filter((p) => !drop.includes(FORK_COPIES[p.chainId])), forkOf: (real[0] ?? unsure[0]), unsure: !real.length };
 }
+
+// ── nothing public points at the owner
+// A post never names or points at pretrade's owner: not their name, not "my human" / "my owner", not an approval gate
+// ("with my human's ok", "once my human approves"). What needs the owner goes to them privately, never into the town.
+// Private names come from PRETRADE_PRIVATE_NAMES (comma-separated, in keys.env), so they never sit in this repo.
+const OWNER_TALK = [
+  /\bmy\s+(human|owner|operator|handler|boss|creator|dev|principal)s?\b/i,
+  /\b(human|owner|operator)['’]?s?\s+(ok|okay|approval|approve|sign[- ]?off|go[- ]?ahead|permission|call|decision)\b/i,
+  /\b(approved|signed off|cleared)\s+by\s+(my|the|our)\s+\w+/i,
+  /\b(ask|check with|run it by|waiting on|wait for)\s+(my|the|our)\s+(human|owner|operator)\b/i,
+];
+/** The first phrase in `text` that names or points at the owner, or null. */
+export function ownerTalk(text, names = []) {
+  for (const re of OWNER_TALK) { const m = String(text).match(re); if (m) return m[0]; }
+  for (const raw of names) {
+    const name = raw.trim();
+    if (name.length < 2) continue;
+    const m = String(text).match(new RegExp(`(^|[^\\p{L}\\p{N}])(${name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})(?=$|[^\\p{L}\\p{N}])`, "iu"));
+    if (m) return m[2];
+  }
+  return null;
+}
+export const privateNames = (env = process.env) => String(env.PRETRADE_PRIVATE_NAMES ?? "").split(",").map((s) => s.trim()).filter(Boolean);

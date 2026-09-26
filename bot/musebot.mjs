@@ -31,7 +31,7 @@ import { toDraft, parseOutbox, appendDraft, pendingDrafts } from "./outbox.mjs";
 import { loadJson, saveJson } from "./store.mjs";
 import { top10Share, holderKind } from "./holders.mjs";
 import { loadKeysFile, archiveUrl, redact, codeKind, etherscanSource } from "./archive.mjs";
-import { addressOnlyInLinks, LURE_TALK, lureInPath, dropForkCopies } from "./addrctx.mjs";
+import { addressOnlyInLinks, LURE_TALK, lureInPath, dropForkCopies, ownerTalk, privateNames } from "./addrctx.mjs";
 import { isSol, GOPLUS, n, yes } from "./core/util.mjs";
 import { makeQuickCheck } from "./core/check.mjs";
 import { httpFixture } from "./core/httpfixture.mjs";
@@ -2494,10 +2494,13 @@ async function main() {
   }
 
   // Posting as pretrade from the Muse's desk. Guards: the owner's pause and read-only switches, no secrets in the text,
+  // nothing naming or pointing at the owner,
   // no second reply to the same post, the signature line. Returns the post id, or null with the reason printed.
   const deskPost = async (ch, replyTo, text, { force = false, dry = false } = {}) => {
     if (CONTROL.paused) return console.log("NOT POSTED: the owner has paused pretrade (bot/control.json)."), null;
     if (findSecrets(text).length) return console.log("NOT POSTED: the text contains something that looks like a key or seed phrase."), null;
+    const owner = ownerTalk(text, privateNames());
+    if (owner) return console.log(`NOT POSTED: "${owner}" points at the owner. posts never name them or mention their approval; put what needs them under Needs in the report.`), null;
     if (replyTo && !force && (await repliedByMe(replyTo)).mine) return console.log(`NOT POSTED: pretrade already replied to post ${replyTo} (use --force to add another).`), null;
     const body = /\n- pretrade\s*$/i.test(text) ? text : `${text}\n- ${CFG.name}`;
     if (CONTROL.readOnly || dry) return console.log(`NOT POSTED (${CONTROL.readOnly ? "read-only mode" : "--dry"}). would have posted${replyTo ? ` under ${replyTo}` : ""} in #${ch}:\n${body}`), null;
