@@ -1,0 +1,119 @@
+{
+ "address": "0x4caf2e6ec0fcbef77314566a9884643512ef8bfc",
+ "chain": "robinhood",
+ "symbol": "MDOG",
+ "verdict": "OK",
+ "score": 0,
+ "flags": [],
+ "liquidity": 29960,
+ "liqKnown": true,
+ "maxSell2": 304,
+ "exit": {
+  "usd": 304,
+  "atLeast": false,
+  "block": 72789141,
+  "formulaUsd": 303
+ },
+ "contractScanned": true,
+ "critical": false,
+ "url": "https://dexscreener.com/robinhood/0xd1fc0038c1422034f23e35bbab6b265574733c2c64ee6514f2849d3b0fb23665",
+ "ageH": 176.7552777777778,
+ "price": 0.0001067,
+ "holders": 406,
+ "top10Pct": 26.6,
+ "priceChange": {
+  "h1": 44.04,
+  "h6": 5.17,
+  "h24": -42.17
+ },
+ "flowH1": {
+  "buys": 26,
+  "sells": 15
+ },
+ "volume24h": 123505.59,
+ "marketCap": 106793,
+ "sellMax": {
+  "p1": 150,
+  "p2": 304,
+  "p5": 784
+ },
+ "hook": {
+  "poolId": "0xd1fc0038c1422034f23e35bbab6b265574733c2c64ee6514f2849d3b0fb23665",
+  "readable": true,
+  "key": {
+   "currency0": "0x4caf2e6ec0fcbef77314566a9884643512ef8bfc",
+   "currency1": "0xc0d6457c16cc70d6790dd43521c899c87ce02f35",
+   "fee": 0,
+   "tickSpacing": 200,
+   "hooks": "0xe5e702641ea86f4ae6cc3cdaed2b886f976be044",
+   "poolManager": "0x8366a39cc670b4001a1121b8f6a443a643e40951",
+   "block": 66474358
+  },
+  "hook": "0xe5e702641ea86f4ae6cc3cdaed2b886f976be044",
+  "perms": [
+   "beforeInitialize",
+   "afterSwap",
+   "afterSwapReturnsDelta"
+  ],
+  "dynamicFee": false,
+  "feePct": 0,
+  "poolManager": "0x8366a39cc670b4001a1121b8f6a443a643e40951",
+  "standard": "standard musepad launch hook",
+  "contract": {
+   "known": true,
+   "hasCode": true,
+   "clone": null,
+   "upgradeable": false,
+   "implementation": null,
+   "beacon": null,
+   "owner": "0x263ed295dafae1d9aadd6e56c4b6f9f38ee019dd"
+  },
+  "risk": [],
+  "points": 0,
+  "scored": true
+ },
+ "sim": {
+  "status": "ok",
+  "line": "🧪 simulated $25 buy then sell on the real pool: 4% round-trip cost (pool fee ~0%, the rest goes to the pool's hook). block 72789082.",
+  "flags": [],
+  "roundTripLossPct": 4,
+  "buyTaxPct": 0,
+  "scored": true
+ },
+ "provenance": {
+  "rec": {
+   "address": "0x4caf2e6ec0fcbef77314566a9884643512ef8bfc",
+   "symbol": "MDOG",
+   "name": "Muse Dog",
+   "launcher": "Mikey 🍊🧙‍♂️🪵",
+   "wallet": "0x320bac255b0a42753fcd711bd8895b92ccd290ae",
+   "custodial": false,
+   "launchedAt": 1789629930841,
+   "post": 3614,
+   "channel": "#memecoins",
+   "launchpad": "pons",
+   "platform": "musebook"
+  },
+  "fee": {
+   "kind": "token-contract",
+   "token": {
+    "address": "0x320bac255b0a42753fcd711bd8895b92ccd290ae",
+    "symbol": "MDOG",
+    "name": "Muse Dog",
+    "launcher": "Kettle",
+    "wallet": "0x0d3862f8490c67fa7b42028dcd7a58af2fc27338",
+    "custodial": false,
+    "launchedAt": 1789628410511,
+    "post": 64,
+    "channel": "#musepad",
+    "launchpad": "pons",
+    "platform": "musegram"
+   },
+   "text": "fees go to the $MDOG token contract (0x320b…90ae), not a wallet: whether anyone can move them depends on what that contract allows"
+  },
+  "lines": [
+   "🧾 launched 9d ago by Mikey 🍊🧙‍♂️🪵 via musepad (musebook.me/p/3614); fees go to the $MDOG token contract (0x320b…90ae), not a wallet: whether anyone can move them depends on what that contract allows.",
+   "same ticker $MDOG on musepad: 2 by other launchers: 0x9960…1bae by Kettle, earlier; 0x320b…90ae by Kettle, earlier. match the address, not the name."
+  ]
+ }
+}

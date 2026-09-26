@@ -1,0 +1,89 @@
+{
+ "address": "0x9480391dc887ec5a33a4938a4607dca924726ba3",
+ "chain": "robinhood",
+ "symbol": "musemini",
+ "verdict": "CAUTION",
+ "score": 35,
+ "flags": [
+  "very low liquidity",
+  "pair 12h old"
+ ],
+ "liquidity": 9987,
+ "liqKnown": true,
+ "maxSell2": 21,
+ "exit": {
+  "usd": 21,
+  "atLeast": false,
+  "block": 72789350,
+  "formulaUsd": 101
+ },
+ "contractScanned": true,
+ "critical": false,
+ "url": "https://dexscreener.com/robinhood/0xd45fc0961d70138638ad3e743aa8db6dba7ca1c594ebd3fadab3a7510ee7001c",
+ "ageH": 11.751388888888888,
+ "price": 1.169e-7,
+ "holders": 8,
+ "top10Pct": 0,
+ "priceChange": {
+  "h1": null,
+  "h6": null,
+  "h24": -31.5
+ },
+ "flowH1": {
+  "buys": 0,
+  "sells": 0
+ },
+ "volume24h": 25398.56,
+ "marketCap": 11698,
+ "sellMax": {
+  "p1": 10,
+  "p2": 21,
+  "p5": 54
+ },
+ "hook": {
+  "poolId": "0xd45fc0961d70138638ad3e743aa8db6dba7ca1c594ebd3fadab3a7510ee7001c",
+  "readable": true,
+  "key": {
+   "currency0": "0x91a2dae9699f0b82540b5886b0d8759c22820ba3",
+   "currency1": "0x9480391dc887ec5a33a4938a4607dca924726ba3",
+   "fee": 8388608,
+   "tickSpacing": 200,
+   "hooks": "0x4e3468951d49f2eea976ed0d6e75ffcb44a9a544",
+   "poolManager": "0x8366a39cc670b4001a1121b8f6a443a643e40951",
+   "block": 72369419
+  },
+  "hook": "0x4e3468951d49f2eea976ed0d6e75ffcb44a9a544",
+  "perms": [
+   "beforeInitialize",
+   "afterAddLiquidity",
+   "afterRemoveLiquidity",
+   "afterSwap",
+   "afterSwapReturnsDelta"
+  ],
+  "dynamicFee": true,
+  "feePct": null,
+  "poolManager": "0x8366a39cc670b4001a1121b8f6a443a643e40951",
+  "standard": "standard musepad launch hook",
+  "contract": {
+   "known": true,
+   "hasCode": true,
+   "clone": null,
+   "upgradeable": false,
+   "implementation": null,
+   "beacon": null,
+   "owner": null
+  },
+  "risk": [],
+  "points": 0,
+  "scored": true
+ },
+ "sim": {
+  "status": "ok",
+  "line": "🧪 simulated $20 buy then sell on the real pool: 3.5% round-trip cost incl. pool and hook fees. block 72789290.",
+  "flags": [],
+  "roundTripLossPct": 3.5,
+  "buyTaxPct": 0,
+  "scored": true
+ },
+ "provenance": null
+}

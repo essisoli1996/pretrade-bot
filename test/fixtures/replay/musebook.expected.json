@@ -1,0 +1,86 @@
+{
+ "address": "0x91a2dae9699f0b82540b5886b0d8759c22820ba3",
+ "chain": "robinhood",
+ "symbol": "musebook",
+ "verdict": "OK",
+ "score": 0,
+ "flags": [],
+ "liquidity": 2245897,
+ "liqKnown": true,
+ "maxSell2": 11386,
+ "exit": {
+  "usd": 11386,
+  "atLeast": false,
+  "block": 72789612,
+  "formulaUsd": 12616
+ },
+ "contractScanned": true,
+ "critical": false,
+ "url": "https://dexscreener.com/robinhood/0x40a433930370f6cdf0a78debc2c6dd599c23bd428c0d67dd8b5373e4f101557f",
+ "ageH": 238.35472222222222,
+ "price": 0.0001029,
+ "holders": 19777,
+ "top10Pct": 15.1,
+ "priceChange": {
+  "h1": 4.28,
+  "h6": -9.35,
+  "h24": -39.05
+ },
+ "flowH1": {
+  "buys": 53,
+  "sells": 93
+ },
+ "volume24h": 1889938.95,
+ "marketCap": 10296602,
+ "sellMax": {
+  "p1": 5635,
+  "p2": 11386,
+  "p5": 29364
+ },
+ "hook": {
+  "poolId": "0x40a433930370f6cdf0a78debc2c6dd599c23bd428c0d67dd8b5373e4f101557f",
+  "readable": true,
+  "key": {
+   "currency0": "0x91a2dae9699f0b82540b5886b0d8759c22820ba3",
+   "currency1": "0xc0d6457c16cc70d6790dd43521c899c87ce02f35",
+   "fee": 8388608,
+   "tickSpacing": 200,
+   "hooks": "0x4e3468951d49f2eea976ed0d6e75ffcb44a9a544",
+   "poolManager": "0x8366a39cc670b4001a1121b8f6a443a643e40951",
+   "block": 64271871
+  },
+  "hook": "0x4e3468951d49f2eea976ed0d6e75ffcb44a9a544",
+  "perms": [
+   "beforeInitialize",
+   "afterAddLiquidity",
+   "afterRemoveLiquidity",
+   "afterSwap",
+   "afterSwapReturnsDelta"
+  ],
+  "dynamicFee": true,
+  "feePct": null,
+  "poolManager": "0x8366a39cc670b4001a1121b8f6a443a643e40951",
+  "standard": "standard musepad launch hook",
+  "contract": {
+   "known": true,
+   "hasCode": true,
+   "clone": null,
+   "upgradeable": false,
+   "implementation": null,
+   "beacon": null,
+   "owner": null
+  },
+  "risk": [],
+  "points": 0,
+  "scored": true
+ },
+ "sim": {
+  "status": "ok",
+  "line": "🧪 simulated $25 buy then sell on the real pool: 3.5% round-trip cost incl. pool and hook fees. block 72789553.",
+  "flags": [],
+  "roundTripLossPct": 3.5,
+  "buyTaxPct": 0,
+  "scored": true
+ },
+ "provenance": null
+}
