@@ -585,7 +585,9 @@ async function searchExit({ sellOut, refIn, guessIn, target = 0.02, steps = 8, m
     const m = await impactAt(mid);
     if (m < target) { lo = mid; loImpact = m; } else hi = mid;
   }
-  return done({ amountIn: lo, impact: loImpact, atLeast: false });
+  // no size above the reference stayed under the target: the exit is below the reference sell itself ("less than"),
+  // never a measured zero
+  return done({ amountIn: lo, impact: loImpact, atLeast: false, ...(lo === refIn ? { atMost: true } : {}) });
 }
 
 /**

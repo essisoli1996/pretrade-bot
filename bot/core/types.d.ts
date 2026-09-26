@@ -52,6 +52,8 @@ export interface SimRead {
 export interface ExitRead {
   usd: number;
   atLeast: boolean;
+  /** Even the reference sell broke the target: the exit is less than `usd` (never reported as $0). */
+  atMost?: boolean;
   block: number;
   formulaUsd: number;
   /** Price impact didn't rise with sell size (a fee band, a revert window): the figure is not a real exit. */

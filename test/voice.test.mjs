@@ -65,6 +65,12 @@ check(acceptOpener("glad you asked about this address") === "glad you asked abou
   check(/found its v4 pool on-chain/.test(m) && /about \$100 is the most one sell/.test(m) && !/\$0 of liquidity|liquidity \$0/.test(m) && !/pool found on-chain, not listed/.test(m), "on-chain pool: exit given, no $0 liquidity, flag said once in plain words");
 }
 
+// an exit below the reference sell reads "less than", never "$0"
+{
+  const m = tokenRead(v, { ...c, liquidity: 8800, maxSell2: 1, exit: { usd: 1, atLeast: false, atMost: true, block: 1, formulaUsd: 88 } }, { kind: "mention", who: "x", url });
+  check(/less than \$1 is the most one sell/.test(m) && !/\$0 is/.test(m), "exit below the reference: 'less than $1'");
+}
+
 // the thread already named the contract: the lead says whose post it came from, never "no contract in the post"
 {
   const pl = lookupLead(v, { sym: "MUSECHAT", chain: "robinhood", addr: "0x29913b9527a824f39848d174cea3353a6af55ba3", others: 1, pinned: { who: "Demetra", postId: 82061 } });

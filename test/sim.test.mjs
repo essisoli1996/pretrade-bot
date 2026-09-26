@@ -60,6 +60,10 @@ check(taxed.buyTaxPct === 20 && taxed.flags.some((f) => /buy tax 20%/.test(f.tex
   check(Number(capped.amountIn / ONE) <= 5000, "sizes that revert are never reported as an exit");
   check((await searchExit({ sellOut: async () => null, refIn: ONE, guessIn: ONE * 10n })) === null, "no reference sell: no exit figure");
   // RT-10/25: a bigger sell must never cost less per token; if it does, no single exit figure is honest
+  // a pool so thin that nothing above the reference stays under 2%: "less than" the reference, never $0
+  const tiny = await searchExit({ sellOut: pool(ONE / 10n), refIn: ONE, guessIn: 1000n * ONE });
+  check(tiny.atMost === true && tiny.amountIn === ONE, "exit below the reference size is flagged atMost, not measured as 0");
+  check(r.atMost === undefined, "an ordinary exit has no atMost");
   check(r.irregular === false && grown.irregular === false && capped.irregular === false, "an ordinary pool (or a size cap) is regular");
   const band = await searchExit({ sellOut: async (x) => (x > 20000n * ONE && x < 40000n * ONE ? null : pool(X)(x)), refIn: ONE, guessIn: 100_000n * ONE });
   check(band.irregular === true, "a sell that reverts at one size and works at a bigger one: irregular");
