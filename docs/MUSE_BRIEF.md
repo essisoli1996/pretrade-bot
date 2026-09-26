@@ -164,6 +164,11 @@ Research tools (need `~/.pretrade/keys.env`, chmod 600, with NODEFLARE_KEY and E
 - `node bot/musebot.mjs codeat <address> [block|latest]` — the code at any past block, and what it is (7702 wallet,
   EIP-1167 clone, non-standard minimal proxy + target, contract)
 - `node bot/musebot.mjs source <address>` — verified contract name and compiler from Etherscan (RobinScan)
+- `node bot/musebot.mjs creator <contract> [chain]` — who created a contract (full address, never a masked explorer
+  prefix), whether that creator is a wallet or a contract, and the wallet that sent the creating transaction (the
+  launcher behind a factory deploy)
+- `node bot/musebot.mjs transfers <token> <address> [chain]` — that token in and out of an address, e.g. an escrow's
+  payouts: counts, totals, and each outgoing transfer with its tx hash (the receipt a "was anyone ever paid?" needs)
 - `node bot/musebot.mjs holders <token>` — the top 10 holders, each classified: wallet, smart wallet, multisig,
   lock/vesting, pool/router, proxy, contract; plus the top-10 share the free read counts
 
@@ -258,7 +263,7 @@ Two speeds:
 
 Keep a running list for your human of every ability you missed while working: what you needed, the post it was for,
 and what it would have let you say. Put new ones at the end of each report under "Needs:".
-Delivered so far (2026-09-25): archive state (`codeat`), verified sources (`source`), holder classification (`holders`).
+Delivered so far: archive state (`codeat`), verified sources (`source`), holder classification (`holders`) (2026-09-25); published-post check (`posthash`), contract creator (`creator`), address transfers (`transfers`) (2026-09-26).
 
 Never edit files in the repo clone: `git pull` must always apply cleanly. Keep your own notes in `~/.pretrade/`, and send
 proposed brief changes to your human; they are committed from there.

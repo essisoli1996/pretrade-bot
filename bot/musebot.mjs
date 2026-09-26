@@ -23,6 +23,7 @@ import { makeRadar } from "./radar.mjs";
 import { makeV4Hooks, isV4, hookLine } from "./v4hooks.mjs";
 import { makeSim, classify, planAdvice } from "./sim.mjs";
 import { makeStocks, indexRegistry } from "./stocks.mjs";
+import { makeExplorer } from "./explorer.mjs";
 import { makeApprovals } from "./approvals.mjs";
 import { makeTxSim, describeTxSim, parseTx } from "./txsim.mjs";
 import { TALK_INTENT, chainNamedIn, chainTheyMean, isPaymentUnit, looksLikeCorrection } from "./talk.mjs";
@@ -2357,6 +2358,39 @@ async function main() {
     }
     // the same rule as the free read: pools, the token, burns, locks and routers are not holders
     return console.log(`top-10 share counted in the read (pools, burns, locks and routers left out): ${((x) => (x === null ? "no holders in view beyond pools and locks (unknown, not 0%)" : `${x}%`))(top10Share(hs, [...poolish, ...leftOut]))}`);
+  }
+
+  if (cmd === "creator" || cmd === "transfers") {
+    // Read-only explorer receipts (Etherscan v2 with the key, else the chain's Blockscout).
+    //   node bot/musebot.mjs creator <contract> [chain]              who created it, and the wallet behind the launch
+    //   node bot/musebot.mjs transfers <token> <address> [chain]     that token in and out of an address (escrow payouts)
+    const X = makeExplorer({ http, rpcFor, key: process.env.ETHERSCAN_KEY || null });
+    const isAddr = (a) => /^0x[0-9a-fA-F]{40}$/.test(a ?? "");
+    if (cmd === "creator") {
+      const [a, chain = "robinhood"] = args.slice(1);
+      if (!isAddr(a)) return console.log("usage: creator <contract address> [chain: robinhood | base | ethereum]");
+      const r = await X.creator(a.toLowerCase(), chain);
+      if (!r.ok) return console.log(redact(`creator of ${a} on ${chain}: FAILED: ${r.error}`));
+      console.log(`creator of ${a.toLowerCase()} on ${chain} (via ${r.via}):`);
+      console.log(`  created by ${r.creator} (${r.creatorKind ?? "kind unread"})${r.factory ? `, factory ${r.factory}` : ""}`);
+      console.log(`  creating tx ${r.txHash ?? "?"}${r.timestamp ? `, ${new Date(r.timestamp * 1000).toISOString().replace(".000", "")}` : ""}`);
+      if (r.sender && r.sender !== r.creator) console.log(`  that tx was sent by ${r.sender} (${r.senderKind ?? "kind unread"}): the creator above is a contract that did the deploy for it`);
+      else if (r.sender) console.log(`  that tx was sent by the creator itself`);
+      else console.log(`  the creating tx's sender could not be read from the RPC`);
+      return;
+    }
+    const [token, who, chain = "base"] = args.slice(1);
+    if (!isAddr(token) || !isAddr(who)) return console.log("usage: transfers <token> <address> [chain: base | robinhood | ethereum]");
+    const r = await X.transfers(token.toLowerCase(), who.toLowerCase(), chain);
+    if (!r.ok) return console.log(redact(`transfers of ${token} at ${who} on ${chain}: FAILED: ${r.error}`));
+    const sym = r.symbol ? `$${r.symbol}` : "the token";
+    console.log(`${sym} (${token.toLowerCase()}) at ${who.toLowerCase()} on ${chain} (via ${r.via}${r.capped ? `, first ${r.seen} transfers only: there are more` : ""}):`);
+    console.log(`  in:  ${r.in.count} transfer(s), ${r.in.total} total`);
+    console.log(`  out: ${r.out.count} transfer(s), ${r.out.total} total`);
+    for (const t of r.out.rows.slice(-20)) console.log(`    out ${t.amount} → ${t.counterparty}  ${new Date(t.time * 1000).toISOString().slice(0, 16)}Z  tx ${t.hash}`);
+    if (r.out.count > 20) console.log(`    (${r.out.count - 20} earlier outgoing transfers not shown)`);
+    if (!r.out.count) console.log(`  no outgoing ${sym} transfer from this address in what the explorer returned.`);
+    return;
   }
 
   if (cmd === "source") {
