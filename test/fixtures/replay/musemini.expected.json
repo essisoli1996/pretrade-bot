@@ -6,7 +6,8 @@
  "score": 35,
  "flags": [
   "very low liquidity",
-  "pair 6h old"
+  "pair 6h old",
+  "holder list not read"
  ],
  "liquidity": 9987,
  "liqKnown": true,
