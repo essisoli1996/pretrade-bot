@@ -94,6 +94,8 @@ console.log("\n" + [hookLine(std), hookLine(evil), hookLine(plain)].join("\n"));
   const got = await discoverV4Pools(rpc, TOK);
   check(got.length === 1 && got[0].poolId === id && got[0].key.poolManager === PM && got[0].sqrtPriceX96 === sqrt, "a v4 pool is found from its Initialize log, with its live sqrtPrice");
   check(priceFromSqrt(sqrt, 18, 18, true) === 1 && priceFromSqrt(2n ** 96n * 2n, 18, 6, true) === 4e12, "price from sqrtPrice honors both decimals");
+  const { quoteDepth } = await import("../bot/v4hooks.mjs");
+  check(quoteDepth(10n ** 18n, 2n ** 96n, true, 18) === 1 && quoteDepth(10n ** 18n, 2n ** 97n, false, 18) === 0.5 && quoteDepth(0n, 2n ** 96n, true, 18) === 0, "in-range quote depth: L·√P or L/√P in whole quote tokens");
   const none = await discoverV4Pools(async (m) => (m === "eth_getLogs" ? { result: [log] } : { result: "0x" + w(0) }), TOK);
   check(none.length === 0, "an uninitialized pool (sqrtPrice 0) is left out");
 }

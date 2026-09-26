@@ -251,6 +251,14 @@ export function slot0SlotOf(poolId) {
   return keccak256(hexBytes(String(poolId).replace(/^0x/, "").padStart(64, "0") + "6".padStart(64, "0")));
 }
 
+/** In-range depth of a pool on its quote side, in whole quote tokens: the virtual reserve L·√P (quote = currency1)
+ *  or L/√P (quote = currency0). A ranking hint between pools, not a listed liquidity figure. Pure. */
+export function quoteDepth(liquidity, sqrtPriceX96, quoteIs1, quoteDecimals) {
+  const s = Number(BigInt(sqrtPriceX96)) / 2 ** 96, L = Number(BigInt(liquidity));
+  if (!(s > 0) || !(L > 0)) return 0;
+  return (quoteIs1 ? L * s : L / s) / 10 ** quoteDecimals;
+}
+
 /** Token price in quote units from a pool's sqrtPriceX96 (currency1 per currency0, raw), with both decimals. Pure. */
 export function priceFromSqrt(sqrtPriceX96, dec0, dec1, tokenIs0) {
   const s = Number(BigInt(sqrtPriceX96)) / 2 ** 96;
@@ -279,7 +287,12 @@ export async function discoverV4Pools(rpc, token) {
     const s = await rpc("eth_call", [{ to: key.poolManager, data: "0x1e2eaeaf" + slot0SlotOf(poolId).slice(2) }, "latest"]); // extsload(bytes32)
     const word0 = typeof s?.result === "string" && s.result.length >= 66 ? BigInt(s.result.slice(0, 66)) : 0n;
     const sqrtPriceX96 = word0 & ((1n << 160n) - 1n);
-    if (sqrtPriceX96 > 0n) out.push({ poolId, key, sqrtPriceX96 });
+    if (sqrtPriceX96 === 0n) continue;
+    // the pool's in-range liquidity sits 3 slots after Slot0 (StateLibrary.LIQUIDITY_OFFSET): used to rank pools
+    const slotL = "0x" + (BigInt(slot0SlotOf(poolId)) + 3n).toString(16).padStart(64, "0");
+    const lq = await rpc("eth_call", [{ to: key.poolManager, data: "0x1e2eaeaf" + slotL.slice(2) }, "latest"]);
+    const liquidity = typeof lq?.result === "string" && lq.result.length >= 66 ? BigInt(lq.result.slice(0, 66)) & ((1n << 128n) - 1n) : 0n;
+    out.push({ poolId, key, sqrtPriceX96, liquidity });
   }
   return out;
 }

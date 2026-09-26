@@ -20,7 +20,7 @@ import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { makeRadar } from "./radar.mjs";
-import { makeV4Hooks, isV4, hookLine, discoverV4Pools, priceFromSqrt } from "./v4hooks.mjs";
+import { makeV4Hooks, isV4, hookLine, discoverV4Pools, priceFromSqrt, quoteDepth } from "./v4hooks.mjs";
 import { makeSim, classify, planAdvice } from "./sim.mjs";
 import { makeStocks, indexRegistry } from "./stocks.mjs";
 import { makeExplorer, blockscoutHolders } from "./explorer.mjs";
@@ -271,7 +271,7 @@ async function onchainPools(a) {
   if (V4CFG.onchainDiscovery === false) return [];
   const found = await discoverV4Pools(v4().rpc, a).catch(() => []);
   const out = [];
-  for (const f of found.slice(0, 5)) {
+  for (const f of found.slice(0, 8)) {
     const tokenIs0 = f.key.currency0 === a, quote = tokenIs0 ? f.key.currency1 : f.key.currency0;
     const dT = await decimalsOf(a), dQ = await decimalsOf(quote);
     if (dT === null || dQ === null) continue;
@@ -283,9 +283,10 @@ async function onchainPools(a) {
       baseToken: { address: a, symbol: (await symbolOf(a)) ?? "?" },
       quoteToken: { address: quote, symbol: /^0x0{40}$/.test(quote) ? "ETH" : (await symbolOf(quote)) ?? "?" },
       priceNative: String(pn), priceUsd: String(pn * qUsd),
+      depthUsd: quoteDepth(f.liquidity, f.sqrtPriceX96, tokenIs0, dQ) * qUsd, // ranking only: the check doesn't list it as liquidity
     });
   }
-  return out;
+  return out.sort((x, y) => y.depthUsd - x.depthUsd); // the deepest in-range pool is the one a read is about
 }
 /** How much of the pool's quote currency buys `usd` worth, from DexScreener's two prices for the pair. */
 async function quoteAmount(pair, key, token, usd) {
