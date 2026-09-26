@@ -32,7 +32,7 @@ import { toDraft, parseOutbox, appendDraft, pendingDrafts } from "./outbox.mjs";
 import { loadJson, saveJson } from "./store.mjs";
 import { top10Share, holderKind } from "./holders.mjs";
 import { loadKeysFile, archiveUrl, redact, codeKind, etherscanSource } from "./archive.mjs";
-import { addressOnlyInLinks, LURE_TALK, lureInPath, dropForkCopies, ownerTalk, privateNames, postHash } from "./addrctx.mjs";
+import { addressOnlyInLinks, LURE_TALK, lureInPath, dropForkCopies, ownerTalk, privateNames, postHash, pinnedInThread } from "./addrctx.mjs";
 import { isSol, GOPLUS, n, yes } from "./core/util.mjs";
 import { makeQuickCheck } from "./core/check.mjs";
 import { httpFixture } from "./core/httpfixture.mjs";
@@ -1970,7 +1970,7 @@ async function pass(identity, state, indexOnly = false) {
         // and a long post (an argument, a retrospective) only when it actually asks something: "selling dragged it to 16%"
         // in Dollar Bill's own post-mortem is not a question about $BILL (#memecoins 76819, rejected by the Muse)
         if (post.text.length > 280 && !/\?/.test(post.text)) continue;
-        const t = await tokenTalk(tick[0], channel, state, chainNamedIn(post.text));
+        const t = await tokenTalk(tick[0], channel, state, chainNamedIn(post.text), { postId: post.id, parentId: post.parent });
         if (!t) continue;
         if (t.text) { // a stock token: answered from Robinhood's registry instead of a DEX read
           console.log(`\n→ stock talk reply to #${channel} post ${post.id} (${post.name}):\n${t.text}\n`);
@@ -2019,7 +2019,7 @@ function tickersIn(text) {
 }
 /** Resolves a ticker to a token on the chain the post names (Robinhood Chain when it names none) and reads it;
  *  null when there's nothing solid to say. The address is my own lookup, and the reply says so. */
-async function tokenTalk(sym, channel, state, namedChain = null) {
+async function tokenTalk(sym, channel, state, namedChain = null, { postId = null, parentId = null } = {}) {
   state.talked = state.talked ?? {};
   const key = `${channel}:${sym}`;
   if (Date.now() - (state.talked[key] ?? 0) < (TALK.cooldownHours ?? 6) * 36e5) return null; // said it recently here
@@ -2033,13 +2033,25 @@ async function tokenTalk(sym, channel, state, namedChain = null) {
   }
   const canon = chain === home ? state.guard?.canonical?.[sym] : null; // the town's canonical list is for its home chain
   const onChain = (await tickerTokens(sym)).filter((t) => t.chain === chain);
-  const pick = canon ? onChain.find((t) => t.address === String(canon).toLowerCase()) ?? { address: String(canon).toLowerCase() } : onChain[0];
+  // a reply that says "the contract you pinned" has it up-thread: use that address, not a ticker guess ($MUSECHAT,
+  // #lobby 82123: two tokens shared the name and the engine picked by liquidity while 82061 had posted the contract)
+  let pinned = null, pinnedCheck = null;
+  if (postId && parentId) {
+    const t = await http(`${BOARD}/api/thread.json?post=${postId}`);
+    for (const c of t.json?.thread ? pinnedInThread(threadPath(t.json.thread, postId)).slice(0, 3) : []) {
+      if (isOwnToken(c.address)) continue;
+      const listed = onChain.find((x) => x.address === c.address);
+      const chk = listed ? null : await quickCheck(c.address, { chain });
+      if (listed || String(chk?.symbol ?? "").toUpperCase() === sym) { pinned = c; pinnedCheck = chk; break; }
+    }
+  }
+  const pick = pinned ? { address: pinned.address } : canon ? onChain.find((t) => t.address === String(canon).toLowerCase()) ?? { address: String(canon).toLowerCase() } : onChain[0];
   if (!pick || isOwnToken(pick.address)) return null;
-  const check = await quickCheck(pick.address, { chain });
+  const check = pinnedCheck ?? (await quickCheck(pick.address, { chain }));
   if (!check) return null;
   const others = onChain.filter((t) => t.address !== pick.address);
-  // the post had no address: say plainly that this one is my lookup, so nobody thinks it came from the author
-  const lead = lookupLead(VOICE, { sym, chain, addr: pick.address, others: others.length, canon: !!canon });
+  // the post had no address: say plainly where this one came from (up-thread, or my own lookup), so nobody thinks the author posted it
+  const lead = lookupLead(VOICE, { sym, chain, addr: pick.address, others: others.length, canon: !!canon, pinned });
   return { check, lead };
 }
 
@@ -2185,7 +2197,7 @@ async function main() {
         const t = tickersIn(p.text);
         if (t.length !== 1) continue;
         if (isPaymentUnit(p.text, t[0])) { console.log(`#${ch} post ${p.id} (${p.name}) mentions $${t[0]} → (payment unit, skipped)\n`); continue; }
-        const r = await tokenTalk(t[0], ch, st, chainNamedIn(p.text));
+        const r = await tokenTalk(t[0], ch, st, chainNamedIn(p.text), { postId: p.id, parentId: p.parent });
         console.log(`#${ch} post ${p.id} (${p.name}) mentions $${t[0]} →\n${r ? (r.text ?? r.lead + replyText(r.check)) : "  (nothing solid to say)"}\n`);
       }
     }

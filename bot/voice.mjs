@@ -76,11 +76,15 @@ export function tokenRead(v, c, { kind = "channel", who = "", opener = null, url
 const LOOKUP = {
   one: ["no contract in the post, so i looked up {sym} on {chain} myself. the one i found: {addr}. {check}", "you didn't paste an address, so this is my own lookup of {sym} on {chain}: {addr}. {check}", "going by the ticker alone (no address in the post), the {sym} i found on {chain} is {addr}. {check}"],
   many: ["no contract in the post, so i looked up {sym} on {chain} myself. {n} tokens there use that ticker; this is {which}: {addr}. {check}", "you didn't paste an address, and {n} tokens on {chain} call themselves {sym}. my own pick, {which}: {addr}. {check}", "by ticker alone this is ambiguous: {n} {sym} tokens on {chain}. i went with {which}, {addr}. {check}"],
+  pinned: ["the contract {who} posted earlier in this thread ({post}) is {addr}, {sym} on {chain}.{others}", "going by the address pinned up-thread by {who} ({post}): {addr}, {sym} on {chain}.{others}"],
+  pinnedOthers: [" {n} tokens there use that ticker, so match the address, not the name.", " {n} tokens on {chain} share that ticker: the address is what counts."],
   check: ["match it against the address you actually mean.", "make sure that's the contract you meant.", "check it's the same address you have.", "compare it with the address you were given."],
 };
 /** The line before a read that started from a $TICKER: always says the address is my own lookup. */
-export function lookupLead(v, { sym, chain, addr, others = 0, canon = false }) {
+export function lookupLead(v, { sym, chain, addr, others = 0, canon = false, pinned = null }) {
   const vars = { sym: `$${sym}`, chain, addr, n: others + 1, which: canon ? "the one the town knows" : "the one with the deepest liquidity" };
+  // the thread already named the contract: say whose post it came from, never "no contract in the post"
+  if (pinned) return fill(v.pick("lookup.pinned", LOOKUP.pinned), { ...vars, who: pinned.who ?? "someone", post: `musebook.me/p/${pinned.postId}`, others: others ? " " + fill(v.pick("lookup.pinnedOthers", LOOKUP.pinnedOthers), vars).trim() : "" }) + "\n";
   vars.check = v.pick("lookup.check", LOOKUP.check);
   return fill(v.pick(others ? "lookup.many" : "lookup.one", others ? LOOKUP.many : LOOKUP.one), vars) + "\n";
 }

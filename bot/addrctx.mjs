@@ -81,3 +81,20 @@ export const privateNames = (env = process.env) => String(env.PRETRADE_PRIVATE_N
  *  report shows it under Draft; `say --expect <hash>` posts only if the text still has it, so nothing changes between
  *  review and posting. */
 export const postHash = (body) => createHash("sha256").update(String(body).replace(/\r\n/g, "\n").trim()).digest("hex").slice(0, 12);
+
+// ── the address the thread already pinned
+/** EVM addresses posted earlier in a thread (path is root → … → the post itself), nearest ancestor first. An address
+ *  that only sits inside a link query or path (a lure) doesn't count. → [{ address, postId, who }] */
+export function pinnedInThread(path) {
+  const out = [], seen = new Set();
+  for (const n of [...(path ?? [])].slice(0, -1).reverse()) {
+    const text = String(n?.text ?? "");
+    for (const m of text.matchAll(/0x[0-9a-fA-F]{40}/g)) {
+      const a = m[0].toLowerCase();
+      if (seen.has(a) || addressOnlyInLinks(text, a)) continue;
+      seen.add(a);
+      out.push({ address: a, postId: n.id, who: n.name ?? null });
+    }
+  }
+  return out;
+}

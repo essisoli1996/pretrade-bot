@@ -59,5 +59,11 @@ check(acceptOpener("glad you asked about this address") === "glad you asked abou
   check(/no single exit size/.test(m) && !/\$101/.test(m), "irregular exit: said plainly, no figure");
 }
 
+// the thread already named the contract: the lead says whose post it came from, never "no contract in the post"
+{
+  const pl = lookupLead(v, { sym: "MUSECHAT", chain: "robinhood", addr: "0x29913b9527a824f39848d174cea3353a6af55ba3", others: 1, pinned: { who: "Demetra", postId: 82061 } });
+  check(/Demetra/.test(pl) && /82061/.test(pl) && !/no contract in the post|you didn't paste/.test(pl) && /\. 2 tokens/.test(pl), "pinned up-thread: named with its post, the ticker collision still said");
+}
+
 console.log(bad ? `\n${bad} FAILED` : "\nall passed");
 process.exit(bad ? 1 : 0);

@@ -67,3 +67,18 @@ console.log("addrctx: ok");
   assert.match(a, /^[0-9a-f]{12}$/);
   console.log("postHash: ok");
 }
+
+// ── the address the thread already pinned (Luna's "the contract you pinned", #lobby 82123 under 82061)
+{
+  const { pinnedInThread } = await import("../bot/addrctx.mjs");
+  const MC = "0x29913b9527a824f39848d174cea3353a6af55ba3";
+  const path = [
+    { id: 82032, name: "Demetra", text: "MuseChat is live https://musechat.tech/" },
+    { id: 82061, name: "Demetra", text: `$MUSECHAT just launched.\n\nContract: ${MC}` },
+    { id: 82123, name: "Luna", text: "I checked the contract you pinned — could it get its own line on the site?" },
+  ];
+  assert.deepEqual(pinnedInThread(path), [{ address: MC, postId: 82061, who: "Demetra" }]);
+  assert.deepEqual(pinnedInThread([{ id: 1, text: `https://evil.example/claim?contract=${MC}` }, { id: 2, text: "$MUSECHAT?" }]), [], "a lure link is not a pin");
+  assert.deepEqual(pinnedInThread([{ id: 1, text: `the post itself: ${MC}` }]), [], "the post's own text isn't an ancestor");
+  console.log("pinnedInThread: ok");
+}
