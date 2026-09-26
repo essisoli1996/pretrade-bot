@@ -31,7 +31,7 @@ import { toDraft, parseOutbox, appendDraft, pendingDrafts } from "./outbox.mjs";
 import { loadJson, saveJson } from "./store.mjs";
 import { top10Share, holderKind } from "./holders.mjs";
 import { loadKeysFile, archiveUrl, redact, codeKind, etherscanSource } from "./archive.mjs";
-import { addressOnlyInLinks, LURE_TALK, lureInPath, dropForkCopies, ownerTalk, privateNames } from "./addrctx.mjs";
+import { addressOnlyInLinks, LURE_TALK, lureInPath, dropForkCopies, ownerTalk, privateNames, postHash } from "./addrctx.mjs";
 import { isSol, GOPLUS, n, yes } from "./core/util.mjs";
 import { makeQuickCheck } from "./core/check.mjs";
 import { httpFixture } from "./core/httpfixture.mjs";
@@ -2345,7 +2345,7 @@ async function main() {
       console.log(`  ${(Number(h.percent) * 100).toFixed(2).padStart(6)}%  ${addr}  ${kind}${leftOut.includes(addr) ? " (left out)" : ""}`);
     }
     // the same rule as the free read: pools, the token, burns, locks and routers are not holders
-    return console.log(`top-10 share counted in the read (pools, burns, locks and routers left out): ${top10Share(hs, [...poolish, ...leftOut])}%`);
+    return console.log(`top-10 share counted in the read (pools, burns, locks and routers left out): ${((x) => (x === null ? "no holders in view beyond pools and locks (unknown, not 0%)" : `${x}%`))(top10Share(hs, [...poolish, ...leftOut]))}`);
   }
 
   if (cmd === "source") {
@@ -2425,6 +2425,12 @@ async function main() {
   // In CI the identity comes from the MUSE_IDENTITY secret (the JSON content of .identity.json)
   // the identity: MUSE_IDENTITY (CI secret), MUSE_IDENTITY_FILE (a file kept outside the repo, e.g. on the Muse's VM), or bot/.identity.json
   const identity = process.env.MUSE_IDENTITY ? JSON.parse(process.env.MUSE_IDENTITY) : process.env.MUSE_IDENTITY_FILE ? loadJson(process.env.MUSE_IDENTITY_FILE, null) : loadJson(ID_FILE, null);
+  if (cmd === "hash") {
+    // The hash a report shows under Draft, for say/approve --expect (same body say posts).  node bot/musebot.mjs hash "<text>"
+    const text = args.slice(1).join(" ").trim();
+    if (!text) return console.log(`usage: hash "<text>"`);
+    return console.log(postHash(/\n- pretrade\s*$/i.test(text) ? text : `${text}\n- ${CFG.name}`));
+  }
   if (!identity) return console.log("No identity yet. Run: node bot/musebot.mjs keygen");
   CONTROL = await CONTROL_SRC.get(); // every command that can post honours the owner's switches (approval included)
   const MUSE_ID_FILE = join(HERE, "muse_id.txt"); // public id, safe to commit; lets CI keep the secret immutable
@@ -2508,13 +2514,18 @@ async function main() {
   // Posting as pretrade from the Muse's desk. Guards: the owner's pause and read-only switches, no secrets in the text,
   // nothing naming or pointing at the owner,
   // no second reply to the same post, the signature line. Returns the post id, or null with the reason printed.
-  const deskPost = async (ch, replyTo, text, { force = false, dry = false } = {}) => {
+  const signed = (text) => (/\n- pretrade\s*$/i.test(text) ? text : `${text}\n- ${CFG.name}`);
+  const deskPost = async (ch, replyTo, text, { force = false, dry = false, expect = null } = {}) => {
     if (CONTROL.paused) return console.log("NOT POSTED: the owner has paused pretrade (bot/control.json)."), null;
     if (findSecrets(text).length) return console.log("NOT POSTED: the text contains something that looks like a key or seed phrase."), null;
     const owner = ownerTalk(text, privateNames());
     if (owner) return console.log(`NOT POSTED: "${owner}" points at the owner. posts never name them or mention their approval; put what needs them under Needs in the report.`), null;
     if (replyTo && !force && (await repliedByMe(replyTo)).mine) return console.log(`NOT POSTED: pretrade already replied to post ${replyTo} (use --force to add another).`), null;
-    const body = /\n- pretrade\s*$/i.test(text) ? text : `${text}\n- ${CFG.name}`;
+    const body = signed(text);
+    // the text posted is the text reviewed: its hash must match the one in the report
+    const h = postHash(body);
+    if (CONTROL.reviewHash && !expect) return console.log(`NOT POSTED: review needs --expect <hash>. this text's hash is ${h}.`), null;
+    if (expect && expect !== h) return console.log(`NOT POSTED: the text changed since review (hash ${h}, reviewed ${expect}).`), null;
     if (CONTROL.readOnly || dry) return console.log(`NOT POSTED (${CONTROL.readOnly ? "read-only mode" : "--dry"}). would have posted${replyTo ? ` under ${replyTo}` : ""} in #${ch}:\n${body}`), null;
     DESK_POSTING = true;
     try {
@@ -2525,14 +2536,15 @@ async function main() {
       return id;
     } finally { DESK_POSTING = false; }
   };
-  const flagArgs = (from) => args.slice(from).filter((x, i, all) => !["--reply", "--force", "--dry", "--text"].includes(x) && all[i - 1] !== "--reply");
+  const flagArgs = (from) => args.slice(from).filter((x, i, all) => !["--reply", "--force", "--dry", "--text", "--expect"].includes(x) && all[i - 1] !== "--reply" && all[i - 1] !== "--expect");
+  const expectArg = () => { const i = args.indexOf("--expect"); return i >= 0 ? String(args[i + 1] ?? "") : null; };
 
   if (cmd === "say") {
-    // Post as pretrade.  node bot/musebot.mjs say <channel> [--reply <postId>] [--force] [--dry] "<text>"
+    // Post as pretrade.  node bot/musebot.mjs say <channel> [--reply <postId>] [--expect <hash>] [--force] [--dry] "<text>"
     const ch = args[1], ri = args.indexOf("--reply"), replyTo = ri >= 0 ? Number(args[ri + 1]) : null;
     const text = flagArgs(2).join(" ").trim();
     if (!ch || !text) return console.log(`usage: say <channel> [--reply <postId>] "<text>"`);
-    await deskPost(ch, replyTo, text, { force: args.includes("--force"), dry: args.includes("--dry") });
+    await deskPost(ch, replyTo, text, { force: args.includes("--force"), dry: args.includes("--dry"), expect: expectArg() });
     return;
   }
 
@@ -2564,13 +2576,13 @@ async function main() {
   }
 
   if (cmd === "approve") {
-    // Publish a draft as-is or edited.  node bot/musebot.mjs approve <id> [--text "<edited text>"] [--dry]
+    // Publish a draft as-is or edited.  node bot/musebot.mjs approve <id> [--text "<edited text>"] [--expect <hash>] [--dry]
     const d = await findDraft(args[1]);
     if (!d) return console.log(`no draft ${args[1]} in the outbox (git pull, or it scrolled out).`);
     const prior = (loadJson(DESK, {}).drafts ?? {})[d.id];
     if (prior && !args.includes("--force")) return console.log(`draft ${d.id} was already decided: ${prior.decision} at ${prior.at} (use --force to post anyway).`);
-    const ti = args.indexOf("--text"), edited = ti >= 0 ? args.slice(ti + 1).filter((x) => !["--dry", "--force"].includes(x)).join(" ").trim() : "";
-    const id = await deskPost(d.channel, d.reply_to, edited || d.text, { dry: args.includes("--dry") });
+    const ti = args.indexOf("--text"), edited = ti >= 0 ? args.slice(ti + 1).filter((x, i, all) => !["--dry", "--force", "--expect"].includes(x) && all[i - 1] !== "--expect").join(" ").trim() : "";
+    const id = await deskPost(d.channel, d.reply_to, edited || d.text, { dry: args.includes("--dry"), expect: expectArg() });
     if (id) decide(d.id, edited ? "edited" : "approved", { post: id });
     return;
   }

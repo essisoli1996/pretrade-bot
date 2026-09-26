@@ -6,8 +6,7 @@
  "score": 35,
  "flags": [
   "very low liquidity",
-  "pair 6h old",
-  "holder list not read"
+  "pair 12h old"
  ],
  "liquidity": 9987,
  "liqKnown": true,
@@ -15,19 +14,19 @@
  "exit": {
   "usd": 21,
   "atLeast": false,
-  "block": 72567434,
+  "block": 72789350,
   "formulaUsd": 101
  },
  "contractScanned": true,
  "critical": false,
  "url": "https://dexscreener.com/robinhood/0xd45fc0961d70138638ad3e743aa8db6dba7ca1c594ebd3fadab3a7510ee7001c",
- "ageH": 5.520555555555555,
+ "ageH": 11.751388888888888,
  "price": 1.169e-7,
- "holders": null,
- "top10Pct": null,
+ "holders": 8,
+ "top10Pct": 0,
  "priceChange": {
   "h1": null,
-  "h6": -31.5,
+  "h6": null,
   "h24": -31.5
  },
  "flowH1": {
@@ -80,7 +79,7 @@
  },
  "sim": {
   "status": "ok",
-  "line": "🧪 simulated $20 buy then sell on the real pool: 3.5% round-trip cost incl. pool and hook fees. block 72567382.",
+  "line": "🧪 simulated $20 buy then sell on the real pool: 3.5% round-trip cost incl. pool and hook fees. block 72789290.",
   "flags": [],
   "roundTripLossPct": 3.5,
   "buyTaxPct": 0,

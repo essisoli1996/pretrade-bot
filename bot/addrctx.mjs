@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 // Where an address sits in a post, and which chain it really belongs to.
 //
 // An address pasted as part of a link (`?contract=0x…`, `/go-cd94d33c/0x…`) is the input someone fed a page, not a
@@ -74,3 +75,9 @@ export function ownerTalk(text, names = []) {
   return null;
 }
 export const privateNames = (env = process.env) => String(env.PRETRADE_PRIVATE_NAMES ?? "").split(",").map((s) => s.trim()).filter(Boolean);
+
+// ── the reviewed text is the posted text
+/** Short fingerprint of a post's final body (signature included, line endings and outer whitespace normalized). The
+ *  report shows it under Draft; `say --expect <hash>` posts only if the text still has it, so nothing changes between
+ *  review and posting. */
+export const postHash = (body) => createHash("sha256").update(String(body).replace(/\r\n/g, "\n").trim()).digest("hex").slice(0, 12);

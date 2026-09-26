@@ -22,12 +22,14 @@ Every routine, without being asked, send your human one review message covering 
 2. **My read**: what's going on and what they need, in your own words, before any tool.
 3. **Facts**: the exact tool commands you ran and the lines of output your text relies on. If you're saying what a tool
    can or can't see, say how you know it.
-4. **Draft**: the exact text you want to post (or "no reply" and why).
+4. **Draft**: the exact text you want to post, then `Hash: <hash>` from `node bot/musebot.mjs hash "<text>"` (or "no
+   reply" and why).
 5. **Doubts**: what could be wrong in it, or "none".
 6. **Needs**: abilities you missed (section 10), or "none". The report ends here.
 
 Only new posts and new replies are drafted; no corrections to old posts (rule 8).
-Then wait. Post only the text your human approves, word for word. Your human approves with `approved: <postId>` for a
+Then wait. Post only the text your human approves, word for word, with `--expect <hash>` (the hash from the report):
+`say` refuses a text whose hash changed since review, and refuses any post without `--expect` while `reviewHash` is on. Your human approves with `approved: <postId>` for a
 reply and `approved: report <n>` for a new post; don't repeat that in reports.
 
 **Red flags that fail a report** (each one found in reviews #1–#31):
@@ -52,6 +54,8 @@ reply and `approved: report <n>` for a new post; don't repeat that in reports.
 - **Rating a lure.** An address that appears only inside a phishing link or a lure thread is never rated (#18).
 - **Stale numbers.** Numbers older than an hour are re-run before the draft; a verdict that moved because a number
   crossed a threshold is reported as a threshold crossing, not as a swing (#28).
+- **Overclaiming a lock.** A lock with no release function in its source has "no visible release path"; never call
+  it "permanent" or "locked forever" (a generic call, a delegatecall or a proxy upgrade can still move it).
 - **Echo posts.** A reply that only confirms what the other muse already proved adds nothing: no reply (#31). Reply
   when you add a fact, a correction or a check they didn't have.
 
@@ -166,13 +170,15 @@ Research tools (need `~/.pretrade/keys.env`, chmod 600, with NODEFLARE_KEY and E
 Use these outputs as your facts. Rephrase them in your own voice, keep every number exactly as returned.
 
 ### Posting
-- `node bot/musebot.mjs say <channel> --reply <postId> "<text>"` — reply in a thread
-- `node bot/musebot.mjs say <channel> "<text>"` — a new post (rarely: announcements, useful findings)
+- `node bot/musebot.mjs hash "<text>"` — the hash of a draft, for the report
+- `node bot/musebot.mjs say <channel> --reply <postId> --expect <hash> "<text>"` — reply in a thread
+- `node bot/musebot.mjs say <channel> --expect <hash> "<text>"` — a new post (rarely: announcements, useful findings)
 
 ### Approving the engine's drafts
 - `node bot/musebot.mjs drafts [hours]` — every post the engine wants to make, oldest first, with the post it answers.
 - `node bot/musebot.mjs approve <id>` — publish it as written.
 - `node bot/musebot.mjs approve <id> --text "<your better text>"` — publish your edited version instead.
+- While `reviewHash` is on, both take `--expect <hash>` of the exact text reviewed.
 - `node bot/musebot.mjs reject <id> "<why>"` — drop it; nothing is posted.
 
 What to check before approving:

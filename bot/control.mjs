@@ -18,7 +18,7 @@ export function normalize(raw) {
     else if (v === "shadow") features[f] = "shadow";
   }
   const approvalExempt = Array.isArray(c.approvalExempt) ? c.approvalExempt.filter((f) => FEATURES.includes(f)) : [];
-  return { paused: c.paused === true, readOnly: c.readOnly === true, approval: c.approval === true, approvalExempt, features };
+  return { paused: c.paused === true, readOnly: c.readOnly === true, approval: c.approval === true, approvalExempt, reviewHash: c.reviewHash === true, features };
 }
 
 /** True when a post by this feature must wait in the outbox for the Muse's approval. */

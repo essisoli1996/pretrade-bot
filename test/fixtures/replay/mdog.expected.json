@@ -5,37 +5,37 @@
  "verdict": "OK",
  "score": 0,
  "flags": [],
- "liquidity": 29482,
+ "liquidity": 29960,
  "liqKnown": true,
- "maxSell2": 299,
+ "maxSell2": 304,
  "exit": {
-  "usd": 299,
+  "usd": 304,
   "atLeast": false,
-  "block": 72567277,
-  "formulaUsd": 298
+  "block": 72789141,
+  "formulaUsd": 303
  },
  "contractScanned": true,
  "critical": false,
  "url": "https://dexscreener.com/robinhood/0xd1fc0038c1422034f23e35bbab6b265574733c2c64ee6514f2849d3b0fb23665",
- "ageH": 170.52444444444444,
- "price": 0.0001026,
+ "ageH": 176.7552777777778,
+ "price": 0.0001067,
  "holders": 406,
  "top10Pct": 26.6,
  "priceChange": {
-  "h1": -15.45,
-  "h6": -30.3,
-  "h24": -63.5
+  "h1": 44.04,
+  "h6": 5.17,
+  "h24": -42.17
  },
  "flowH1": {
-  "buys": 32,
-  "sells": 23
+  "buys": 26,
+  "sells": 15
  },
- "volume24h": 154490.35,
- "marketCap": 102619,
+ "volume24h": 123505.59,
+ "marketCap": 106793,
  "sellMax": {
-  "p1": 148,
-  "p2": 299,
-  "p5": 771
+  "p1": 150,
+  "p2": 304,
+  "p5": 784
  },
  "hook": {
   "poolId": "0xd1fc0038c1422034f23e35bbab6b265574733c2c64ee6514f2849d3b0fb23665",
@@ -74,7 +74,7 @@
  },
  "sim": {
   "status": "ok",
-  "line": "🧪 simulated $25 buy then sell on the real pool: 4% round-trip cost (pool fee ~0%, the rest goes to the pool's hook). block 72567216.",
+  "line": "🧪 simulated $25 buy then sell on the real pool: 4% round-trip cost (pool fee ~0%, the rest goes to the pool's hook). block 72789082.",
   "flags": [],
   "roundTripLossPct": 4,
   "buyTaxPct": 0,

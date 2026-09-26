@@ -32,6 +32,10 @@ assert.equal(r.verdict, "OK"); assert.equal(r.score, 0);
 r = await deps({ sec: { is_open_source: "1" } })(T);
 assert.equal(r.verdict, "CAUTION"); assert.ok(r.flags.includes("holder list not read"));
 
+// every listed holder is a pool or lock: the real holders aren't in view, which is not 0%
+r = await deps({ sec: { is_open_source: "1", holders: [{ address: "0xpair", percent: "0.9" }] } })(T);
+assert.equal(r.top10Pct, null); assert.equal(r.verdict, "CAUTION"); assert.ok(r.flags.includes("no holders in view beyond pools and locks"));
+
 // v4 pool whose sell couldn't be simulated → CAUTION
 for (const s of [null, { status: "unavailable", line: "", flags: [] }, { status: "inconclusive", line: "", flags: [] }]) {
   r = await deps({ hook: { key: KEY, scored: true, risk: [] }, sim: s })(T);

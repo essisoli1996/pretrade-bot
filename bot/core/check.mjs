@@ -131,7 +131,8 @@ export function makeQuickCheck(deps) {
     // missing evidence never reads OK: a holder list or a sell simulation that should exist but didn't come back leaves the
     // read at CAUTION at least. it lifts OK only; an unknown is not a finding, so it never pushes a read to DANGER.
     const gaps = [];
-    if (top10Pct === null) gaps.push("holder list not read");
+    const listed = sec?.holders ?? solSec?.gp?.holders;
+    if (top10Pct === null) gaps.push(Array.isArray(listed) && listed.length ? "no holders in view beyond pools and locks" : "holder list not read");
     if (irregularExit) gaps.push("exit size irregular: price impact doesn't rise with sell size");
     if (quoteUnknown) gaps.push("liquidity only against an unrecognized quote token");
     if (hook?.key && (!sim || sim.status === "unavailable" || sim.status === "inconclusive")) gaps.push("sell not simulated");

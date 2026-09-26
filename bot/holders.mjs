@@ -9,6 +9,7 @@ const BURN = /^0x(0{40}|0{36}dead|000000000000000000000000000000000000dead)$/i;
 export function top10Share(holders, poolish = []) {
   const skip = new Set(poolish.filter(Boolean).map((x) => String(x).toLowerCase()));
   const real = holders.filter((h) => !skip.has(String(h.address).toLowerCase()) && !BURN.test(String(h.address)) && !yes(h.is_locked) && !/pool|pair|lock|burn|dead|router|bridge/i.test(h.tag ?? ""));
+  if (!real.length) return null; // every listed holder is a pool, lock or burn: the real holders aren't in view, not 0%
   return Math.round(real.slice(0, 10).reduce((t, h) => t + (n(h.percent) ?? 0), 0) * 1000) / 10;
 }
 

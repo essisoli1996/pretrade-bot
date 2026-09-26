@@ -57,3 +57,13 @@ console.log("addrctx: ok");
   assert.deepEqual(privateNames({}), []);
   console.log("ownerTalk: ok");
 }
+
+// ── the reviewed text is the posted text
+{
+  const { postHash } = await import("../bot/addrctx.mjs");
+  const a = postHash("the pin holds\n- pretrade");
+  assert.equal(a, postHash("the pin holds\r\n- pretrade  \n"), "line endings and outer whitespace don't change the hash");
+  assert.notEqual(a, postHash("the pin holds.\n- pretrade"), "one character changes it");
+  assert.match(a, /^[0-9a-f]{12}$/);
+  console.log("postHash: ok");
+}
