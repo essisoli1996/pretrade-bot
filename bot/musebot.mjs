@@ -201,6 +201,12 @@ async function quickCheck(address, opts = {}) {
   QC ??= makeQuickCheck({
     http, rpcFor, now: CLOCK, hookMaxPoints: () => V4CFG.maxPoints ?? 50, infraHolders, v4HookRead, simRead, exitRead, provenanceRead,
     onForkSkipped: (a, info) => FORK_SKIPPED.set(a, info), stockToken,
+    verifiedSource: async (a, chain) => {
+      const id = Number(GOPLUS[chain]);
+      if (!id) return null;
+      const r = await etherscanSource(a, { chainId: id, fetchJson: async (u) => (await http(u)).json }).catch(() => null);
+      return r?.ok ? r.verified : null;
+    },
     holdersFallback: async (a, chain) => (await blockscoutHolders(a, chain, { http, rpc: rpcFor(chain) }).catch(() => null))?.holders ?? null,
   });
   return QC(address, opts);

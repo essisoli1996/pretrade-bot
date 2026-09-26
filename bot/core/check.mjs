@@ -9,7 +9,7 @@ import { recognizedQuote } from "./quotes.mjs";
 
 /** @param {import("./types").CheckDeps} deps */
 export function makeQuickCheck(deps) {
-  const { http, rpcFor, now, hookMaxPoints, infraHolders, v4HookRead, simRead, exitRead, provenanceRead, onForkSkipped, stockToken, holdersFallback } = deps;
+  const { http, rpcFor, now, hookMaxPoints, infraHolders, v4HookRead, simRead, exitRead, provenanceRead, onForkSkipped, stockToken, holdersFallback, verifiedSource } = deps;
   /** @type {import("./types").QuickCheck} */
   return async function quickCheck(address, { light = false, chain: onlyChain = null } = {}) {
     const sol = isSol(address);
@@ -80,7 +80,9 @@ export function makeQuickCheck(deps) {
       if (st !== null && st >= 0.5) add(`sell tax ${(st * 100).toFixed(0)}%`, 100, true);
       else if (st !== null && st > 0.1) add(`sell tax ${(st * 100).toFixed(0)}%`, 30);
       if (bt !== null && bt > 0.1) add(`buy tax ${(bt * 100).toFixed(0)}%`, 15);
-      if (sec.is_open_source !== undefined && !yes(sec.is_open_source)) add("unverified source", 25);
+      // GoPlus's first scan of a fresh launch can say "not open source" before it catches up ($MUSECHAT read DANGER 65
+      // on that flag while RobinScan already showed verified DopplerERC20V1): the explorer's own answer decides
+      if (sec.is_open_source !== undefined && !yes(sec.is_open_source) && (await verifiedSource(a, chain)) !== true) add("unverified source", 25);
       if (yes(sec.hidden_owner)) add("hidden owner", 25);
       if (yes(sec.slippage_modifiable)) add("tax modifiable", 25);
       if (yes(sec.is_mintable)) add("mintable", 15);

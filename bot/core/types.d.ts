@@ -72,6 +72,8 @@ export interface CheckDeps {
   /** Robinhood Chain: is this a Robinhood Stock Token (Robinhood's registry)? null when the registry is unreachable. */
   stockToken: (address: string) => Promise<boolean | null>;
   /** Holder list from the chain's explorer when GoPlus has none (GoPlus shape: address + percent as a fraction). */
+  /** The chain explorer's verified-source answer: true verified, false not, null unknown (no key, no answer). */
+  verifiedSource: (address: string, chain: string) => Promise<boolean | null>;
   holdersFallback: (address: string, chain: string) => Promise<{ address: string; percent: string }[] | null>;
   /** Called when only fork-copy pools were found for an address (the reply explains instead of rating). */
   onForkSkipped: (address: string, info: { chain: string; unsure: boolean }) => void;

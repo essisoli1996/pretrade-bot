@@ -8,7 +8,7 @@ const NOW = 1_790_000_000_000;
 const holders = [{ address: "0x2222222222222222222222222222222222222222", percent: "0.05" }];
 
 /** A token on base with deep liquidity and a clean scan; each case changes one thing. */
-function deps({ fallback = null, extra = [], stock = async () => null, chain = "base", addr = T, quote = chain === "solana" ? "So11111111111111111111111111111111111111112" : "0x4200000000000000000000000000000000000006", sec = { is_open_source: "1", holders }, solSec = null, hook = null, sim = null } = {}) {
+function deps({ verified = null, fallback = null, extra = [], stock = async () => null, chain = "base", addr = T, quote = chain === "solana" ? "So11111111111111111111111111111111111111112" : "0x4200000000000000000000000000000000000006", sec = { is_open_source: "1", holders }, solSec = null, hook = null, sim = null } = {}) {
   const pair = { chainId: chain, baseToken: { address: addr, symbol: "TST" }, pairAddress: "0xpair", quoteToken: { address: quote }, liquidity: { usd: 500000 }, pairCreatedAt: NOW - 90 * 864e5, priceUsd: "1" };
   return makeQuickCheck({
     http: async (url) => {
@@ -18,7 +18,7 @@ function deps({ fallback = null, extra = [], stock = async () => null, chain = "
       return { ok: false, status: 503, json: null, text: "" }; // rugcheck down
     },
     rpcFor: () => null, now: () => NOW, hookMaxPoints: () => 50, infraHolders: async () => [],
-    v4HookRead: async () => hook, simRead: async () => sim, exitRead: async () => null, provenanceRead: async () => null, onForkSkipped: () => {}, stockToken: stock, holdersFallback: async () => fallback,
+    v4HookRead: async () => hook, simRead: async () => sim, exitRead: async () => null, provenanceRead: async () => null, onForkSkipped: () => {}, stockToken: stock, holdersFallback: async () => fallback, verifiedSource: async () => verified,
   });
 }
 const KEY = { currency0: "0x0", currency1: T, fee: 0, tickSpacing: 1, hooks: "0x0" };
@@ -94,5 +94,13 @@ r = await deps({ chain: "robinhood", sec: { is_open_source: "1" }, fallback: nul
 assert.ok(r.flags.includes("holder list not read"), "no list anywhere: still a gap");
 r = await deps({ chain: "base", sec: { is_open_source: "1" }, fallback: [{ address: "0x4444444444444444444444444444444444444444", percent: "0.04" }] })(T);
 assert.ok(r.flags.includes("holder list not read"), "off robinhood (no holder classification) the fallback isn't used");
+
+// GoPlus says unverified but the explorer says verified: no flag (the $MUSECHAT DANGER 65); unknown keeps it
+r = await deps({ sec: { is_open_source: "0", holders }, verified: true })(T);
+assert.ok(!r.flags.includes("unverified source")); assert.equal(r.verdict, "OK");
+r = await deps({ sec: { is_open_source: "0", holders }, verified: null })(T);
+assert.ok(r.flags.includes("unverified source"), "explorer unknown: GoPlus's flag stands");
+r = await deps({ sec: { is_open_source: "0", holders }, verified: false })(T);
+assert.ok(r.flags.includes("unverified source"));
 
 console.log("check: ok");
