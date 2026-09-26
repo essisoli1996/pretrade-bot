@@ -376,8 +376,10 @@ async function exitRead(pair, key, token, formulaUsd) {
       const r = await SIM.exitSize({ key, token, refIn: units(Math.min(2, formulaUsd / 100)), guessIn: units(formulaUsd) });
       if (!r) return null;
       const usd = (Number(r.amountIn) / 10 ** dec) * price;
-      // below the reference size: "less than $N" (rounded up), so a thin pool never reads as a $0 exit
-      return { usd: r.atMost ? Math.max(1, Math.ceil(usd)) : Math.floor(usd), atLeast: r.atLeast, ...(r.atMost ? { atMost: true } : {}), block: r.block, formulaUsd, ...(r.irregular ? { irregular: true } : {}) };
+      // below the reference size, or under $1 at all: "less than $N" (rounded up), so a thin pool never reads as a $0
+      // exit (MOLEBOOK, $CEREBRO: the reference sell is itself under $1 on an ~$8k Doppler pool)
+      const below = r.atMost || usd < 1;
+      return { usd: below ? Math.max(1, Math.ceil(usd)) : Math.floor(usd), atLeast: r.atLeast, ...(below ? { atMost: true } : {}), block: r.block, formulaUsd, ...(r.irregular ? { irregular: true } : {}) };
     };
     const timeout = new Promise((_, no) => setTimeout(() => no(new Error("timed out")), SIMCFG.exitTimeoutMs ?? 30000).unref());
     return await Promise.race([go(), timeout]);
@@ -391,7 +393,7 @@ const prov = () => (PROV ??= makeProvenance({ http, rpc: rpcFor("robinhood") }))
 async function provenanceRead(address) {
   try {
     const hit = await prov().lookup(address);
-    return hit ? { ...hit, lines: provenanceLines(hit.rec, prov().registry(), hit.fee, { board: boardHost() }) } : null;
+    return hit ? { ...hit, lines: provenanceLines(hit.rec, prov().registry(), hit.fee, { board: boardHost(), now: CLOCK() }) } : null;
   } catch { return null; }
 }
 /** "@pretrade real <TICKER>": every Robinhood Chain contract using the ticker, told apart by facts. */
@@ -403,7 +405,7 @@ async function realText(text) {
   const all = await tickerTokens(sym), market = all.filter((t) => t.chain === "robinhood");
   const fees = new Map();
   for (const r of reg.bySymbol.get(sym.toUpperCase()) ?? []) fees.set(r.address, await prov().feeOf(r));
-  const rep = tickerReport(sym, reg, market, fees, { board: boardHost() });
+  const rep = tickerReport(sym, reg, market, fees, { board: boardHost(), now: CLOCK() });
   // a ticker alone doesn't name a chain: say where else it trades, deepest first, so nobody reads the wrong chain's
   // token (the $BNKR lesson: the town meant Base)
   const seen = new Set(), elsewhere = all.filter((t) => t.chain !== "robinhood" && t.liq >= 10000 && !seen.has(t.chain) && seen.add(t.chain)).slice(0, 3);
