@@ -132,10 +132,11 @@ export const V4 = (() => {
   const gasPrices = new Map<string, string>();
   async function gasPrice(block: string): Promise<string> {
     if (!gasPrices.has(block)) {
-      const r = await rpc("eth_gasPrice", []).catch(() => null);
-      let g = "0x3b9aca00"; // 1 gwei if unreadable
-      try { if (typeof r?.result === "string" && BigInt(r.result) > 0n) g = r.result; } catch {}
-      gasPrices.set(block, g);
+      // twice the block's base fee, as a real transaction pays: never 0, and never under the base fee (the RPC refuses)
+      let base = 0n;
+      try { base = BigInt((await rpc("eth_getBlockByNumber", [block, false]))?.result?.baseFeePerGas); } catch {}
+      if (!base) try { base = BigInt((await rpc("eth_gasPrice", []))?.result); } catch {}
+      gasPrices.set(block, "0x" + ((base > 0n ? base : 10n ** 9n) * 2n).toString(16));
     }
     return gasPrices.get(block)!;
   }

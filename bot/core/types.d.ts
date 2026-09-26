@@ -54,6 +54,8 @@ export interface ExitRead {
   atLeast: boolean;
   block: number;
   formulaUsd: number;
+  /** Price impact didn't rise with sell size (a fee band, a revert window): the figure is not a real exit. */
+  irregular?: boolean;
 }
 
 /** Everything quickCheck reaches outside itself. Tests hand in fakes; the bot hands in the live ones. */

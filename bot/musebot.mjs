@@ -291,7 +291,7 @@ async function exitRead(pair, key, token, formulaUsd) {
       const units = (usd) => BigInt(Math.max(1, Math.floor((usd / price) * 1e6))) * 10n ** BigInt(dec) / 1000000n;
       const r = await SIM.exitSize({ key, token, refIn: units(Math.min(2, formulaUsd / 100)), guessIn: units(formulaUsd) });
       if (!r) return null;
-      return { usd: Math.floor((Number(r.amountIn) / 10 ** dec) * price), atLeast: r.atLeast, block: r.block, formulaUsd };
+      return { usd: Math.floor((Number(r.amountIn) / 10 ** dec) * price), atLeast: r.atLeast, block: r.block, formulaUsd, ...(r.irregular ? { irregular: true } : {}) };
     };
     const timeout = new Promise((_, no) => setTimeout(() => no(new Error("timed out")), SIMCFG.exitTimeoutMs ?? 30000).unref());
     return await Promise.race([go(), timeout]);

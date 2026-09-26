@@ -91,12 +91,15 @@ export function makeSim({ rpc, control = null, seed = null }) {
   /** Simulator and sender addresses for one block: unpredictable, and different every block. */
   const actors = (block) => ({ sim: derive("sim", block), from: derive("from", block) });
   const gasCache = new Map();
-  /** The chain's gas price for this block (never 0: a token can tell an eth_call from a real transaction by that). */
+  /** A real gas price for this block: twice its base fee, as a real transaction would pay (never 0: a token can tell an
+   *  eth_call from a transaction by that, and never under the base fee, which the RPC refuses). */
   async function gasPrice(block) {
     if (!gasCache.has(block)) {
-      const r = await rpc("eth_gasPrice", []).catch(() => null);
-      const g = typeof r?.result === "string" && BigInt(r.result) > 0n ? r.result : "0x3b9aca00"; // 1 gwei if unreadable
-      gasCache.clear(); gasCache.set(block, g);
+      const b = await rpc("eth_getBlockByNumber", [block, false]).catch(() => null);
+      let base = null;
+      try { base = BigInt(b?.result?.baseFeePerGas); } catch {}
+      if (!base) { const r = await rpc("eth_gasPrice", []).catch(() => null); try { base = BigInt(r?.result); } catch {} }
+      gasCache.clear(); gasCache.set(block, toHexQty((base && base > 0n ? base : 10n ** 9n) * 2n));
     }
     return gasCache.get(block);
   }
@@ -226,18 +229,33 @@ export async function searchExit({ sellOut, refIn, guessIn, target = 0.02, steps
   const refOut = await out(refIn);
   if (!refOut || refOut <= 0n || refIn <= 0n) return null;
   const rateRef = Number((refOut * 10n ** 18n) / refIn) / 1e18;
-  const impactAt = async (x) => { const o = await out(x); return o === null ? 1 : Math.max(0, 1 - Number((o * 10n ** 18n) / x) / 1e18 / rateRef); };
+  const probes = [{ x: refIn, imp: 0 }];
+  const impactAt = async (x) => {
+    const o = await out(x);
+    const imp = o === null ? 1 : Math.max(0, 1 - Number((o * 10n ** 18n) / x) / 1e18 / rateRef);
+    probes.push({ x, imp });
+    return imp;
+  };
   let lo = refIn, loImpact = 0, hi = guessIn > refIn ? guessIn : refIn * 10n;
   let hiImpact = await impactAt(hi);
   for (let g = 0; hiImpact < target && g < maxGrow; g++) { lo = hi; loImpact = hiImpact; hi *= 4n; hiImpact = await impactAt(hi); }
-  if (hiImpact < target) return { amountIn: hi, impact: hiImpact, atLeast: true, calls };
+  const done = async (r) => {
+    // the search assumes a bigger sell never costs less per token. A pool or hook that breaks that (a fee band, a sell
+    // that reverts at one size and works at a bigger one) makes any single figure a guess: one more probe below the
+    // answer, then every probe must rise with size, or the exit is reported as irregular instead of as a number.
+    if (lo > refIn) { const mid = BigInt(Math.floor(Math.sqrt(Number(refIn) * Number(lo)))); if (mid > refIn && mid < lo) await impactAt(mid); }
+    const sorted = [...probes].sort((a, b) => (a.x < b.x ? -1 : a.x > b.x ? 1 : 0));
+    const irregular = sorted.some((p, i) => i > 0 && p.imp < sorted[i - 1].imp - 0.002);
+    return { ...r, irregular, calls };
+  };
+  if (hiImpact < target) return done({ amountIn: hi, impact: hiImpact, atLeast: true });
   for (let i = 0; i < steps; i++) {
     const mid = BigInt(Math.floor(Math.sqrt(Number(lo) * Number(hi))));
     if (mid <= lo || mid >= hi) break;
     const m = await impactAt(mid);
     if (m < target) { lo = mid; loImpact = m; } else hi = mid;
   }
-  return { amountIn: lo, impact: loImpact, atLeast: false, calls };
+  return done({ amountIn: lo, impact: loImpact, atLeast: false });
 }
 
 /**

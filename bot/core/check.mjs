@@ -114,7 +114,11 @@ export function makeQuickCheck(deps) {
     const deepest = n(p.liquidity?.usd) ?? 0;
     const formula2 = Math.floor((0.02 * (deepest / 2)) / 0.98);
     // on a v4 pool the exit is measured by selling on the live pool: a full-position figure (Doppler multicurve) overstates it
-    const exit = sim?.status === "ok" && hook?.key ? await exitRead(p, hook.key, a, formula2) : null;
+    const measured = sim?.status === "ok" && hook?.key ? await exitRead(p, hook.key, a, formula2) : null;
+    // an irregular pool (impact not rising with size) has no honest single exit figure: no number from it, and the
+    // listed-liquidity formula isn't trusted either, so the read says so and never reads OK
+    const irregularExit = !!measured?.irregular;
+    const exit = irregularExit ? null : measured;
     // "low liquidity" judges what a seller can reach: with a measured exit, the depth that exit implies (2% size × 98),
     // not the listed figure ($musemini: $9,987 listed read "low", ~$2k reachable is "very low")
     if (liqKnown) {
@@ -128,6 +132,7 @@ export function makeQuickCheck(deps) {
     // read at CAUTION at least. it lifts OK only; an unknown is not a finding, so it never pushes a read to DANGER.
     const gaps = [];
     if (top10Pct === null) gaps.push("holder list not read");
+    if (irregularExit) gaps.push("exit size irregular: price impact doesn't rise with sell size");
     if (quoteUnknown) gaps.push("liquidity only against an unrecognized quote token");
     if (hook?.key && (!sim || sim.status === "unavailable" || sim.status === "inconclusive")) gaps.push("sell not simulated");
     for (const g of gaps) flags.push(g);

@@ -53,6 +53,11 @@ check(acceptOpener("glad you asked about this address") === "glad you asked abou
   const m = tokenRead(v, { ...c, liquidity: 9987, maxSell2: 22, exit: { usd: 22, atLeast: false, block: 1, formulaUsd: 101 } }, { kind: "mention", who: "x", url });
   check(/\$9,987 of liquidity listed; selling on the live pool, about \$22 is the most/.test(m) && !/\$101/.test(m), "measured exit shown, full-position estimate dropped");
 }
+// an irregular pool (impact not rising with size) gets no exit number at all, not the listed-liquidity estimate
+{
+  const m = tokenRead(v, { ...c, verdict: "CAUTION", liquidity: 9987, maxSell2: 101, exit: null, flags: ["exit size irregular: price impact doesn't rise with sell size"] }, { kind: "mention", who: "x", url });
+  check(/no single exit size/.test(m) && !/\$101/.test(m), "irregular exit: said plainly, no figure");
+}
 
 console.log(bad ? `\n${bad} FAILED` : "\nall passed");
 process.exit(bad ? 1 : 0);

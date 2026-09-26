@@ -59,6 +59,12 @@ check(taxed.buyTaxPct === 20 && taxed.flags.some((f) => /buy tax 20%/.test(f.tex
   const capped = await searchExit({ sellOut: async (x) => (x > 5000n * ONE ? null : pool(X)(x)), refIn: ONE, guessIn: 100_000n * ONE });
   check(Number(capped.amountIn / ONE) <= 5000, "sizes that revert are never reported as an exit");
   check((await searchExit({ sellOut: async () => null, refIn: ONE, guessIn: ONE * 10n })) === null, "no reference sell: no exit figure");
+  // RT-10/25: a bigger sell must never cost less per token; if it does, no single exit figure is honest
+  check(r.irregular === false && grown.irregular === false && capped.irregular === false, "an ordinary pool (or a size cap) is regular");
+  const band = await searchExit({ sellOut: async (x) => (x > 20000n * ONE && x < 40000n * ONE ? null : pool(X)(x)), refIn: ONE, guessIn: 100_000n * ONE });
+  check(band.irregular === true, "a sell that reverts at one size and works at a bigger one: irregular");
+  const feeBand = await searchExit({ sellOut: async (x) => { const o = await pool(X)(x); return x > 100n * ONE && x < 1000n * ONE ? (o * 90n) / 100n : o; }, refIn: ONE, guessIn: 100_000n * ONE });
+  check(feeBand.irregular === true, "a fee band on mid-size sells, cheaper again above it: irregular");
 }
 
 // the simulator can't be recognised (RT-20/24): new addresses every block, a real gas price on every call
@@ -68,7 +74,7 @@ check(taxed.buyTaxPct === 20 && taxed.flags.some((f) => /buy tax 20%/.test(f.tex
   const rpc = async (method, params) => {
     calls.push({ method, params });
     if (method === "eth_blockNumber") return { result: "0x" + (head++).toString(16) };
-    if (method === "eth_gasPrice") return { result: "0x989680" };
+    if (method === "eth_getBlockByNumber") return { result: { baseFeePerGas: "0x989680" } };
     if (method === "eth_createAccessList") return { result: { accessList: [] } };
     return { result: "0x" };
   };
@@ -81,7 +87,7 @@ check(taxed.buyTaxPct === 20 && taxed.flags.some((f) => /buy tax 20%/.test(f.tex
   const froms = ethCalls.map((c) => c.params[0].from), tos = ethCalls.map((c) => c.params[0].to);
   check(ethCalls.length === 3 && new Set(froms).size === 3 && new Set(tos).size === 3, "a new simulator and sender every block, and per process");
   check(!froms.concat(tos).some((a) => /5117/.test(a)), "no fixed 0x5117… address left");
-  check(ethCalls.every((c) => c.params[0].gasPrice === "0x989680"), "every eth_call carries the chain's gas price");
+  check(ethCalls.every((c) => c.params[0].gasPrice === "0x1312d00"), "every eth_call pays twice the block's base fee");
   check(ethCalls.every((c) => c.params[2][c.params[0].from]?.balance), "the sender is funded for that gas");
   const s1 = makeSim({ rpc, seed: "fixture" }), s2 = makeSim({ rpc, seed: "fixture" });
   calls.length = 0; head = 7; await s1.run({ key, token: key.currency1, quoteIn: 1n });
