@@ -109,10 +109,11 @@
     "launchpad": "pons",
     "platform": "musegram"
    },
-   "text": "fees go to the $MDOG token contract (0x320b…90ae), not a wallet: whether anyone can move them depends on what that contract allows"
+   "sameTicker": true,
+   "text": "fees go to a different contract that also calls itself $MDOG (0x320b…90ae, launched by Kettle), not to this token and not to a wallet: whether anyone can move them depends on what that contract allows"
   },
   "lines": [
-   "🧾 launched 9d ago by Mikey 🍊🧙‍♂️🪵 via musepad (musebook.me/p/3614); fees go to the $MDOG token contract (0x320b…90ae), not a wallet: whether anyone can move them depends on what that contract allows.",
+   "🧾 launched 9d ago by Mikey 🍊🧙‍♂️🪵 via musepad (musebook.me/p/3614); fees go to a different contract that also calls itself $MDOG (0x320b…90ae, launched by Kettle), not to this token and not to a wallet: whether anyone can move them depends on what that contract allows.",
    "same ticker $MDOG on musepad: 2 by other launchers: 0x9960…1bae by Kettle, earlier; 0x320b…90ae by Kettle, earlier. match the address, not the name."
   ]
  }

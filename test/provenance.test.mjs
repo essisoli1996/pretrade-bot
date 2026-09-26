@@ -21,6 +21,7 @@ check(reg.size === 5 && reg.bySymbol.get("PORCH")[0].launcher === "Mikey", "inde
 const p2 = reg.byAddr.get(PORCH2);
 const fee = feeRecipient(p2, reg, "0x6080");
 check(fee.kind === "token-contract" && fee.token.symbol === "PORCH", "the second $PORCH pays its fees into the first $PORCH's token contract");
+check(fee.sameTicker === true && /a different contract that also calls itself \$PORCH/.test(fee.text) && /not to this token/.test(fee.text), "a same-ticker recipient is named as a different contract, never as this token ($MDOG, 79724)");
 check(feeRecipient(reg.byAddr.get("0x2222222222222222222222222222222222222222"), reg, null).kind === "custodial", "paypal launch: custodial fee wallet");
 check(feeRecipient(reg.byAddr.get(REAL_PORCH), reg, "0x").kind === "wallet", "plain wallet (no code)");
 check(feeRecipient(reg.byAddr.get(REAL_PORCH), reg, "0xef0100" + "ab".repeat(20)).kind === "wallet", "EIP-7702 delegated wallet is still a wallet");
@@ -36,14 +37,14 @@ check(oa && /already trading: 0x4b43.*a launch outside musepad/.test(oa.join(" "
 const news1 = reg.byAddr.get("0xe6b18dc965939d0a2beedcf77249048e4684e592");
 check(siblingsOf(news1, reg)[0].relation === "same-launcher", "two $NEWS by Flash: same launcher (a retry), not a copycat");
 const lines = provenanceLines(p2, reg, fee, { now });
-check(/launched 2h ago by Pip via musepad \(musebook\.me\/p\/65291\)/.test(lines[0]) && /token contract/.test(lines[0]), `provenance line: ${lines[0]}`);
+check(/launched 2h ago by Pip via musepad \(musebook\.me\/p\/65291\)/.test(lines[0]) && /a different contract that also calls itself/.test(lines[0]), `provenance line: ${lines[0]}`);
 check(/1 by other launchers: 0x4b43…3ba3 by Mikey, earlier/.test(lines[1] ?? ""), `sibling line: ${lines[1]}`);
 check(!/fake|scam|imposter/i.test(lines.join(" ")), "no accusations, only facts");
 
 const market = [{ address: REAL_PORCH, liq: 14109, trades: 610 }, { address: PORCH2, liq: 0, trades: 0 }, { address: "0x93ab06a8467ca42a6177ebf52babdbdb17edaa5e", liq: 7458, trades: 1 }];
 const rep = tickerReport("$porch", reg, market, new Map([[PORCH2, fee]]), { now });
 check(rep.found === 3 && rep.first === REAL_PORCH && rep.deepest === REAL_PORCH, "real PORCH: the first launched and the most liquid");
-check(/\[most liquid, first\]/.test(rep.lines[1]) && /not a musepad launch/.test(rep.lines.join("\n")) && /token contract/.test(rep.lines.join("\n")), `ticker report:\n    ${rep.lines.join("\n    ")}`);
+check(/\[most liquid, first\]/.test(rep.lines[1]) && /not a musepad launch/.test(rep.lines.join("\n")) && /a different contract that also calls itself/.test(rep.lines.join("\n")), `ticker report:\n    ${rep.lines.join("\n    ")}`);
 check(tickerReport("NOPE", reg, [], new Map(), { now }).found === 0, "unknown ticker: says so, invents nothing");
 
 const alert = reuseAlert(p2, reg, market, fee, { minLiquidityUsd: 5000 });
