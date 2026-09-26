@@ -9,7 +9,7 @@ import { recognizedQuote } from "./quotes.mjs";
 
 /** @param {import("./types").CheckDeps} deps */
 export function makeQuickCheck(deps) {
-  const { http, rpcFor, now, hookMaxPoints, infraHolders, v4HookRead, simRead, exitRead, provenanceRead, onForkSkipped, stockToken } = deps;
+  const { http, rpcFor, now, hookMaxPoints, infraHolders, v4HookRead, simRead, exitRead, provenanceRead, onForkSkipped, stockToken, holdersFallback } = deps;
   /** @type {import("./types").QuickCheck} */
   return async function quickCheck(address, { light = false, chain: onlyChain = null } = {}) {
     const sol = isSol(address);
@@ -90,8 +90,12 @@ export function makeQuickCheck(deps) {
     // unknown is not the same as clean: without a scan, never say OK (on solana too: GoPlus and RugCheck both down)
     if (!sec && !solSec) add("contract not scanned", 20);
     // a third of supply in ten non-pool wallets is an exit risk the pool numbers can't show (chiefofstaff, #memecoins 74152)
+    // a fresh launch often has no GoPlus holder list yet: on robinhood, where holders are classified below, read the
+    // explorer's list instead (balances as a share of on-chain supply) rather than leave the read without one
+    let listed = sec?.holders ?? solSec?.gp?.holders;
+    if ((!Array.isArray(listed) || !listed.length) && chain === "robinhood" && !light) listed = (await holdersFallback(a, chain)) ?? listed;
     const top10Pct = await (async () => {
-      const hs = sec?.holders ?? solSec?.gp?.holders;
+      const hs = listed;
       if (!Array.isArray(hs) || !hs.length) return null;
       // on robinhood, holders are classified by code and verified name: launch lockers and routers are not holders
       // ($MDOG: 8.2% sat in PonsV2LaunchLocker and was counted as concentration)
@@ -131,7 +135,6 @@ export function makeQuickCheck(deps) {
     // missing evidence never reads OK: a holder list or a sell simulation that should exist but didn't come back leaves the
     // read at CAUTION at least. it lifts OK only; an unknown is not a finding, so it never pushes a read to DANGER.
     const gaps = [];
-    const listed = sec?.holders ?? solSec?.gp?.holders;
     if (top10Pct === null) gaps.push(Array.isArray(listed) && listed.length ? "no holders in view beyond pools and locks" : "holder list not read");
     if (irregularExit) gaps.push("exit size irregular: price impact doesn't rise with sell size");
     if (quoteUnknown) gaps.push("liquidity only against an unrecognized quote token");

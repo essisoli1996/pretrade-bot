@@ -92,3 +92,31 @@ export function makeExplorer({ http, rpcFor, key = null, pageSize = 1000 }) {
 
   return { query, creator, transfers };
 }
+
+/** Blockscout getTokenHolders rows + total supply → the GoPlus holder shape ({ address, percent }), biggest first. Pure. */
+export function holdersShape(rows, totalSupply) {
+  const supply = BigInt(totalSupply ?? 0);
+  if (supply <= 0n || !Array.isArray(rows)) return [];
+  return rows
+    .filter((r) => /^0x[0-9a-fA-F]{40}$/.test(r?.address ?? ""))
+    .map((r) => ({ address: String(r.address).toLowerCase(), balance: BigInt(r.value ?? 0) }))
+    .sort((x, y) => (y.balance > x.balance ? 1 : y.balance < x.balance ? -1 : 0))
+    .map((r) => ({ address: r.address, percent: String(Number((r.balance * 10n ** 12n) / supply) / 1e12) }));
+}
+
+/**
+ * The biggest holders of a token from the chain's Blockscout, for when GoPlus has no list (fresh launches). Percent of
+ * total supply read on-chain at the same time. → { holders, count } or null.
+ */
+export async function blockscoutHolders(token, chain, { http, rpc, limit = 20 }) {
+  const ex = EXPLORERS[chain];
+  if (!ex || !rpc) return null;
+  const [list, supply] = await Promise.all([
+    http(`${ex.blockscout}?module=token&action=getTokenHolders&contractaddress=${token}&page=1&offset=${limit}`).catch(() => null),
+    rpc("eth_call", [{ to: token, data: "0x18160ddd" }, "latest"]).catch(() => null), // totalSupply()
+  ]);
+  const rows = list?.json?.result;
+  if (!Array.isArray(rows) || !rows.length || typeof supply?.result !== "string" || supply.result.length < 3) return null;
+  const holders = holdersShape(rows, BigInt(supply.result));
+  return holders.length ? { holders, count: null } : null;
+}

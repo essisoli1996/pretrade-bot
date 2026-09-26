@@ -42,3 +42,19 @@ assert.equal(t.ok, true); assert.equal(t.out.count, 0, "no transfers found is an
 assert.equal((await X.creator(TOKEN, "solana")).ok, false, "a chain with no explorer says so");
 
 console.log("explorer: ok");
+
+// fallback holder list: Blockscout balances as a share of on-chain supply, biggest first
+{
+  const { holdersShape, blockscoutHolders } = await import("../bot/explorer.mjs");
+  const A = "0x" + "a".repeat(40), B = "0x" + "b".repeat(40);
+  const h = holdersShape([{ address: A, value: "100" }, { address: B, value: "600" }, { address: "junk", value: "5" }], 1000n);
+  assert.deepEqual(h, [{ address: B, percent: "0.6" }, { address: A, percent: "0.1" }]);
+  assert.deepEqual(holdersShape([{ address: A, value: "1" }], 0n), []);
+  const got = await blockscoutHolders("0x" + "c".repeat(40), "robinhood", {
+    http: async () => ({ ok: true, json: { status: "1", result: [{ address: A, value: "250" }] } }),
+    rpc: async () => ({ result: "0x3e8" }), // 1000
+  });
+  assert.deepEqual(got.holders, [{ address: A, percent: "0.25" }]);
+  assert.equal(await blockscoutHolders("0x" + "c".repeat(40), "solana", { http: async () => ({}), rpc: async () => ({}) }), null);
+  console.log("explorer holders: ok");
+}

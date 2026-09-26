@@ -23,7 +23,7 @@ import { makeRadar } from "./radar.mjs";
 import { makeV4Hooks, isV4, hookLine } from "./v4hooks.mjs";
 import { makeSim, classify, planAdvice } from "./sim.mjs";
 import { makeStocks, indexRegistry } from "./stocks.mjs";
-import { makeExplorer } from "./explorer.mjs";
+import { makeExplorer, blockscoutHolders } from "./explorer.mjs";
 import { makeApprovals } from "./approvals.mjs";
 import { makeTxSim, describeTxSim, parseTx } from "./txsim.mjs";
 import { TALK_INTENT, chainNamedIn, chainTheyMean, isPaymentUnit, looksLikeCorrection } from "./talk.mjs";
@@ -201,6 +201,7 @@ async function quickCheck(address, opts = {}) {
   QC ??= makeQuickCheck({
     http, rpcFor, now: CLOCK, hookMaxPoints: () => V4CFG.maxPoints ?? 50, infraHolders, v4HookRead, simRead, exitRead, provenanceRead,
     onForkSkipped: (a, info) => FORK_SKIPPED.set(a, info), stockToken,
+    holdersFallback: async (a, chain) => (await blockscoutHolders(a, chain, { http, rpc: rpcFor(chain) }).catch(() => null))?.holders ?? null,
   });
   return QC(address, opts);
 }
@@ -2342,11 +2343,12 @@ async function main() {
     const a = String(args[1] ?? "").toLowerCase();
     if (!/^0x[0-9a-f]{40}$/.test(a)) return console.log("usage: holders <token address>");
     const g = (await http(`https://api.gopluslabs.io/api/v1/token_security/4663?contract_addresses=${a}`)).json?.result?.[a];
-    const hs = g?.holders ?? [];
-    if (!hs.length) return console.log(`no holder list for ${a} from goplus right now.`);
+    let hs = g?.holders ?? [], from = "goplus snapshot";
+    if (!hs.length) { hs = (await blockscoutHolders(a, "robinhood", { http, rpc: rpcFor("robinhood") }).catch(() => null))?.holders ?? []; from = "blockscout list, share of on-chain supply (goplus had none)"; }
+    if (!hs.length) return console.log(`no holder list for ${a} from goplus or blockscout right now.`);
     const rpc = archiveUrl() ?? CFG.token?.rpc;
-    const poolish = [a, ...(g.dex ?? []).flatMap((d) => [d.pool_manager, d.pair])].filter(Boolean).map((x) => x.toLowerCase());
-    console.log(`top ${hs.length} holders of $${g.token_symbol ?? "?"} (${g.holder_count ?? "?"} holders), goplus snapshot:`);
+    const poolish = [a, ...(g?.dex ?? []).flatMap((d) => [d.pool_manager, d.pair])].filter(Boolean).map((x) => x.toLowerCase());
+    console.log(`top ${Math.min(10, hs.length)} holders of $${g?.token_symbol ?? "?"} (${g?.holder_count ?? "?"} holders), ${from}:`);
     const leftOut = [];
     for (const h of hs.slice(0, 10)) {
       const addr = String(h.address).toLowerCase();
