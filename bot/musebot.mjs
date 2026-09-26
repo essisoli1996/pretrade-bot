@@ -2554,7 +2554,7 @@ async function main() {
     // Post as pretrade.  node bot/musebot.mjs say <channel> [--reply <postId>] [--expect <hash>] [--force] [--dry] "<text>"
     const ch = args[1], ri = args.indexOf("--reply"), replyTo = ri >= 0 ? Number(args[ri + 1]) : null;
     const text = flagArgs(2).join(" ").trim();
-    if (!ch || !text) return console.log(`usage: say <channel> [--reply <postId>] "<text>"`);
+    if (!ch || !text) return console.log(`usage: say <channel> [--reply <postId>] --expect <hash> "<text>"   (hash: node bot/musebot.mjs hash "<text>")`);
     await deskPost(ch, replyTo, text, { force: args.includes("--force"), dry: args.includes("--dry"), expect: expectArg() });
     return;
   }
