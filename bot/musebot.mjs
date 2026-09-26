@@ -37,7 +37,7 @@ import { makeQuickCheck } from "./core/check.mjs";
 import { httpFixture } from "./core/httpfixture.mjs";
 import { makeProvenance, provenanceLines, tickerReport, reuseAlert } from "./provenance.mjs";
 import { makeVoice, tokenRead, lookupLead, digestText, launchAlertText, acceptOpener, OPENER_SYSTEM } from "./voice.mjs";
-import { findSecrets, mnemonicRanges, scanInstructions, isPublicUrl, PHISH_SYSTEM, phishFacts, parsePhishVerdict } from "./sentinel.mjs";
+import { findSecrets, ownSecretIn, mnemonicRanges, scanInstructions, isPublicUrl, PHISH_SYSTEM, phishFacts, parsePhishVerdict } from "./sentinel.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const CFG = JSON.parse(readFileSync(join(HERE, "config.json"), "utf8"));
@@ -75,7 +75,16 @@ function privateKeyFrom(identity) {
   return createPrivateKey({ key: { kty: "OKP", crv: "Ed25519", x: identity.public_key, d: identity.secret }, format: "jwk" });
 }
 
+/** The exact secret values pretrade holds: never in anything it signs and sends. */
+const ownSecrets = (identity) => ({
+  "identity secret": identity?.secret, "NODEFLARE_KEY": process.env.NODEFLARE_KEY, "ETHERSCAN_KEY": process.env.ETHERSCAN_KEY,
+  "BANKR_API_KEY": process.env.BANKR_API_KEY, "BANKR_LLM_KEY": process.env.BANKR_LLM_KEY, "OPENROUTER_KEY": process.env.OPENROUTER_KEY,
+});
+
 function signRequest(endpoint, identity, fields) {
+  // last line of defence, below every feature and the desk: a signed request never carries pretrade's own secrets
+  const leak = ownSecretIn(Object.values(fields).map((v) => (v == null ? "" : String(v))).join("\n"), ownSecrets(identity));
+  if (leak) throw new Error(`refused to sign: the outgoing ${endpoint} contains the ${leak} (in some form)`);
   const timestamp = String(Date.now());
   const nonce = randomBytes(18).toString("base64url");
   const lines = ["musebook-v1", endpoint, timestamp, nonce, identity.muse_id];
@@ -102,7 +111,8 @@ function signedQuery(endpoint, identity, trailingNewline) {
 // be held back per feature: in "shadow" mode it is written to shadow.log and reported as posted, exactly as if it went out.
 let CONTROL = { paused: false, readOnly: false, features: {} }, FEATURE = null, DESK_POSTING = false;
 const CONTROL_SRC = makeControl({
-  fetchText: async () => { const r = await fetch(process.env.CONTROL_URL || "https://raw.githubusercontent.com/essisoli1996/pretrade-bot/main/bot/control.json", { signal: AbortSignal.timeout(8000) }); return r.ok ? r.text() : null; },
+  // PRETRADE_CONTROL=local: the repo's own copy only (offline tests; no 8-second wait for GitHub)
+  fetchText: async () => { if (process.env.PRETRADE_CONTROL === "local") return null; const r = await fetch(process.env.CONTROL_URL || "https://raw.githubusercontent.com/essisoli1996/pretrade-bot/main/bot/control.json", { signal: AbortSignal.timeout(8000) }); return r.ok ? r.text() : null; },
   readLocal: async () => readFileSync(join(HERE, "control.json"), "utf8"),
 });
 function shadowed(url, body) {

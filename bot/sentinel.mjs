@@ -220,3 +220,18 @@ export function parsePhishVerdict(text) {
   const reason = String(t.match(/REASON\W{0,4}([^\n]+)/i)?.[1] ?? "").replace(/https?:\/\/\S+/g, "").replace(/@(\w)/g, "$1").replace(/\s+/g, " ").trim().slice(0, 160);
   return { verdict: m[1].toUpperCase().replace(" ", "_"), reason };
 }
+
+/** pretrade's own secrets (identity secret, API keys) found in outgoing text, in plain form or in a common encoding
+ *  (base64, base64url, hex, URL-encoded, any letter case). Returns the kind that matched, or null. The generic
+ *  detectors above catch the shapes of keys; this catches the exact values, however they are dressed. */
+export function ownSecretIn(text, secrets) {
+  const t = String(text ?? ""), low = t.toLowerCase();
+  const compact = low.replace(/[\s._\-:'"`,;|/\\]+/g, ""); // a value split up with spaces, dots or dashes
+  for (const [kind, raw] of Object.entries(secrets ?? {})) {
+    const v = String(raw ?? "");
+    if (v.length < 8) continue;
+    const forms = [v, encodeURIComponent(v), Buffer.from(v).toString("base64").replace(/=+$/, ""), Buffer.from(v).toString("base64url"), Buffer.from(v).toString("hex"), [...v].reverse().join("")];
+    if (forms.some((f) => low.includes(f.toLowerCase()) || compact.includes(f.toLowerCase().replace(/[\s._\-:'"`,;|/\\]+/g, "")))) return kind;
+  }
+  return null;
+}
