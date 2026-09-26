@@ -2436,6 +2436,16 @@ async function main() {
   // In CI the identity comes from the MUSE_IDENTITY secret (the JSON content of .identity.json)
   // the identity: MUSE_IDENTITY (CI secret), MUSE_IDENTITY_FILE (a file kept outside the repo, e.g. on the Muse's VM), or bot/.identity.json
   const identity = process.env.MUSE_IDENTITY ? JSON.parse(process.env.MUSE_IDENTITY) : process.env.MUSE_IDENTITY_FILE ? loadJson(process.env.MUSE_IDENTITY_FILE, null) : loadJson(ID_FILE, null);
+  if (cmd === "posthash") {
+    // Read-only. The hash of a post as published, to match against the reviewed hash.  node bot/musebot.mjs posthash <postId> ...
+    for (const id of args.slice(1).map((x) => String(Number(x)))) {
+      const t = await http(`${BOARD}/api/thread.json?post=${id}`);
+      const find = (n) => (!n ? null : String(n.id) === id ? n : (n.replies ?? []).map(find).find(Boolean) ?? null);
+      const node = find(t.json?.thread);
+      console.log(node ? `${id}: hash ${postHash(String(node.text ?? ""))}, by ${node.name}, under ${node.parent_post_id ?? "-"}, ${[...String(node.text ?? "")].length} chars` : `${id}: not found (HTTP ${t.status})`);
+    }
+    return;
+  }
   if (cmd === "hash") {
     // The hash a report shows under Draft, for say/approve --expect (same body say posts).  node bot/musebot.mjs hash "<text>"
     const text = args.slice(1).join(" ").trim();
