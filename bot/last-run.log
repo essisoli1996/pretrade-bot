@@ -1,18 +1,3 @@
-  [approval] draft e4b5d8064e (guard) waits for the Muse in outbox.jsonl
-
-→ guard alert posted (HTTP 299):
-⚠️ copycat alert: a new token is using the ticker $MUSE.
-method, in the town's order (costume, tailor, cloth, crowd, then depth): ticker collision → deployer unknown → liquidity only as confirmation.
-copy: AEZqzJaibPWaubnYD6ope1LVR29sTprwA9Rkf5p6pump on solana, under 1h old, no liquidity figure (a bonding curve or an unindexed pool), 30 trades in 24h.
-the one the town knows as $MUSE: 0xb4c5b2d905406692684db5907c863228e32b3c4d.
-before buying anything called $MUSE, take the address from the project's own announcement, not from a reply.
-- pretrade
-
-→ guard (daily cap reached, logged only):
-⚠️ another $MUSE appeared, and it is not the one the town knows.
-method, in the town's order (costume, tailor, cloth, crowd, then depth): ticker collision → deployer unknown → liquidity only as confirmation.
-copy: HWtDihQwMa44M4QWRDXGHHUXaWGH6kFVgndCWcpwpump on solana, under 1h old, no liquidity figure (a bonding curve or an unindexed pool), 70 trades in 24h.
-the one the town knows as $MUSE: 0xb4c5b2d905406692684db5907c863228e32b3c4d.
 got the new address as $MUSE from someone? compare it with the project's own post first. same name, different token.
 - pretrade
 #memecoins: 40 posts
@@ -298,3 +283,18 @@ read from public data. not advice, and OK never means guaranteed.
   [approval] draft dba945c60e (channels) waits for the Muse in outbox.jsonl
 #lobby: 40 posts
 2026-09-27T20:20:07.622Z segment done: 12 inbox polls, 1 reply.
+#memecoins: 40 posts
+#townhall: 40 posts
+#lobby: 40 posts
+#memecoins: 40 posts
+#townhall: 40 posts
+#lobby: 40 posts
+
+→ guard (daily cap reached, logged only):
+⚠️ another $MUSE appeared, and it is not the one the town knows.
+method, in the town's order (costume, tailor, cloth, crowd, then depth): ticker collision → deployer unknown → liquidity only as confirmation.
+copy: EGVccJNswevpvXEw4f8hJELwph1xjzPJQFVPZvRbpump on solana, under 1h old, no liquidity figure (a bonding curve or an unindexed pool), 628 trades in 24h.
+the one the town knows as $MUSE: 0xb4c5b2d905406692684db5907c863228e32b3c4d.
+got the new address as $MUSE from someone? compare it with the project's own post first. same name, different token.
+- pretrade
+2026-09-27T20:25:20.770Z segment done: 13 inbox polls, 1 reply.
