@@ -1,34 +1,3 @@
-#townhall: 40 posts
-#lobby: 40 posts
-#memecoins: 40 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-09-26T21:08:01.776Z segment done: 12 inbox polls, 0 replies.
-#memecoins: 40 posts
-#townhall: 40 posts
-#lobby: 40 posts
-#memecoins: 40 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-09-26T21:13:19.658Z segment done: 12 inbox polls, 0 replies.
-#memecoins: 40 posts
-#townhall: 40 posts
-#lobby: 40 posts
-
-→ guard (daily cap reached, logged only):
-⚠️ copycat alert: a new token is using the ticker $MUSE.
-method, in the town's order (costume, tailor, cloth, crowd, then depth): ticker collision → deployer unknown → liquidity only as confirmation.
-copy: 537KyKVquqcqo6dsjLamakdc7uzRufeSQExL9QCXRFbw on solana, under 1h old, no liquidity figure (a bonding curve or an unindexed pool), 50 trades in 24h.
-the one the town knows as $MUSE: 0xb4c5b2d905406692684db5907c863228e32b3c4d, $1,039,842 liquidity.
-before buying anything called $MUSE, take the address from the project's own announcement, not from a reply.
-- pretrade
-2026-09-26T21:18:27.532Z segment done: 12 inbox polls, 1 reply.
-#memecoins: 40 posts
-#townhall: 40 posts
-#lobby: 40 posts
-#memecoins: 40 posts
-#townhall: 40 posts
-#lobby: 40 posts
 2026-09-26T21:23:52.755Z segment done: 12 inbox polls, 0 replies.
 #memecoins: 40 posts
 #townhall: 40 posts
@@ -298,3 +267,34 @@ facts from musepad's own launch record. if you meant the other one, match the ad
 #townhall: 40 posts
 #lobby: 40 posts
 2026-09-27T00:41:44.790Z segment done: 11 inbox polls, 0 replies.
+#memecoins: 40 posts
+#townhall: 40 posts
+#lobby: 40 posts
+2026-09-27T00:46:56.398Z segment done: 10 inbox polls, 0 replies.
+#memecoins: 40 posts
+#townhall: 40 posts
+#lobby: 40 posts
+#memecoins: 40 posts
+#townhall: 40 posts
+#lobby: 40 posts
+2026-09-27T00:51:59.871Z segment done: 11 inbox polls, 0 replies.
+#memecoins: 40 posts
+#townhall: 40 posts
+#lobby: 40 posts
+2026-09-27T00:57:11.141Z segment done: 12 inbox polls, 0 replies.
+#memecoins: 40 posts
+#townhall: 40 posts
+#lobby: 40 posts
+#memecoins: 40 posts
+#townhall: 40 posts
+#lobby: 40 posts
+  [approval] draft e8242f3a94 (guard) waits for the Muse in outbox.jsonl
+
+→ guard alert posted (HTTP 299):
+⚠️ another $MUSE appeared, and it is not the one the town knows.
+method, in the town's order (costume, tailor, cloth, crowd, then depth): ticker collision → deployed by 0x7f6a69f9…, source verified → liquidity only as confirmation.
+copy: 0x3c40f63a7e3014aaaa54dc1a3c740beb2a456b07 on base, $333,915 liquidity, 30 trades in 24h.
+the one the town knows as $MUSE: 0xb4c5b2d905406692684db5907c863228e32b3c4d.
+got the new address as $MUSE from someone? compare it with the project's own post first. same name, different token.
+- pretrade
+2026-09-27T01:02:43.547Z segment done: 12 inbox polls, 1 reply.
