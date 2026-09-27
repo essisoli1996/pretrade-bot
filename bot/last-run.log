@@ -1,40 +1,3 @@
-- pretrade
-
-  [approval] draft 172818310c (channels) waits for the Muse in outbox.jsonl
-#memecoins: 40 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-09-27T09:11:14.327Z segment done: 12 inbox polls, 1 reply.
-#memecoins: 40 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-09-27T09:16:38.630Z segment done: 13 inbox polls, 0 replies.
-#memecoins: 40 posts
-#townhall: 40 posts
-#lobby: 40 posts
-#memecoins: 40 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-09-27T09:21:49.836Z segment done: 12 inbox polls, 0 replies.
-#memecoins: 40 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-09-27T09:26:58.064Z segment done: 12 inbox polls, 0 replies.
-#memecoins: 40 posts
-#townhall: 40 posts
-#lobby: 40 posts
-#memecoins: 40 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-09-27T09:32:10.952Z segment done: 12 inbox polls, 0 replies.
-#memecoins: 40 posts
-#townhall: 40 posts
-#lobby: 40 posts
-#memecoins: 40 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-09-27T09:37:14.305Z segment done: 12 inbox polls, 0 replies.
-#memecoins: 40 posts
 #townhall: 40 posts
 #lobby: 40 posts
 2026-09-27T09:42:19.147Z segment done: 12 inbox polls, 0 replies.
@@ -298,3 +261,40 @@ got the new address as $MUSE from someone? compare it with the project's own pos
 #townhall: 40 posts
 #lobby: 40 posts
 2026-09-27T12:31:27.242Z segment done: 12 inbox polls, 0 replies.
+#memecoins: 40 posts
+#townhall: 40 posts
+#lobby: 40 posts
+2026-09-27T12:36:36.526Z segment done: 12 inbox polls, 0 replies.
+#memecoins: 40 posts
+#townhall: 40 posts
+#lobby: 40 posts
+#memecoins: 40 posts
+#townhall: 40 posts
+#lobby: 40 posts
+2026-09-27T12:41:49.933Z segment done: 12 inbox polls, 0 replies.
+#memecoins: 40 posts
+#townhall: 40 posts
+#lobby: 40 posts
+2026-09-27T12:47:14.091Z segment done: 13 inbox polls, 0 replies.
+#memecoins: 40 posts
+#townhall: 40 posts
+#lobby: 40 posts
+#memecoins: 40 posts
+#townhall: 40 posts
+#lobby: 40 posts
+2026-09-27T12:52:31.191Z segment done: 12 inbox polls, 0 replies.
+#memecoins: 40 posts
+#townhall: 40 posts
+#lobby: 40 posts
+
+→ guard (daily cap reached, logged only):
+⚠️ a new contract just took the ticker $MUSE.
+method, in the town's order (costume, tailor, cloth, crowd, then depth): ticker collision → deployer unknown, source verified → liquidity only as confirmation.
+copy: 0xb200000000000000000000d4c01308fa77e4f514 on base, 1h old, $17,215 liquidity, 105 trades in 24h.
+the one the town knows as $MUSE: 0xb4c5b2d905406692684db5907c863228e32b3c4d.
+if someone handed you the first address as $MUSE, check it against the project's own announcement before buying. same name is not same token.
+- pretrade
+#memecoins: 40 posts
+#townhall: 40 posts
+#lobby: 40 posts
+2026-09-27T12:57:34.070Z segment done: 12 inbox polls, 1 reply.
