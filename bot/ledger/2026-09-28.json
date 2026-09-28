@@ -1,0 +1,2622 @@
+{
+ "period": {
+  "from": "2026-09-21T23:07:42.270Z",
+  "to": "2026-09-28T23:07:42.270Z"
+ },
+ "receipts": [
+  {
+   "t": 1790031030491,
+   "kind": "copycat",
+   "ticker": "MUSEBOOK",
+   "address": "APrLQfWx16M9h3qPVTnWkNPESYBoc7du3KFWCE6Npump",
+   "chain": "solana",
+   "postId": 47879
+  },
+  {
+   "t": 1790032863379,
+   "kind": "copycat",
+   "ticker": "MUSEBOOK",
+   "address": "7P6VL1cpLZM6w1jGPHmfwxkgDAf2CPnh8oP6Q3sJXXWi",
+   "chain": "solana",
+   "postId": 48079
+  },
+  {
+   "t": 1790034191511,
+   "kind": "copycat",
+   "ticker": "MUSEBOOK",
+   "address": "0xead30952e18a669f7d8e60d2512502c2c851901f",
+   "chain": "ethereum",
+   "postId": 48278
+  },
+  {
+   "t": 1790034192437,
+   "kind": "copycat",
+   "ticker": "MUSEBOOK",
+   "address": "Ek3Jr8R1HNca5hTh1Qb2bYjewpYrsYdnhrNMDfZVcPuM",
+   "chain": "solana",
+   "postId": 48279
+  },
+  {
+   "t": 1790040540768,
+   "kind": "copycat",
+   "ticker": "MUSEPAD",
+   "address": "0x051348f0e213b51df4f03e16f3662eddb2597777",
+   "chain": "robinhood"
+  },
+  {
+   "t": 1790049820784,
+   "kind": "copycat",
+   "ticker": "MUSEBOOK",
+   "address": "0xe4b967105dc54b7d39f0335c5be5a1a245272ce6",
+   "chain": "robinhood"
+  },
+  {
+   "t": 1790066584844,
+   "kind": "copycat",
+   "ticker": "MUSEBOOK",
+   "address": "0x69a65982f9a4ff72f5cb617e363de80c030a388e",
+   "chain": "robinhood"
+  },
+  {
+   "t": 1790067177214,
+   "kind": "copycat",
+   "ticker": "MUSEBOOK",
+   "address": "0x629f2b4a2469e0972924ec37658c887d01f51caf",
+   "chain": "robinhood"
+  },
+  {
+   "t": 1790073101855,
+   "kind": "copycat",
+   "ticker": "MUSEBOOK",
+   "address": "0x17e900c2a7a16695431469a40ea060d508edd6d2",
+   "chain": "robinhood"
+  },
+  {
+   "t": 1790091029270,
+   "kind": "copycat",
+   "ticker": "MUSEBOOK",
+   "address": "0x2e871296976b96a96c6bada4a83048d1d3803f3a",
+   "chain": "robinhood"
+  },
+  {
+   "t": 1790092373971,
+   "kind": "copycat",
+   "ticker": "MUSEBOOK",
+   "address": "5fFVVvhSXMAeDWytT1ayVdbxxM15C1Q7QmojDzqDNj77",
+   "chain": "solana"
+  },
+  {
+   "t": 1790092374422,
+   "kind": "copycat",
+   "ticker": "MUSEBOOK",
+   "address": "0x09b8cc351f9f2810061c5597f179cf09d01df3e4",
+   "chain": "robinhood"
+  },
+  {
+   "t": 1790092570387,
+   "kind": "copycat",
+   "ticker": "MUSEBOOK",
+   "address": "D8fPQZo5F9pUANBT3QZWrmzPKEfMh9YSTu8kGbERNEGv",
+   "chain": "solana"
+  },
+  {
+   "t": 1790093356573,
+   "kind": "copycat",
+   "ticker": "MUSEBOOK",
+   "address": "GUYAPivbyxBepUkEqmx5gdoqW6zVaDnRf2uAkqRspPQi",
+   "chain": "solana"
+  },
+  {
+   "t": 1790093750290,
+   "kind": "copycat",
+   "ticker": "MUSEBOOK",
+   "address": "GDaW36fpdXAqoLQGBicusNZ62rNGZ329jbh4vVxPjK3J",
+   "chain": "solana"
+  },
+  {
+   "t": 1790094535838,
+   "kind": "copycat",
+   "ticker": "MUSEBOOK",
+   "address": "GX24aapFa2mDrFUSC5xCGWpbce6tAw5ENkdqZJJjN8At",
+   "chain": "solana"
+  },
+  {
+   "t": 1790102376460,
+   "kind": "copycat",
+   "ticker": "MUSEBOOK",
+   "address": "0x657a9aae240c47469b44e41ef6b31d44552c9e85",
+   "chain": "robinhood"
+  },
+  {
+   "t": 1790110984901,
+   "kind": "copycat",
+   "ticker": "MUSEBOOK",
+   "address": "EwpJtbYyZv7jtB6VqsXyXGNDYRigjHSJrAPxpjep9vzh",
+   "chain": "solana"
+  },
+  {
+   "t": 1790111767716,
+   "kind": "copycat",
+   "ticker": "MUSEBOOK",
+   "address": "2HZ5UDJvsx2RRiZzk7g5T8NsHN71XX8gLbhpj5wDpump",
+   "chain": "solana"
+  },
+  {
+   "t": 1790114502702,
+   "kind": "copycat",
+   "ticker": "MUSEPAD",
+   "address": "0x73449c9676bca3c909ad28da086368e6629c1a74",
+   "chain": "robinhood"
+  },
+  {
+   "t": 1790147501783,
+   "kind": "copycat",
+   "ticker": "MUSEBOOK",
+   "address": "0x2f7b5eadb0f537e32683b0cdfd6c52f9344e5820",
+   "chain": "robinhood",
+   "postId": 58270
+  },
+  {
+   "t": 1790147683844,
+   "kind": "town token alert",
+   "ticker": "MUSEPAD",
+   "postId": 58289
+  },
+  {
+   "t": 1790148519063,
+   "kind": "ticker collision warned",
+   "ticker": "SQUARE",
+   "address": "0x2e3496a9894d9120cc901e51cf74bae257077777",
+   "postId": 58344
+  },
+  {
+   "t": 1790172281859,
+   "kind": "town token alert",
+   "ticker": "MUSEPAD",
+   "postId": 59883
+  },
+  {
+   "t": 1790184023423,
+   "kind": "copycat",
+   "ticker": "MUSEBOOK",
+   "address": "Dw7bunzaQFzzTLJkQcnaSYxoqnMhLy8MKdrrL3n6po5C",
+   "chain": "solana"
+  },
+  {
+   "t": 1790187012850,
+   "kind": "copycat",
+   "ticker": "MUSEBOOK",
+   "address": "0x7b3cd054d99dd4ec4574e6de0df5d9b256717777",
+   "chain": "robinhood"
+  },
+  {
+   "t": 1790195248910,
+   "kind": "copycat",
+   "ticker": "MUSEBOOK",
+   "address": "GhT5S6zMsubnUDKJBCy7WaXwbQybvGppL16kojRY2KgC",
+   "chain": "solana"
+  },
+  {
+   "t": 1790195995128,
+   "kind": "copycat",
+   "ticker": "MUSEBOOK",
+   "address": "uUfY6cMrohxaE1FpX7jnqrPpLAGGBmtxcGADj4LA1tq",
+   "chain": "solana"
+  },
+  {
+   "t": 1790197114437,
+   "kind": "copycat",
+   "ticker": "MUSEBOOK",
+   "address": "5mnBU3fGiogLZNvmcm2sTNtjVkSGLreRtveFdRmY5Jcb",
+   "chain": "solana"
+  },
+  {
+   "t": 1790197491922,
+   "kind": "copycat",
+   "ticker": "MUSEBOOK",
+   "address": "Ctj417MViWQajMKJpvrkUBPiyVvkaokktnsZxTXoMfu5",
+   "chain": "solana"
+  },
+  {
+   "t": 1790204403030,
+   "kind": "copycat",
+   "ticker": "MUSEBOOK",
+   "address": "0x035753c18ae1e7fcc5ff3d25e720e3abe4e95ba3",
+   "chain": "robinhood"
+  },
+  {
+   "t": 1790204403202,
+   "kind": "copycat",
+   "ticker": "MUSEBOOK",
+   "address": "0xce6a9c3816001aefeb8f531fb81f665e0f26104a",
+   "chain": "arc"
+  },
+  {
+   "t": 1790217539793,
+   "kind": "copycat",
+   "ticker": "MUSEBOOK",
+   "address": "9oF2RKyZqwXgeKxdjar7rbaXwBu5XeSUjhPpzD6cpump",
+   "chain": "solana"
+  },
+  {
+   "t": 1790224771741,
+   "kind": "copycat",
+   "ticker": "MUSEBOOK",
+   "address": "DK84djZFz9iRUSJzMpCnNLMzD4RhJoVL5LarRZyN4Nwz",
+   "chain": "solana"
+  },
+  {
+   "t": 1790227782954,
+   "kind": "copycat",
+   "ticker": "MUSEPAD",
+   "address": "0x85722b0c29f7343b404bda388169834028d6d011",
+   "chain": "robinhood"
+  },
+  {
+   "t": 1790240695777,
+   "kind": "copycat",
+   "ticker": "MUSEBOOK",
+   "address": "0xb0aab5d5575127997cd44c5eeb04048e6f93e239",
+   "chain": "robinhood",
+   "postId": 66424
+  },
+  {
+   "t": 1790242785778,
+   "kind": "town token alert",
+   "ticker": "MUSEPAD",
+   "postId": 66646
+  },
+  {
+   "t": 1790245367454,
+   "kind": "copycat",
+   "ticker": "MUSEPAD",
+   "address": "0x1e051d70c776f350ad38844242e1aa669ab66be2",
+   "chain": "robinhood",
+   "postId": 66934
+  },
+  {
+   "t": 1790245741377,
+   "kind": "copycat",
+   "ticker": "MUSEPAD",
+   "address": "0xb2b292f5fe2419017b6ec869e9bfb242b5266be2",
+   "chain": "robinhood"
+  },
+  {
+   "t": 1790246309999,
+   "kind": "copycat",
+   "ticker": "MUSEPAD",
+   "address": "0x85f004e058fddaf2c9f716b9b85db190d16ac513",
+   "chain": "robinhood"
+  },
+  {
+   "t": 1790246875659,
+   "kind": "copycat",
+   "ticker": "MUSEBOOK",
+   "address": "0x17518dc7cf35289125cbe8ebf4a8639e37f80eb9",
+   "chain": "robinhood"
+  },
+  {
+   "t": 1790248586593,
+   "kind": "copycat",
+   "ticker": "MUSEBOOK",
+   "address": "0x39cb5bdb9a9f3f1504153415649c0af7fe7c5f60",
+   "chain": "robinhood"
+  },
+  {
+   "t": 1790248789218,
+   "kind": "copycat",
+   "ticker": "MUSEBOOK",
+   "address": "0xe459da46652753d50b4163aff9280540d7075226",
+   "chain": "robinhood"
+  },
+  {
+   "t": 1790253050093,
+   "kind": "copycat",
+   "ticker": "MUSEPAD",
+   "address": "0x27166a4b16b3e4fcc7c3d054478a972820df01e1",
+   "chain": "robinhood"
+  },
+  {
+   "t": 1790253624237,
+   "kind": "copycat",
+   "ticker": "MUSEPAD",
+   "address": "0x18dc2ddc2f212b3d2e1ffa51f471568d9ecc2343",
+   "chain": "robinhood"
+  },
+  {
+   "t": 1790255336720,
+   "kind": "copycat",
+   "ticker": "MUSEPAD",
+   "address": "0x4a47dfb6256baa69b98c6aaaac2d41369f336e21",
+   "chain": "robinhood"
+  },
+  {
+   "t": 1790255518943,
+   "kind": "copycat",
+   "ticker": "MUSEPAD",
+   "address": "0x18de1cdaefbaa4961b2d0961e2017157790b7777",
+   "chain": "robinhood"
+  },
+  {
+   "t": 1790255918284,
+   "kind": "copycat",
+   "ticker": "MUSEPAD",
+   "address": "0xd012bbe5b5c13f3823efd1191e80cf213fe36015",
+   "chain": "robinhood"
+  },
+  {
+   "t": 1790258061896,
+   "kind": "copycat",
+   "ticker": "MUSEBOOK",
+   "address": "69V75wpmgxgA8WJMAUyGt9DsUCHRAERL9Ab7iaYvzjbX",
+   "chain": "solana"
+  },
+  {
+   "t": 1790259457479,
+   "kind": "copycat",
+   "ticker": "MUSEPAD",
+   "address": "0x5233b89ea4baae8339fcc239f8a8b2448dda6f9f",
+   "chain": "robinhood",
+   "postId": 68382
+  },
+  {
+   "t": 1790260030434,
+   "kind": "copycat",
+   "ticker": "MUSEPAD",
+   "address": "0x261731d279e00b5f7b03739b2cfe376c09641f6d",
+   "chain": "robinhood"
+  },
+  {
+   "t": 1790262703783,
+   "kind": "copycat",
+   "ticker": "MUSEBOOK",
+   "address": "0xfa705e3dbfea930a3729a21665aa22c9529a5ccf",
+   "chain": "robinhood"
+  },
+  {
+   "t": 1790279366517,
+   "kind": "ticker reuse",
+   "ticker": "ROCKY",
+   "address": "0x5df1cff7912b8520572a18be9943a7175b849204",
+   "postId": 70967
+  },
+  {
+   "t": 1790279759803,
+   "kind": "copycat",
+   "ticker": "MUSEBOOK",
+   "address": "KtPzKPgMhAbCkFV6FedHsTnFjvLWNCerSGX4NxZw2KT",
+   "chain": "solana"
+  },
+  {
+   "t": 1790295608666,
+   "kind": "copycat",
+   "ticker": "MUSEPAD",
+   "address": "BdAysajD3ADrPne95Lh3ernXzpYUcm1iY6EXNyaaa6Ta",
+   "chain": "solana"
+  },
+  {
+   "t": 1790295608993,
+   "kind": "copycat",
+   "ticker": "MUSEPAD",
+   "address": "0x384d9cd9241d54b15285e1ba5a1adb877043ca06",
+   "chain": "arc"
+  },
+  {
+   "t": 1790295609518,
+   "kind": "copycat",
+   "ticker": "MUSEPAD",
+   "address": "3PcHi48ANJ3UFtRunaWYj3LgEPKuRvgx7M2d2Yonpump",
+   "chain": "solana"
+  },
+  {
+   "t": 1790301026700,
+   "kind": "ticker reuse",
+   "ticker": "WADDLE",
+   "address": "0xecd61c4d79194c5868b35bed878c6c6a050f961f",
+   "postId": 72873
+  },
+  {
+   "t": 1790305335374,
+   "kind": "copycat",
+   "ticker": "MUSEBOOK",
+   "address": "0x79e857cbbd2425f3a7487082bfa86b1a3711c759",
+   "chain": "robinhood"
+  },
+  {
+   "t": 1790308260418,
+   "kind": "copycat",
+   "ticker": "MUSEBOOK",
+   "address": "0xf48e9e2e51c1cc02e73ae83a802f0d929cc10e61",
+   "chain": "base"
+  },
+  {
+   "t": 1790318657619,
+   "kind": "copycat",
+   "ticker": "MUSEBOOK",
+   "address": "0x402f6a53f6b9aeaca39667972604eff4bd67fee1",
+   "chain": "robinhood"
+  },
+  {
+   "t": 1790347615936,
+   "kind": "leakWatch",
+   "ticker": "-",
+   "postId": 77077
+  },
+  {
+   "t": 1790349537173,
+   "kind": "town token alert",
+   "ticker": "MUSEPAD",
+   "postId": null
+  },
+  {
+   "t": 1790379551984,
+   "kind": "copycat",
+   "ticker": "MUSEBOOK",
+   "address": "77UNY9p9ztwTZ7Jy79o7TH7p7Cq7QKgwkPJ1JgXP5LVV",
+   "chain": "solana",
+   "postId": null
+  },
+  {
+   "t": 1790380173366,
+   "kind": "copycat",
+   "ticker": "MUSEPAD",
+   "address": "0xcf9383db106785e0fd5248810baa6a8db51b7732",
+   "chain": "arc",
+   "postId": null
+  },
+  {
+   "t": 1790380174119,
+   "kind": "copycat",
+   "ticker": "MUSEPAD",
+   "address": "9A1e67EvqTyddnStmwNwBGdPvisu36vFvny96TVirewa",
+   "chain": "solana",
+   "postId": null
+  },
+  {
+   "t": 1790390797414,
+   "kind": "copycat",
+   "ticker": "MUSEBOOK",
+   "address": "EQkbJ6EAX9NLhp11Xd8N98rxSpJMbGnAaz8VKPQTpump",
+   "chain": "solana"
+  },
+  {
+   "t": 1790390977037,
+   "kind": "copycat",
+   "ticker": "MUSEBOOK",
+   "address": "FJmj3EZm7kxhGLw6RrXyAM3o5N2mDGB5FsRKPtPKpump",
+   "chain": "solana"
+  },
+  {
+   "t": 1790392420959,
+   "kind": "copycat",
+   "ticker": "MUSEBOOK",
+   "address": "HfBqsDxoLN3RLU3Ko4y4dLweEVw13H3gcGBj3BWMpump",
+   "chain": "solana"
+  },
+  {
+   "t": 1790397302704,
+   "kind": "copycat",
+   "ticker": "MUSEPAD",
+   "address": "EMaUEq8fadKNuVMWrWRgQMox67694zrUPy3mtzJZpump",
+   "chain": "solana"
+  },
+  {
+   "t": 1790415790213,
+   "kind": "copycat",
+   "ticker": "MUSEBOOK",
+   "address": "6vE2neVJsRd4qJDLaJL8JHfMhEzKojQojx3DxnuSWdZ9",
+   "chain": "solana"
+  },
+  {
+   "t": 1790415790828,
+   "kind": "copycat",
+   "ticker": "MUSEBOOK",
+   "address": "8bRLYyyLWzJdwC3Yj6uWPPikjsgC3perkwfwUeBKF8yF",
+   "chain": "solana"
+  },
+  {
+   "t": 1790416578536,
+   "kind": "copycat",
+   "ticker": "MUSEPAD",
+   "address": "5FZaewoMFsPcDCU9Ldjrk43X8HYyseSmaXeu6bkmpump",
+   "chain": "solana"
+  },
+  {
+   "t": 1790419248215,
+   "kind": "copycat",
+   "ticker": "MUSEPAD",
+   "address": "GhrQxUCuUQvBgaaZxG7nCNgY9Lrk97vRQhxnkV2MAvLL",
+   "chain": "solana"
+  },
+  {
+   "t": 1790436587041,
+   "kind": "copycat",
+   "ticker": "MUSEBOOK",
+   "address": "0x37b70fb4269db8b3ae6ff15b548277b2d9aa7777",
+   "chain": "robinhood",
+   "postId": null
+  },
+  {
+   "t": 1790439041179,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "jngsNASkHoNC71x3G9tbhWh5WLRCwgZX6wFkEStawpb",
+   "chain": "solana"
+  },
+  {
+   "t": 1790439785750,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "CJ2D8cAApH4DNMZ6ktHjFurSgjxPWs3QB1SXbc3TCHQB",
+   "chain": "solana"
+  },
+  {
+   "t": 1790440921686,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "5yEGP1v2CY7d7gDiL5ryoSFojnMYH6HmA9ob6KuK2uDP",
+   "chain": "solana"
+  },
+  {
+   "t": 1790449801553,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "7oaDQ5BoWcNeQJKZVTwDYsecPboAXrjeAXuiRXBBpump",
+   "chain": "solana"
+  },
+  {
+   "t": 1790453000382,
+   "kind": "copycat",
+   "ticker": "MUSEBOOK",
+   "address": "4byKr3vdRQv8xSKmgCbmvEtY3KZNmy1fjyrM1XKdrnvA",
+   "chain": "solana"
+  },
+  {
+   "t": 1790454872119,
+   "kind": "copycat",
+   "ticker": "MUSEPAD",
+   "address": "5vURQQKvfg8GfbeQCdHjantFFTY12EqRb4tTZMZ3S7GK",
+   "chain": "solana"
+  },
+  {
+   "t": 1790455362094,
+   "kind": "ticker reuse",
+   "ticker": "HOODED",
+   "address": "0x3726a06d1500c12fcb5164c1ba5e35ac570f9d22",
+   "postId": 87218
+  },
+  {
+   "t": 1790457405419,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "537KyKVquqcqo6dsjLamakdc7uzRufeSQExL9QCXRFbw",
+   "chain": "solana"
+  },
+  {
+   "t": 1790460507862,
+   "kind": "copycat",
+   "ticker": "MUSEPAD",
+   "address": "EvrSCgBYtHQedmJD5mDAKrfg8aHkQEHPwQqBnRsPcb1q",
+   "chain": "solana"
+  },
+  {
+   "t": 1790464812481,
+   "kind": "copycat",
+   "ticker": "MUSEPAD",
+   "address": "AeCtyTWM9NgytWzm6wdS8jzdYkZRQqufm7N3vvX3nZhA",
+   "chain": "solana"
+  },
+  {
+   "t": 1790466383351,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "0xe5e93516307bfad98a3c06b5cd6c839599cd8b07",
+   "chain": "base",
+   "postId": null
+  },
+  {
+   "t": 1790467745434,
+   "kind": "ticker reuse",
+   "ticker": "MG",
+   "address": "0xcfff3090465d458a5fb718260dd401c399c8fa6b",
+   "postId": 88643
+  },
+  {
+   "t": 1790470906755,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "0x3c40f63a7e3014aaaa54dc1a3c740beb2a456b07",
+   "chain": "base",
+   "postId": null
+  },
+  {
+   "t": 1790471310174,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "2cjG5WZdu5vnFB59WJKG4RL8MiowR5kz3aKfd84fpump",
+   "chain": "solana",
+   "postId": null
+  },
+  {
+   "t": 1790471513534,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "4umm2tETuXvPop24A8qgBTVy11yYNaznfChBz4M7WWrh",
+   "chain": "solana"
+  },
+  {
+   "t": 1790474147491,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "3vzLFAa6z5qVZ9FkGFrtfNBDi8h2EQYPneHR3Ax1oeaV",
+   "chain": "solana"
+  },
+  {
+   "t": 1790474772804,
+   "kind": "ticker reuse",
+   "ticker": "PORCH",
+   "address": "0xb62810fa429ea5886b8d5ce4993494ead6240812",
+   "postId": 89528
+  },
+  {
+   "t": 1790474909490,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "7mEP5zXCaAj6qKt7xfCZAjrLKXZfESGFJQiXGZm4vNwA",
+   "chain": "solana"
+  },
+  {
+   "t": 1790475432843,
+   "kind": "ticker reuse",
+   "ticker": "MG",
+   "address": "0xe1c0df658a56cb6ffe1cab050152da5fce5cf890",
+   "postId": 89637
+  },
+  {
+   "t": 1790475900332,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "0xafdf997cae3d37f08df73326386f7a98b796db07",
+   "chain": "base"
+  },
+  {
+   "t": 1790476085729,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "0x4678d9e48cbfd39abc452711a45e4ac05cdc5b07",
+   "chain": "base"
+  },
+  {
+   "t": 1790479362577,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "0xc2db5a9834a902a027342a076cf7df42911c1b07",
+   "chain": "base"
+  },
+  {
+   "t": 1790479552151,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "0x54f13480905b34ba0c18aa6d442f84936e6f4b07",
+   "chain": "base"
+  },
+  {
+   "t": 1790481238796,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "AA5uXneY5LZwekC1WZRuCAH56BgkcZWp6kATCEiepump",
+   "chain": "solana"
+  },
+  {
+   "t": 1790484127360,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "0x7fc0d6626940bd2c01971a2df4c3c1d3beaa6b07",
+   "chain": "base"
+  },
+  {
+   "t": 1790486416501,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "0x76a111e6dfd34c55f751a5fa5dc4f7edfefc6dfe",
+   "chain": "robinhood"
+  },
+  {
+   "t": 1790497754938,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "4ft4xq6NNp5LpMLsm84YmgSVPyrpa1CRPBL9GzhUZKAV",
+   "chain": "solana"
+  },
+  {
+   "t": 1790499862972,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "Fc3THY6w1fPAMWeRgEcafzcsfzrxafUzvQt2QkmPbzk3",
+   "chain": "solana"
+  },
+  {
+   "t": 1790502756594,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "GJuzggBbbhV4BLc6zEmefctTbcqpxNZFxfBYdWBWpump",
+   "chain": "solana"
+  },
+  {
+   "t": 1790502757088,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "3GhbH1yfJMcipPE3LJJRUguLuM45N7uppLriFbutpump",
+   "chain": "solana"
+  },
+  {
+   "t": 1790502950309,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "0xc4696e8b97b8612ecdcfb73a75058997be9f3b07",
+   "chain": "base"
+  },
+  {
+   "t": 1790503710116,
+   "kind": "copycat",
+   "ticker": "MUSEBOOK",
+   "address": "0x5008340103479b286df27eae69b6dc67b9776b07",
+   "chain": "robinhood"
+  },
+  {
+   "t": 1790506970889,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "0x9597a86fc3d6c34d43ebe1f66ae51ce55dca4348",
+   "chain": "arc"
+  },
+  {
+   "t": 1790507358390,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "CpPZc81JRveeg9vSbiHbi1WoY6e4CnDWZpWkpnjfpump",
+   "chain": "solana"
+  },
+  {
+   "t": 1790508306358,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "9xJeRHiMycx7WAqcEcFBMomjEAqPuddzXBxdRCEapump",
+   "chain": "solana"
+  },
+  {
+   "t": 1790510191160,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "5esGXKdMqAPZYhyWnH1sda2eLGa9XJSth88cup9QF5cA",
+   "chain": "solana"
+  },
+  {
+   "t": 1790513646858,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "0xb200000000000000000000d4c01308fa77e4f514",
+   "chain": "base"
+  },
+  {
+   "t": 1790517316561,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "DRzaN9twzYofZr818k4nNvGyx1nf9dF99XSibPEFpump",
+   "chain": "solana"
+  },
+  {
+   "t": 1790518085876,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "0xa8eb5b2234ecd79ba9c933687f0814eb0fbc7777",
+   "chain": "robinhood"
+  },
+  {
+   "t": 1790519648623,
+   "kind": "copycat",
+   "ticker": "MUSEBOOK",
+   "address": "0xcd68c7f692e1d2b824898556ddab50ff5e71102f",
+   "chain": "robinhood"
+  },
+  {
+   "t": 1790525711803,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "AEZqzJaibPWaubnYD6ope1LVR29sTprwA9Rkf5p6pump",
+   "chain": "solana",
+   "postId": null
+  },
+  {
+   "t": 1790525712446,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "HWtDihQwMa44M4QWRDXGHHUXaWGH6kFVgndCWcpwpump",
+   "chain": "solana"
+  },
+  {
+   "t": 1790532236072,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "FMj5kH87Z5SQzB3UKa3Pjqm8gYGDVF4Z4ojvY8Q8pump",
+   "chain": "solana"
+  },
+  {
+   "t": 1790536638689,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "D6tnJ9PtQdrd9vuSqgk5UuHrSSpr9id2TcFGyDG6pump",
+   "chain": "solana"
+  },
+  {
+   "t": 1790540699182,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "EGVccJNswevpvXEw4f8hJELwph1xjzPJQFVPZvRbpump",
+   "chain": "solana"
+  },
+  {
+   "t": 1790547507042,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "oa7qb9qtxs8ESN28mRoWstUw11iSqaKoeCiFhXQpump",
+   "chain": "solana"
+  },
+  {
+   "t": 1790554641312,
+   "kind": "copycat",
+   "ticker": "MUSEPAD",
+   "address": "38cZUd5T3wbcgpmEfnN6M7BS8WX46GD4jPZHino6FLEX",
+   "chain": "solana",
+   "postId": null
+  },
+  {
+   "t": 1790555030968,
+   "kind": "copycat",
+   "ticker": "MUSEPAD",
+   "address": "39aaFLD5U1qR3srsf541mhrBC5dju7R2wfGuj4poFLEX",
+   "chain": "solana"
+  },
+  {
+   "t": 1790555031468,
+   "kind": "copycat",
+   "ticker": "MUSEPAD",
+   "address": "392my3NnoBu3b3dyWsMMbiv5ebavQ25idrn5BgagFLEX",
+   "chain": "solana"
+  },
+  {
+   "t": 1790555211630,
+   "kind": "copycat",
+   "ticker": "MUSEPAD",
+   "address": "3CZVP6szsPLgZaZTCR8N9fZL3Sz2p5NDogi7fXzpFLEX",
+   "chain": "solana"
+  },
+  {
+   "t": 1790561014351,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "0xb200000000000000000000bde811ea1918260201",
+   "chain": "base",
+   "postId": null
+  },
+  {
+   "t": 1790561207656,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "Cp2Z5mtDRjBdtkFThxMp2NP8R6uAkPmBWBkctPK9pump",
+   "chain": "solana",
+   "postId": null
+  },
+  {
+   "t": 1790568561090,
+   "kind": "copycat",
+   "ticker": "MUSEBOOK",
+   "address": "0xc772b948c5e592a69c4d55657c6959a675779df3",
+   "chain": "base"
+  },
+  {
+   "t": 1790570869527,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "0xb20000000000000000000041d1c9c56b47f538cd",
+   "chain": "base"
+  },
+  {
+   "t": 1790579778086,
+   "kind": "ticker reuse",
+   "ticker": "PRINCIPAL",
+   "address": "0x4d2932ae946a0be9b84c3e399917252e262df140",
+   "postId": 104280
+  },
+  {
+   "t": 1790605403826,
+   "kind": "copycat",
+   "ticker": "MUSEBOOK",
+   "address": "0x3ca842041e764674586a862aa2970ba4e9b6d9a9",
+   "chain": "arc"
+  },
+  {
+   "t": 1790614099391,
+   "kind": "copycat",
+   "ticker": "MUSEBOOK",
+   "address": "0xb4565703e342f57b589450833f89421981a17777",
+   "chain": "bsc",
+   "postId": null
+  },
+  {
+   "t": 1790617720247,
+   "kind": "copycat",
+   "ticker": "MUSEPAD",
+   "address": "2Fnm7NBEBpTMc3Ht8rrfxawT7KpMS44xYeV4CTnUFLEX",
+   "chain": "solana"
+  },
+  {
+   "t": 1790623417577,
+   "kind": "copycat",
+   "ticker": "MUSEBOOK",
+   "address": "0xb206cb7f74f78679d426ca08e08445f31bbc5b07",
+   "chain": "base"
+  }
+ ],
+ "verdicts": [
+  {
+   "token": "0x91a2dae9699f0b82540b5886b0d8759c22820ba3",
+   "chain": "robinhood",
+   "symbol": "musebook",
+   "t": 1789833777005,
+   "verdict": "OK",
+   "score": 0,
+   "liq": 3072428,
+   "price": 0.0001459,
+   "source": "channel",
+   "out": {
+    "t": 1789920687581,
+    "liqChg": -0.48,
+    "priceChg": -0.55,
+    "rugged": false
+   }
+  },
+  {
+   "token": "0xabf427223acfd46e26da5f2e4d49025b0308dba3",
+   "chain": "robinhood",
+   "symbol": "JENSEN",
+   "t": 1789856973919,
+   "verdict": "CAUTION",
+   "score": 50,
+   "liq": 8691,
+   "price": 1.022e-7,
+   "source": "channel",
+   "out": {
+    "t": 1789944223841,
+    "liqChg": -1,
+    "priceChg": null,
+    "rugged": true
+   }
+  },
+  {
+   "token": "0xff82e1d47d11dc51d55442eee9b0b44f599c5ba3",
+   "chain": "robinhood",
+   "symbol": "MOOSEBOOK",
+   "t": 1789862199356,
+   "verdict": "CAUTION",
+   "score": 25,
+   "liq": 8859,
+   "price": 1.042e-7,
+   "source": "channel",
+   "out": {
+    "t": 1789949654433,
+    "liqChg": -0.49,
+    "priceChg": -0.49,
+    "rugged": false
+   }
+  },
+  {
+   "token": "0x3247eb7f374c57ef267c12f4abc3f31c2a907777",
+   "chain": "bsc",
+   "symbol": "DEBTCATS",
+   "t": 1789868969560,
+   "verdict": "CAUTION",
+   "score": 20,
+   "liq": 21434,
+   "price": 0.00005662,
+   "source": "channel",
+   "out": {
+    "t": 1789956894654,
+    "liqChg": 0.38,
+    "priceChg": 0.88,
+    "rugged": false
+   }
+  },
+  {
+   "token": "0xe84549f2f157a0f405fa8b58b1d437a784597ba3",
+   "chain": "robinhood",
+   "symbol": "LEMON",
+   "t": 1789891583930,
+   "verdict": "CAUTION",
+   "score": 50,
+   "liq": 9520,
+   "price": 1.12e-7,
+   "source": "channel",
+   "out": {
+    "t": 1789978617199,
+    "liqChg": -1,
+    "priceChg": null,
+    "rugged": true
+   }
+  },
+  {
+   "token": "0x85a574f2ff0795685f58d1d7b0d4b51f148ac489",
+   "chain": "robinhood",
+   "symbol": "PRINTER",
+   "t": 1789917630828,
+   "verdict": "OK",
+   "score": 0,
+   "liq": 241133,
+   "price": 0.00375,
+   "source": "channel",
+   "out": {
+    "t": 1790004097285,
+    "liqChg": 0.27,
+    "priceChg": 0.48,
+    "rugged": false
+   }
+  },
+  {
+   "token": "0x6245e67affa44a23077f0ea7f981a8dc743a0c47",
+   "chain": "robinhood",
+   "symbol": "FRONG",
+   "t": 1789917631550,
+   "verdict": "OK",
+   "score": 0,
+   "liq": 901806,
+   "price": 0.005743,
+   "source": "channel",
+   "out": {
+    "t": 1790004097533,
+    "liqChg": 0.03,
+    "priceChg": 0.07,
+    "rugged": false
+   }
+  },
+  {
+   "token": "0x998f3244fbf39152f2128aed5f4e7926b9954c68",
+   "chain": "robinhood",
+   "symbol": "0XBOT",
+   "t": 1789917632415,
+   "verdict": "OK",
+   "score": 15,
+   "liq": 64071,
+   "price": 0.00007796,
+   "source": "channel",
+   "out": {
+    "t": 1790004098090,
+    "liqChg": -1,
+    "priceChg": 0.28,
+    "rugged": true
+   }
+  },
+  {
+   "token": "0xd17c81cb01d44cc6e822936e8f098960001b47d2",
+   "chain": "robinhood",
+   "symbol": "HOODCATS",
+   "t": 1789933620692,
+   "verdict": "OK",
+   "score": 0,
+   "liq": 33562,
+   "price": 0.0001677,
+   "source": "channel",
+   "out": {
+    "t": 1790021115737,
+    "liqChg": 0.65,
+    "priceChg": 1.63,
+    "rugged": false
+   }
+  },
+  {
+   "token": "27pbcjz2K3u1HKcoaigftSJNEga8w5zxDvmQNK46YnkP",
+   "chain": "solana",
+   "symbol": "ZCOIN",
+   "t": 1789953662950,
+   "verdict": "CAUTION",
+   "score": 30,
+   "liq": 17291,
+   "price": 0.00004387,
+   "source": "channel",
+   "out": {
+    "t": 1790041421570,
+    "liqChg": -0.77,
+    "priceChg": -0.91,
+    "rugged": true
+   }
+  },
+  {
+   "token": "A9AVBXj8C7aNdbTqrGfUTqGTmagA8cRxo4PrgC796cV5",
+   "chain": "solana",
+   "symbol": "ZEAL",
+   "t": 1789955541552,
+   "verdict": "CAUTION",
+   "score": 20,
+   "liq": 14032,
+   "price": 0.00003182,
+   "source": "channel",
+   "out": {
+    "t": 1790043233072,
+    "liqChg": -0.68,
+    "priceChg": -0.84,
+    "rugged": false
+   }
+  },
+  {
+   "token": "0xffdb767ffe602d5bc8c06952f67056f113a87777",
+   "chain": "bsc",
+   "symbol": "Olympus",
+   "t": 1789966254085,
+   "verdict": "CAUTION",
+   "score": 20,
+   "liq": 23026,
+   "price": 0.00005051,
+   "source": "channel",
+   "out": {
+    "t": 1790054617168,
+    "liqChg": -0.38,
+    "priceChg": -0.62,
+    "rugged": false
+   }
+  },
+  {
+   "token": "0xea835c017ef7b53439fe2f871cccdf0038206d3e",
+   "chain": "robinhood",
+   "symbol": "PERPS",
+   "t": 1790019702604,
+   "verdict": "CAUTION",
+   "score": 50,
+   "liq": 18722,
+   "price": 0.0000317,
+   "source": "channel",
+   "out": {
+    "t": 1790107269705,
+    "liqChg": -1,
+    "priceChg": null,
+    "rugged": true
+   }
+  },
+  {
+   "token": "0x93f79007c51c40d3b756c1c65e104017cdb52c97",
+   "chain": "robinhood",
+   "symbol": "GOB",
+   "t": 1790026799450,
+   "verdict": "CAUTION",
+   "score": 50,
+   "liq": 18877,
+   "price": 0.00001632,
+   "source": "channel",
+   "out": {
+    "t": 1790114502878,
+    "liqChg": -1,
+    "priceChg": null,
+    "rugged": true
+   }
+  },
+  {
+   "token": "APrLQfWx16M9h3qPVTnWkNPESYBoc7du3KFWCE6Npump",
+   "chain": "solana",
+   "symbol": "musebook",
+   "t": 1790031669883,
+   "verdict": "CAUTION",
+   "score": 35,
+   "liq": 0,
+   "price": 0.000003461,
+   "source": "channel",
+   "out": {
+    "t": 1790118114795,
+    "liqChg": -1,
+    "priceChg": -0.04,
+    "rugged": true
+   }
+  },
+  {
+   "token": "0x42f79e5be5da503bc00b5ad1627b25711d4b3530",
+   "chain": "robinhood",
+   "symbol": "HADES",
+   "t": 1790034187540,
+   "verdict": "OK",
+   "score": 15,
+   "liq": 31762,
+   "price": 0.000004553,
+   "source": "channel",
+   "out": {
+    "t": 1790121722964,
+    "liqChg": -1,
+    "priceChg": null,
+    "rugged": true
+   }
+  },
+  {
+   "token": "0x0e1ed29a6db079b3860f2a7401c6bd7273c4cba3",
+   "chain": "robinhood",
+   "symbol": "METAMUSE",
+   "t": 1790034558501,
+   "verdict": "CAUTION",
+   "score": 25,
+   "liq": 18679,
+   "price": 2.223e-7,
+   "source": "channel",
+   "out": {
+    "t": 1790121723891,
+    "liqChg": 0.59,
+    "priceChg": 0.58,
+    "rugged": false
+   }
+  },
+  {
+   "token": "0xead30952e18a669f7d8e60d2512502c2c851901f",
+   "chain": "ethereum",
+   "symbol": "MUSEBOOK",
+   "t": 1790034679018,
+   "verdict": "CAUTION",
+   "score": 30,
+   "liq": 9810855,
+   "price": 0.0001962,
+   "source": "conversation",
+   "out": {
+    "t": 1790121724413,
+    "liqChg": -0.01,
+    "priceChg": -0.01,
+    "rugged": false
+   }
+  },
+  {
+   "token": "0x84c1c2a67ef71f02d0a729cfb4af0fdc0568cba3",
+   "chain": "robinhood",
+   "symbol": "JOLLYBUTT",
+   "t": 1790037387165,
+   "verdict": "CAUTION",
+   "score": 25,
+   "liq": 10476,
+   "price": 1.047e-7,
+   "source": "channel",
+   "out": {
+    "t": 1790125355672,
+    "liqChg": 0.02,
+    "priceChg": 0.02,
+    "rugged": false
+   }
+  },
+  {
+   "token": "0x0472bb855155082f4e49261e0f4b6da860ecbd6c",
+   "chain": "robinhood",
+   "symbol": "RCAT",
+   "t": 1790041191594,
+   "verdict": "CAUTION",
+   "score": 25,
+   "liq": 9566,
+   "price": 0.008289,
+   "source": "channel",
+   "out": {
+    "t": 1790127996653,
+    "liqChg": -1,
+    "priceChg": null,
+    "rugged": true
+   }
+  },
+  {
+   "token": "0x0ebcdef4d366f10303ceb0af28362d0eeb484f5c",
+   "chain": "robinhood",
+   "symbol": "PACK",
+   "t": 1790048469593,
+   "verdict": "CAUTION",
+   "score": 50,
+   "liq": 20049,
+   "price": 0.00001865,
+   "source": "channel",
+   "out": {
+    "t": 1790135248522,
+    "liqChg": -1,
+    "priceChg": null,
+    "rugged": true
+   }
+  },
+  {
+   "token": "0x20d6c5cccbbe282e334e6c012a40528eed24eba3",
+   "chain": "robinhood",
+   "symbol": "PROOF",
+   "t": 1790050027487,
+   "verdict": "CAUTION",
+   "score": 25,
+   "liq": 9023,
+   "price": 1.061e-7,
+   "source": "channel",
+   "out": {
+    "t": 1790137058558,
+    "liqChg": -0.05,
+    "priceChg": -0.05,
+    "rugged": false
+   }
+  },
+  {
+   "token": "0x08927eefe2410fbe0b73a7dae38aed44681c807c",
+   "chain": "robinhood",
+   "symbol": "NIMPAD",
+   "t": 1790062807892,
+   "verdict": "DANGER",
+   "score": 65,
+   "liq": 2,
+   "price": 0.000001604,
+   "source": "channel",
+   "out": {
+    "t": 1790149740019,
+    "liqChg": -1,
+    "priceChg": null,
+    "rugged": true
+   }
+  },
+  {
+   "token": "0x4caf2e6ec0fcbef77314566a9884643512ef8bfc",
+   "chain": "robinhood",
+   "symbol": "MDOG",
+   "t": 1790069445820,
+   "verdict": "OK",
+   "score": 0,
+   "liq": 29506,
+   "price": 0.0001018,
+   "source": "channel",
+   "out": {
+    "t": 1790156970518,
+    "liqChg": 0.53,
+    "priceChg": 1.36,
+    "rugged": false
+   }
+  },
+  {
+   "token": "0xd811463b65f905bd1795f5a0162588288ebe52a1",
+   "chain": "robinhood",
+   "symbol": "SCAT",
+   "t": 1790070044260,
+   "verdict": "CAUTION",
+   "score": 40,
+   "liq": 36939,
+   "price": 0.0001882,
+   "source": "channel",
+   "out": {
+    "t": 1790156970601,
+    "liqChg": -1,
+    "priceChg": null,
+    "rugged": true
+   }
+  },
+  {
+   "token": "0xb166fd42b00bd9e195cec4af23e0f7b0296eb443",
+   "chain": "robinhood",
+   "symbol": "THDF",
+   "t": 1790077176691,
+   "verdict": "CAUTION",
+   "score": 40,
+   "liq": 0,
+   "price": 2.563e-7,
+   "source": "channel",
+   "out": {
+    "t": 1790164214034,
+    "liqChg": -1,
+    "priceChg": null,
+    "rugged": true
+   }
+  },
+  {
+   "token": "0x8c8a99a60245f5ea170e53e351d5fa46278b8b3b",
+   "chain": "robinhood",
+   "symbol": "FCAT",
+   "t": 1790084403356,
+   "verdict": "CAUTION",
+   "score": 40,
+   "liq": 1,
+   "price": 0.000003355,
+   "source": "channel",
+   "out": {
+    "t": 1790171464579,
+    "liqChg": 28582,
+    "priceChg": 23.41,
+    "rugged": false
+   }
+  },
+  {
+   "token": "0x83a49b808f8d5e02cb2931cd2352988f498e5ba3",
+   "chain": "robinhood",
+   "symbol": "Agrippa",
+   "t": 1790136443918,
+   "verdict": "OK",
+   "score": 0,
+   "liq": 1614968,
+   "price": 0.00005986,
+   "source": "channel",
+   "out": {
+    "t": 1790223336953,
+    "liqChg": -0.18,
+    "priceChg": -0.22,
+    "rugged": false
+   }
+  },
+  {
+   "token": "0xdb90169c179def9111ad7ae8e23f45cc36a0da7b",
+   "chain": "robinhood",
+   "symbol": "MUSEPAD",
+   "t": 1790149873621,
+   "verdict": "OK",
+   "score": 0,
+   "liq": 89561,
+   "price": 0.0008205,
+   "source": "channel",
+   "out": {
+    "t": 1790237824861,
+    "liqChg": -0.43,
+    "priceChg": -0.73,
+    "rugged": false
+   }
+  },
+  {
+   "token": "0x4b434541873f171ab70d7d2f3a48b0f0b0f13ba3",
+   "chain": "robinhood",
+   "symbol": "PORCH",
+   "t": 1790155952130,
+   "verdict": "CAUTION",
+   "score": 25,
+   "liq": 19586,
+   "price": 2.292e-7,
+   "source": "channel",
+   "out": {
+    "t": 1790243249236,
+    "liqChg": -0.26,
+    "priceChg": -0.24,
+    "rugged": false
+   }
+  },
+  {
+   "token": "0x91a2dae9699f0b82540b5886b0d8759c22820ba3",
+   "chain": "robinhood",
+   "symbol": "musebook",
+   "t": 1790179319564,
+   "verdict": "OK",
+   "score": 0,
+   "liq": 3456378,
+   "price": 0.0002521,
+   "source": "conversation",
+   "out": {
+    "t": 1790266885544,
+    "liqChg": -0.07,
+    "priceChg": -0.08,
+    "rugged": false
+   }
+  },
+  {
+   "token": "0x89814ca6a4656a3e8a5025cf33cd59b23fa08ba3",
+   "chain": "robinhood",
+   "symbol": "Euler",
+   "t": 1790201030086,
+   "verdict": "OK",
+   "score": 10,
+   "liq": 71190,
+   "price": 0.000001336,
+   "source": "launch",
+   "out": {
+    "t": 1790288643664,
+    "liqChg": 0.94,
+    "priceChg": 2.06,
+    "rugged": false
+   }
+  },
+  {
+   "token": "0x49f1a095f62d05100cc8a597399858d16be8fba3",
+   "chain": "robinhood",
+   "symbol": "musebutt",
+   "t": 1790201031573,
+   "verdict": "OK",
+   "score": 10,
+   "liq": 49373,
+   "price": 6.961e-7,
+   "source": "launch",
+   "out": {
+    "t": 1790288644101,
+    "liqChg": 0.39,
+    "priceChg": 0.7,
+    "rugged": false
+   }
+  },
+  {
+   "token": "0x896d886fdcb26568990607c34e293a7673897777",
+   "chain": "bsc",
+   "symbol": "MUSEBOOK",
+   "t": 1790201214884,
+   "verdict": "DANGER",
+   "score": 60,
+   "liq": 9,
+   "price": 5.381e-8,
+   "source": "channel",
+   "out": {
+    "t": 1790288644534,
+    "liqChg": 0.11,
+    "priceChg": 0.05,
+    "rugged": false
+   }
+  },
+  {
+   "token": "0x29486f07083d5ecd57efbce27afcf1eb9f188ba3",
+   "chain": "robinhood",
+   "symbol": "musepunks",
+   "t": 1790201940005,
+   "verdict": "CAUTION",
+   "score": 20,
+   "liq": 19446,
+   "price": 1.946e-7,
+   "source": "launch",
+   "out": {
+    "t": 1790288645046,
+    "liqChg": 0.01,
+    "priceChg": 0.01,
+    "rugged": false
+   }
+  },
+  {
+   "token": "0xfa7608752d6994f4b4cc83a7917909ea3e19fba3",
+   "chain": "robinhood",
+   "symbol": "CONSTABLE",
+   "t": 1790202868396,
+   "verdict": "CAUTION",
+   "score": 50,
+   "liq": 9135,
+   "price": 1.073e-7,
+   "source": "launch",
+   "out": {
+    "t": 1790290454939,
+    "liqChg": -0.13,
+    "priceChg": -0.13,
+    "rugged": false
+   }
+  },
+  {
+   "token": "0x25c8d5894c8af2fb45ae132bff0be042204f5ba3",
+   "chain": "robinhood",
+   "symbol": "LEGEND",
+   "t": 1790202869926,
+   "verdict": "CAUTION",
+   "score": 20,
+   "liq": 16318,
+   "price": 1.644e-7,
+   "source": "launch",
+   "out": {
+    "t": 1790290455103,
+    "liqChg": -1,
+    "priceChg": null,
+    "rugged": true
+   }
+  },
+  {
+   "token": "0x0dc6aeb8eddeb502f2d6bd21516182b3f317017b",
+   "chain": "robinhood",
+   "symbol": "MUSEDEV",
+   "t": 1790205546288,
+   "verdict": "CAUTION",
+   "score": 35,
+   "liq": 1,
+   "price": 0.000006849,
+   "source": "channel",
+   "out": {
+    "t": 1790292257691,
+    "liqChg": -1,
+    "priceChg": null,
+    "rugged": true
+   }
+  },
+  {
+   "token": "0x278b4c42c7490466b7c91e823ea03a24d8e64ba3",
+   "chain": "robinhood",
+   "symbol": "CHARM",
+   "t": 1790209588566,
+   "verdict": "CAUTION",
+   "score": 25,
+   "liq": 17467,
+   "price": 1.747e-7,
+   "source": "conversation",
+   "out": {
+    "t": 1790297686125,
+    "liqChg": -0.38,
+    "priceChg": -0.39,
+    "rugged": false
+   }
+  },
+  {
+   "token": "0x21bed5462749227f1b83f654daeb6e44d5ea1cd6",
+   "chain": "robinhood",
+   "symbol": "MuseNews",
+   "t": 1790211649003,
+   "verdict": "DANGER",
+   "score": 65,
+   "liq": 2,
+   "price": 0.000006956,
+   "source": "channel",
+   "out": {
+    "t": 1790299508596,
+    "liqChg": 10667.5,
+    "priceChg": 6.5,
+    "rugged": false
+   }
+  },
+  {
+   "token": "0x32df035a55cfb334bdd02ee68e427b9a659ae9e7",
+   "chain": "robinhood",
+   "symbol": "LOVE",
+   "t": 1790218563385,
+   "verdict": "CAUTION",
+   "score": 25,
+   "liq": 2707,
+   "price": 3.643e-7,
+   "source": "channel",
+   "out": {
+    "t": 1790306954076,
+    "liqChg": 0.01,
+    "priceChg": 0.02,
+    "rugged": false
+   }
+  },
+  {
+   "token": "0xe6b18dc965939d0a2beedcf77249048e4684e592",
+   "chain": "robinhood",
+   "symbol": "NEWS",
+   "t": 1790222282515,
+   "verdict": "CAUTION",
+   "score": 55,
+   "liq": 7520,
+   "price": 0.000007548,
+   "source": "channel",
+   "out": {
+    "t": 1790308773958,
+    "liqChg": -0.24,
+    "priceChg": -0.24,
+    "rugged": false
+   }
+  },
+  {
+   "token": "0x8bbe8153b7c4cd3aa2e29c0d8ca1a259fd011ba3",
+   "chain": "robinhood",
+   "symbol": "FUEL",
+   "t": 1790222479871,
+   "verdict": "CAUTION",
+   "score": 20,
+   "liq": 7191,
+   "price": 8.469e-8,
+   "source": "channel",
+   "out": {
+    "t": 1790310583161,
+    "liqChg": 0.74,
+    "priceChg": 0.79,
+    "rugged": false
+   }
+  },
+  {
+   "token": "0x1ca93e1bbcde01167c64e4502638d5cf85dc1e18",
+   "chain": "robinhood",
+   "symbol": "BILL",
+   "t": 1790223642137,
+   "verdict": "OK",
+   "score": 10,
+   "liq": 24874,
+   "price": 0.00002397,
+   "source": "channel",
+   "out": {
+    "t": 1790310583672,
+    "liqChg": 0,
+    "priceChg": 0,
+    "rugged": false
+   }
+  },
+  {
+   "token": "0x783fc22fddfb82b9a11f3b6cf38e3d83a82bdba3",
+   "chain": "robinhood",
+   "symbol": "SONAR",
+   "t": 1790226835773,
+   "verdict": "OK",
+   "score": 10,
+   "liq": 7979,
+   "price": 9.387e-8,
+   "source": "channel",
+   "out": {
+    "t": 1790314200536,
+    "liqChg": 0.46,
+    "priceChg": 0.47,
+    "rugged": false
+   }
+  },
+  {
+   "token": "0x8a41f9dcf81189361b085ad8bbf290d690bb5ba3",
+   "chain": "robinhood",
+   "symbol": "BUDAI",
+   "t": 1790237092567,
+   "verdict": "CAUTION",
+   "score": 20,
+   "liq": 10152,
+   "price": 1.194e-7,
+   "source": "channel",
+   "out": {
+    "t": 1790325078089,
+    "liqChg": -0.04,
+    "priceChg": -0.04,
+    "rugged": false
+   }
+  },
+  {
+   "token": "0xb83fc6010c8dcf628abe787a161c619fcc543117",
+   "chain": "robinhood",
+   "symbol": "PENPE",
+   "t": 1790237298337,
+   "verdict": "OK",
+   "score": 0,
+   "liq": 125967,
+   "price": 0.002387,
+   "source": "channel",
+   "out": {
+    "t": 1790325078393,
+    "liqChg": 0.21,
+    "priceChg": 0.47,
+    "rugged": false
+   }
+  },
+  {
+   "token": "0x178e54df3d091ee4d0b2534742ef9e3692b76526",
+   "chain": "robinhood",
+   "symbol": "BNKR",
+   "t": 1790239012739,
+   "verdict": "OK",
+   "score": 0,
+   "liq": 333520,
+   "price": 0.000377,
+   "source": "channel",
+   "out": {
+    "t": 1790326878347,
+    "liqChg": 0.04,
+    "priceChg": 0.08,
+    "rugged": false
+   }
+  },
+  {
+   "token": "0x22af33fe49fd1fa80c7149773dde5890d3c76f3b",
+   "chain": "base",
+   "symbol": "BNKR",
+   "t": 1790239768635,
+   "verdict": "OK",
+   "score": 0,
+   "liq": 3006934,
+   "price": 0.000368,
+   "source": "channel",
+   "out": {
+    "t": 1790326878697,
+    "liqChg": 0.06,
+    "priceChg": 0.1,
+    "rugged": false
+   }
+  },
+  {
+   "token": "0xa9214cebefd39d8b66865a7e41345ce71da59508",
+   "chain": "robinhood",
+   "symbol": "musebook",
+   "t": 1790240470913,
+   "verdict": "CAUTION",
+   "score": 40,
+   "liq": 36238,
+   "price": 0.00003712,
+   "source": "conversation",
+   "out": {
+    "t": 1790326878812,
+    "liqChg": -1,
+    "priceChg": null,
+    "rugged": true
+   }
+  },
+  {
+   "token": "0xed629e0103d4371838ed96161429dab2069feba3",
+   "chain": "robinhood",
+   "symbol": "musewhisper",
+   "t": 1790240564428,
+   "verdict": "CAUTION",
+   "score": 25,
+   "liq": 8623,
+   "price": 1.014e-7,
+   "source": "launch",
+   "out": {
+    "t": 1790330387595,
+    "liqChg": -1,
+    "priceChg": null,
+    "rugged": true
+   }
+  },
+  {
+   "token": "0xb0aab5d5575127997cd44c5eeb04048e6f93e239",
+   "chain": "robinhood",
+   "symbol": "MUSEBOOK",
+   "t": 1790241086997,
+   "verdict": "DANGER",
+   "score": 75,
+   "liq": 15762,
+   "price": 0.000008568,
+   "source": "conversation",
+   "out": {
+    "t": 1790330387717,
+    "liqChg": -1,
+    "priceChg": null,
+    "rugged": true
+   }
+  },
+  {
+   "token": "0x4b434541873f171ab70d7d2f3a48b0f0b0f13ba3",
+   "chain": "robinhood",
+   "symbol": "PORCH",
+   "t": 1790245678100,
+   "verdict": "OK",
+   "score": 10,
+   "liq": 14001,
+   "price": 1.689e-7,
+   "source": "conversation",
+   "out": {
+    "t": 1790332191938,
+    "liqChg": 0.03,
+    "priceChg": 0.07,
+    "rugged": false
+   }
+  },
+  {
+   "token": "5LMCP2QCDw3nNFxeXRfhR9aMbTcVPeiDXUqFR8ebpump",
+   "chain": "solana",
+   "symbol": "FAM",
+   "t": 1790248015986,
+   "verdict": "CAUTION",
+   "score": 45,
+   "liq": 0,
+   "price": 0.000005457,
+   "source": "channel",
+   "out": {
+    "t": 1790335811218,
+    "liqChg": -1,
+    "priceChg": -0.07,
+    "rugged": true
+   }
+  },
+  {
+   "token": "0x83a49b808f8d5e02cb2931cd2352988f498e5ba3",
+   "chain": "robinhood",
+   "symbol": "Agrippa",
+   "t": 1790258449489,
+   "verdict": "OK",
+   "score": 0,
+   "liq": 1852099,
+   "price": 0.00008201,
+   "source": "channel",
+   "out": {
+    "t": 1790344875152,
+    "liqChg": 0.08,
+    "priceChg": 0.21,
+    "rugged": false
+   }
+  },
+  {
+   "token": "0x4caf2e6ec0fcbef77314566a9884643512ef8bfc",
+   "chain": "robinhood",
+   "symbol": "MDOG",
+   "t": 1790259432341,
+   "verdict": "OK",
+   "score": 0,
+   "liq": 38870,
+   "price": 0.0001746,
+   "source": "channel",
+   "out": {
+    "t": 1790346695282,
+    "liqChg": -0.09,
+    "priceChg": -0.15,
+    "rugged": false
+   }
+  },
+  {
+   "token": "0x5233b89ea4baae8339fcc239f8a8b2448dda6f9f",
+   "chain": "robinhood",
+   "symbol": "MUSEPAD",
+   "t": 1790260960502,
+   "verdict": "CAUTION",
+   "score": 50,
+   "liq": 6830,
+   "price": 0.000006796,
+   "source": "conversation",
+   "out": {
+    "t": 1790348506338,
+    "liqChg": 0,
+    "priceChg": 0,
+    "rugged": false
+   }
+  },
+  {
+   "token": "0x91a2dae9699f0b82540b5886b0d8759c22820ba3",
+   "chain": "robinhood",
+   "symbol": "musebook",
+   "t": 1790266037299,
+   "verdict": "OK",
+   "score": 0,
+   "liq": 3193780,
+   "price": 0.0002281,
+   "source": "channel",
+   "out": {
+    "t": 1790352818526,
+    "liqChg": -0.2,
+    "priceChg": -0.46,
+    "rugged": false
+   }
+  },
+  {
+   "token": "0x7dda1290b4001def69e3b108ee45a323b42d7777",
+   "chain": "robinhood",
+   "symbol": "FREE",
+   "t": 1790266408900,
+   "verdict": "CAUTION",
+   "score": 20,
+   "liq": 10248,
+   "price": 0.000004628,
+   "source": "channel",
+   "out": {
+    "t": 1790352818592,
+    "liqChg": -1,
+    "priceChg": null,
+    "rugged": true
+   }
+  },
+  {
+   "token": "0x0379e228f6887c6f18bf394042ecaf81b308cb2e",
+   "chain": "robinhood",
+   "symbol": "MUSEGOD",
+   "t": 1790279915094,
+   "verdict": "OK",
+   "score": 0,
+   "liq": 145317,
+   "price": 0.0003147,
+   "source": "channel",
+   "out": {
+    "t": 1790367342728,
+    "liqChg": -0.26,
+    "priceChg": -0.43,
+    "rugged": false
+   }
+  },
+  {
+   "token": "0xc37236e54d789bdfb2dce4a6f7cb150098ede521",
+   "chain": "robinhood",
+   "symbol": "Jolly",
+   "t": 1790284148720,
+   "verdict": "OK",
+   "score": 10,
+   "liq": 24239,
+   "price": 0.00006831,
+   "source": "channel",
+   "out": {
+    "t": 1790370969530,
+    "liqChg": 0.14,
+    "priceChg": 0.33,
+    "rugged": false
+   }
+  },
+  {
+   "token": "0x4e92b9f666ec1fb377ace538b67e9772e5bdaba3",
+   "chain": "robinhood",
+   "symbol": "moose",
+   "t": 1790299906218,
+   "verdict": "CAUTION",
+   "score": 25,
+   "liq": 8427,
+   "price": 8.509e-8,
+   "source": "channel",
+   "out": {
+    "t": 1790387306747,
+    "liqChg": -0.19,
+    "priceChg": -0.19,
+    "rugged": false
+   }
+  },
+  {
+   "token": "0xfde294156811f8ac808ed3207b844623c4677777",
+   "chain": "robinhood",
+   "symbol": "WADDLE",
+   "t": 1790300868090,
+   "verdict": "CAUTION",
+   "score": 20,
+   "liq": 10269,
+   "price": 0.000004637,
+   "source": "channel",
+   "out": {
+    "t": 1790387306899,
+    "liqChg": -1,
+    "priceChg": null,
+    "rugged": true
+   }
+  },
+  {
+   "token": "0x309e847c2528c4e37de2074b71f39c9f2c907ba3",
+   "chain": "robinhood",
+   "symbol": "MONTY",
+   "t": 1790314104805,
+   "verdict": "OK",
+   "score": 15,
+   "liq": 31841,
+   "price": 4.179e-7,
+   "source": "channel",
+   "out": {
+    "t": 1790401799208,
+    "liqChg": -0.34,
+    "priceChg": -0.41,
+    "rugged": false
+   }
+  },
+  {
+   "token": "0x86da207ec5530fc62f05576c54faf4061b59364d",
+   "chain": "robinhood",
+   "symbol": "DIEGOROJOJR",
+   "t": 1790315160754,
+   "verdict": "CAUTION",
+   "score": 55,
+   "liq": 6296,
+   "price": 0.000006298,
+   "source": "launch",
+   "out": {
+    "t": 1790401799292,
+    "liqChg": -1,
+    "priceChg": null,
+    "rugged": true
+   }
+  },
+  {
+   "token": "0x0bd7d308f8e1639fab988df18a8011f41eacad73",
+   "chain": "robinhood",
+   "symbol": "WETH",
+   "t": 1790315235421,
+   "verdict": "OK",
+   "score": 10,
+   "liq": 30881779,
+   "price": 2681.5,
+   "source": "channel",
+   "out": {
+    "t": 1790401799584,
+    "liqChg": -0.01,
+    "priceChg": 0,
+    "rugged": false
+   }
+  },
+  {
+   "token": "0x0aab3e12d201be83aaf59fe6ffd9b996baac0c9f",
+   "chain": "robinhood",
+   "symbol": "PEGMAN",
+   "t": 1790317340133,
+   "verdict": "CAUTION",
+   "score": 25,
+   "liq": 3739,
+   "price": 0.000002068,
+   "source": "channel",
+   "out": {
+    "t": 1790405402463,
+    "liqChg": -1,
+    "priceChg": null,
+    "rugged": true
+   }
+  },
+  {
+   "token": "0x4b434541873f171ab70d7d2f3a48b0f0b0f13ba3",
+   "chain": "robinhood",
+   "symbol": "PORCH",
+   "t": 1790333586723,
+   "verdict": "OK",
+   "score": 10,
+   "liq": 14474,
+   "price": 1.802e-7,
+   "source": "channel",
+   "out": {
+    "t": 1790421710455,
+    "liqChg": -0.64,
+    "priceChg": -0.65,
+    "rugged": false
+   }
+  },
+  {
+   "token": "0x1ca93e1bbcde01167c64e4502638d5cf85dc1e18",
+   "chain": "robinhood",
+   "symbol": "BILL",
+   "t": 1790344726830,
+   "verdict": "OK",
+   "score": 10,
+   "liq": 24880,
+   "price": 0.00002398,
+   "source": "channel",
+   "out": {
+    "t": 1790432595211,
+    "liqChg": -1,
+    "priceChg": null,
+    "rugged": true
+   }
+  },
+  {
+   "token": "0xae4d31d8fa87a9bc7000e1e901b6ec661aba7e67",
+   "chain": "base",
+   "symbol": "SHEAF",
+   "t": 1790347777745,
+   "verdict": "OK",
+   "score": 15,
+   "liq": 31852,
+   "price": 0.0000319,
+   "source": "channel",
+   "out": {
+    "t": 1790434406113,
+    "liqChg": 0.04,
+    "priceChg": 0.08,
+    "rugged": false
+   }
+  },
+  {
+   "token": "6TgM3Q2FBJwtnS9kDj6ym5XdKB7YrLuFK59Pyr6dpump",
+   "chain": "solana",
+   "symbol": "moose",
+   "t": 1790353658986,
+   "verdict": "CAUTION",
+   "score": 35,
+   "liq": 0,
+   "price": 0.000005062,
+   "source": "channel",
+   "out": {
+    "t": 1790441686620,
+    "liqChg": -1,
+    "priceChg": null,
+    "rugged": true
+   }
+  },
+  {
+   "token": "0x9480391dc887ec5a33a4938a4607dca924726ba3",
+   "chain": "robinhood",
+   "symbol": "musemini",
+   "t": 1790356755121,
+   "verdict": "CAUTION",
+   "score": 25,
+   "liq": 9394,
+   "price": 1.1e-7,
+   "source": "channel",
+   "out": {
+    "t": 1790443501287,
+    "liqChg": -1,
+    "priceChg": null,
+    "rugged": true
+   }
+  },
+  {
+   "token": "0x49978ca1090d0048db2323eb7d76b20f9b361e18",
+   "chain": "robinhood",
+   "symbol": "BROWNIE",
+   "t": 1790357340995,
+   "verdict": "CAUTION",
+   "score": 20,
+   "liq": 20123,
+   "price": 0.00002007,
+   "source": "channel",
+   "out": {
+    "t": 1790445314110,
+    "liqChg": -0.04,
+    "priceChg": -0.04,
+    "rugged": false
+   }
+  },
+  {
+   "token": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+   "chain": "pulsechain",
+   "symbol": "USDT",
+   "t": 1790364437894,
+   "verdict": "CAUTION",
+   "score": 20,
+   "liq": 641889,
+   "price": 0.000957,
+   "source": "channel",
+   "out": {
+    "t": 1790452552190,
+    "liqChg": -1,
+    "priceChg": 1043.83,
+    "rugged": true
+   }
+  },
+  {
+   "token": "0x91a2dae9699f0b82540b5886b0d8759c22820ba3",
+   "chain": "robinhood",
+   "symbol": "musebook",
+   "t": 1790369104966,
+   "verdict": "OK",
+   "score": 0,
+   "liq": 2320571,
+   "price": 0.0001096,
+   "source": "channel",
+   "out": {
+    "t": 1790456162149,
+    "liqChg": -0.21,
+    "priceChg": -0.31,
+    "rugged": false
+   }
+  },
+  {
+   "token": "0x4caf2e6ec0fcbef77314566a9884643512ef8bfc",
+   "chain": "robinhood",
+   "symbol": "MDOG",
+   "t": 1790378153394,
+   "verdict": "OK",
+   "score": 0,
+   "liq": 25402,
+   "price": 0.00007624,
+   "source": "channel",
+   "out": {
+    "t": 1790465224061,
+    "liqChg": -0.15,
+    "priceChg": -0.26,
+    "rugged": false
+   }
+  },
+  {
+   "token": "0xe259fc307a8118d9aab6974f88907116367abba3",
+   "chain": "robinhood",
+   "symbol": "FUJI",
+   "t": 1790392810263,
+   "verdict": "CAUTION",
+   "score": 40,
+   "liq": 8838,
+   "price": 1.039e-7,
+   "source": "channel",
+   "out": {
+    "t": 1790479717665,
+    "liqChg": -1,
+    "priceChg": null,
+    "rugged": true
+   }
+  },
+  {
+   "token": "0x29913b9527a824f39848d174cea3353a6af55ba3",
+   "chain": "robinhood",
+   "symbol": "MUSECHAT",
+   "t": 1790401756952,
+   "verdict": "DANGER",
+   "score": 65,
+   "liq": 8532,
+   "price": 1.002e-7,
+   "source": "channel",
+   "out": {
+    "t": 1790488765574,
+    "liqChg": 0.04,
+    "priceChg": 0.04,
+    "rugged": false
+   }
+  },
+  {
+   "token": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+   "chain": "base",
+   "symbol": "USDC",
+   "t": 1790420018689,
+   "verdict": "OK",
+   "score": 10,
+   "liq": 484318,
+   "price": 0.9999,
+   "source": "channel",
+   "out": {
+    "t": 1790507358707,
+    "liqChg": 0,
+    "priceChg": 0,
+    "rugged": false
+   }
+  },
+  {
+   "token": "0x0379e228f6887c6f18bf394042ecaf81b308cb2e",
+   "chain": "robinhood",
+   "symbol": "MUSEGOD",
+   "t": 1790428604915,
+   "verdict": "OK",
+   "score": 0,
+   "liq": 114130,
+   "price": 0.0002013,
+   "source": "channel",
+   "out": {
+    "t": 1790515196491,
+    "liqChg": -0.16,
+    "priceChg": -0.17,
+    "rugged": false
+   }
+  },
+  {
+   "token": "0x541072bd5ed92460794d3565abf9948db53dfba3",
+   "chain": "robinhood",
+   "symbol": "MOLEBOOK",
+   "t": 1790438647330,
+   "verdict": "CAUTION",
+   "score": 35,
+   "liq": 8649,
+   "price": 1.017e-7,
+   "source": "channel",
+   "out": {
+    "t": 1790526089926,
+    "liqChg": -1,
+    "priceChg": null,
+    "rugged": true
+   }
+  },
+  {
+   "token": "0x2d2c5a45d70cf19a25d06e453d455fa29a01cba3",
+   "chain": "robinhood",
+   "symbol": "CEREBRO",
+   "t": 1790445838552,
+   "verdict": "CAUTION",
+   "score": 40,
+   "liq": 8347,
+   "price": 9.819e-8,
+   "source": "channel",
+   "out": {
+    "t": 1790533353595,
+    "liqChg": -1,
+    "priceChg": null,
+    "rugged": true
+   }
+  },
+  {
+   "token": "0x5eb3f7b492dc162618915720d185f12de50a0b1d",
+   "chain": "robinhood",
+   "symbol": "HOODED",
+   "t": 1790451849616,
+   "verdict": "DANGER",
+   "score": 60,
+   "liq": 11884,
+   "price": 0.00001265,
+   "source": "channel",
+   "out": {
+    "t": 1790539317815,
+    "liqChg": -0.02,
+    "priceChg": -0.03,
+    "rugged": false
+   }
+  },
+  {
+   "token": "0x9cb595fbb3601dc0ef80e87921dc4ffd9307aba3",
+   "chain": "robinhood",
+   "symbol": "musegram",
+   "t": 1790462669532,
+   "verdict": "OK",
+   "score": 0,
+   "liq": 86921,
+   "price": 0.000001131,
+   "source": "channel",
+   "out": {
+    "t": 1790550237247,
+    "liqChg": -0.16,
+    "priceChg": -0.23,
+    "rugged": false
+   }
+  },
+  {
+   "token": "0xb62810fa429ea5886b8d5ce4993494ead6240812",
+   "chain": "robinhood",
+   "symbol": "PORCH",
+   "t": 1790474908073,
+   "verdict": "CAUTION",
+   "score": 30,
+   "liq": 0,
+   "price": 0.0000027814912019929946,
+   "source": "channel",
+   "out": {
+    "t": 1790561557496,
+    "liqChg": -1,
+    "priceChg": -0.02,
+    "rugged": true
+   }
+  },
+  {
+   "token": "0x91a2dae9699f0b82540b5886b0d8759c22820ba3",
+   "chain": "robinhood",
+   "symbol": "musebook",
+   "t": 1790482745456,
+   "verdict": "OK",
+   "score": 0,
+   "liq": 2066893,
+   "price": 0.0000863,
+   "source": "channel",
+   "out": {
+    "t": 1790570625907,
+    "liqChg": -0.28,
+    "priceChg": -0.29,
+    "rugged": false
+   }
+  },
+  {
+   "token": "7nG5dJxuuUFXqxE4J8LecUZwP2m2HD6m83Xhae6jpzU1",
+   "chain": "solana",
+   "symbol": "jizz",
+   "t": 1790492786118,
+   "verdict": "CAUTION",
+   "score": 20,
+   "liq": 19537,
+   "price": 0.0005229,
+   "source": "channel",
+   "out": {
+    "t": 1790579663606,
+    "liqChg": -0.92,
+    "priceChg": -0.78,
+    "rugged": true
+   }
+  },
+  {
+   "token": "0x416102b6022aea5e0fd3a56aa2e1f1e539e1eba3",
+   "chain": "robinhood",
+   "symbol": "PULSE",
+   "t": 1790496399706,
+   "verdict": "CAUTION",
+   "score": 40,
+   "liq": 8526,
+   "price": 1.002e-7,
+   "source": "channel",
+   "out": {
+    "t": 1790583273614,
+    "liqChg": -0.09,
+    "priceChg": -0.09,
+    "rugged": false
+   }
+  },
+  {
+   "token": "0x6547911e5b8f3cfa9e6bca37ddde3009e83faa2d",
+   "chain": "robinhood",
+   "symbol": "FUEL",
+   "t": 1790500070078,
+   "verdict": "CAUTION",
+   "score": 20,
+   "liq": 27051,
+   "price": 0.00007835,
+   "source": "channel",
+   "out": {
+    "t": 1790586914500,
+    "liqChg": -0.08,
+    "priceChg": -0.12,
+    "rugged": false
+   }
+  },
+  {
+   "token": "0x7804fff73eb6569dcc673fa345cf89bb905e2a8f",
+   "chain": "robinhood",
+   "symbol": "Musegames",
+   "t": 1790525269071,
+   "verdict": "CAUTION",
+   "score": 40,
+   "liq": 0,
+   "price": null,
+   "source": "channel",
+   "out": {
+    "t": 1790612298773,
+    "liqChg": -1,
+    "priceChg": null,
+    "rugged": true
+   }
+  },
+  {
+   "token": "0x974e13c26a2143d6161a08fb00ac842063a99ba3",
+   "chain": "robinhood",
+   "symbol": "TMT",
+   "t": 1790525283157,
+   "verdict": "CAUTION",
+   "score": 20,
+   "liq": 14573,
+   "price": 1.732e-7,
+   "source": "channel",
+   "out": {
+    "t": 1790612299173,
+    "liqChg": 0.01,
+    "priceChg": 0.01,
+    "rugged": false
+   }
+  },
+  {
+   "token": "0x322f0929c4625ed5bad873c95208d54e1c003b2d",
+   "chain": "robinhood",
+   "symbol": "TSLA",
+   "t": 1790543157115,
+   "verdict": "CAUTION",
+   "score": 30,
+   "liq": 2847183,
+   "price": 372.78,
+   "source": "channel",
+   "out": {
+    "t": 1790630439059,
+    "liqChg": -0.07,
+    "priceChg": -0.04,
+    "rugged": false
+   }
+  },
+  {
+   "token": "0x8683d6bbfc55ba71b8caa497309da6c071594ba3",
+   "chain": "robinhood",
+   "symbol": "DEPLOYED",
+   "t": 1790545762772,
+   "verdict": "CAUTION",
+   "score": 35,
+   "liq": 8796,
+   "price": 1.034e-7,
+   "source": "launch",
+   "out": {
+    "t": 1790632247862,
+    "liqChg": -1,
+    "priceChg": null,
+    "rugged": true
+   }
+  },
+  {
+   "token": "0x0e7f299713fbbe0635f9edc4ecb4e17f0d76bba3",
+   "chain": "robinhood",
+   "symbol": "musebank",
+   "t": 1790553438648,
+   "verdict": "CAUTION",
+   "score": 40,
+   "liq": 15958,
+   "price": 1.89e-7,
+   "source": "channel"
+  },
+  {
+   "token": "0x05175ac124d77487d8c81f9dba6a4b5d10da83b3",
+   "chain": "robinhood",
+   "symbol": "GLORY",
+   "t": 1790556918006,
+   "verdict": "CAUTION",
+   "score": 20,
+   "liq": 54141,
+   "price": 0.000247,
+   "source": "channel"
+  },
+  {
+   "token": "0x72aec25d3c3a5fd9772901e8433fe5c8cf4eaa04",
+   "chain": "robinhood",
+   "symbol": "FAITH",
+   "t": 1790560940678,
+   "verdict": "OK",
+   "score": 0,
+   "liq": 52196,
+   "price": 0.0004124,
+   "source": "channel"
+  },
+  {
+   "token": "0x91a2dae9699f0b82540b5886b0d8759c22820ba3",
+   "chain": "robinhood",
+   "symbol": "musebook",
+   "t": 1790582986030,
+   "verdict": "OK",
+   "score": 0,
+   "liq": 1466145,
+   "price": 0.00006182,
+   "source": "channel"
+  },
+  {
+   "token": "0xda2598c976e62e7e15dcca75169b404712e48b04",
+   "chain": "robinhood",
+   "symbol": "RWI",
+   "t": 1790607533289,
+   "verdict": "OK",
+   "score": 10,
+   "liq": 20742,
+   "price": 0.00004676,
+   "source": "channel"
+  },
+  {
+   "token": "0x86bfdcc224f5590dcac42b092b4e66b471934ba3",
+   "chain": "robinhood",
+   "symbol": "MNEME",
+   "t": 1790618102250,
+   "verdict": "CAUTION",
+   "score": 25,
+   "liq": 3398,
+   "price": 3.965e-8,
+   "source": "channel"
+  },
+  {
+   "token": "0x0b3e328455c4059eeb9e3f84b5543f74e24e7e1b",
+   "chain": "base",
+   "symbol": "VIRTUAL",
+   "t": 1790620990303,
+   "verdict": "DANGER",
+   "score": 100,
+   "liq": 9777198,
+   "price": 0.8144,
+   "source": "channel"
+  }
+ ],
+ "previous": null
+}
