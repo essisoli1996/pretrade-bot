@@ -44,7 +44,7 @@ check(dl.length === 2 && /rejected.*d1.*stale/.test(dl[0]) && /posted +9 #lobby 
   check(autoPostAllowed([...log, { at, replyTo: 8, founder: true }], 3, now, "reply").used === 3, "founder replies don't count against the cap");
   check(normalize({}).founders.includes("wynjr") && normalize({ founders: ["Pip"] }).founders[0] === "pip", "founders: default list, lower-cased");
   const n = normalize({});
-  check(n.maxAutoPostsPer8h === 6 && n.maxAutoRepliesPer8h === 24 && n.maxRepliesPerThread8h === 3, "cap defaults: 6 posts, 24 replies, 3 per thread");
+  check(n.maxAutoPostsPer8h === 6 && n.maxAutoRepliesPer8h === 24 && n.maxRepliesPerThread8h === 3 && n.maxRepliesPerPersonPerPost === 2, "cap defaults: 6 posts, 24 replies, 3 per thread, 2 per person per post");
 }
 console.log(bad ? `\n${bad} FAILED` : "\nall passed");
 process.exit(bad ? 1 : 0);

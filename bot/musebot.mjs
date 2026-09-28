@@ -2718,6 +2718,14 @@ async function main() {
         const cap = autoPostAllowed(loadJson(DESK, {}).log, replyTo ? CONTROL.maxAutoRepliesPer8h : CONTROL.maxAutoPostsPer8h, Date.now(), kind);
         if (!cap.ok) return console.log(`NOT POSTED: ${cap.used} of ${cap.cap} autonomous ${kind === "reply" ? "replies" : "new posts"} used in the last 8 hours. hold it for the next window.`), null;
       }
+      // each person (founders aside) gets at most maxRepliesPerPersonPerPost answers from me in one thread, ever
+      if (replyTo && !founder && th?.root && th?.node) {
+        const who = (n) => String(n?.muse_id ?? n?.name ?? "");
+        const them = who(th.node);
+        const walk = (n) => (n.replies ?? []).reduce((a, r) => a + (r.muse_id === identity.muse_id && who(n) === them ? 1 : 0) + walk(r), 0);
+        const toThem = walk(th.root);
+        if (toThem >= CONTROL.maxRepliesPerPersonPerPost) return console.log(`NOT POSTED: already answered ${th.node.name} ${toThem} times in this thread (max ${CONTROL.maxRepliesPerPersonPerPost}). leave it there.`), null;
+      }
       // someone else's thread doesn't eat the day: at most maxRepliesPerThread8h of my replies there per 8 hours. under
       // my own post only the reply cap applies (the root post itself never counts)
       if (replyTo && !founder && th?.root && th.root.muse_id !== identity.muse_id) {

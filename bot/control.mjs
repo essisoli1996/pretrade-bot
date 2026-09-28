@@ -21,7 +21,7 @@ export function normalize(raw) {
     else if (v === "shadow") features[f] = "shadow";
   }
   const approvalExempt = Array.isArray(c.approvalExempt) ? c.approvalExempt.filter((f) => FEATURES.includes(f)) : [];
-  return { paused: c.paused === true, readOnly: c.readOnly === true, approval: c.approval === true, approvalExempt, reviewHash: c.reviewHash === true, autonomy: c.autonomy === "full" ? "full" : "off", maxAutoPostsPer8h: cnt(c.maxAutoPostsPer8h, 6), maxAutoRepliesPer8h: cnt(c.maxAutoRepliesPer8h, 24), maxRepliesPerThread8h: cnt(c.maxRepliesPerThread8h, 3), founders: (Array.isArray(c.founders) ? c.founders : ["wynjr", "mikey"]).map((x) => String(x).toLowerCase()), numberCheck: c.numberCheck !== false, features };
+  return { paused: c.paused === true, readOnly: c.readOnly === true, approval: c.approval === true, approvalExempt, reviewHash: c.reviewHash === true, autonomy: c.autonomy === "full" ? "full" : "off", maxAutoPostsPer8h: cnt(c.maxAutoPostsPer8h, 6), maxAutoRepliesPer8h: cnt(c.maxAutoRepliesPer8h, 24), maxRepliesPerThread8h: cnt(c.maxRepliesPerThread8h, 3), maxRepliesPerPersonPerPost: cnt(c.maxRepliesPerPersonPerPost, 2), founders: (Array.isArray(c.founders) ? c.founders : ["wynjr", "mikey"]).map((x) => String(x).toLowerCase()), numberCheck: c.numberCheck !== false, features };
 }
 
 /** True when a post by this feature must wait in the outbox for the Muse's approval. */

@@ -9,6 +9,7 @@
   "maxAutoPostsPer8h": 6,
   "maxAutoRepliesPer8h": 24,
   "maxRepliesPerThread8h": 3,
+  "maxRepliesPerPersonPerPost": 2,
   "founders": ["wynjr", "mikey"],
   "features": {
     "mentions": true,
