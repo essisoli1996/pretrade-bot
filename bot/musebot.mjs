@@ -945,6 +945,13 @@ async function guardScan(identity, state, dry = false) {
     const tokens = await tickerTokens(ticker);
     const canon = canonicalFor(state, ticker, tokens);
     if (!canon) continue;
+    // a seeded canonical whose pool died is no anchor: an alert naming it points readers at nothing checkable ($MUSE,
+    // #83: the seed drained from $1.04m to no pair). Drop the seed and its deployer; the next scan re-seeds or stays quiet.
+    if (!G.canonical?.[ticker] && !(canon.liq > 0 && tokens.some((t) => t.address.toLowerCase() === canon.address.toLowerCase()))) {
+      delete state.guard.canonical[ticker]; if (state.guard.deployer) delete state.guard.deployer[ticker];
+      console.log(`guard: $${ticker}'s seeded canonical ${canon.address} has no live pool any more: seed dropped, no alert`);
+      continue;
+    }
     // identity before depth: pin the canonical deployer once, and refuse to guard a canonical whose source is unverified
     state.guard.deployer = state.guard.deployer ?? {};
     if (!state.guard.deployer[ticker] && canon.chain && canon.chain !== "?") {
@@ -2026,11 +2033,17 @@ async function pass(identity, state, indexOnly = false) {
       const addrs = allAddrs.filter((x) => !state.tokens.includes(x) && !isOwnToken(x) && !filed.has(x.toLowerCase()) && !addressOnlyInLinks(post.text, x));
       if (LURE_TALK.test(post.text)) continue;
       let check = null, lead = "";
+      // an official Robinhood Stock Token is a regulated instrument, not a launch: no unasked meme-scored read (#74, $TSLA)
+      if (addrs.length === 1 && (await stockToken(addrs[0])) === true) continue;
       if (addrs.length === 1) { check = await quickCheck(addrs[0]); if (check?.liqKnown === false) continue; } // unasked, and no liquidity figure: nothing solid to say
       else if (!allAddrs.length) {
         // no address: someone talking about a token by its $TICKER
         // outside the trading channel, only when the post is actually about the token, not a passing mention
-        if (!(TALK.anyMentionChannels ?? CFG.channels).includes(channel) && !TALK_INTENT.test(post.text)) continue;
+        // a ticker read only answers a post that is about trading or checking the token (a question, a buy/sell word),
+        // in every channel, and never a post addressed to another muse (a raffle ask to its runner, a game invite,
+        // a shout-out: #68, #71, #80 were all unasked reads on an engine-picked contract)
+        if (!TALK_INTENT.test(post.text)) continue;
+        if (/(^|\s)@(?!pretrade\b)[a-z0-9_]+/i.test(post.text) && !new RegExp(`@${CFG.name}\\b`, "i").test(post.text)) continue;
         const tick = tickersIn(post.text);
         if (tick.length !== 1) continue; // none, or a list: a single reply would be noise
         if (isPaymentUnit(post.text, tick[0])) continue; // "$1 in $BNKR", "paid in $X": the coin is the payment, not the topic
@@ -2162,7 +2175,7 @@ function launchRow(f, c) {
   const icon = { OK: "🟢", CAUTION: "🟡", DANGER: "🔴" }[c.verdict];
   const sim = c.sim?.status === "ok" && !c.sim.flags.length ? `sell works, ${c.sim.roundTripLossPct}% round trip` : c.sim?.status && c.sim.status !== "unavailable" ? c.sim.flags.map((x) => x.text).join(", ") || c.sim.status : null;
   const flags = c.flags.filter((x) => !/round trip|sell reverted|simulation|^pair /.test(x)).slice(0, 2); // age is already in the row
-  return `${icon} $${c.symbol} (${shortA(f.token)}) · ${ageText(f.created)} old · liq ${kUsd(c.liquidity)} · ${c.verdict} ${c.score}/100${sim ? ` · ${sim}` : ""}${flags.length ? ` · ${flags.join(", ")}` : ""}${f.musebook ? "" : " · not a $MUSEBOOK pair"}`;
+  return `${icon} $${c.symbol} (${f.token}) · ${ageText(f.created)} old · liq ${kUsd(c.liquidity)} · ${c.verdict} ${c.score}/100${sim ? ` · ${sim}` : ""}${flags.length ? ` · ${flags.join(", ")}` : ""}${f.musebook ? "" : " · not a $MUSEBOOK pair"}`;
 }
 
 /** Checks new launches; posts an hourly digest, and a standalone alert right away when a sell reverts or a round trip loses 50%+. */
