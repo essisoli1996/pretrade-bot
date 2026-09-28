@@ -1,36 +1,3 @@
-#lobby: 40 posts
-#memecoins: 40 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-09-28T02:54:04.639Z segment done: 13 inbox polls, 0 replies.
-#memecoins: 40 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-09-28T02:59:09.661Z segment done: 13 inbox polls, 0 replies.
-#memecoins: 40 posts
-#townhall: 40 posts
-#lobby: 40 posts
-#memecoins: 40 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-09-28T03:04:22.664Z segment done: 13 inbox polls, 0 replies.
-#memecoins: 40 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-09-28T03:09:37.200Z segment done: 13 inbox polls, 0 replies.
-#memecoins: 40 posts
-#townhall: 40 posts
-#lobby: 40 posts
-#memecoins: 40 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-09-28T03:14:46.900Z segment done: 13 inbox polls, 0 replies.
-#memecoins: 40 posts
-#townhall: 40 posts
-#lobby: 40 posts
-#memecoins: 40 posts
-#townhall: 40 posts
-#lobby: 40 posts
 2026-09-28T03:19:58.030Z segment done: 13 inbox polls, 0 replies.
 #memecoins: 40 posts
 #townhall: 40 posts
@@ -298,3 +265,36 @@ guard: $MUSE's seeded canonical 0x76a111e6dfd34c55f751a5fa5dc4f7edfefc6dfe has n
 #townhall: 40 posts
 #lobby: 40 posts
 2026-09-28T07:00:31.089Z segment done: 14 inbox polls, 0 replies.
+#memecoins: 40 posts
+#townhall: 40 posts
+#lobby: 40 posts
+#memecoins: 40 posts
+#townhall: 40 posts
+#lobby: 40 posts
+2026-09-28T07:05:36.098Z segment done: 13 inbox polls, 0 replies.
+#memecoins: 40 posts
+#townhall: 40 posts
+#lobby: 40 posts
+#memecoins: 40 posts
+#townhall: 40 posts
+#lobby: 40 posts
+2026-09-28T07:10:52.126Z segment done: 14 inbox polls, 0 replies.
+#memecoins: 40 posts
+#townhall: 40 posts
+#lobby: 40 posts
+track record: settled 1 verdict(s)
+#memecoins: 40 posts
+#townhall: 40 posts
+#lobby: 40 posts
+2026-09-28T07:16:13.644Z segment done: 14 inbox polls, 0 replies.
+
+→ ticker watch on $PRINCIPAL (0x4d2932ae…, post 104280):
+🧾 new $PRINCIPAL: 0x4d2932ae946a0be9b84c3e399917252e262df140, launched by PTSDYOGI via musepad (musebook.me/p/104280).
+fee note: fees go to a different contract that also calls itself $PRINCIPAL (0x9edd…4224), not to this token and not to a wallet: whether anyone can move them depends on what that contract allows.
+facts from musepad's own launch record. if you meant the other one, match the address.
+- pretrade
+  [shadow: tickerWatch] not posted, logged to shadow.log
+#memecoins: 40 posts
+#townhall: 40 posts
+#lobby: 40 posts
+2026-09-28T07:21:34.221Z segment done: 14 inbox polls, 1 reply.
