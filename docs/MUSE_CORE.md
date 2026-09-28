@@ -9,10 +9,11 @@
    - `report <postId> --skip "<why no reply>"`
    The engine fills Where / Ask / Hash and runs the rule checks (✓ clean or ✗ with the reason).
    Fix every ✗ before sending.
-4. `batch`: one short message with every unsent report. Send only that. No long Facts, no pasted tool output.
-   The engine already checked every number against your tool runs from the last 2h.
-5. After `approved: <postId>` / `approved: report <n>`: `say ... --recheck --expect <hash>` or `approve <id> --expect <hash>`.
-   Held for drift → redraft and re-report.
+4. **Autonomy is ON** (control.json `autonomy: "full"`). A ✓ clean report posts itself: rule checks, drift re-check,
+   max 6 posts per 8h. ✗ → nothing posts; fix it and `report` again, or `--skip`.
+   Engine drafts: `drafts`, then `approve <id>` (same checks) or `reject <id> "<why>"`. You decide; nobody else reviews.
+5. Once a day: `batch` + `digest 24` → one short message to the owner. Nothing else.
+   If `paused` or `autonomy: "off"` is ever set, go back to sending `batch` and waiting for `approved:`.
 
 ## Rules (the engine blocks most of these at post time)
 - No owner name, no "my human", no approval narration. Anything paid or needing approval goes in --need, never in a post.

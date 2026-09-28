@@ -2701,7 +2701,7 @@ async function main() {
     }
     const owner = ownerTalk(text, privateNames());
     if (owner) return console.log(`NOT POSTED: "${owner}" points at the owner. posts never name them or mention their approval; put what needs them under Needs in the report.`), null;
-    const ruled = lintDraft(text, { facts: `${recentFacts(2)}\n${engineText ?? ""}`, names: privateNames(), maxChars: Infinity }).filter((p) => !/^numbers /.test(p));
+    const ruled = lintDraft(text, { facts: `${recentFacts(2)}\n${engineText ?? ""}`, names: privateNames(), maxChars: CONTROL.autonomy === "full" ? 500 : Infinity }).filter((p) => !/^numbers /.test(p));
     if (ruled.length) return console.log(`NOT POSTED: ${ruled.join("; ")}.`), null;
     if (replyTo && !force && (await repliedByMe(replyTo)).mine) return console.log(`NOT POSTED: pretrade already replied to post ${replyTo} (use --force to add another).`), null;
     const body = signed(text);
@@ -2789,7 +2789,15 @@ async function main() {
     if (args.includes("--skip")) { const r = addReport({ key, where, skip: opt("--skip") || "no ask" }); return console.log(r ? reportLines(r).join("\n") : `already reported: ${key}`); }
     const problems = lintDraft(draft, { facts: recentFacts(2), names: privateNames() });
     const r = addReport({ key, where, ask, read: opt("--read"), draft, hash: postHash(signed(draft)), problems, doubts: opt("--doubt"), needs: opt("--need") });
-    return console.log(r ? reportLines(r).join("\n") : `already reported: ${key}`);
+    if (!r) return console.log(`already reported: ${key}`);
+    console.log(reportLines(r).join("\n"));
+    // autonomy "full": a clean report posts itself (drift re-check, cap and rule blocks still apply in deskPost)
+    if (CONTROL.autonomy === "full" && !problems.length) {
+      const ch = /^\d+$/.test(target) ? (where.match(/^#(\S+)/)?.[1] ?? "") : target.replace(/^new:/, "");
+      const id = ch && ch !== "?" ? await deskPost(ch, /^\d+$/.test(target) ? Number(target) : null, draft, { recheck: true }) : null;
+      const d = loadJson(DESK, {}); d.reports = (d.reports ?? []).map((x) => (x.n === r.n ? { ...x, posted: id ?? null } : x)); saveJson(DESK, d);
+    } else if (CONTROL.autonomy === "full") console.log("held: fix every ✗ and report again.");
+    return;
   }
 
   if (cmd === "batch") {

@@ -50,7 +50,7 @@ export function reportLines(r) {
     `  ask: ${r.ask}`,
     `  read: ${r.read || "-"}`,
     `  draft: ${r.draft}`,
-    `  hash: ${r.hash}   check: ${r.problems.length ? `✗ ${r.problems.join("; ")}` : "✓ clean"}`,
+    `  hash: ${r.hash}   check: ${r.problems.length ? `✗ ${r.problems.join("; ")}` : "✓ clean"}${r.posted ? `   posted ${r.posted}` : ""}`,
   ];
   if (r.doubts) lines.push(`  doubts: ${r.doubts}`);
   if (r.needs) lines.push(`  needs: ${r.needs}`);
