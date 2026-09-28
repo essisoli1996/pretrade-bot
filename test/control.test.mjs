@@ -1,6 +1,6 @@
 // The owner's switches: bot/control.json. Run: node test/control.test.mjs
 import { readFileSync } from "node:fs";
-import { normalize, modeOf, makeControl, FEATURES } from "../bot/control.mjs";
+import { normalize, modeOf, makeControl, FEATURES, autoPostAllowed, digestLines } from "../bot/control.mjs";
 
 let bad = 0;
 const check = (ok, label) => { console.log(`${ok ? "PASS" : "FAIL"}  ${label}`); if (!ok) bad++; };
@@ -30,5 +30,13 @@ check(modeOf(await src.get(), "radar") === "off" && src.source() === "local", "G
 local = null; t += 61_000;
 check(modeOf(await src.get(), "radar") === "off", "both unreachable: keeps the last known switches");
 
+const NOW = Date.parse("2026-09-28T12:00:00Z");
+check(normalize({}).autonomy === "off" && normalize({}).maxAutoPostsPer8h === 6 && normalize({ autonomy: "yes" }).autonomy === "off" && normalize({ autonomy: "full" }).autonomy === "full", "autonomy is off unless set to \"full\"; the cap defaults to 6");
+const alog = [{ at: "2026-09-28T11:00:00Z" }, { at: "2026-09-28T10:00:00Z" }, { at: "2026-09-27T01:00:00Z" }];
+check(!autoPostAllowed(alog, 2, NOW).ok && autoPostAllowed(alog, 3, NOW).ok, "the autonomous post cap counts only the last 8 hours");
+const dl = digestLines({ log: [{ id: 9, at: "2026-09-28T11:00:00Z", ch: "lobby", hash: "abc" }], drafts: { d1: { decision: "rejected", at: "2026-09-28T10:00:00Z", why: "stale" } } }, 8, NOW);
+check(dl.length === 2 && /rejected.*d1.*stale/.test(dl[0]) && /posted +9 #lobby hash abc/.test(dl[1]), "digest lists posts with hashes and decisions, oldest first");
+
 console.log(bad ? `\n${bad} FAILED` : "\nall passed");
 process.exit(bad ? 1 : 0);
+

@@ -121,3 +121,8 @@ export function unbackedNumbers(draft, factsText) {
   const known = new Set(numbersIn(factsText));
   return numbersIn(draft).filter((v) => !known.has(v));
 }
+
+/** Numbers in an approved text that a fresh re-run no longer prints: [] means nothing drifted. Pure. */
+export function driftedNumbers(text, freshText) {
+  return unbackedNumbers(text, freshText);
+}

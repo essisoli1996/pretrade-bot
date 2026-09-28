@@ -4,6 +4,8 @@
 //   readOnly: true      → everything runs, nothing is posted: every post goes to shadow.log instead
 //   features.<name>     → true (on), false (off), or "shadow" (runs, writes what it would post to shadow.log)
 //   approval: true      → nothing is posted by the engine: each post waits in outbox.jsonl for the Muse (approve / reject)
+//   autonomy: "full"   → the Muse posts without a review hash (default "off"); every post is still logged with its hash
+//   maxAutoPostsPer8h  → under autonomy "full", at most this many desk posts in any 8 hours (default 6)
 //   approvalExempt: []  → features whose posts skip that wait (e.g. ["leakWatch"] if a leaked key must be flagged fast)
 export const FEATURES = ["mentions", "channels", "conversation", "launches", "launchReport", "townWatch", "guard", "tickerWatch", "leakWatch", "threatWatch", "digest", "radar", "watches", "presence"];
 export const DEFAULTS = Object.freeze({ paused: false, readOnly: false, features: {} });
@@ -18,7 +20,7 @@ export function normalize(raw) {
     else if (v === "shadow") features[f] = "shadow";
   }
   const approvalExempt = Array.isArray(c.approvalExempt) ? c.approvalExempt.filter((f) => FEATURES.includes(f)) : [];
-  return { paused: c.paused === true, readOnly: c.readOnly === true, approval: c.approval === true, approvalExempt, reviewHash: c.reviewHash === true, numberCheck: c.numberCheck !== false, features };
+  return { paused: c.paused === true, readOnly: c.readOnly === true, approval: c.approval === true, approvalExempt, reviewHash: c.reviewHash === true, autonomy: c.autonomy === "full" ? "full" : "off", maxAutoPostsPer8h: Number.isFinite(c.maxAutoPostsPer8h) && c.maxAutoPostsPer8h >= 0 ? Math.floor(c.maxAutoPostsPer8h) : 6, numberCheck: c.numberCheck !== false, features };
 }
 
 /** True when a post by this feature must wait in the outbox for the Muse's approval. */
@@ -51,4 +53,18 @@ export function makeControl({ fetchText, readLocal, everyMs = 60_000, now = () =
     },
     source: () => source,
   };
+}
+
+/** Under autonomy "full": may one more desk post go out? log = desk.json's log ([{ at }]). Pure. */
+export function autoPostAllowed(log, cap, now = Date.now()) {
+  const used = (Array.isArray(log) ? log : []).filter((e) => Date.parse(e?.at) > now - 8 * 36e5).length;
+  return { ok: used < cap, used, cap };
+}
+
+/** The last `hours` of the desk: posts (with hash) and draft decisions, oldest first. Pure. */
+export function digestLines(desk, hours = 8, now = Date.now()) {
+  const since = now - hours * 36e5, rows = [];
+  for (const e of desk?.log ?? []) if (Date.parse(e.at) > since) rows.push([e.at, `posted   ${e.id} #${e.ch}${e.replyTo ? ` ↳${e.replyTo}` : ""} hash ${e.hash}${e.auto ? " (auto)" : ""}`]);
+  for (const [id, d] of Object.entries(desk?.drafts ?? {})) if (Date.parse(d.at) > since) rows.push([d.at, `${d.decision.padEnd(8)} draft ${id}${d.post ? ` → ${d.post}` : ""}${d.why ? `: ${d.why}` : ""}`]);
+  return rows.sort((a, b) => a[0].localeCompare(b[0])).map(([at, l]) => `${at.slice(0, 16)}  ${l}`);
 }

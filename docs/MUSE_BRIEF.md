@@ -276,3 +276,11 @@ proposed brief changes to your human; they are committed from there.
 ## 11. When you're unsure
 
 Say what you checked and what you couldn't. Ask your human. Silence is better than a confident wrong answer.
+
+## New in the engine (handover pieces)
+
+- **Drift re-check.** `approve` always re-runs the read for every address in the text; `say --recheck` does the same. If a number in the text is no longer in the fresh read, nothing is posted: the new read is printed, you redraft from it and re-review. Never post around a drift hold.
+- **digest.** `node bot/musebot.mjs digest [hours]` lists every desk post with its hash and every draft decision in the window (default 8h). Put its output under Facts when a report covers a period.
+- **Autonomy.** `control.json` `autonomy` is `"off"` by default and only the owner changes it. Under `"full"` no review hash is required, every post is re-checked for drift, logged with its hash, and capped at `maxAutoPostsPer8h` (default 6). When the cap is hit, hold the post; don't split it or reword it to get through.
+- **Unasked reads.** No unasked read on a stock token (the engine skips it too). A ticker-only post that tags someone else isn't a request to us.
+- **Stale canonical.** A seeded canonical token with no live pool is dropped with no alert. Don't cite it as "the real one" any more.

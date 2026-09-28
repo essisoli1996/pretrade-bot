@@ -27,12 +27,12 @@ import { makeExplorer, blockscoutHolders } from "./explorer.mjs";
 import { makeApprovals } from "./approvals.mjs";
 import { makeTxSim, describeTxSim, parseTx } from "./txsim.mjs";
 import { TALK_INTENT, chainNamedIn, chainTheyMean, isPaymentUnit, looksLikeCorrection } from "./talk.mjs";
-import { makeControl, modeOf, needsApproval } from "./control.mjs";
+import { makeControl, modeOf, needsApproval, autoPostAllowed, digestLines } from "./control.mjs";
 import { toDraft, parseOutbox, appendDraft, pendingDrafts } from "./outbox.mjs";
 import { loadJson, saveJson } from "./store.mjs";
 import { top10Share, holderKind } from "./holders.mjs";
 import { loadKeysFile, archiveUrl, redact, codeKind, etherscanSource } from "./archive.mjs";
-import { addressOnlyInLinks, LURE_TALK, lureInPath, dropForkCopies, ownerTalk, privateNames, postHash, pinnedInThread, unbackedNumbers } from "./addrctx.mjs";
+import { addressOnlyInLinks, LURE_TALK, lureInPath, dropForkCopies, ownerTalk, privateNames, postHash, pinnedInThread, unbackedNumbers, driftedNumbers } from "./addrctx.mjs";
 import { isSol, GOPLUS, n, yes } from "./core/util.mjs";
 import { makeQuickCheck } from "./core/check.mjs";
 import { httpFixture } from "./core/httpfixture.mjs";
@@ -2678,7 +2678,7 @@ async function main() {
   // nothing naming or pointing at the owner,
   // no second reply to the same post, the signature line. Returns the post id, or null with the reason printed.
   const signed = (text) => (/\n- pretrade\s*$/i.test(text) ? text : `${text}\n- ${CFG.name}`);
-  const deskPost = async (ch, replyTo, text, { force = false, dry = false, expect = null, engineText = null } = {}) => {
+  const deskPost = async (ch, replyTo, text, { force = false, dry = false, expect = null, engineText = null, recheck = false } = {}) => {
     if (CONTROL.paused) return console.log("NOT POSTED: the owner has paused pretrade (bot/control.json)."), null;
     if (findSecrets(text).length) return console.log("NOT POSTED: the text contains something that looks like a key or seed phrase."), null;
     // every number in the post comes from a tool the Muse ran in the last 2 hours (or from the engine's own draft)
@@ -2692,19 +2692,31 @@ async function main() {
     const body = signed(text);
     // the text posted is the text reviewed: its hash must match the one in the report
     const h = postHash(body);
-    if (CONTROL.reviewHash && !expect) return console.log(`NOT POSTED: review needs --expect <hash>. this text's hash is ${h}.`), null;
+    const auto = CONTROL.autonomy === "full";
+    if (auto) {
+      const cap = autoPostAllowed(loadJson(DESK, {}).log, CONTROL.maxAutoPostsPer8h);
+      if (!cap.ok) return console.log(`NOT POSTED: ${cap.used} of ${cap.cap} autonomous posts used in the last 8 hours. hold it for the next window.`), null;
+    }
+    // drift: re-run the read for every address in the text; a number the fresh read no longer prints holds the post
+    if (recheck || auto) {
+      const fresh = [];
+      for (const a of addressesIn(text).slice(0, 3)) { const q = await quickCheck(a).catch(() => null); if (q) fresh.push(replyText(q, await replyCtx("mention", "tester", a))); }
+      const moved = fresh.length ? driftedNumbers(text, `${fresh.join("\n")}\n${engineText ?? ""}`) : [];
+      if (moved.length) { return console.log(`NOT POSTED (drift): the fresh read no longer shows ${moved.map((x) => `"${x}"`).join(", ")}. new read:\n${fresh.join("\n---\n")}\nredraft from it and re-review.`), null; }
+    }
+    if (CONTROL.reviewHash && !auto && !expect) return console.log(`NOT POSTED: review needs --expect <hash>. this text's hash is ${h}.`), null;
     if (expect && expect !== h) return console.log(`NOT POSTED: the text changed since review (hash ${h}, reviewed ${expect}).`), null;
     if (CONTROL.readOnly || dry) return console.log(`NOT POSTED (${CONTROL.readOnly ? "read-only mode" : "--dry"}). would have posted${replyTo ? ` under ${replyTo}` : ""} in #${ch}:\n${body}`), null;
     DESK_POSTING = true;
     try {
       const r = replyTo ? await postReply(identity, ch, replyTo, body) : await http(`${BOARD}/api/post`, signRequest("post", identity, { channel: ch, name: CFG.name, text: body }));
       const id = r.ok ? r.json?.post?.id : null;
-      if (id) { const d = loadJson(DESK, {}); d.posts = [...(d.posts ?? []), id].slice(-2000); saveJson(DESK, d); }
+      if (id) { const d = loadJson(DESK, {}); d.posts = [...(d.posts ?? []), id].slice(-2000); d.log = [...(d.log ?? []), { id, at: new Date().toISOString(), ch, replyTo, hash: h, auto }].slice(-2000); saveJson(DESK, d); }
       console.log(id ? `posted: ${BOARD}/p/${id}` : `FAILED: HTTP ${r.status} ${String(r.text).slice(0, 200)}`);
       return id;
     } finally { DESK_POSTING = false; }
   };
-  const flagArgs = (from) => args.slice(from).filter((x, i, all) => !["--reply", "--force", "--dry", "--text", "--expect"].includes(x) && all[i - 1] !== "--reply" && all[i - 1] !== "--expect");
+  const flagArgs = (from) => args.slice(from).filter((x, i, all) => !["--reply", "--force", "--dry", "--text", "--expect", "--recheck"].includes(x) && all[i - 1] !== "--reply" && all[i - 1] !== "--expect");
   const expectArg = () => { const i = args.indexOf("--expect"); return i >= 0 ? String(args[i + 1] ?? "") : null; };
 
   if (cmd === "say") {
@@ -2712,7 +2724,7 @@ async function main() {
     const ch = args[1], ri = args.indexOf("--reply"), replyTo = ri >= 0 ? Number(args[ri + 1]) : null;
     const text = flagArgs(2).join(" ").trim();
     if (!ch || !text) return console.log(`usage: say <channel> [--reply <postId>] --expect <hash> "<text>"   (hash: node bot/musebot.mjs hash "<text>")`);
-    await deskPost(ch, replyTo, text, { force: args.includes("--force"), dry: args.includes("--dry"), expect: expectArg() });
+    await deskPost(ch, replyTo, text, { force: args.includes("--force"), dry: args.includes("--dry"), expect: expectArg(), recheck: args.includes("--recheck") });
     return;
   }
 
@@ -2743,14 +2755,21 @@ async function main() {
     return console.log(waiting.length ? `${waiting.length} draft(s) waiting (of ${all.length} in the outbox).` : "no drafts waiting.");
   }
 
+  if (cmd === "digest") {
+    // The desk's last hours: every post with its hash, every draft decision.  node bot/musebot.mjs digest [hours]
+    const lines = digestLines(loadJson(DESK, {}), Number(args[1] ?? 8));
+    console.log(`autonomy: ${CONTROL.autonomy}${CONTROL.autonomy === "full" ? ` (${autoPostAllowed(loadJson(DESK, {}).log, CONTROL.maxAutoPostsPer8h).used}/${CONTROL.maxAutoPostsPer8h} in 8h)` : ""}`);
+    return console.log(lines.length ? lines.join("\n") : "nothing in that window.");
+  }
+
   if (cmd === "approve") {
     // Publish a draft as-is or edited.  node bot/musebot.mjs approve <id> [--text "<edited text>"] [--expect <hash>] [--dry]
     const d = await findDraft(args[1]);
     if (!d) return console.log(`no draft ${args[1]} in the outbox (git pull, or it scrolled out).`);
     const prior = (loadJson(DESK, {}).drafts ?? {})[d.id];
     if (prior && !args.includes("--force")) return console.log(`draft ${d.id} was already decided: ${prior.decision} at ${prior.at} (use --force to post anyway).`);
-    const ti = args.indexOf("--text"), edited = ti >= 0 ? args.slice(ti + 1).filter((x, i, all) => !["--dry", "--force", "--expect"].includes(x) && all[i - 1] !== "--expect").join(" ").trim() : "";
-    const id = await deskPost(d.channel, d.reply_to, edited || d.text, { dry: args.includes("--dry"), expect: expectArg(), engineText: d.text });
+    const ti = args.indexOf("--text"), edited = ti >= 0 ? args.slice(ti + 1).filter((x, i, all) => !["--dry", "--force", "--expect", "--recheck"].includes(x) && all[i - 1] !== "--expect").join(" ").trim() : "";
+    const id = await deskPost(d.channel, d.reply_to, edited || d.text, { dry: args.includes("--dry"), expect: expectArg(), engineText: d.text, recheck: true });
     if (id) decide(d.id, edited ? "edited" : "approved", { post: id });
     return;
   }
