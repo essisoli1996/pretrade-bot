@@ -12,6 +12,7 @@ export const DEFAULTS = Object.freeze({ paused: false, readOnly: false, features
 
 /** Accepts whatever is in the file and keeps only what makes sense; anything unreadable means "on" (the default). */
 export function normalize(raw) {
+  const cnt = (v, d) => (Number.isFinite(v) && v >= 0 ? Math.floor(v) : d);
   const c = raw && typeof raw === "object" ? raw : {};
   const features = {};
   for (const f of FEATURES) {
@@ -20,7 +21,7 @@ export function normalize(raw) {
     else if (v === "shadow") features[f] = "shadow";
   }
   const approvalExempt = Array.isArray(c.approvalExempt) ? c.approvalExempt.filter((f) => FEATURES.includes(f)) : [];
-  return { paused: c.paused === true, readOnly: c.readOnly === true, approval: c.approval === true, approvalExempt, reviewHash: c.reviewHash === true, autonomy: c.autonomy === "full" ? "full" : "off", maxAutoPostsPer8h: Number.isFinite(c.maxAutoPostsPer8h) && c.maxAutoPostsPer8h >= 0 ? Math.floor(c.maxAutoPostsPer8h) : 6, numberCheck: c.numberCheck !== false, features };
+  return { paused: c.paused === true, readOnly: c.readOnly === true, approval: c.approval === true, approvalExempt, reviewHash: c.reviewHash === true, autonomy: c.autonomy === "full" ? "full" : "off", maxAutoPostsPer8h: cnt(c.maxAutoPostsPer8h, 6), maxAutoRepliesPer8h: cnt(c.maxAutoRepliesPer8h, 24), maxRepliesPerThread8h: cnt(c.maxRepliesPerThread8h, 3), numberCheck: c.numberCheck !== false, features };
 }
 
 /** True when a post by this feature must wait in the outbox for the Muse's approval. */
@@ -55,9 +56,10 @@ export function makeControl({ fetchText, readLocal, everyMs = 60_000, now = () =
   };
 }
 
-/** Under autonomy "full": may one more desk post go out? log = desk.json's log ([{ at }]). Pure. */
-export function autoPostAllowed(log, cap, now = Date.now()) {
-  const used = (Array.isArray(log) ? log : []).filter((e) => Date.parse(e?.at) > now - 8 * 36e5).length;
+/** Under autonomy "full": may one more desk post go out? New posts and replies have separate caps (kind "post" |
+ *  "reply"). log = desk.json's log ([{ at, replyTo }]). Pure. */
+export function autoPostAllowed(log, cap, now = Date.now(), kind = "post") {
+  const used = (Array.isArray(log) ? log : []).filter((e) => Date.parse(e?.at) > now - 8 * 36e5 && (kind === "reply" ? !!e?.replyTo : !e?.replyTo)).length;
   return { ok: used < cap, used, cap };
 }
 

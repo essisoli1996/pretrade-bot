@@ -2709,8 +2709,16 @@ async function main() {
     const h = postHash(body);
     const auto = CONTROL.autonomy === "full";
     if (auto) {
-      const cap = autoPostAllowed(loadJson(DESK, {}).log, CONTROL.maxAutoPostsPer8h);
-      if (!cap.ok) return console.log(`NOT POSTED: ${cap.used} of ${cap.cap} autonomous posts used in the last 8 hours. hold it for the next window.`), null;
+      const kind = replyTo ? "reply" : "post";
+      const cap = autoPostAllowed(loadJson(DESK, {}).log, replyTo ? CONTROL.maxAutoRepliesPer8h : CONTROL.maxAutoPostsPer8h, Date.now(), kind);
+      if (!cap.ok) return console.log(`NOT POSTED: ${cap.used} of ${cap.cap} autonomous ${kind === "reply" ? "replies" : "new posts"} used in the last 8 hours. hold it for the next window.`), null;
+      if (replyTo) {
+        // one thread doesn't eat the day: at most maxRepliesPerThread8h of mine in the same thread per 8 hours
+        const { root } = await repliedByMe(replyTo), since = Date.now() - 8 * 36e5;
+        const walk = (n) => (!n ? 0 : (n.muse_id === identity.muse_id && Date.parse(String(n.created_at ?? "").replace(" ", "T") + (/[zZ]$/.test(String(n.created_at ?? "")) ? "" : "Z")) > since ? 1 : 0) + (n.replies ?? []).reduce((a, r) => a + walk(r), 0));
+        const inThread = walk(root);
+        if (inThread >= CONTROL.maxRepliesPerThread8h) return console.log(`NOT POSTED: already ${inThread} replies from me in this thread in the last 8 hours (max ${CONTROL.maxRepliesPerThread8h}). let it rest.`), null;
+      }
     }
     // drift: re-run the read for every address in the text; a number the fresh read no longer prints holds the post
     if (recheck || auto) {
@@ -2817,7 +2825,7 @@ async function main() {
   if (cmd === "digest") {
     // The desk's last hours: every post with its hash, every draft decision.  node bot/musebot.mjs digest [hours]
     const lines = digestLines(loadJson(DESK, {}), Number(args[1] ?? 8));
-    console.log(`autonomy: ${CONTROL.autonomy}${CONTROL.autonomy === "full" ? ` (${autoPostAllowed(loadJson(DESK, {}).log, CONTROL.maxAutoPostsPer8h).used}/${CONTROL.maxAutoPostsPer8h} in 8h)` : ""}`);
+    console.log(`autonomy: ${CONTROL.autonomy}${CONTROL.autonomy === "full" ? ` (new posts ${autoPostAllowed(loadJson(DESK, {}).log, CONTROL.maxAutoPostsPer8h).used}/${CONTROL.maxAutoPostsPer8h}, replies ${autoPostAllowed(loadJson(DESK, {}).log, CONTROL.maxAutoRepliesPer8h, Date.now(), "reply").used}/${CONTROL.maxAutoRepliesPer8h} in 8h)` : ""}`);
     return console.log(lines.length ? lines.join("\n") : "nothing in that window.");
   }
 

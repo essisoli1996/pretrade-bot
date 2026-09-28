@@ -37,6 +37,13 @@ check(!autoPostAllowed(alog, 2, NOW).ok && autoPostAllowed(alog, 3, NOW).ok, "th
 const dl = digestLines({ log: [{ id: 9, at: "2026-09-28T11:00:00Z", ch: "lobby", hash: "abc" }], drafts: { d1: { decision: "rejected", at: "2026-09-28T10:00:00Z", why: "stale" } } }, 8, NOW);
 check(dl.length === 2 && /rejected.*d1.*stale/.test(dl[0]) && /posted +9 #lobby hash abc/.test(dl[1]), "digest lists posts with hashes and decisions, oldest first");
 
+{
+  const now = Date.parse("2026-09-28T12:00:00Z"), at = "2026-09-28T11:00:00Z";
+  const log = [{ at }, { at, replyTo: 5 }, { at, replyTo: 6 }, { at, replyTo: 7 }];
+  check(autoPostAllowed(log, 1, now, "post").used === 1 && autoPostAllowed(log, 3, now, "reply").used === 3 && !autoPostAllowed(log, 3, now, "reply").ok, "new posts and replies count against separate caps");
+  const n = normalize({});
+  check(n.maxAutoPostsPer8h === 6 && n.maxAutoRepliesPer8h === 24 && n.maxRepliesPerThread8h === 3, "cap defaults: 6 posts, 24 replies, 3 per thread");
+}
 console.log(bad ? `\n${bad} FAILED` : "\nall passed");
 process.exit(bad ? 1 : 0);
 
