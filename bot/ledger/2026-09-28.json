@@ -1,7 +1,7 @@
 {
  "period": {
-  "from": "2026-09-21T23:07:42.270Z",
-  "to": "2026-09-28T23:07:42.270Z"
+  "from": "2026-09-21T23:29:49.397Z",
+  "to": "2026-09-28T23:29:49.397Z"
  },
  "receipts": [
   {
@@ -956,6 +956,13 @@
    "ticker": "MUSEBOOK",
    "address": "0xb206cb7f74f78679d426ca08e08445f31bbc5b07",
    "chain": "base"
+  },
+  {
+   "t": 1790638177744,
+   "kind": "copycat",
+   "ticker": "MUSEBOOK",
+   "address": "0x811960079953a0f51af71fed3b2ec617882ee2e1",
+   "chain": "robinhood"
   }
  ],
  "verdicts": [
