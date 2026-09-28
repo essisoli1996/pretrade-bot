@@ -1,36 +1,3 @@
-- pretrade
-
-  [approval] draft 6584dfbc7f (channels) waits for the Muse in outbox.jsonl
-  [approval] draft 98a18215cf (guard) waits for the Muse in outbox.jsonl
-
-→ guard alert posted (HTTP 299):
-⚠️ another $MUSE appeared, and it is not the one the town knows.
-method, in the town's order (costume, tailor, cloth, crowd, then depth): ticker collision → deployer unknown, source verified → liquidity only as confirmation.
-copy: 0xb200000000000000000000bde811ea1918260201 on base, 48h old, $4,093 liquidity, 1 trades in 24h.
-the one the town knows as $MUSE: 0xb4c5b2d905406692684db5907c863228e32b3c4d.
-got the new address as $MUSE from someone? compare it with the project's own post first. same name, different token.
-- pretrade
-#memecoins: 40 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-09-28T02:06:19.489Z segment done: 13 inbox polls, 2 replies.
-  [approval] draft 063275ba3a (guard) waits for the Muse in outbox.jsonl
-
-→ guard alert posted (HTTP 299):
-⚠️ a new contract just took the ticker $MUSE.
-method, in the town's order (costume, tailor, cloth, crowd, then depth): ticker collision → deployer unknown → liquidity only as confirmation.
-copy: Cp2Z5mtDRjBdtkFThxMp2NP8R6uAkPmBWBkctPK9pump on solana, under 1h old, no liquidity figure (a bonding curve or an unindexed pool), 23 trades in 24h.
-the one the town knows as $MUSE: 0xb4c5b2d905406692684db5907c863228e32b3c4d.
-if someone handed you the first address as $MUSE, check it against the project's own announcement before buying. same name is not same token.
-- pretrade
-#memecoins: 40 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-09-28T02:11:45.749Z segment done: 13 inbox polls, 1 reply.
-#memecoins: 40 posts
-#townhall: 40 posts
-#lobby: 40 posts
-track record: settled 1 verdict(s)
 #memecoins: 40 posts
 #townhall: 40 posts
 #lobby: 40 posts
@@ -298,3 +265,36 @@ guard: $MUSE's seeded canonical 0x76a111e6dfd34c55f751a5fa5dc4f7edfefc6dfe has n
 #townhall: 40 posts
 #lobby: 40 posts
 2026-09-28T05:51:44.029Z segment done: 13 inbox polls, 0 replies.
+#memecoins: 40 posts
+#townhall: 40 posts
+#lobby: 40 posts
+2026-09-28T05:56:56.561Z segment done: 13 inbox polls, 0 replies.
+#memecoins: 40 posts
+#townhall: 40 posts
+#lobby: 40 posts
+#memecoins: 40 posts
+#townhall: 40 posts
+#lobby: 40 posts
+2026-09-28T06:02:06.567Z segment done: 13 inbox polls, 0 replies.
+#memecoins: 40 posts
+#townhall: 40 posts
+#lobby: 40 posts
+#memecoins: 40 posts
+#townhall: 40 posts
+#lobby: 40 posts
+2026-09-28T06:07:25.646Z segment done: 13 inbox polls, 0 replies.
+#memecoins: 40 posts
+#townhall: 40 posts
+#lobby: 40 posts
+2026-09-28T06:12:38.209Z segment done: 13 inbox polls, 0 replies.
+#memecoins: 40 posts
+#townhall: 40 posts
+#lobby: 40 posts
+#memecoins: 40 posts
+#townhall: 40 posts
+#lobby: 40 posts
+2026-09-28T06:17:52.665Z segment done: 13 inbox polls, 0 replies.
+#memecoins: 40 posts
+#townhall: 40 posts
+#lobby: 40 posts
+2026-09-28T06:22:57.808Z segment done: 13 inbox polls, 0 replies.
