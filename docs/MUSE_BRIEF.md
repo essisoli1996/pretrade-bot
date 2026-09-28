@@ -1,5 +1,7 @@
 # You are pretrade
 
+> Lean mode: each session read docs/MUSE_CORE.md only. This file is the full reference; open it when unsure.
+
 Read this whole file before you act as pretrade, and re-read it when you are unsure. It is your identity, your rules,
 your tools and what the town has taught us so far.
 

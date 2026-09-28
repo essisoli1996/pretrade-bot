@@ -32,6 +32,7 @@ import { toDraft, parseOutbox, appendDraft, pendingDrafts } from "./outbox.mjs";
 import { loadJson, saveJson } from "./store.mjs";
 import { top10Share, holderKind } from "./holders.mjs";
 import { loadKeysFile, archiveUrl, redact, codeKind, etherscanSource } from "./archive.mjs";
+import { needsReply, lintDraft, reportLines, machineStreak } from "./lean.mjs";
 import { addressOnlyInLinks, LURE_TALK, lureInPath, dropForkCopies, ownerTalk, privateNames, postHash, pinnedInThread, unbackedNumbers, driftedNumbers } from "./addrctx.mjs";
 import { isSol, GOPLUS, n, yes } from "./core/util.mjs";
 import { makeQuickCheck } from "./core/check.mjs";
@@ -2612,6 +2613,15 @@ async function main() {
   const DESK = join(process.env.MUSE_IDENTITY_FILE ? dirname(process.env.MUSE_IDENTITY_FILE) : DATA, "desk.json");
   const myPostIds = () => [...new Set([...(loadJson(STATE_FILE, {}).ownPosts ?? []), ...(loadJson(DESK, {}).posts ?? [])].map(Number).filter(Boolean))].sort((a, b) => b - a);
 
+  // lean reports (bot/lean.mjs): the engine writes the report and runs the rule checks; the Muse adds one-line judgment
+  const addReport = (r) => {
+    const d = loadJson(DESK, {}); d.reports = d.reports ?? [];
+    if (d.reports.some((x) => x.key === r.key && !x.sent)) return null; // dedupe by Key
+    const rep = { n: (d.reportN ?? 0) + 1, at: new Date().toISOString(), problems: [], ...r };
+    d.reportN = rep.n; d.reports = [...d.reports, rep].slice(-500); saveJson(DESK, d);
+    return rep;
+  };
+
   if (cmd === "inbox") {
     // What waits for a human-quality answer: mentions and replies to my posts that the engine leaves to the Muse
     // (no command, not a single token address), newest last, minus anything already answered.  node bot/musebot.mjs inbox [hours]
@@ -2642,7 +2652,7 @@ async function main() {
       walk(root);
       if (toTime(root.created_at) && toTime(root.created_at) < since - 7 * 864e5) break; // older threads than this are done
     }
-    let shown = 0;
+    let shown = 0, skipped = 0;
     for (const it of [...items.values()].sort((a, b) => Number(a.id) - Number(b.id))) {
       if (/^\s*\[(removed|deleted)\]\s*$/i.test(it.text)) continue; // taken down by its author or a mod: nothing to answer
       if (COMMAND_RE.test(it.text) || (addressesIn(it.text).length === 1 && !/\?/.test(it.text))) continue; // the engine answers these
@@ -2651,11 +2661,14 @@ async function main() {
       const created = node.created_at ? Date.parse(String(node.created_at).replace(" ", "T") + "Z") : it.created;
       if (created && created < since) continue;
       if (/^\s*\[(removed|deleted)\]\s*$/i.test(String(node.text))) continue;
+      const nr = needsReply(node.text);
+      if (!nr.reply && !args.includes("--all")) { addReport({ key: `post${it.id}`, where: `#${it.channel} ${it.who}`, skip: nr.why }); skipped++; continue; }
       shown++;
       console.log(`──── post ${it.id} · #${it.channel} · ${it.who} · ${it.why}${created ? ` · ${new Date(created).toISOString().slice(0, 16)}Z` : ""}`);
       if (root && String(root.id) !== String(it.id)) console.log(`thread started by ${root.name}: ${String(root.text).replace(/\s+/g, " ").slice(0, 300)}`);
       console.log(`${String(node.text).trim()}\n→ reply: node bot/musebot.mjs say ${it.channel} --reply ${it.id} "<your text>"\n`);
     }
+    if (skipped) console.log(`${skipped} with no ask: logged as no-reply, no report needed (inbox --all shows them).`);
     return console.log(shown ? `${shown} waiting.` : "inbox clear: nothing waiting for me.");
   }
 
@@ -2688,6 +2701,8 @@ async function main() {
     }
     const owner = ownerTalk(text, privateNames());
     if (owner) return console.log(`NOT POSTED: "${owner}" points at the owner. posts never name them or mention their approval; put what needs them under Needs in the report.`), null;
+    const ruled = lintDraft(text, { facts: `${recentFacts(2)}\n${engineText ?? ""}`, names: privateNames(), maxChars: Infinity }).filter((p) => !/^numbers /.test(p));
+    if (ruled.length) return console.log(`NOT POSTED: ${ruled.join("; ")}.`), null;
     if (replyTo && !force && (await repliedByMe(replyTo)).mine) return console.log(`NOT POSTED: pretrade already replied to post ${replyTo} (use --force to add another).`), null;
     const body = signed(text);
     // the text posted is the text reviewed: its hash must match the one in the report
@@ -2755,6 +2770,41 @@ async function main() {
     return console.log(waiting.length ? `${waiting.length} draft(s) waiting (of ${all.length} in the outbox).` : "no drafts waiting.");
   }
 
+  if (cmd === "report") {
+    // Write a report for the batch.  report <postId|new:<channel>> "<draft>" [--read ".."] [--doubt ".."] [--need ".."]
+    //                                report <postId> --skip "<why no reply>"
+    const opt = (f) => { const i = args.indexOf(f); return i >= 0 ? String(args[i + 1] ?? "").trim() : ""; };
+    const target = String(args[1] ?? ""), rest = args.slice(2).filter((x, i, all) => !["--read", "--doubt", "--need", "--skip"].includes(x) && !["--read", "--doubt", "--need", "--skip"].includes(all[i - 1]));
+    const draft = rest.join(" ").trim();
+    if (!target || (!draft && !args.includes("--skip"))) return console.log(`usage: report <postId|new:<channel>> "<draft>" [--read ".."] [--doubt ".."] [--need ".."]  |  report <postId> --skip "<why>"`);
+    let where = target, ask = "-";
+    if (/^\d+$/.test(target)) {
+      const t = await http(`${BOARD}/api/thread.json?post=${target}`);
+      const find = (n) => (!n ? null : String(n.id) === target ? n : (n.replies ?? []).map(find).find(Boolean) ?? null);
+      const node = find(t.json?.thread);
+      where = `#${node?.channel ?? t.json?.channel ?? "?"} ↳${target} ${node?.name ?? "?"}`;
+      ask = String(node?.text ?? "").replace(/\s+/g, " ").slice(0, 160);
+    }
+    const key = /^\d+$/.test(target) ? `post${target}` : `${target}:${postHash(draft).slice(0, 6)}`;
+    if (args.includes("--skip")) { const r = addReport({ key, where, skip: opt("--skip") || "no ask" }); return console.log(r ? reportLines(r).join("\n") : `already reported: ${key}`); }
+    const problems = lintDraft(draft, { facts: recentFacts(2), names: privateNames() });
+    const r = addReport({ key, where, ask, read: opt("--read"), draft, hash: postHash(signed(draft)), problems, doubts: opt("--doubt"), needs: opt("--need") });
+    return console.log(r ? reportLines(r).join("\n") : `already reported: ${key}`);
+  }
+
+  if (cmd === "batch") {
+    // Every report not yet sent, in one short message; marks them sent.  batch [--peek]
+    const d = loadJson(DESK, {}), all = d.reports ?? [], todo = all.filter((r) => !r.sent);
+    if (!todo.length) return console.log("nothing to send.");
+    const skips = todo.filter((r) => r.skip), real = todo.filter((r) => !r.skip);
+    const out = [`Batch ${new Date().toISOString().slice(0, 16)}Z · ${real.length} to review · ${skips.length} no-reply · machine streak ${machineStreak(all)}`];
+    for (const r of real) out.push(...reportLines(r));
+    if (skips.length) out.push(`no-reply ✓: ${skips.map((r) => `#${r.n} ${r.key} (${r.skip})`).join(", ")}`);
+    console.log(out.join("\n"));
+    if (!args.includes("--peek")) { const ids = new Set(todo.map((r) => r.n)); d.reports = all.map((r) => (ids.has(r.n) ? { ...r, sent: true } : r)); saveJson(DESK, d); }
+    return;
+  }
+
   if (cmd === "digest") {
     // The desk's last hours: every post with its hash, every draft decision.  node bot/musebot.mjs digest [hours]
     const lines = digestLines(loadJson(DESK, {}), Number(args[1] ?? 8));
@@ -2784,19 +2834,27 @@ async function main() {
   if (cmd === "check") {
     // The cheap, frequent look (every 30-60 s): anything new since the last check? About 5 requests, no thread walks, no
     // tool runs. It prints "nothing new" or the new items; run the full routine (drafts / inbox / tools) only when it
-    // finds something.  node bot/musebot.mjs check [--pending <file.jsonl>]
-    const d = loadJson(DESK, {}), seen = new Set(d.seen ?? []), fresh = [];
-    let res = await http(`${BOARD}/api/mentions.json?${signedQuery("mentions", identity, false)}`);
-    if (res.status === 401) res = await http(`${BOARD}/api/mentions.json?${signedQuery("mentions", identity, true)}`);
-    for (const m of res.json?.mentions ?? []) { const id = String(m.post_id ?? m.id); if (!seen.has(`p${id}`)) fresh.push({ key: `p${id}`, line: `mention  #${m.channel} post ${id} by ${m.name ?? m.from ?? "?"}: ${String(m.text ?? m.excerpt ?? "").replace(/\s+/g, " ").slice(0, 160)}` }); }
-    const mine = new Set(myPostIds().map(String));
-    for (const ch of [...new Set([...CFG.channels, "townhall"])]) {
-      for (const p of postsFrom((await http(`${BOARD}/api/latest.json?channel=${encodeURIComponent(ch)}&limit=40`)).json)) {
-        if (!p.parent || !mine.has(String(p.parent)) || p.museId === identity.muse_id || seen.has(`p${p.id}`)) continue;
-        fresh.push({ key: `p${p.id}`, line: `reply    #${ch} post ${p.id} by ${p.name} (to my ${p.parent}): ${p.text.replace(/\s+/g, " ").slice(0, 160)}` });
+    // finds something.  node bot/musebot.mjs check [--wait <sec>] [--pending <file.jsonl>]
+    const scan = async () => {
+      const d = loadJson(DESK, {}), seen = new Set(d.seen ?? []), fresh = [];
+      let res = await http(`${BOARD}/api/mentions.json?${signedQuery("mentions", identity, false)}`);
+      if (res.status === 401) res = await http(`${BOARD}/api/mentions.json?${signedQuery("mentions", identity, true)}`);
+      for (const m of res.json?.mentions ?? []) { const id = String(m.post_id ?? m.id); if (!seen.has(`p${id}`)) fresh.push({ key: `p${id}`, line: `mention  #${m.channel} post ${id} by ${m.name ?? m.from ?? "?"}: ${String(m.text ?? m.excerpt ?? "").replace(/\s+/g, " ").slice(0, 160)}` }); }
+      const mine = new Set(myPostIds().map(String));
+      for (const ch of [...new Set([...CFG.channels, "townhall"])]) {
+        for (const p of postsFrom((await http(`${BOARD}/api/latest.json?channel=${encodeURIComponent(ch)}&limit=40`)).json)) {
+          if (!p.parent || !mine.has(String(p.parent)) || p.museId === identity.muse_id || seen.has(`p${p.id}`)) continue;
+          fresh.push({ key: `p${p.id}`, line: `reply    #${ch} post ${p.id} by ${p.name} (to my ${p.parent}): ${p.text.replace(/\s+/g, " ").slice(0, 160)}` });
+        }
       }
-    }
-    for (const dr of pendingDrafts(await readOutbox(), d.drafts ?? {}, Date.now() - 24 * 36e5)) if (!seen.has(`d${dr.id}`)) fresh.push({ key: `d${dr.id}`, line: `draft    ${dr.id} (${dr.feature ?? "engine"}) #${dr.channel}${dr.reply_to ? ` reply to ${dr.reply_to}` : ""}: ${dr.text.replace(/\s+/g, " ").slice(0, 160)}` });
+      for (const dr of pendingDrafts(await readOutbox(), d.drafts ?? {}, Date.now() - 24 * 36e5)) if (!seen.has(`d${dr.id}`)) fresh.push({ key: `d${dr.id}`, line: `draft    ${dr.id} (${dr.feature ?? "engine"}) #${dr.channel}${dr.reply_to ? ` reply to ${dr.reply_to}` : ""}: ${dr.text.replace(/\s+/g, " ").slice(0, 160)}` });
+      return { d, fresh };
+    };
+    // --wait <sec>: poll quietly inside the process (every 60 s) and return only when something is new or time is up,
+    // so the Muse spends no tokens on "nothing new" turns
+    const wi = args.indexOf("--wait"), until = Date.now() + (wi >= 0 ? Number(args[wi + 1] ?? 1800) : 0) * 1000;
+    let { d, fresh } = await scan();
+    while (!fresh.length && Date.now() + 60_000 <= until) { await new Promise((r) => setTimeout(r, 60_000)); ({ d, fresh } = await scan()); }
     const stamp = new Date().toISOString().slice(11, 16);
     if (!fresh.length) return console.log(`${stamp} UTC nothing new.`);
     // --pending <file>: append the new items there BEFORE marking them seen, so a crash in between can only repeat an
