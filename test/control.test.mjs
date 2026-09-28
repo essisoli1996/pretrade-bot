@@ -41,6 +41,8 @@ check(dl.length === 2 && /rejected.*d1.*stale/.test(dl[0]) && /posted +9 #lobby 
   const now = Date.parse("2026-09-28T12:00:00Z"), at = "2026-09-28T11:00:00Z";
   const log = [{ at }, { at, replyTo: 5 }, { at, replyTo: 6 }, { at, replyTo: 7 }];
   check(autoPostAllowed(log, 1, now, "post").used === 1 && autoPostAllowed(log, 3, now, "reply").used === 3 && !autoPostAllowed(log, 3, now, "reply").ok, "new posts and replies count against separate caps");
+  check(autoPostAllowed([...log, { at, replyTo: 8, founder: true }], 3, now, "reply").used === 3, "founder replies don't count against the cap");
+  check(normalize({}).founders.includes("wynjr") && normalize({ founders: ["Pip"] }).founders[0] === "pip", "founders: default list, lower-cased");
   const n = normalize({});
   check(n.maxAutoPostsPer8h === 6 && n.maxAutoRepliesPer8h === 24 && n.maxRepliesPerThread8h === 3, "cap defaults: 6 posts, 24 replies, 3 per thread");
 }

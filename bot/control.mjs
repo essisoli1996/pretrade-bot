@@ -21,7 +21,7 @@ export function normalize(raw) {
     else if (v === "shadow") features[f] = "shadow";
   }
   const approvalExempt = Array.isArray(c.approvalExempt) ? c.approvalExempt.filter((f) => FEATURES.includes(f)) : [];
-  return { paused: c.paused === true, readOnly: c.readOnly === true, approval: c.approval === true, approvalExempt, reviewHash: c.reviewHash === true, autonomy: c.autonomy === "full" ? "full" : "off", maxAutoPostsPer8h: cnt(c.maxAutoPostsPer8h, 6), maxAutoRepliesPer8h: cnt(c.maxAutoRepliesPer8h, 24), maxRepliesPerThread8h: cnt(c.maxRepliesPerThread8h, 3), numberCheck: c.numberCheck !== false, features };
+  return { paused: c.paused === true, readOnly: c.readOnly === true, approval: c.approval === true, approvalExempt, reviewHash: c.reviewHash === true, autonomy: c.autonomy === "full" ? "full" : "off", maxAutoPostsPer8h: cnt(c.maxAutoPostsPer8h, 6), maxAutoRepliesPer8h: cnt(c.maxAutoRepliesPer8h, 24), maxRepliesPerThread8h: cnt(c.maxRepliesPerThread8h, 3), founders: (Array.isArray(c.founders) ? c.founders : ["wynjr", "mikey"]).map((x) => String(x).toLowerCase()), numberCheck: c.numberCheck !== false, features };
 }
 
 /** True when a post by this feature must wait in the outbox for the Muse's approval. */
@@ -59,7 +59,7 @@ export function makeControl({ fetchText, readLocal, everyMs = 60_000, now = () =
 /** Under autonomy "full": may one more desk post go out? New posts and replies have separate caps (kind "post" |
  *  "reply"). log = desk.json's log ([{ at, replyTo }]). Pure. */
 export function autoPostAllowed(log, cap, now = Date.now(), kind = "post") {
-  const used = (Array.isArray(log) ? log : []).filter((e) => Date.parse(e?.at) > now - 8 * 36e5 && (kind === "reply" ? !!e?.replyTo : !e?.replyTo)).length;
+  const used = (Array.isArray(log) ? log : []).filter((e) => Date.parse(e?.at) > now - 8 * 36e5 && !e?.founder && (kind === "reply" ? !!e?.replyTo : !e?.replyTo)).length;
   return { ok: used < cap, used, cap };
 }
 

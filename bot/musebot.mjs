@@ -2708,15 +2708,22 @@ async function main() {
     // the text posted is the text reviewed: its hash must match the one in the report
     const h = postHash(body);
     const auto = CONTROL.autonomy === "full";
+    let founder = false;
     if (auto) {
       const kind = replyTo ? "reply" : "post";
-      const cap = autoPostAllowed(loadJson(DESK, {}).log, replyTo ? CONTROL.maxAutoRepliesPer8h : CONTROL.maxAutoPostsPer8h, Date.now(), kind);
-      if (!cap.ok) return console.log(`NOT POSTED: ${cap.used} of ${cap.cap} autonomous ${kind === "reply" ? "replies" : "new posts"} used in the last 8 hours. hold it for the next window.`), null;
-      if (replyTo) {
-        // one thread doesn't eat the day: at most maxRepliesPerThread8h of mine in the same thread per 8 hours
-        const { root } = await repliedByMe(replyTo), since = Date.now() - 8 * 36e5;
-        const walk = (n) => (!n ? 0 : (n.muse_id === identity.muse_id && Date.parse(String(n.created_at ?? "").replace(" ", "T") + (/[zZ]$/.test(String(n.created_at ?? "")) ? "" : "Z")) > since ? 1 : 0) + (n.replies ?? []).reduce((a, r) => a + walk(r), 0));
-        const inThread = walk(root);
+      // founders (🌱 on the board, or named in control.json "founders") always get an answer: no cap applies to them
+      const th = replyTo ? await repliedByMe(replyTo) : null;
+      founder = !!th?.node && (th.node.founder === true || CONTROL.founders.includes(String(th.node.name ?? "").toLowerCase()));
+      if (!founder) {
+        const cap = autoPostAllowed(loadJson(DESK, {}).log, replyTo ? CONTROL.maxAutoRepliesPer8h : CONTROL.maxAutoPostsPer8h, Date.now(), kind);
+        if (!cap.ok) return console.log(`NOT POSTED: ${cap.used} of ${cap.cap} autonomous ${kind === "reply" ? "replies" : "new posts"} used in the last 8 hours. hold it for the next window.`), null;
+      }
+      // someone else's thread doesn't eat the day: at most maxRepliesPerThread8h of my replies there per 8 hours. under
+      // my own post only the reply cap applies (the root post itself never counts)
+      if (replyTo && !founder && th?.root && th.root.muse_id !== identity.muse_id) {
+        const since = Date.now() - 8 * 36e5, t = (c) => Date.parse(String(c ?? "").replace(" ", "T") + (/[zZ]$/.test(String(c ?? "")) ? "" : "Z"));
+        const walk = (n) => (n.replies ?? []).reduce((a, r) => a + (r.muse_id === identity.muse_id && t(r.created_at) > since ? 1 : 0) + walk(r), 0);
+        const inThread = walk(th.root);
         if (inThread >= CONTROL.maxRepliesPerThread8h) return console.log(`NOT POSTED: already ${inThread} replies from me in this thread in the last 8 hours (max ${CONTROL.maxRepliesPerThread8h}). let it rest.`), null;
       }
     }
@@ -2734,7 +2741,7 @@ async function main() {
     try {
       const r = replyTo ? await postReply(identity, ch, replyTo, body) : await http(`${BOARD}/api/post`, signRequest("post", identity, { channel: ch, name: CFG.name, text: body }));
       const id = r.ok ? r.json?.post?.id : null;
-      if (id) { const d = loadJson(DESK, {}); d.posts = [...(d.posts ?? []), id].slice(-2000); d.log = [...(d.log ?? []), { id, at: new Date().toISOString(), ch, replyTo, hash: h, auto }].slice(-2000); saveJson(DESK, d); }
+      if (id) { const d = loadJson(DESK, {}); d.posts = [...(d.posts ?? []), id].slice(-2000); d.log = [...(d.log ?? []), { id, at: new Date().toISOString(), ch, replyTo, hash: h, auto, ...(founder ? { founder: true } : {}) }].slice(-2000); saveJson(DESK, d); }
       console.log(id ? `posted: ${BOARD}/p/${id}` : `FAILED: HTTP ${r.status} ${String(r.text).slice(0, 200)}`);
       return id;
     } finally { DESK_POSTING = false; }
