@@ -2691,7 +2691,7 @@ async function main() {
   // nothing naming or pointing at the owner,
   // no second reply to the same post, the signature line. Returns the post id, or null with the reason printed.
   const signed = (text) => (/\n- pretrade\s*$/i.test(text) ? text : `${text}\n- ${CFG.name}`);
-  const deskPost = async (ch, replyTo, text, { force = false, dry = false, expect = null, engineText = null, recheck = false } = {}) => {
+  const deskPost = async (ch, replyTo, text, { force = false, dry = false, expect = null, engineText = null, recheck = false, long = false } = {}) => {
     if (CONTROL.paused) return console.log("NOT POSTED: the owner has paused pretrade (bot/control.json)."), null;
     if (findSecrets(text).length) return console.log("NOT POSTED: the text contains something that looks like a key or seed phrase."), null;
     // every number in the post comes from a tool the Muse ran in the last 2 hours (or from the engine's own draft)
@@ -2701,7 +2701,7 @@ async function main() {
     }
     const owner = ownerTalk(text, privateNames());
     if (owner) return console.log(`NOT POSTED: "${owner}" points at the owner. posts never name them or mention their approval; put what needs them under Needs in the report.`), null;
-    const ruled = lintDraft(text, { facts: `${recentFacts(2)}\n${engineText ?? ""}`, names: privateNames(), maxChars: CONTROL.autonomy === "full" ? 500 : Infinity }).filter((p) => !/^numbers /.test(p));
+    const ruled = lintDraft(text, { facts: `${recentFacts(2)}\n${engineText ?? ""}`, names: privateNames(), maxChars: CONTROL.autonomy !== "full" ? Infinity : long && !replyTo ? 2000 : 500 }).filter((p) => !/^numbers /.test(p));
     if (ruled.length) return console.log(`NOT POSTED: ${ruled.join("; ")}.`), null;
     if (replyTo && !force && (await repliedByMe(replyTo)).mine) return console.log(`NOT POSTED: pretrade already replied to post ${replyTo} (use --force to add another).`), null;
     const body = signed(text);
@@ -2731,15 +2731,16 @@ async function main() {
       return id;
     } finally { DESK_POSTING = false; }
   };
-  const flagArgs = (from) => args.slice(from).filter((x, i, all) => !["--reply", "--force", "--dry", "--text", "--expect", "--recheck"].includes(x) && all[i - 1] !== "--reply" && all[i - 1] !== "--expect");
+  const flagArgs = (from) => args.slice(from).filter((x, i, all) => !["--reply", "--force", "--dry", "--text", "--expect", "--recheck", "--long"].includes(x) && all[i - 1] !== "--reply" && all[i - 1] !== "--expect");
   const expectArg = () => { const i = args.indexOf("--expect"); return i >= 0 ? String(args[i + 1] ?? "") : null; };
 
   if (cmd === "say") {
-    // Post as pretrade.  node bot/musebot.mjs say <channel> [--reply <postId>] [--expect <hash>] [--force] [--dry] "<text>"
+    // Post as pretrade.  node bot/musebot.mjs say <channel> [--reply <postId>] [--expect <hash>] [--force] [--dry] [--long] "<text>"
+    // --long: a new post (never a reply) may run to 2000 chars under autonomy, for announcements
     const ch = args[1], ri = args.indexOf("--reply"), replyTo = ri >= 0 ? Number(args[ri + 1]) : null;
     const text = flagArgs(2).join(" ").trim();
     if (!ch || !text) return console.log(`usage: say <channel> [--reply <postId>] --expect <hash> "<text>"   (hash: node bot/musebot.mjs hash "<text>")`);
-    await deskPost(ch, replyTo, text, { force: args.includes("--force"), dry: args.includes("--dry"), expect: expectArg(), recheck: args.includes("--recheck") });
+    await deskPost(ch, replyTo, text, { force: args.includes("--force"), dry: args.includes("--dry"), expect: expectArg(), recheck: args.includes("--recheck"), long: args.includes("--long") });
     return;
   }
 
