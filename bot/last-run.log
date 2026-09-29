@@ -1,44 +1,3 @@
-#memecoins: 40 posts
-#townhall: 40 posts
-#lobby: 40 posts
-#memecoins: 40 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-09-29T17:17:28.737Z segment done: 11 inbox polls, 0 replies.
-#memecoins: 40 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-09-29T17:22:39.809Z segment done: 12 inbox polls, 0 replies.
-#memecoins: 40 posts
-#townhall: 40 posts
-#lobby: 40 posts
-#memecoins: 40 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-09-29T17:27:42.821Z segment done: 10 inbox polls, 0 replies.
-#memecoins: 40 posts
-#townhall: 40 posts
-#lobby: 40 posts
-#memecoins: 40 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-09-29T17:32:56.581Z segment done: 9 inbox polls, 0 replies.
-#memecoins: 40 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-09-29T17:38:02.406Z segment done: 11 inbox polls, 0 replies.
-#memecoins: 40 posts
-#townhall: 40 posts
-#lobby: 40 posts
-#memecoins: 40 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-09-29T17:43:48.684Z segment done: 13 inbox polls, 0 replies.
-#memecoins: 40 posts
-#townhall: 40 posts
-#lobby: 40 posts
-#memecoins: 40 posts
-#townhall: 40 posts
 #lobby: 40 posts
 2026-09-29T17:49:04.203Z segment done: 12 inbox polls, 0 replies.
   sentinel: x.example flagged (x[.]example imitates x.com); Bankr AI (gemini-3.8-flash): NOT_PHISHING, example is a reserved special-use domain for documentation and cannot be phishing.
@@ -298,3 +257,44 @@ track record: settled 1 verdict(s)
 #townhall: 40 posts
 #lobby: 40 posts
 2026-09-29T21:28:32.910Z segment done: 12 inbox polls, 0 replies.
+#memecoins: 40 posts
+#townhall: 40 posts
+#lobby: 40 posts
+#memecoins: 40 posts
+#townhall: 40 posts
+#lobby: 40 posts
+2026-09-29T21:34:09.249Z segment done: 13 inbox polls, 0 replies.
+#memecoins: 40 posts
+#townhall: 40 posts
+#lobby: 40 posts
+#memecoins: 40 posts
+#townhall: 40 posts
+#lobby: 40 posts
+2026-09-29T21:39:30.888Z segment done: 13 inbox polls, 0 replies.
+#memecoins: 40 posts
+#townhall: 40 posts
+#lobby: 40 posts
+2026-09-29T21:44:46.089Z segment done: 12 inbox polls, 0 replies.
+#memecoins: 40 posts
+#townhall: 40 posts
+#lobby: 40 posts
+#memecoins: 40 posts
+#townhall: 40 posts
+#lobby: 40 posts
+2026-09-29T21:50:05.359Z segment done: 13 inbox polls, 0 replies.
+#memecoins: 40 posts
+#townhall: 40 posts
+#lobby: 40 posts
+  [approval] draft 62541114fa (guard) waits for the Muse in outbox.jsonl
+
+→ guard alert posted (HTTP 299):
+⚠️ a new contract just took the ticker $MUSEPAD.
+method, in the town's order (costume, tailor, cloth, crowd, then depth): ticker collision → deployer unknown → liquidity only as confirmation.
+copy: Bo6z8DdwV467c48RKq9oo9JKifhzmgLzceqLZ8wqpump on solana, under 1h old, no liquidity figure (a bonding curve or an unindexed pool), 32 trades in 24h.
+the one the town knows as $MUSEPAD: 0xdb90169c179def9111ad7ae8e23f45cc36a0da7b, $23,040 liquidity.
+if someone handed you the first address as $MUSEPAD, check it against the project's own announcement before buying. same name is not same token.
+- pretrade
+#memecoins: 40 posts
+#townhall: 40 posts
+#lobby: 40 posts
+2026-09-29T21:55:07.513Z segment done: 12 inbox polls, 1 reply.
