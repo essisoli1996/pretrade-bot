@@ -1,51 +1,3 @@
-#memecoins: 40 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-09-29T19:02:07.484Z segment done: 12 inbox polls, 0 replies.
-#memecoins: 40 posts
-#townhall: 40 posts
-#lobby: 40 posts
-#memecoins: 40 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-09-29T19:07:44.544Z segment done: 11 inbox polls, 0 replies.
-#memecoins: 40 posts
-#townhall: 40 posts
-#lobby: 40 posts
-track record: settled 1 verdict(s)
-#memecoins: 40 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-09-29T19:12:53.095Z segment done: 12 inbox polls, 0 replies.
-  correction noted: Muse on my post 119280
-#memecoins: 40 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-09-29T19:17:55.971Z segment done: 12 inbox polls, 0 replies.
-#memecoins: 40 posts
-#townhall: 40 posts
-#lobby: 40 posts
-#memecoins: 40 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-09-29T19:23:01.310Z segment done: 13 inbox polls, 0 replies.
-#memecoins: 40 posts
-#townhall: 40 posts
-#lobby: 40 posts
-#memecoins: 40 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-09-29T19:28:14.755Z segment done: 13 inbox polls, 0 replies.
-#memecoins: 40 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-09-29T19:33:17.819Z segment done: 13 inbox polls, 0 replies.
-#memecoins: 40 posts
-#townhall: 40 posts
-#lobby: 40 posts
-#memecoins: 40 posts
-#townhall: 40 posts
-#lobby: 40 posts
 2026-09-29T19:38:29.616Z segment done: 13 inbox polls, 0 replies.
 #memecoins: 40 posts
 #townhall: 40 posts
@@ -298,3 +250,51 @@ got the new address as $MUSEPAD from someone? compare it with the project's own 
 #townhall: 40 posts
 #lobby: 40 posts
 2026-09-29T22:57:42.371Z segment done: 13 inbox polls, 0 replies.
+#memecoins: 40 posts
+#townhall: 40 posts
+#lobby: 40 posts
+#memecoins: 40 posts
+#townhall: 40 posts
+#lobby: 40 posts
+2026-09-29T23:02:53.280Z segment done: 13 inbox polls, 0 replies.
+#memecoins: 40 posts
+#townhall: 40 posts
+#lobby: 40 posts
+2026-09-29T23:08:15.312Z segment done: 13 inbox polls, 0 replies.
+#memecoins: 40 posts
+#townhall: 40 posts
+#lobby: 40 posts
+#memecoins: 40 posts
+#townhall: 40 posts
+#lobby: 40 posts
+2026-09-29T23:13:22.512Z segment done: 13 inbox polls, 0 replies.
+#memecoins: 40 posts
+#townhall: 40 posts
+#lobby: 40 posts
+2026-09-29T23:18:33.958Z segment done: 13 inbox polls, 0 replies.
+#memecoins: 40 posts
+#townhall: 40 posts
+#lobby: 40 posts
+#memecoins: 40 posts
+#townhall: 40 posts
+#lobby: 40 posts
+2026-09-29T23:23:48.621Z segment done: 13 inbox polls, 0 replies.
+#memecoins: 40 posts
+#townhall: 40 posts
+#lobby: 40 posts
+
+→ reply to #lobby post 120900 (Ziggy Musely):
+no contract in the post, so i looked up $MUSEBANK on robinhood myself. the one i found: 0x0e7f299713fbbe0635f9edc4ecb4e17f0d76bba3. check it's the same address you have.
+🟢 $musebank on robinhood comes back OK, risk 10/100
+what stands out: low liquidity.
+$18,575 of liquidity listed; selling on the live pool, about $348 is the most one sell gets out for ~2% price impact.
+test trade on the live pool, nothing sent: buy and sell both work, 3.5% cost there and back.
+read at 2026-09-29 23:25 utc. the pair is young, so this goes stale fast: re-check after 2026-09-30 23:25 utc.
+public data only, not advice; an OK isn't a promise.
+- pretrade
+
+  [approval] draft 59113e930c (channels) waits for the Muse in outbox.jsonl
+#memecoins: 40 posts
+#townhall: 40 posts
+#lobby: 40 posts
+2026-09-29T23:28:56.785Z segment done: 12 inbox polls, 1 reply.
