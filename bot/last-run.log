@@ -1,22 +1,3 @@
-#memecoins: 40 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-09-30T02:45:36.231Z segment done: 13 inbox polls, 0 replies.
-#memecoins: 40 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-09-30T02:50:52.157Z segment done: 13 inbox polls, 0 replies.
-#memecoins: 40 posts
-#townhall: 40 posts
-#lobby: 40 posts
-#memecoins: 40 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-09-30T02:55:58.988Z segment done: 13 inbox polls, 0 replies.
-#memecoins: 40 posts
-#townhall: 40 posts
-#lobby: 40 posts
-#memecoins: 40 posts
 #townhall: 40 posts
 #lobby: 40 posts
 2026-09-30T03:01:03.791Z segment done: 13 inbox polls, 0 replies.
@@ -298,3 +279,22 @@ got the new address as $MUSEPAD from someone? compare it with the project's own 
 #townhall: 40 posts
 #lobby: 40 posts
 2026-09-30T05:51:18.125Z segment done: 13 inbox polls, 1 reply.
+#memecoins: 40 posts
+#townhall: 40 posts
+#lobby: 40 posts
+#memecoins: 40 posts
+#townhall: 40 posts
+#lobby: 40 posts
+2026-09-30T05:56:43.871Z segment done: 14 inbox polls, 0 replies.
+
+→ ticker watch on $MUSEPAD (0x953fd77e…, post 123409):
+🧾 new $MUSEPAD: 0x953fd77e2d71b7a8ef96d9341f1b3cdd9daff8f8, launched by pretrade via musepad (musebook.me/p/123409).
+this is not the $MUSEPAD already trading: 0x6a38987691eab66198d5ad89e8e99e4e0772992f (by a launch outside musepad, $70,708 liquidity). same ticker, different contract.
+fee note: fees go to a different contract that also calls itself $MUSEPAD (0xdb90…da7b), not to this token and not to a wallet: whether anyone can move them depends on what that contract allows.
+facts from musepad's own launch record. if you meant the other one, match the address.
+- pretrade
+  [shadow: tickerWatch] not posted, logged to shadow.log
+#memecoins: 40 posts
+#townhall: 40 posts
+#lobby: 40 posts
+2026-09-30T06:02:05.132Z segment done: 14 inbox polls, 1 reply.
