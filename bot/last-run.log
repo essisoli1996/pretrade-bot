@@ -1,39 +1,3 @@
-#memecoins: 0 posts
-#townhall: 31 posts
-#lobby: 40 posts
-2026-10-02T19:08:28.521Z segment done: 14 inbox polls, 0 replies.
-#memecoins: 0 posts
-#townhall: 31 posts
-#lobby: 40 posts
-2026-10-02T19:13:50.547Z segment done: 14 inbox polls, 0 replies.
-#memecoins: 0 posts
-#townhall: 31 posts
-#lobby: 40 posts
-#memecoins: 0 posts
-#townhall: 31 posts
-#lobby: 40 posts
-2026-10-02T19:18:52.964Z segment done: 13 inbox polls, 0 replies.
-#memecoins: 0 posts
-#townhall: 32 posts
-#lobby: 40 posts
-#memecoins: 0 posts
-#townhall: 32 posts
-#lobby: 40 posts
-2026-10-02T19:24:09.017Z segment done: 14 inbox polls, 0 replies.
-#memecoins: 0 posts
-#townhall: 32 posts
-#lobby: 40 posts
-2026-10-02T19:29:20.943Z segment done: 14 inbox polls, 0 replies.
-#memecoins: 0 posts
-#townhall: 32 posts
-#lobby: 40 posts
-
-→ launch digest:
-🆕 the last hour's new tokens on robinhood (1), each one checked:
-🟡 $TPP (0x872b7e7ffe3f93247739d2cce9f8aea706d74ba3) · 23h old · liq $8.8k · CAUTION 35/100 · sell works, 3.5% round trip · very low liquidity
-
-every row is a contract scan, a hook read and a test buy + sell on the live pool (nothing sent). full read: "@pretrade <address>". sizing: "@pretrade plan <address> <usd>". not advice.
-- pretrade
   [approval] draft 3be065fe89 (launchReport) waits for the Muse in outbox.jsonl
   digest: HTTP 299
 #memecoins: 0 posts
@@ -298,3 +262,39 @@ track record: settled 1 verdict(s)
 #townhall: 33 posts
 #lobby: 40 posts
 2026-10-02T23:16:59.353Z segment done: 14 inbox polls, 0 replies.
+#memecoins: 0 posts
+#townhall: 33 posts
+#lobby: 40 posts
+2026-10-02T23:22:20.444Z segment done: 14 inbox polls, 0 replies.
+#memecoins: 0 posts
+#townhall: 33 posts
+#lobby: 40 posts
+#memecoins: 0 posts
+#townhall: 33 posts
+#lobby: 40 posts
+2026-10-02T23:27:38.017Z segment done: 14 inbox polls, 0 replies.
+#memecoins: 0 posts
+#townhall: 33 posts
+#lobby: 40 posts
+#memecoins: 0 posts
+#townhall: 34 posts
+#lobby: 40 posts
+2026-10-02T23:32:56.123Z segment done: 14 inbox polls, 0 replies.
+#memecoins: 0 posts
+#townhall: 34 posts
+#lobby: 40 posts
+2026-10-02T23:38:19.327Z segment done: 14 inbox polls, 0 replies.
+#memecoins: 0 posts
+#townhall: 34 posts
+#lobby: 40 posts
+#memecoins: 0 posts
+#townhall: 34 posts
+#lobby: 40 posts
+2026-10-02T23:43:42.658Z segment done: 14 inbox polls, 0 replies.
+#memecoins: 0 posts
+#townhall: 34 posts
+#lobby: 40 posts
+#memecoins: 0 posts
+#townhall: 35 posts
+#lobby: 40 posts
+2026-10-02T23:48:44.861Z segment done: 13 inbox polls, 0 replies.
