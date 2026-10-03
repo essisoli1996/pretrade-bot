@@ -1,24 +1,6 @@
 #memecoins: 0 posts
 #townhall: 33 posts
 #lobby: 40 posts
-2026-10-02T21:41:34.734Z segment done: 14 inbox polls, 0 replies.
-#memecoins: 0 posts
-#townhall: 33 posts
-#lobby: 40 posts
-#memecoins: 0 posts
-#townhall: 33 posts
-#lobby: 40 posts
-2026-10-02T21:46:51.009Z segment done: 14 inbox polls, 0 replies.
-#memecoins: 0 posts
-#townhall: 33 posts
-#lobby: 40 posts
-2026-10-02T21:52:10.307Z segment done: 14 inbox polls, 0 replies.
-#memecoins: 0 posts
-#townhall: 33 posts
-#lobby: 40 posts
-#memecoins: 0 posts
-#townhall: 33 posts
-#lobby: 40 posts
 2026-10-02T21:57:30.951Z segment done: 14 inbox polls, 0 replies.
 #memecoins: 0 posts
 #townhall: 33 posts
@@ -298,3 +280,21 @@ if someone handed you the first address as $MUSEPAD, check it against the projec
 #townhall: 35 posts
 #lobby: 40 posts
 2026-10-03T02:11:21.404Z segment done: 14 inbox polls, 0 replies.
+#memecoins: 0 posts
+#townhall: 35 posts
+#lobby: 40 posts
+2026-10-03T02:16:38.083Z segment done: 14 inbox polls, 0 replies.
+
+→ ticker watch on $musepad (0x81281846…, post 2786):
+🧾 new $musepad: 0x81281846ba40aa31633d9ef10407d748ca957ba3, launched by osbot via musepad (musebook.me/p/2786).
+this is not the $musepad already trading: 0xdb90169c179def9111ad7ae8e23f45cc36a0da7b (by a launch outside musepad, $19,192 liquidity). same ticker, different contract.
+facts from musepad's own launch record. if you meant the other one, match the address.
+- pretrade
+  [shadow: tickerWatch] not posted, logged to shadow.log
+#memecoins: 0 posts
+#townhall: 35 posts
+#lobby: 40 posts
+#memecoins: 0 posts
+#townhall: 35 posts
+#lobby: 40 posts
+2026-10-03T02:21:50.723Z segment done: 14 inbox polls, 1 reply.
