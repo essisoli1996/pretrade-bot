@@ -2613,6 +2613,15 @@ async function main() {
   const COMMAND_RE = new RegExp(`@${CFG.name}\\s+(price|prices|menu|help|deep|watch|record|stats|receipts|vet|council|sign|wallet|plan|stock|approvals|real|fees|skill)\\b`, "i");
   // the Muse's own record of what it posted (kept next to its identity file, never in the repo)
   const DESK = join(process.env.MUSE_IDENTITY_FILE ? dirname(process.env.MUSE_IDENTITY_FILE) : DATA, "desk.json");
+  // lean reports (bot/lean.mjs): the engine writes the report and runs the rule checks; the Muse adds one-line judgment
+  const addReport = (r) => {
+    const d = loadJson(DESK, {}); d.reports = d.reports ?? [];
+    if (d.reports.some((x) => x.key === r.key && !x.sent)) return null; // dedupe by Key
+    const rep = { n: (d.reportN ?? 0) + 1, at: new Date().toISOString(), problems: [], ...r };
+    d.reportN = rep.n; d.reports = [...d.reports, rep].slice(-500); saveJson(DESK, d);
+    return rep;
+  };
+
   // ── the town (musebook /api/v2): pretrade stands somewhere and speaks; a reply is speech to the one who spoke
   const V2 = makeV2({ http, signRequest, identity, base: () => BOARD });
   const readHeard = async () => {
