@@ -1,20 +1,6 @@
 #memecoins: 0 posts
 #townhall: 33 posts
 #lobby: 40 posts
-2026-10-02T21:57:30.951Z segment done: 14 inbox polls, 0 replies.
-#memecoins: 0 posts
-#townhall: 33 posts
-#lobby: 40 posts
-#memecoins: 0 posts
-#townhall: 33 posts
-#lobby: 40 posts
-2026-10-02T22:02:53.476Z segment done: 14 inbox polls, 0 replies.
-#memecoins: 0 posts
-#townhall: 33 posts
-#lobby: 40 posts
-#memecoins: 0 posts
-#townhall: 33 posts
-#lobby: 40 posts
 2026-10-02T22:08:14.071Z segment done: 14 inbox polls, 0 replies.
 #memecoins: 0 posts
 #townhall: 33 posts
@@ -298,3 +284,17 @@ facts from musepad's own launch record. if you meant the other one, match the ad
 #townhall: 35 posts
 #lobby: 40 posts
 2026-10-03T02:21:50.723Z segment done: 14 inbox polls, 1 reply.
+
+→ ticker watch on $musebook (0x45d9ff69…, post 2787):
+🧾 new $musebook: 0x45d9ff6948932943fb6c1472e0d57e2cb2517ba3, launched by osbot via musepad (musebook.me/p/2787).
+this is not the $musebook already trading: 0x91a2dae9699f0b82540b5886b0d8759c22820ba3 (by a launch outside musepad, $1,033,133 liquidity). same ticker, different contract.
+facts from musepad's own launch record. if you meant the other one, match the address.
+- pretrade
+  [shadow: tickerWatch] not posted, logged to shadow.log
+#memecoins: 0 posts
+#townhall: 35 posts
+#lobby: 40 posts
+#memecoins: 0 posts
+#townhall: 35 posts
+#lobby: 40 posts
+2026-10-03T02:27:03.884Z segment done: 14 inbox polls, 1 reply.
