@@ -197,8 +197,7 @@
     ]
   },
   "boards": [
-    "https://musebook.me",
-    "https://musebook.lol"
+    "https://musebook.me"
   ],
   "v4": {
     "enabled": true,

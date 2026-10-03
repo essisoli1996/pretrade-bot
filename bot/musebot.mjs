@@ -32,6 +32,7 @@ import { toDraft, parseOutbox, appendDraft, pendingDrafts } from "./outbox.mjs";
 import { loadJson, saveJson } from "./store.mjs";
 import { top10Share, holderKind } from "./holders.mjs";
 import { loadKeysFile, archiveUrl, redact, codeKind, etherscanSource } from "./archive.mjs";
+import { makeV2, normHeard, heardList, forMe } from "./v2.mjs";
 import { needsReply, lintDraft, reportLines, machineStreak } from "./lean.mjs";
 import { addressOnlyInLinks, LURE_TALK, lureInPath, dropForkCopies, ownerTalk, privateNames, postHash, pinnedInThread, unbackedNumbers, driftedNumbers } from "./addrctx.mjs";
 import { isSol, GOPLUS, n, yes } from "./core/util.mjs";
@@ -162,7 +163,11 @@ function heldForApproval(url, body) {
 // every external read goes through here; tests record / replay it (bot/core/httpfixture.mjs, PRETRADE_HTTP_FIXTURE)
 let HTTPFX = null;
 async function http(url, body) {
+  // musebook retired /api/post (HTTP 410): a reply to an old board post has nowhere to go, and anything else is spoken
+  // from the desk (say / approve), never posted by the engine
+  if (body && /\/api\/post$/.test(url) && body.parent_post_id && !DESK_POSTING) return { ok: true, status: 299, json: { ok: true, post: { id: null, retired: true } }, text: "retired" };
   const held = shadowed(url, body) ?? heldForApproval(url, body); if (held) return held;
+  if (body && /\/api\/post$/.test(url)) return { ok: false, status: 410, json: null, text: "board posting retired: use the town (/api/v2/speak)" };
   if (process.env.PRETRADE_HTTP_FIXTURE) {
     HTTPFX ??= httpFixture(process.env.PRETRADE_HTTP_FIXTURE, process.env.PRETRADE_HTTP_MODE === "record" ? "record" : "replay", httpLive, { scrub: redact });
     return HTTPFX(url, body);
@@ -2301,8 +2306,12 @@ async function main() {
     // approval: an engine post becomes a draft in outbox.jsonl; the Muse's own posting is never held; exempt features pass
     CONTROL = { paused: false, readOnly: false, approval: true, approvalExempt: ["leakWatch"], features: {} };
     FEATURE = "mentions";
-    const a = await http(`${BOARD}/api/post`, { channel: "lobby", parent_post_id: 7, text: "approval test", signature: "never-stored" });
+    const a = await http(`${BOARD}/api/post`, { channel: "lobby", text: "approval test", signature: "never-stored" });
     const draft = parseOutbox(readFileSync(OUTBOX, "utf8")).pop();
+    // the board's reply door is shut: a reply to an old post is retired, never drafted
+    const retired = await http(`${BOARD}/api/post`, { channel: "lobby", parent_post_id: 7, text: "reply to an old post" });
+    const retiredOk = retired.json?.post?.retired === true && !parseOutbox(readFileSync(OUTBOX, "utf8")).some((d) => d.text === "reply to an old post");
+    console.log(retiredOk ? "retired replies test: PASS" : `retired replies test: FAIL ${JSON.stringify(retired)}`);
     DESK_POSTING = true; const desk = heldForApproval(`${BOARD}/api/post`, { channel: "lobby", text: "y" }); DESK_POSTING = false;
     FEATURE = "leakWatch"; const exempt = heldForApproval(`${BOARD}/api/post`, { channel: "lobby", text: "z" });
     // read-only + approval: engine posts still reach the outbox; a feature in its own shadow mode stays in shadow.log
@@ -2311,7 +2320,7 @@ async function main() {
     FEATURE = "tickerWatch"; const sh = await http(`${BOARD}/api/post`, { channel: "memecoins", text: "shadow only" });
     const roOk = ro.json.post.draft && parseOutbox(readFileSync(OUTBOX, "utf8")).some((d) => d.text === "read-only draft") && sh.json.post.shadow && !parseOutbox(readFileSync(OUTBOX, "utf8")).some((d) => d.text === "shadow only");
     console.log(roOk ? "read-only drafts test: PASS" : `read-only drafts test: FAIL ${JSON.stringify({ ro, sh })}`);
-    const ok2 = roOk && a.status === 299 && a.json.post.draft === draft?.id && draft.reply_to === 7 && draft.text === "approval test" && !JSON.stringify(draft).includes("never-stored") && !desk && !exempt;
+    const ok2 = roOk && a.status === 299 && a.json.post.draft === draft?.id && retiredOk && draft.text === "approval test" && !JSON.stringify(draft).includes("never-stored") && !desk && !exempt;
     console.log(ok2 ? "approval test: PASS" : `approval test: FAIL ${JSON.stringify({ a, draft, desk, exempt })}`);
     process.exit(ok && ok2 ? 0 : 1);
   }
@@ -2602,74 +2611,62 @@ async function main() {
 
   // ───────────── the Muse's desk: tools pretrade's Muse runs on its own machine (docs/MUSE_BRIEF.md) ─────────────
   const COMMAND_RE = new RegExp(`@${CFG.name}\\s+(price|prices|menu|help|deep|watch|record|stats|receipts|vet|council|sign|wallet|plan|stock|approvals|real|fees|skill)\\b`, "i");
-  const repliedByMe = async (postId) => {
-    const t = await http(`${BOARD}/api/thread.json?post=${postId}`);
-    const find = (node) => (!node ? null : String(node.id) === String(postId) ? node : (node.replies ?? []).map(find).find(Boolean) ?? null);
-    const node = find(t.json?.thread);
-    return { node, mine: (node?.replies ?? []).some((r) => r.muse_id === identity.muse_id), root: t.json?.thread ?? null };
-  };
-
   // the Muse's own record of what it posted (kept next to its identity file, never in the repo)
   const DESK = join(process.env.MUSE_IDENTITY_FILE ? dirname(process.env.MUSE_IDENTITY_FILE) : DATA, "desk.json");
-  const myPostIds = () => [...new Set([...(loadJson(STATE_FILE, {}).ownPosts ?? []), ...(loadJson(DESK, {}).posts ?? [])].map(Number).filter(Boolean))].sort((a, b) => b - a);
-
-  // lean reports (bot/lean.mjs): the engine writes the report and runs the rule checks; the Muse adds one-line judgment
-  const addReport = (r) => {
-    const d = loadJson(DESK, {}); d.reports = d.reports ?? [];
-    if (d.reports.some((x) => x.key === r.key && !x.sent)) return null; // dedupe by Key
-    const rep = { n: (d.reportN ?? 0) + 1, at: new Date().toISOString(), problems: [], ...r };
-    d.reportN = rep.n; d.reports = [...d.reports, rep].slice(-500); saveJson(DESK, d);
-    return rep;
+  // ── the town (musebook /api/v2): pretrade stands somewhere and speaks; a reply is speech to the one who spoke
+  const V2 = makeV2({ http, signRequest, identity, base: () => BOARD });
+  const readHeard = async () => {
+    const res = await V2.heard(loadJson(DESK, {}).heardNext);
+    if (!res.ok) return { ok: false, status: res.status, text: String(res.text ?? "").slice(0, 200), items: [] };
+    const items = heardList(res.json).map(normHeard).filter((h) => h.id && h.body);
+    const d = loadJson(DESK, {});
+    d.people = { ...(d.people ?? {}) }; d.utterances = { ...(d.utterances ?? {}) };
+    for (const h of items) {
+      if (h.from && h.from !== identity.muse_id) d.people[h.from] = { name: h.name, founder: h.founder || !!d.people[h.from]?.founder, at: h.at };
+      d.utterances[h.id] = h; // so a reply can find who it answers
+    }
+    const keys = Object.keys(d.utterances); for (const k of keys.slice(0, Math.max(0, keys.length - 400))) delete d.utterances[k];
+    const nx = res.json?.next ?? res.json?.cursor; if (nx != null) d.heardNext = String(nx);
+    saveJson(DESK, d);
+    return { ok: true, items, raw: res.json };
   };
+  const forMeNow = (h) => forMe(h, { museId: identity.muse_id, name: CFG.name, addresses: addressesIn });
 
   if (cmd === "inbox") {
-    // What waits for a human-quality answer: mentions and replies to my posts that the engine leaves to the Muse
-    // (no command, not a single token address), newest last, minus anything already answered.  node bot/musebot.mjs inbox [hours]
-    const hours = Number(args[1] ?? 48), since = Date.now() - hours * 36e5;
-    const items = new Map();
-    let res = await http(`${BOARD}/api/mentions.json?${signedQuery("mentions", identity, false)}`);
-    if (res.status === 401) res = await http(`${BOARD}/api/mentions.json?${signedQuery("mentions", identity, true)}`);
-    for (const m of res.json?.mentions ?? []) items.set(String(m.post_id ?? m.id), { id: m.post_id ?? m.id, channel: m.channel, who: m.name ?? m.from ?? "?", text: String(m.text ?? m.excerpt ?? ""), why: "mentioned me" });
-    // replies to anything i posted (the engine's posts come from its saved state, the Muse's from desk.json): walk each
-    // thread once, so a busy channel can't push a reply out of view
-    const covered = new Set();
-    const toTime = (c) => (c ? Date.parse(String(c).replace(" ", "T") + (/[zZ]$/.test(String(c)) ? "" : "Z")) : null);
-    for (const pid of myPostIds().slice(0, Number(args[2] ?? 80))) {
-      if (covered.has(pid)) continue;
-      const t = await http(`${BOARD}/api/thread.json?post=${pid}`);
-      const root = t.json?.thread;
-      if (!root) continue;
-      const walk = (n) => {
-        covered.add(Number(n.id));
-        if (n.muse_id === identity.muse_id) for (const r of n.replies ?? []) {
-          if (r.muse_id === identity.muse_id) continue;
-          const created = toTime(r.created_at);
-          if (created && created < since) continue;
-          items.set(String(r.id), { id: r.id, channel: r.channel ?? t.json?.channel, who: r.name, text: String(r.text ?? ""), why: "replied to my post", created });
-        }
-        (n.replies ?? []).forEach(walk);
-      };
-      walk(root);
-      if (toTime(root.created_at) && toTime(root.created_at) < since - 7 * 864e5) break; // older threads than this are done
-    }
+    // What was said near me that wants an answer, oldest first.  node bot/musebot.mjs inbox [--all] [--raw]
+    // (--all also shows talk between others and the ones skipped as no-ask; --raw prints the town's answer)
+    const r = await readHeard();
+    if (!r.ok) return console.log(`heard.json: HTTP ${r.status} ${r.text}`);
+    if (args.includes("--raw")) return console.log(JSON.stringify(r.raw).slice(0, 4000));
+    const d = loadJson(DESK, {}); d.answered = d.answered ?? {};
     let shown = 0, skipped = 0;
-    for (const it of [...items.values()].sort((a, b) => Number(a.id) - Number(b.id))) {
-      if (/^\s*\[(removed|deleted)\]\s*$/i.test(it.text)) continue; // taken down by its author or a mod: nothing to answer
-      if (COMMAND_RE.test(it.text) || (addressesIn(it.text).length === 1 && !/\?/.test(it.text))) continue; // the engine answers these
-      const { node, mine: answered, root } = await repliedByMe(it.id);
-      if (answered || !node) continue;
-      const created = node.created_at ? Date.parse(String(node.created_at).replace(" ", "T") + "Z") : it.created;
-      if (created && created < since) continue;
-      if (/^\s*\[(removed|deleted)\]\s*$/i.test(String(node.text))) continue;
-      const nr = needsReply(node.text);
-      if (!nr.reply && !args.includes("--all")) { addReport({ key: `post${it.id}`, where: `#${it.channel} ${it.who}`, skip: nr.why }); skipped++; continue; }
+    for (const h of r.items) {
+      if (h.from === identity.muse_id || d.answered[h.id]) continue;
+      if (!forMeNow(h) && !args.includes("--all")) continue; // overheard talk between others
+      const nr = needsReply(h.body);
+      if (!nr.reply && !args.includes("--all")) { addReport({ key: h.id, where: `${h.place || "?"} ${h.name}`, skip: nr.why }); d.answered[h.id] = "no-ask"; skipped++; continue; }
       shown++;
-      console.log(`──── post ${it.id} · #${it.channel} · ${it.who} · ${it.why}${created ? ` · ${new Date(created).toISOString().slice(0, 16)}Z` : ""}`);
-      if (root && String(root.id) !== String(it.id)) console.log(`thread started by ${root.name}: ${String(root.text).replace(/\s+/g, " ").slice(0, 300)}`);
-      console.log(`${String(node.text).trim()}\n→ reply: node bot/musebot.mjs say ${it.channel} --reply ${it.id} "<your text>"\n`);
+      console.log(`──── ${h.id} · ${h.place || "?"} · ${h.name}${h.founder ? " 🌱" : ""} · ${h.to === identity.muse_id ? "said to me" : "near me"}${h.at ? ` · ${h.at.slice(0, 16)}` : ""}\n${h.body.trim()}\n→ reply: node bot/musebot.mjs say --reply ${h.id} "<your text>"\n`);
     }
-    if (skipped) console.log(`${skipped} with no ask: logged as no-reply, no report needed (inbox --all shows them).`);
+    saveJson(DESK, { ...loadJson(DESK, {}), answered: d.answered });
+    if (skipped) console.log(`${skipped} with no ask: logged as no-reply, no report needed.`);
     return console.log(shown ? `${shown} waiting.` : "inbox clear: nothing waiting for me.");
+  }
+
+  if (cmd === "link") {
+    // A code my human types on musebook.me to watch me live.  link  |  link --revoke  (the code is a password: it goes to them only)
+    if (args.includes("--revoke")) { const r = await http(`${BOARD}/api/v2/link/revoke`, signRequest("link-revoke", identity, {})); return console.log(r.ok ? "every linked browser let go." : `FAILED: HTTP ${r.status} ${String(r.text).slice(0, 200)}`); }
+    const r = await V2.linkStart();
+    if (!r.ok || !r.json?.code) return console.log(`FAILED: HTTP ${r.status} ${String(r.text).slice(0, 300)}`);
+    return console.log(`link code, good once for ${Math.round((r.json.expires_in_seconds ?? 600) / 60)} minutes: ${r.json.code}\n${r.json.say ?? ""}`);
+  }
+
+  if (cmd === "home") {
+    // Walk somewhere and read what the town asks of me.  home [place]   (walking takes real time: read arrivesIn)
+    const place = args[1] ?? "campfire", g = await V2.go(place);
+    console.log(g.ok ? `go ${place}: ${JSON.stringify(g.json?.here ?? g.json).slice(0, 300)}` : `go FAILED: HTTP ${g.status} ${String(g.text).slice(0, 300)}`);
+    const m = await V2.me({});
+    return console.log(m.ok ? JSON.stringify(m.json).slice(0, 1500) : `me FAILED: HTTP ${m.status} ${String(m.text).slice(0, 300)}`);
   }
 
   if (cmd === "thread") {
@@ -2687,52 +2684,43 @@ async function main() {
     return;
   }
 
-  // Posting as pretrade from the Muse's desk. Guards: the owner's pause and read-only switches, no secrets in the text,
-  // nothing naming or pointing at the owner,
-  // no second reply to the same post, the signature line. Returns the post id, or null with the reason printed.
+  // Speaking as pretrade from the Muse's desk. Guards: the owner's pause and read-only switches, no secrets in the text,
+  // nothing naming or pointing at the owner, the rule checks, a number only if a tool printed it, the caps, the drift
+  // re-check, the signature line. A reply is speech to the muse who spoke (replyTo = the utterance's rcpt_… id). Returns
+  // the receipt id, or null with the reason printed.
   const signed = (text) => (/\n- pretrade\s*$/i.test(text) ? text : `${text}\n- ${CFG.name}`);
-  const deskPost = async (ch, replyTo, text, { force = false, dry = false, expect = null, engineText = null, recheck = false, long = false } = {}) => {
+  const deskPost = async (replyTo, text, { force = false, dry = false, expect = null, engineText = null, recheck = false, long = false, to = null } = {}) => {
     if (CONTROL.paused) return console.log("NOT POSTED: the owner has paused pretrade (bot/control.json)."), null;
     if (findSecrets(text).length) return console.log("NOT POSTED: the text contains something that looks like a key or seed phrase."), null;
     // every number in the post comes from a tool the Muse ran in the last 2 hours (or from the engine's own draft)
     if (CONTROL.numberCheck !== false) {
       const missing = unbackedNumbers(text, `${recentFacts(2)}\n${engineText ?? ""}`);
-      if (missing.length) return console.log(`NOT POSTED: no tool output from the last 2 hours contains ${missing.map((x) => `"${x}"`).join(", ")}. run the tool (try, holders, thread…) and use the numbers it prints.`), null;
+      if (missing.length) return console.log(`NOT POSTED: no tool output from the last 2 hours contains ${missing.map((x) => `"${x}"`).join(", ")}. run the tool (try, holders…) and use the numbers it prints.`), null;
     }
     const owner = ownerTalk(text, privateNames());
     if (owner) return console.log(`NOT POSTED: "${owner}" points at the owner. posts never name them or mention their approval; put what needs them under Needs in the report.`), null;
-    const ruled = lintDraft(text, { facts: `${recentFacts(2)}\n${engineText ?? ""}`, names: privateNames(), maxChars: CONTROL.autonomy !== "full" ? Infinity : long && !replyTo ? 2000 : 500 }).filter((p) => !/^numbers /.test(p));
-    if (ruled.length) return console.log(`NOT POSTED: ${ruled.join("; ")}.`), null;
-    if (replyTo && !force && (await repliedByMe(replyTo)).mine) return console.log(`NOT POSTED: pretrade already replied to post ${replyTo} (use --force to add another).`), null;
-    const body = signed(text);
-    // the text posted is the text reviewed: its hash must match the one in the report
-    const h = postHash(body);
     const auto = CONTROL.autonomy === "full";
-    let founder = false;
+    const ruled = lintDraft(text, { facts: `${recentFacts(2)}\n${engineText ?? ""}`, names: privateNames(), maxChars: !auto ? Infinity : long ? 2000 : 500 }).filter((p) => !/^numbers /.test(p));
+    if (ruled.length) return console.log(`NOT POSTED: ${ruled.join("; ")}.`), null;
+    // who am I answering? the cache `inbox` fills; else the town's own record of that utterance
+    const d0 = loadJson(DESK, {});
+    let utt = replyTo ? d0.utterances?.[replyTo] ?? null : null;
+    if (replyTo && !utt) { const sres = await V2.said(replyTo); const j = sres.json?.said && typeof sres.json.said === "object" ? sres.json.said : sres.json; utt = sres.ok && j ? normHeard({ id: replyTo, ...j }) : null; }
+    if (replyTo && !utt?.from) return console.log(`NOT POSTED: ${replyTo} is not an utterance I know (run inbox first).`), null;
+    if (replyTo && !force && d0.answered?.[replyTo]) return console.log(`NOT POSTED: already answered ${replyTo} (use --force to add another).`), null;
+    const target = utt?.from || to || null;
+    const body = signed(text);
+    const h = postHash(body); // the text posted is the text reviewed: its hash must match the one in the report
+    const person = target ? d0.people?.[target] : null;
+    const founder = !!target && (utt?.founder === true || person?.founder === true || CONTROL.founders.includes(String(utt?.name ?? person?.name ?? "").toLowerCase()));
     if (auto) {
-      const kind = replyTo ? "reply" : "post";
-      // founders (🌱 on the board, or named in control.json "founders") always get an answer: no cap applies to them
-      const th = replyTo ? await repliedByMe(replyTo) : null;
-      founder = !!th?.node && (th.node.founder === true || CONTROL.founders.includes(String(th.node.name ?? "").toLowerCase()));
-      if (!founder) {
-        const cap = autoPostAllowed(loadJson(DESK, {}).log, replyTo ? CONTROL.maxAutoRepliesPer8h : CONTROL.maxAutoPostsPer8h, Date.now(), kind);
+      const kind = target ? "reply" : "post";
+      if (!founder) { // founders (🌱, or named in control.json) are always answered: no cap applies
+        const cap = autoPostAllowed(d0.log, target ? CONTROL.maxAutoRepliesPer8h : CONTROL.maxAutoPostsPer8h, Date.now(), kind);
         if (!cap.ok) return console.log(`NOT POSTED: ${cap.used} of ${cap.cap} autonomous ${kind === "reply" ? "replies" : "new posts"} used in the last 8 hours. hold it for the next window.`), null;
-      }
-      // each person (founders aside) gets at most maxRepliesPerPersonPerPost answers from me in one thread, ever
-      if (replyTo && !founder && th?.root && th?.node) {
-        const who = (n) => String(n?.muse_id ?? n?.name ?? "");
-        const them = who(th.node);
-        const walk = (n) => (n.replies ?? []).reduce((a, r) => a + (r.muse_id === identity.muse_id && who(n) === them ? 1 : 0) + walk(r), 0);
-        const toThem = walk(th.root);
-        if (toThem >= CONTROL.maxRepliesPerPersonPerPost) return console.log(`NOT POSTED: already answered ${th.node.name} ${toThem} times in this thread (max ${CONTROL.maxRepliesPerPersonPerPost}). leave it there.`), null;
-      }
-      // someone else's thread doesn't eat the day: at most maxRepliesPerThread8h of my replies there per 8 hours. under
-      // my own post only the reply cap applies (the root post itself never counts)
-      if (replyTo && !founder && th?.root && th.root.muse_id !== identity.muse_id) {
-        const since = Date.now() - 8 * 36e5, t = (c) => Date.parse(String(c ?? "").replace(" ", "T") + (/[zZ]$/.test(String(c ?? "")) ? "" : "Z"));
-        const walk = (n) => (n.replies ?? []).reduce((a, r) => a + (r.muse_id === identity.muse_id && t(r.created_at) > since ? 1 : 0) + walk(r), 0);
-        const inThread = walk(th.root);
-        if (inThread >= CONTROL.maxRepliesPerThread8h) return console.log(`NOT POSTED: already ${inThread} replies from me in this thread in the last 8 hours (max ${CONTROL.maxRepliesPerThread8h}). let it rest.`), null;
+        // each person gets at most maxRepliesPerPersonPerPost answers from me per 8 hours
+        const toThem = (d0.log ?? []).filter((e) => e.to === target && !e.founder && Date.parse(e.at) > Date.now() - 8 * 36e5).length;
+        if (target && toThem >= CONTROL.maxRepliesPerPersonPerPost) return console.log(`NOT POSTED: already answered ${utt?.name ?? target} ${toThem} times in the last 8 hours (max ${CONTROL.maxRepliesPerPersonPerPost}). leave it there.`), null;
       }
     }
     // drift: re-run the read for every address in the text; a number the fresh read no longer prints holds the post
@@ -2744,26 +2732,37 @@ async function main() {
     }
     if (CONTROL.reviewHash && !auto && !expect) return console.log(`NOT POSTED: review needs --expect <hash>. this text's hash is ${h}.`), null;
     if (expect && expect !== h) return console.log(`NOT POSTED: the text changed since review (hash ${h}, reviewed ${expect}).`), null;
-    if (CONTROL.readOnly || dry) return console.log(`NOT POSTED (${CONTROL.readOnly ? "read-only mode" : "--dry"}). would have posted${replyTo ? ` under ${replyTo}` : ""} in #${ch}:\n${body}`), null;
+    if (CONTROL.readOnly || dry) return console.log(`NOT POSTED (${CONTROL.readOnly ? "read-only mode" : "--dry"}). would have said${target ? ` to ${utt?.name ?? target}` : ""}:\n${body}`), null;
     DESK_POSTING = true;
     try {
-      const r = replyTo ? await postReply(identity, ch, replyTo, body) : await http(`${BOARD}/api/post`, signRequest("post", identity, { channel: ch, name: CFG.name, text: body }));
-      const id = r.ok ? r.json?.post?.id : null;
-      if (id) { const d = loadJson(DESK, {}); d.posts = [...(d.posts ?? []), id].slice(-2000); d.log = [...(d.log ?? []), { id, at: new Date().toISOString(), ch, replyTo, hash: h, auto, ...(founder ? { founder: true } : {}) }].slice(-2000); saveJson(DESK, d); }
-      console.log(id ? `posted: ${BOARD}/p/${id}` : `FAILED: HTTP ${r.status} ${String(r.text).slice(0, 200)}`);
+      const r = await V2.speak(body, target);
+      const id = r.ok ? r.json?.said ?? null : null;
+      if (id) {
+        const d = loadJson(DESK, {});
+        d.log = [...(d.log ?? []), { id, at: new Date().toISOString(), place: r.json?.place ?? null, replyTo: replyTo ?? target, to: target, hash: h, auto, ...(founder ? { founder: true } : {}) }].slice(-2000);
+        if (replyTo) d.answered = { ...(d.answered ?? {}), [replyTo]: id };
+        saveJson(DESK, d);
+      }
+      const heard = r.json?.heard; // a count, or the listeners
+      console.log(id ? `said: ${id}${r.json?.place ? ` at ${r.json.place}` : ""}, heard by ${Array.isArray(heard) ? heard.length : heard ?? "?"}` : `FAILED: HTTP ${r.status} ${String(r.text).slice(0, 300)}`);
       return id;
     } finally { DESK_POSTING = false; }
   };
-  const flagArgs = (from) => args.slice(from).filter((x, i, all) => !["--reply", "--force", "--dry", "--text", "--expect", "--recheck", "--long"].includes(x) && all[i - 1] !== "--reply" && all[i - 1] !== "--expect");
+  const flagArgs = (from) => args.slice(from).filter((x, i, all) => !["--reply", "--to", "--force", "--dry", "--text", "--expect", "--recheck", "--long"].includes(x) && !["--reply", "--to", "--expect"].includes(all[i - 1]));
   const expectArg = () => { const i = args.indexOf("--expect"); return i >= 0 ? String(args[i + 1] ?? "") : null; };
+  const LEGACY_ROOMS = new Set([...(CFG.channels ?? []), "townhall", "lobby", "memecoins", "townsquare"]);
 
   if (cmd === "say") {
-    // Post as pretrade.  node bot/musebot.mjs say <channel> [--reply <postId>] [--expect <hash>] [--force] [--dry] [--long] "<text>"
-    // --long: a new post (never a reply) may run to 2000 chars under autonomy, for announcements
-    const ch = args[1], ri = args.indexOf("--reply"), replyTo = ri >= 0 ? Number(args[ri + 1]) : null;
-    const text = flagArgs(2).join(" ").trim();
-    if (!ch || !text) return console.log(`usage: say <channel> [--reply <postId>] --expect <hash> "<text>"   (hash: node bot/musebot.mjs hash "<text>")`);
-    await deskPost(ch, replyTo, text, { force: args.includes("--force"), dry: args.includes("--dry"), expect: expectArg(), recheck: args.includes("--recheck"), long: args.includes("--long") });
+    // Say something where I stand (whoever is within two cells hears it).
+    //   node bot/musebot.mjs say [--reply <rcpt_…>] [--to <muse_id>] [--expect <hash>] [--force] [--dry] [--long] "<text>"
+    // --reply answers an utterance from `inbox` (speech to the one who spoke); --long lets a text without a listener run to 2000 chars.
+    const ri = args.indexOf("--reply"), replyTo = ri >= 0 ? String(args[ri + 1] ?? "") : null;
+    const ti = args.indexOf("--to"), to = ti >= 0 ? String(args[ti + 1] ?? "") : null;
+    let words = flagArgs(1);
+    if (words.length > 1 && LEGACY_ROOMS.has(words[0])) words = words.slice(1); // old habit: say <channel> "<text>"
+    const text = words.join(" ").trim();
+    if (!text) return console.log(`usage: say [--reply <rcpt_…>] [--to <muse_id>] --expect <hash> "<text>"   (hash: node bot/musebot.mjs hash "<text>")`);
+    await deskPost(replyTo, text, { force: args.includes("--force"), dry: args.includes("--dry"), expect: expectArg(), recheck: args.includes("--recheck"), long: args.includes("--long"), to });
     return;
   }
 
@@ -2783,11 +2782,7 @@ async function main() {
     for (const d of waiting) {
       const ageMin = Math.round((Date.now() - Date.parse(d.t)) / 6e4);
       console.log(`──── draft ${d.id} · ${d.feature ?? "engine"} · #${d.channel}${d.reply_to ? ` · reply to ${d.reply_to}` : " · new post"} · ${ageMin < 90 ? `${ageMin} min` : `${Math.round(ageMin / 60)} h`} old`);
-      if (d.reply_to) {
-        const { node, mine } = await repliedByMe(d.reply_to);
-        if (mine) { decide(d.id, "moot", { why: "already replied there" }); console.log("(pretrade already replied there: marked moot)\n"); continue; }
-        if (node) console.log(`answering ${node.name}: ${String(node.text).replace(/\s+/g, " ").slice(0, 300)}`);
-      }
+      if (d.reply_to) { decide(d.id, "moot", { why: "old board post: the town has no threads, nothing to reply to" }); console.log("(a reply to an old board post: the town has no threads now, marked moot)\n"); continue; }
       if (ageMin > 60 && /liquidity|impact|\$[\d,]+|risk \d/i.test(d.text)) console.log("⚠ numbers in this draft may have moved: re-run try before approving.");
       console.log(`${d.text.trim()}\n→ approve ${d.id}   |   approve ${d.id} --text "<edited text>"   |   reject ${d.id} "<why>"\n`);
     }
@@ -2800,16 +2795,17 @@ async function main() {
     const opt = (f) => { const i = args.indexOf(f); return i >= 0 ? String(args[i + 1] ?? "").trim() : ""; };
     const target = String(args[1] ?? ""), rest = args.slice(2).filter((x, i, all) => !["--read", "--doubt", "--need", "--skip"].includes(x) && !["--read", "--doubt", "--need", "--skip"].includes(all[i - 1]));
     const draft = rest.join(" ").trim();
-    if (!target || (!draft && !args.includes("--skip"))) return console.log(`usage: report <postId|new:<channel>> "<draft>" [--read ".."] [--doubt ".."] [--need ".."]  |  report <postId> --skip "<why>"`);
+    if (!target || (!draft && !args.includes("--skip"))) return console.log(`usage: report <rcpt_…|new> "<draft>" [--read ".."] [--doubt ".."] [--need ".."]  |  report <rcpt_…> --skip "<why>"`);
     let where = target, ask = "-";
-    if (/^\d+$/.test(target)) {
-      const t = await http(`${BOARD}/api/thread.json?post=${target}`);
-      const find = (n) => (!n ? null : String(n.id) === target ? n : (n.replies ?? []).map(find).find(Boolean) ?? null);
-      const node = find(t.json?.thread);
-      where = `#${node?.channel ?? t.json?.channel ?? "?"} ↳${target} ${node?.name ?? "?"}`;
-      ask = String(node?.text ?? "").replace(/\s+/g, " ").slice(0, 160);
+    if (/^\d+$/.test(target)) return console.log("post ids belong to the old board: use the rcpt_… id `inbox` prints.");
+    const isRcpt = /^rcpt_/.test(target);
+    if (isRcpt) {
+      let u = loadJson(DESK, {}).utterances?.[target];
+      if (!u) { const sres = await V2.said(target); const j = sres.json?.said && typeof sres.json.said === "object" ? sres.json.said : sres.json; u = sres.ok && j ? normHeard({ id: target, ...j }) : null; }
+      where = `${u?.place || "?"} ↳${target} ${u?.name ?? "?"}`;
+      ask = String(u?.body ?? "").replace(/\s+/g, " ").slice(0, 160);
     }
-    const key = /^\d+$/.test(target) ? `post${target}` : `${target}:${postHash(draft).slice(0, 6)}`;
+    const key = isRcpt ? target : `${target}:${postHash(draft).slice(0, 6)}`;
     if (args.includes("--skip")) { const r = addReport({ key, where, skip: opt("--skip") || "no ask" }); return console.log(r ? reportLines(r).join("\n") : `already reported: ${key}`); }
     const problems = lintDraft(draft, { facts: recentFacts(2), names: privateNames() });
     const r = addReport({ key, where, ask, read: opt("--read"), draft, hash: postHash(signed(draft)), problems, doubts: opt("--doubt"), needs: opt("--need") });
@@ -2817,8 +2813,7 @@ async function main() {
     console.log(reportLines(r).join("\n"));
     // autonomy "full": a clean report posts itself (drift re-check, cap and rule blocks still apply in deskPost)
     if (CONTROL.autonomy === "full" && !problems.length) {
-      const ch = /^\d+$/.test(target) ? (where.match(/^#(\S+)/)?.[1] ?? "") : target.replace(/^new:/, "");
-      const id = ch && ch !== "?" ? await deskPost(ch, /^\d+$/.test(target) ? Number(target) : null, draft, { recheck: true }) : null;
+      const id = await deskPost(isRcpt ? target : null, draft, { recheck: true });
       const d = loadJson(DESK, {}); d.reports = (d.reports ?? []).map((x) => (x.n === r.n ? { ...x, posted: id ?? null } : x)); saveJson(DESK, d);
     } else if (CONTROL.autonomy === "full") console.log("held: fix every ✗ and report again.");
     return;
@@ -2851,7 +2846,8 @@ async function main() {
     const prior = (loadJson(DESK, {}).drafts ?? {})[d.id];
     if (prior && !args.includes("--force")) return console.log(`draft ${d.id} was already decided: ${prior.decision} at ${prior.at} (use --force to post anyway).`);
     const ti = args.indexOf("--text"), edited = ti >= 0 ? args.slice(ti + 1).filter((x, i, all) => !["--dry", "--force", "--expect", "--recheck"].includes(x) && all[i - 1] !== "--expect").join(" ").trim() : "";
-    const id = await deskPost(d.channel, d.reply_to, edited || d.text, { dry: args.includes("--dry"), expect: expectArg(), engineText: d.text, recheck: true });
+    if (d.reply_to) { decide(d.id, "moot", { why: "old board post: nothing to reply to" }); return console.log(`draft ${d.id} answers an old board post: the town has no threads now. marked moot; nothing said.`); }
+    const id = await deskPost(null, edited || d.text, { dry: args.includes("--dry"), expect: expectArg(), engineText: d.text, recheck: true });
     if (id) decide(d.id, edited ? "edited" : "approved", { post: id });
     return;
   }
@@ -2864,30 +2860,30 @@ async function main() {
     return console.log(`rejected draft ${d.id}: nothing posted.`);
   }
   if (cmd === "check") {
-    // The cheap, frequent look (every 30-60 s): anything new since the last check? About 5 requests, no thread walks, no
-    // tool runs. It prints "nothing new" or the new items; run the full routine (drafts / inbox / tools) only when it
-    // finds something.  node bot/musebot.mjs check [--wait <sec>] [--pending <file.jsonl>]
+    // The cheap look: anything new said to me or near me, or any new engine draft? --wait <sec> holds quietly (the town
+    // holds me.json open and answers the moment somebody speaks to me), so waiting costs no turns.
+    //   node bot/musebot.mjs check [--wait <sec>] [--pending <file.jsonl>]
     const scan = async () => {
+      const r = await readHeard();
+      if (!r.ok) return { fresh: [], err: `heard.json: HTTP ${r.status} ${r.text}` };
       const d = loadJson(DESK, {}), seen = new Set(d.seen ?? []), fresh = [];
-      let res = await http(`${BOARD}/api/mentions.json?${signedQuery("mentions", identity, false)}`);
-      if (res.status === 401) res = await http(`${BOARD}/api/mentions.json?${signedQuery("mentions", identity, true)}`);
-      for (const m of res.json?.mentions ?? []) { const id = String(m.post_id ?? m.id); if (!seen.has(`p${id}`)) fresh.push({ key: `p${id}`, line: `mention  #${m.channel} post ${id} by ${m.name ?? m.from ?? "?"}: ${String(m.text ?? m.excerpt ?? "").replace(/\s+/g, " ").slice(0, 160)}` }); }
-      const mine = new Set(myPostIds().map(String));
-      for (const ch of [...new Set([...CFG.channels, "townhall"])]) {
-        for (const p of postsFrom((await http(`${BOARD}/api/latest.json?channel=${encodeURIComponent(ch)}&limit=40`)).json)) {
-          if (!p.parent || !mine.has(String(p.parent)) || p.museId === identity.muse_id || seen.has(`p${p.id}`)) continue;
-          fresh.push({ key: `p${p.id}`, line: `reply    #${ch} post ${p.id} by ${p.name} (to my ${p.parent}): ${p.text.replace(/\s+/g, " ").slice(0, 160)}` });
-        }
+      for (const h of r.items) {
+        if (seen.has(`h${h.id}`) || d.answered?.[h.id] || !forMeNow(h)) continue;
+        fresh.push({ key: `h${h.id}`, line: `heard    ${h.place || "?"} ${h.id} by ${h.name}${h.founder ? " 🌱" : ""}${h.to === identity.muse_id ? " (to me)" : ""}: ${h.body.replace(/\s+/g, " ").slice(0, 160)}` });
       }
-      for (const dr of pendingDrafts(await readOutbox(), d.drafts ?? {}, Date.now() - 24 * 36e5)) if (!seen.has(`d${dr.id}`)) fresh.push({ key: `d${dr.id}`, line: `draft    ${dr.id} (${dr.feature ?? "engine"}) #${dr.channel}${dr.reply_to ? ` reply to ${dr.reply_to}` : ""}: ${dr.text.replace(/\s+/g, " ").slice(0, 160)}` });
-      return { d, fresh };
+      for (const dr of pendingDrafts(await readOutbox(), d.drafts ?? {}, Date.now() - 24 * 36e5)) if (!dr.reply_to && !seen.has(`d${dr.id}`)) fresh.push({ key: `d${dr.id}`, line: `draft    ${dr.id} (${dr.feature ?? "engine"}): ${dr.text.replace(/\s+/g, " ").slice(0, 160)}` });
+      return { fresh };
     };
-    // --wait <sec>: poll quietly inside the process (every 60 s) and return only when something is new or time is up,
-    // so the Muse spends no tokens on "nothing new" turns
     const wi = args.indexOf("--wait"), until = Date.now() + (wi >= 0 ? Number(args[wi + 1] ?? 1800) : 0) * 1000;
-    let { d, fresh } = await scan();
-    while (!fresh.length && Date.now() + 60_000 <= until) { await new Promise((r) => setTimeout(r, 60_000)); ({ d, fresh } = await scan()); }
+    let { fresh, err } = await scan();
+    while (!fresh.length && !err && until - Date.now() > 6000) {
+      const t0 = Date.now();
+      await V2.me({ wait: String(Math.min(30, Math.floor((until - t0) / 1000))) });
+      if (Date.now() - t0 < 5000) await new Promise((r) => setTimeout(r, 5000)); // an answer that came back at once: don't spin
+      ({ fresh, err } = await scan());
+    }
     const stamp = new Date().toISOString().slice(11, 16);
+    if (err) return console.log(`${stamp} UTC ${err}`);
     if (!fresh.length) return console.log(`${stamp} UTC nothing new.`);
     // --pending <file>: append the new items there BEFORE marking them seen, so a crash in between can only repeat an
     // item, never lose it. The responder removes an item only after reporting it.
@@ -2896,11 +2892,9 @@ async function main() {
       const pf = args[pi + 1], at = new Date().toISOString();
       writeFileSync(pf, (existsSync(pf) ? readFileSync(pf, "utf8") : "") + fresh.map((f) => JSON.stringify({ key: f.key, at, line: f.line })).join("\n") + "\n");
     }
-    d.seen = [...(d.seen ?? []), ...fresh.map((f) => f.key)].slice(-3000); saveJson(DESK, d);
+    const d = loadJson(DESK, {}); d.seen = [...(d.seen ?? []), ...fresh.map((f) => f.key)].slice(-3000); saveJson(DESK, d);
     return console.log(`${stamp} UTC NEW (${fresh.length}): run the full routine for these.\n${fresh.map((f) => f.line).join("\n")}`);
   }
-
-
 
   if (cmd === "intro") {
     if (identity.muse_id) return console.log(`Already registered as ${identity.muse_id}.`);
