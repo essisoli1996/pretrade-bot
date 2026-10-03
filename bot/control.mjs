@@ -6,6 +6,7 @@
 //   approval: true      → nothing is posted by the engine: each post waits in outbox.jsonl for the Muse (approve / reject)
 //   autonomy: "full"   → the Muse posts without a review hash (default "off"); every post is still logged with its hash
 //   maxAutoPostsPer8h  → under autonomy "full", at most this many desk posts in any 8 hours (default 6)
+//   quiet: true         → the Muse only shows up once a day (presence); the desk loop commands refuse to run
 //   approvalExempt: []  → features whose posts skip that wait (e.g. ["leakWatch"] if a leaked key must be flagged fast)
 export const FEATURES = ["mentions", "channels", "conversation", "launches", "launchReport", "townWatch", "guard", "tickerWatch", "leakWatch", "threatWatch", "digest", "radar", "watches", "presence"];
 export const DEFAULTS = Object.freeze({ paused: false, readOnly: false, features: {} });
@@ -21,7 +22,7 @@ export function normalize(raw) {
     else if (v === "shadow") features[f] = "shadow";
   }
   const approvalExempt = Array.isArray(c.approvalExempt) ? c.approvalExempt.filter((f) => FEATURES.includes(f)) : [];
-  return { paused: c.paused === true, readOnly: c.readOnly === true, approval: c.approval === true, approvalExempt, reviewHash: c.reviewHash === true, autonomy: c.autonomy === "full" ? "full" : "off", maxAutoPostsPer8h: cnt(c.maxAutoPostsPer8h, 6), maxAutoRepliesPer8h: cnt(c.maxAutoRepliesPer8h, 24), maxRepliesPerThread8h: cnt(c.maxRepliesPerThread8h, 3), maxRepliesPerPersonPerPost: cnt(c.maxRepliesPerPersonPerPost, 2), founders: (Array.isArray(c.founders) ? c.founders : ["wynjr", "mikey"]).map((x) => String(x).toLowerCase()), numberCheck: c.numberCheck !== false, features };
+  return { paused: c.paused === true, readOnly: c.readOnly === true, approval: c.approval === true, approvalExempt, reviewHash: c.reviewHash === true, autonomy: c.autonomy === "full" ? "full" : "off", quiet: c.quiet === true, maxAutoPostsPer8h: cnt(c.maxAutoPostsPer8h, 6), maxAutoRepliesPer8h: cnt(c.maxAutoRepliesPer8h, 24), maxRepliesPerThread8h: cnt(c.maxRepliesPerThread8h, 3), maxRepliesPerPersonPerPost: cnt(c.maxRepliesPerPersonPerPost, 2), founders: (Array.isArray(c.founders) ? c.founders : ["wynjr", "mikey"]).map((x) => String(x).toLowerCase()), numberCheck: c.numberCheck !== false, features };
 }
 
 /** True when a post by this feature must wait in the outbox for the Muse's approval. */

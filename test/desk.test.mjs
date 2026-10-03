@@ -12,10 +12,11 @@ const check = (ok, label) => { console.log(`${ok ? "PASS" : "FAIL"}  ${label}`);
 const dir = mkdtempSync(join(tmpdir(), "desk-"));
 const { publicKey, privateKey } = generateKeyPairSync("ed25519");
 const identity = { public_key: publicKey.export({ format: "jwk" }).x, secret: privateKey.export({ format: "jwk" }).d, muse_id: "muse_desktest" };
-const idFile = join(dir, "identity.json");
+const idFile = join(dir, "identity.json"), ctlFile = join(dir, "control.json");
 writeFileSync(idFile, JSON.stringify(identity));
+writeFileSync(ctlFile, JSON.stringify({ autonomy: "off", quiet: false, features: {} })); // the shipped switches are the owner's to flip: test with our own
 const run = (...args) => {
-  const r = spawnSync("node", ["bot/musebot.mjs", ...args], { encoding: "utf8", timeout: 60000, env: { ...process.env, MUSE_IDENTITY_FILE: idFile, PRETRADE_CONTROL: "local", PRETRADE_DATA: dir, MUSE_IDENTITY: "" } });
+  const r = spawnSync("node", ["bot/musebot.mjs", ...args], { encoding: "utf8", timeout: 60000, env: { ...process.env, MUSE_IDENTITY_FILE: idFile, PRETRADE_CONTROL: "local", PRETRADE_CONTROL_FILE: ctlFile, PRETRADE_DATA: dir, MUSE_IDENTITY: "" } });
   return { out: `${r.stdout}${r.stderr}`, code: r.status };
 };
 const clean = (o) => !/ReferenceError|TypeError|SyntaxError|is not defined|is not a function/.test(o);
@@ -37,6 +38,13 @@ r = run("say", "--dry", "i can't see that");
 check(clean(r.out) && /NOT POSTED/.test(r.out), "say refuses a rule break");
 r = run("say", "--reply", "rcpt_unknown", "--dry", "hi");
 check(clean(r.out), "say --reply with an unknown receipt fails cleanly");
+r = run("presence");
+check(clean(r.out) && /presence/.test(r.out), "presence runs (one line, no model)");
+writeFileSync(ctlFile, JSON.stringify({ quiet: true, features: {} }));
+for (const cmd of [["check"], ["inbox"], ["report", "new", "x"], ["say", "hi"], ["batch"]]) { r = run(...cmd); check(/quiet mode/.test(r.out), `quiet mode stops ${cmd[0]}`); }
+r = run("presence");
+check(!/quiet mode/.test(r.out) && /presence/.test(r.out), "quiet mode still lets presence run");
+writeFileSync(ctlFile, JSON.stringify({ quiet: false, features: {} }));
 for (const cmd of [["digest"], ["drafts"], ["hash", "hello"]]) { r = run(...cmd); check(clean(r.out), `${cmd[0]} starts`); }
 
 console.log(bad ? `\n${bad} FAILED` : "\nall passed");

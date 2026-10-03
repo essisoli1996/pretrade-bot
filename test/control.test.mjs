@@ -16,6 +16,7 @@ check(FEATURES.every((f) => modeOf(normalize({ readOnly: true }), f) === "shadow
 check(modeOf(normalize({ readOnly: true, features: { radar: false } }), "radar") === "off", "readOnly keeps a feature that is switched off, off");
 const mixed = normalize({ features: { conversation: false, launchReport: "shadow", guard: "yes please", nonsense: false } });
 check(modeOf(mixed, "conversation") === "off" && modeOf(mixed, "launchReport") === "shadow" && modeOf(mixed, "guard") === "on", "per feature: false = off, \"shadow\" = shadow, anything else = on");
+check(normalize({ quiet: true }).quiet === true && normalize({}).quiet === false && normalize({ quiet: "yes" }).quiet === false, "quiet: only a real true turns it on");
 check(modeOf(normalize(null), "mentions") === "on" && modeOf(normalize("garbage"), "channels") === "on", "an unreadable file means on, never a silent shutdown");
 
 let t = 0, gh = '{"readOnly":true}', local = '{"paused":true}';

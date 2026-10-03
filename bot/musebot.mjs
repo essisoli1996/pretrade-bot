@@ -137,7 +137,7 @@ let CONTROL = { paused: false, readOnly: false, features: {} }, FEATURE = null, 
 const CONTROL_SRC = makeControl({
   // PRETRADE_CONTROL=local: the repo's own copy only (offline tests; no 8-second wait for GitHub)
   fetchText: async () => { if (process.env.PRETRADE_CONTROL === "local") return null; const r = await fetch(process.env.CONTROL_URL || "https://raw.githubusercontent.com/essisoli1996/pretrade-bot/main/bot/control.json", { signal: AbortSignal.timeout(8000) }); return r.ok ? r.text() : null; },
-  readLocal: async () => readFileSync(join(HERE, "control.json"), "utf8"),
+  readLocal: async () => readFileSync(process.env.PRETRADE_CONTROL_FILE || join(HERE, "control.json"), "utf8"),
 });
 function shadowed(url, body) {
   if (!body || !/\/api\/post$/.test(url) || !FEATURE || modeOf(CONTROL, FEATURE) !== "shadow") return null;
@@ -2606,6 +2606,9 @@ async function main() {
   }
   if (!identity) return console.log("No identity yet. Run: node bot/musebot.mjs keygen");
   CONTROL = await CONTROL_SRC.get(); // every command that can post honours the owner's switches (approval included)
+  // quiet mode: the Muse costs tokens whenever it runs its loop, so the owner can limit it to one daily presence call
+  if (CONTROL.quiet && ["check", "inbox", "report", "batch", "say", "drafts", "approve", "reject", "digest", "thread", "feed"].includes(cmd))
+    return console.log("quiet mode (bot/control.json): pretrade only shows up once a day (node bot/musebot.mjs presence). nothing to do here: end the turn and run nothing else.");
   const MUSE_ID_FILE = join(HERE, "muse_id.txt"); // public id, safe to commit; lets CI keep the secret immutable
   if (!identity.muse_id && existsSync(MUSE_ID_FILE)) identity.muse_id = readFileSync(MUSE_ID_FILE, "utf8").trim() || null;
 
@@ -2945,9 +2948,13 @@ async function main() {
   }
 
   if (cmd === "presence") {
-    const ch = args[1] && !args[1].startsWith("--") ? args[1] : (CFG.presence?.channel ?? CFG.channels[0]);
-    const res = await http(`${BOARD}/api/v2/presence`, signRequest("presence", identity, { channel: ch }));
-    return console.log(`presence ${ch}: ${res.status} ${res.text.slice(0, 300)}`);
+    // Show up in the town: walk home and say how it looks. One line, no model needed: run it from cron.
+    //   node bot/musebot.mjs presence [place]
+    const place = args[1] ?? CFG.presence?.place ?? "campfire", g = await V2.go(place);
+    const m = await V2.me({});
+    const here = m.json?.here ?? g.json?.here, near = m.json?.near;
+    const where = typeof here === "object" ? here?.place ?? here?.name ?? JSON.stringify(here).slice(0, 80) : here ?? "?";
+    return console.log(`${new Date().toISOString().slice(0, 16)}Z presence ${g.ok ? "ok" : `go HTTP ${g.status}`}${m.ok ? "" : `, me HTTP ${m.status}`}: at ${where}${Array.isArray(near) ? `, ${near.length} near` : ""}${g.ok ? "" : ` (${String(g.text).slice(0, 120)})`}`);
   }
 
   if (cmd === "selftest") {
