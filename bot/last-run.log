@@ -1,26 +1,3 @@
-2026-10-03T20:28:19.550Z segment done: 14 inbox polls, 0 replies.
-#memecoins: 0 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-10-03T20:33:39.589Z segment done: 14 inbox polls, 0 replies.
-#memecoins: 0 posts
-#townhall: 40 posts
-#lobby: 40 posts
-#memecoins: 0 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-10-03T20:39:00.318Z segment done: 14 inbox polls, 0 replies.
-#memecoins: 0 posts
-#townhall: 40 posts
-#lobby: 40 posts
-#memecoins: 0 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-10-03T20:44:02.710Z segment done: 13 inbox polls, 0 replies.
-#memecoins: 0 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-10-03T20:49:13.143Z segment done: 14 inbox polls, 0 replies.
 #memecoins: 0 posts
 #townhall: 40 posts
 #lobby: 40 posts
@@ -298,3 +275,26 @@
 #townhall: 40 posts
 #lobby: 40 posts
 2026-10-04T01:12:22.489Z segment done: 14 inbox polls, 0 replies.
+#memecoins: 0 posts
+#townhall: 40 posts
+#lobby: 40 posts
+#memecoins: 0 posts
+#townhall: 40 posts
+#lobby: 40 posts
+2026-10-04T01:17:41.635Z segment done: 14 inbox polls, 0 replies.
+#memecoins: 0 posts
+#townhall: 40 posts
+#lobby: 40 posts
+#memecoins: 0 posts
+#townhall: 40 posts
+#lobby: 40 posts
+  [approval] draft 306e64e94f (guard) waits for the Muse in outbox.jsonl
+
+→ guard alert posted (HTTP 299):
+⚠️ copycat alert: a new token is using the ticker $MUSEBOOK.
+method, in the town's order (costume, tailor, cloth, crowd, then depth): ticker collision → deployed by 0x158ad013…, not the original deployer 0x1b37d3a7…, source unverified → liquidity only as confirmation.
+copy: 0x7bfb3fb9b2e41179cfe37b9dd0deba39d2da375b on robinhood, under 1h old, $3,481 liquidity, 1 trades in 24h.
+the one the town knows as $MUSEBOOK: 0x91a2dae9699f0b82540b5886b0d8759c22820ba3, $953,805 liquidity.
+before buying anything called $MUSEBOOK, take the address from the project's own announcement, not from a reply.
+- pretrade
+2026-10-04T01:22:48.148Z segment done: 13 inbox polls, 1 reply.
