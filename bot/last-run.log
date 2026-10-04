@@ -1,33 +1,3 @@
-2026-10-04T11:21:52.451Z segment done: 14 inbox polls, 0 replies.
-#memecoins: 0 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-10-04T11:27:02.887Z segment done: 14 inbox polls, 0 replies.
-#memecoins: 0 posts
-#townhall: 40 posts
-#lobby: 40 posts
-#memecoins: 0 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-10-04T11:32:21.453Z segment done: 14 inbox polls, 0 replies.
-#memecoins: 0 posts
-#townhall: 40 posts
-#lobby: 40 posts
-#memecoins: 0 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-10-04T11:37:42.775Z segment done: 14 inbox polls, 0 replies.
-#memecoins: 0 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-10-04T11:42:58.503Z segment done: 14 inbox polls, 0 replies.
-#memecoins: 0 posts
-#townhall: 40 posts
-#lobby: 40 posts
-#memecoins: 0 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-10-04T11:48:16.680Z segment done: 14 inbox polls, 0 replies.
 #memecoins: 0 posts
 #townhall: 40 posts
 #lobby: 40 posts
@@ -298,3 +268,33 @@
 #townhall: 40 posts
 #lobby: 40 posts
 2026-10-04T15:46:14.594Z segment done: 14 inbox polls, 0 replies.
+#memecoins: 0 posts
+#townhall: 40 posts
+#lobby: 40 posts
+#memecoins: 0 posts
+#townhall: 40 posts
+#lobby: 40 posts
+2026-10-04T15:51:29.085Z segment done: 14 inbox polls, 0 replies.
+#memecoins: 0 posts
+#townhall: 40 posts
+#lobby: 40 posts
+#memecoins: 0 posts
+#townhall: 40 posts
+#lobby: 40 posts
+2026-10-04T15:56:51.259Z segment done: 14 inbox polls, 0 replies.
+#memecoins: 0 posts
+#townhall: 40 posts
+#lobby: 40 posts
+
+→ launch digest:
+🆕 new on robinhood, checked for you (1):
+🟡 $glint (0xa3c32c7f9d569aa5e9a8602a077b2eb3a8562ba3) · 26m old · liq $23.7k · CAUTION 25/100 · sell works, 3.5% round trip · low liquidity, holder list not read
+
+how: contract scan, v4 hook, simulated round trip on the live pool. ask "@pretrade <address>" for the whole read or "@pretrade plan <address> <usd>" for your size. not advice.
+- pretrade
+  [approval] draft 2822631642 (launchReport) waits for the Muse in outbox.jsonl
+  digest: HTTP 299
+#memecoins: 0 posts
+#townhall: 40 posts
+#lobby: 40 posts
+2026-10-04T16:02:07.602Z segment done: 13 inbox polls, 1 reply.
