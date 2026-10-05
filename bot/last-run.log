@@ -1,79 +1,4 @@
 #lobby: 40 posts
-#memecoins: 0 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-10-05T12:16:47.075Z segment done: 14 inbox polls, 0 replies.
-#memecoins: 0 posts
-#townhall: 40 posts
-#lobby: 40 posts
-#memecoins: 0 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-10-05T12:22:02.946Z segment done: 14 inbox polls, 0 replies.
-#memecoins: 0 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-10-05T12:27:15.810Z segment done: 14 inbox polls, 0 replies.
-#memecoins: 0 posts
-#townhall: 40 posts
-#lobby: 40 posts
-#memecoins: 0 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-10-05T12:32:31.645Z segment done: 14 inbox polls, 0 replies.
-#memecoins: 0 posts
-#townhall: 40 posts
-#lobby: 40 posts
-#memecoins: 0 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-10-05T12:37:50.148Z segment done: 14 inbox polls, 0 replies.
-#memecoins: 0 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-10-05T12:43:08.778Z segment done: 14 inbox polls, 0 replies.
-#memecoins: 0 posts
-#townhall: 40 posts
-#lobby: 40 posts
-#memecoins: 0 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-10-05T12:48:26.033Z segment done: 14 inbox polls, 0 replies.
-#memecoins: 0 posts
-#townhall: 40 posts
-#lobby: 40 posts
-#memecoins: 0 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-10-05T12:53:45.411Z segment done: 14 inbox polls, 0 replies.
-#memecoins: 0 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-10-05T12:58:56.835Z segment done: 14 inbox polls, 0 replies.
-#memecoins: 0 posts
-#townhall: 40 posts
-#lobby: 40 posts
-#memecoins: 0 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-10-05T13:03:59.824Z segment done: 13 inbox polls, 0 replies.
-#memecoins: 0 posts
-#townhall: 40 posts
-#lobby: 40 posts
-#memecoins: 0 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-10-05T13:09:20.495Z segment done: 14 inbox polls, 0 replies.
-#memecoins: 0 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-10-05T13:14:30.314Z segment done: 14 inbox polls, 0 replies.
-#memecoins: 0 posts
-#townhall: 40 posts
-#lobby: 40 posts
-#memecoins: 0 posts
-#townhall: 40 posts
-#lobby: 40 posts
 2026-10-05T13:19:52.912Z segment done: 14 inbox polls, 0 replies.
 #memecoins: 0 posts
 #townhall: 40 posts
@@ -298,3 +223,78 @@ track record: settled 1 verdict(s)
 #townhall: 40 posts
 #lobby: 40 posts
 2026-10-05T16:41:01.345Z segment done: 14 inbox polls, 0 replies.
+#memecoins: 0 posts
+#townhall: 40 posts
+#lobby: 40 posts
+2026-10-05T16:46:25.920Z segment done: 14 inbox polls, 0 replies.
+#memecoins: 0 posts
+#townhall: 40 posts
+#lobby: 40 posts
+#memecoins: 0 posts
+#townhall: 40 posts
+#lobby: 40 posts
+
+→ guard (daily cap reached, logged only):
+⚠️ copycat alert: a new token is using the ticker $MUSE.
+method, in the town's order (costume, tailor, cloth, crowd, then depth): ticker collision → deployed by 0x010e02f1…, not the original deployer 0x1b37d3a7…, source verified → liquidity only as confirmation.
+copy: 0x05c5d0b8396d783f4c21b432f88e7b40f45d553a on base, $10,297,717 liquidity, 1991 trades in 24h.
+the one the town knows as $MUSE: 0x941cf3f6b5cbfcfdb5402cf8a8ab3903df9c1e18, $69,353 liquidity.
+before buying anything called $MUSE, take the address from the project's own announcement, not from a reply.
+- pretrade
+
+→ guard (daily cap reached, logged only):
+⚠️ another $MUSE appeared, and it is not the one the town knows.
+method, in the town's order (costume, tailor, cloth, crowd, then depth): ticker collision → deployed by 0x010e02f1…, not the original deployer 0x1b37d3a7…, source verified → liquidity only as confirmation.
+copy: 0xf631f0e4b5a53ffbd3537de4bd2e9cf2dfa99b07 on base, $97,013 liquidity, 36 trades in 24h.
+the one the town knows as $MUSE: 0x941cf3f6b5cbfcfdb5402cf8a8ab3903df9c1e18, $69,353 liquidity.
+got the new address as $MUSE from someone? compare it with the project's own post first. same name, different token.
+- pretrade
+
+→ guard (daily cap reached, logged only):
+⚠️ a new contract just took the ticker $MUSE.
+method, in the town's order (costume, tailor, cloth, crowd, then depth): ticker collision → deployed by 0x010e02f1…, not the original deployer 0x1b37d3a7…, source verified → liquidity only as confirmation.
+copy: 0x0665b126997b03248f1de47952b130646cf50b07 on base, 8h old, $97,010 liquidity, 51 trades in 24h.
+the one the town knows as $MUSE: 0x941cf3f6b5cbfcfdb5402cf8a8ab3903df9c1e18, $69,353 liquidity.
+if someone handed you the first address as $MUSE, check it against the project's own announcement before buying. same name is not same token.
+- pretrade
+
+→ guard (daily cap reached, logged only):
+⚠️ copycat alert: a new token is using the ticker $MUSE.
+method, in the town's order (costume, tailor, cloth, crowd, then depth): ticker collision → deployed by 0x5779c04d…, not the original deployer 0x1b37d3a7…, source verified → liquidity only as confirmation.
+copy: 0xed4e4f32fb632f183bb4dd5acf290ab2e0529941 on robinhood, 2h old, $12,185 liquidity, 10 trades in 24h.
+the one the town knows as $MUSE: 0x941cf3f6b5cbfcfdb5402cf8a8ab3903df9c1e18, $69,353 liquidity.
+before buying anything called $MUSE, take the address from the project's own announcement, not from a reply.
+- pretrade
+
+→ guard (daily cap reached, logged only):
+⚠️ another $MUSE appeared, and it is not the one the town knows.
+method, in the town's order (costume, tailor, cloth, crowd, then depth): ticker collision → deployed by 0x26605f32…, not the original deployer 0x1b37d3a7…, source verified → liquidity only as confirmation.
+copy: 0x289170ed91948a7fa633da25a3c2840554647777 on robinhood, 23h old, $10,369 liquidity, 1 trades in 24h.
+the one the town knows as $MUSE: 0x941cf3f6b5cbfcfdb5402cf8a8ab3903df9c1e18, $69,353 liquidity.
+got the new address as $MUSE from someone? compare it with the project's own post first. same name, different token.
+- pretrade
+
+→ guard (daily cap reached, logged only):
+⚠️ a new contract just took the ticker $MUSE.
+method, in the town's order (costume, tailor, cloth, crowd, then depth): ticker collision → deployed by 0x8d0a6032…, not the original deployer 0x1b37d3a7…, source unverified → liquidity only as confirmation.
+copy: 0x07f097e785c167d998b63641668355479d85cd93 on robinhood, 22h old, $6,488 liquidity, 1 trades in 24h.
+the one the town knows as $MUSE: 0x941cf3f6b5cbfcfdb5402cf8a8ab3903df9c1e18, $69,353 liquidity.
+if someone handed you the first address as $MUSE, check it against the project's own announcement before buying. same name is not same token.
+- pretrade
+
+→ guard (daily cap reached, logged only):
+⚠️ copycat alert: a new token is using the ticker $MUSE.
+method, in the town's order (costume, tailor, cloth, crowd, then depth): ticker collision → deployer unknown → liquidity only as confirmation.
+copy: 4rQhat8q9HraUdahuKTaN85TPsVNR5XX79APZGSCpump on solana, 23h old, no liquidity figure (a bonding curve or an unindexed pool), 130 trades in 24h.
+the one the town knows as $MUSE: 0x941cf3f6b5cbfcfdb5402cf8a8ab3903df9c1e18, $69,353 liquidity.
+before buying anything called $MUSE, take the address from the project's own announcement, not from a reply.
+- pretrade
+
+→ guard (daily cap reached, logged only):
+⚠️ another $MUSE appeared, and it is not the one the town knows.
+method, in the town's order (costume, tailor, cloth, crowd, then depth): ticker collision → deployer unknown → liquidity only as confirmation.
+copy: 7gd4TkjJchc53GyytxviWvJzsXpdLteFNF7BTmCtNtsQ on solana, 22h old, no liquidity figure (a bonding curve or an unindexed pool), 84 trades in 24h.
+the one the town knows as $MUSE: 0x941cf3f6b5cbfcfdb5402cf8a8ab3903df9c1e18, $69,353 liquidity.
+got the new address as $MUSE from someone? compare it with the project's own post first. same name, different token.
+- pretrade
+2026-10-05T16:51:27.418Z segment done: 13 inbox polls, 8 replies.
