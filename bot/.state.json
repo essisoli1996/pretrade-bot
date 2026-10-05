@@ -3313,19 +3313,19 @@
   "mentionsSeen": [],
   "watches": [],
   "clock": {
-    "channels": 1791237063745,
-    "watches": 1791236749308,
+    "channels": 1791237448218,
+    "watches": 1791237358432,
     "ledger": 1791236724270,
-    "presence": 1791237087220,
-    "launches": 1791237131279,
-    "guard": 1791237065204,
+    "presence": 1791237336636,
+    "launches": 1791237402921,
+    "guard": 1791237448919,
     "digest": 1791236702279,
-    "conversations": 1791237109124,
-    "townwatch": 1791237064561,
-    "radar": 1791236749306,
+    "conversations": 1791237448653,
+    "townwatch": 1791237448653,
+    "radar": 1791237358430,
     "launchreport": 1791236723456,
-    "tickerwatch": 1791236858030,
-    "sentinel": 1791237152420
+    "tickerwatch": 1791237178548,
+    "sentinel": 1791237424089
   },
   "ledger": [
     {
@@ -7719,7 +7719,9 @@
         "4rQhat8q9HraUdahuKTaN85TPsVNR5XX79APZGSCpump",
         "5Kt3adNtcW2TuVqG5EakmMP3wisSRU64JYUxjpybpump",
         "Fj62J8ALrc3DQM6r6bRh4vJfhmFuvE41xq6f7YMi9Pev",
-        "6nW6QY26rAWezMECxT52K52LTgcycSM4RLsGuXcaJE74"
+        "6nW6QY26rAWezMECxT52K52LTgcycSM4RLsGuXcaJE74",
+        "wkUm1EpmLXsMGtSp54vUTUpWtcHsmLAiNQJQyQ8pump",
+        "9Rn3iQkMpn5bJcJbdUgrdospauDckSB13bpXRajnpump"
       ]
     },
     "canonical": {
@@ -9076,6 +9078,20 @@
       "kind": "copycat",
       "ticker": "MUSE",
       "address": "6nW6QY26rAWezMECxT52K52LTgcycSM4RLsGuXcaJE74",
+      "chain": "solana"
+    },
+    {
+      "t": 1791237449591,
+      "kind": "copycat",
+      "ticker": "MUSE",
+      "address": "wkUm1EpmLXsMGtSp54vUTUpWtcHsmLAiNQJQyQ8pump",
+      "chain": "solana"
+    },
+    {
+      "t": 1791237449935,
+      "kind": "copycat",
+      "ticker": "MUSE",
+      "address": "9Rn3iQkMpn5bJcJbdUgrdospauDckSB13bpXRajnpump",
       "chain": "solana"
     }
   ],
@@ -12471,6 +12487,14 @@
         {
           "t": 1791237064694,
           "liq": 780428.9
+        },
+        {
+          "t": 1791237266950,
+          "liq": 781316.6900000001
+        },
+        {
+          "t": 1791237448770,
+          "liq": 781309.37
         }
       ],
       "MUSEPAD": [
@@ -12561,6 +12585,14 @@
         {
           "t": 1791237064853,
           "liq": 13193.029999999999
+        },
+        {
+          "t": 1791237267127,
+          "liq": 13193.029999999999
+        },
+        {
+          "t": 1791237448903,
+          "liq": 13193.029999999999
         }
       ],
       "MUSE": [
@@ -12646,6 +12678,14 @@
         },
         {
           "t": 1791237064962,
+          "liq": 68598.97
+        },
+        {
+          "t": 1791237267175,
+          "liq": 68598.97
+        },
+        {
+          "t": 1791237448919,
           "liq": 68598.97
         }
       ]
@@ -13154,12 +13194,12 @@
       0
     ],
     "copy.head": [
-      1,
-      0
+      2,
+      1
     ],
     "copy.tail": [
-      0,
-      2
+      1,
+      0
     ],
     "lookup.check": [
       2,
