@@ -1,80 +1,3 @@
-2026-10-05T06:12:32.348Z segment done: 14 inbox polls, 0 replies.
-#memecoins: 0 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-10-05T06:17:48.137Z segment done: 14 inbox polls, 0 replies.
-#memecoins: 0 posts
-#townhall: 40 posts
-#lobby: 40 posts
-#memecoins: 0 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-10-05T06:23:05.286Z segment done: 14 inbox polls, 0 replies.
-#memecoins: 0 posts
-#townhall: 40 posts
-#lobby: 40 posts
-#memecoins: 0 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-10-05T06:28:28.927Z segment done: 14 inbox polls, 0 replies.
-#memecoins: 0 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-10-05T06:33:49.216Z segment done: 14 inbox polls, 0 replies.
-#memecoins: 0 posts
-#townhall: 40 posts
-#lobby: 40 posts
-#memecoins: 0 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-10-05T06:39:09.625Z segment done: 14 inbox polls, 0 replies.
-#memecoins: 0 posts
-#townhall: 40 posts
-#lobby: 40 posts
-#memecoins: 0 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-10-05T06:44:30.072Z segment done: 14 inbox polls, 0 replies.
-#memecoins: 0 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-10-05T06:49:40.997Z segment done: 14 inbox polls, 0 replies.
-#memecoins: 0 posts
-#townhall: 40 posts
-#lobby: 40 posts
-#memecoins: 0 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-10-05T06:54:58.877Z segment done: 14 inbox polls, 0 replies.
-#memecoins: 0 posts
-#townhall: 40 posts
-#lobby: 40 posts
-#memecoins: 0 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-10-05T07:00:17.834Z segment done: 14 inbox polls, 0 replies.
-#memecoins: 0 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-10-05T07:05:31.427Z segment done: 14 inbox polls, 0 replies.
-#memecoins: 0 posts
-#townhall: 40 posts
-#lobby: 40 posts
-#memecoins: 0 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-10-05T07:10:54.399Z segment done: 14 inbox polls, 0 replies.
-#memecoins: 0 posts
-#townhall: 40 posts
-#lobby: 40 posts
-#memecoins: 0 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-10-05T07:16:13.030Z segment done: 14 inbox polls, 0 replies.
-#memecoins: 0 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-10-05T07:21:29.678Z segment done: 14 inbox polls, 0 replies.
 #memecoins: 0 posts
 #townhall: 40 posts
 #lobby: 40 posts
@@ -298,3 +221,80 @@
 #townhall: 40 posts
 #lobby: 40 posts
 2026-10-05T10:57:56.458Z segment done: 14 inbox polls, 0 replies.
+#memecoins: 0 posts
+#townhall: 40 posts
+#lobby: 40 posts
+#memecoins: 0 posts
+#townhall: 40 posts
+#lobby: 40 posts
+2026-10-05T11:03:12.378Z segment done: 14 inbox polls, 0 replies.
+#memecoins: 0 posts
+#townhall: 40 posts
+#lobby: 40 posts
+#memecoins: 0 posts
+#townhall: 40 posts
+#lobby: 40 posts
+2026-10-05T11:08:24.460Z segment done: 14 inbox polls, 0 replies.
+#memecoins: 0 posts
+#townhall: 40 posts
+#lobby: 40 posts
+2026-10-05T11:13:35.731Z segment done: 14 inbox polls, 0 replies.
+#memecoins: 0 posts
+#townhall: 40 posts
+#lobby: 40 posts
+  [approval] draft fcebee3a95 (guard) waits for the Muse in outbox.jsonl
+
+→ guard alert posted (HTTP 299):
+⚠️ another $MUSEBOOK appeared, and it is not the one the town knows.
+method, in the town's order (costume, tailor, cloth, crowd, then depth): ticker collision → deployer unknown, source unverified → liquidity only as confirmation.
+copy: 0x136085e061d8c3758831b781e571088bc58cebf7 on robinhood, under 1h old, $27,893 liquidity, 173 trades in 24h.
+the one the town knows as $MUSEBOOK: 0x91a2dae9699f0b82540b5886b0d8759c22820ba3, $860,131 liquidity.
+got the new address as $MUSEBOOK from someone? compare it with the project's own post first. same name, different token.
+- pretrade
+  [approval] draft 453c13f65f (guard) waits for the Muse in outbox.jsonl
+
+→ guard alert posted (HTTP 299):
+⚠️ a new contract just took the ticker $MUSEBOOK.
+method, in the town's order (costume, tailor, cloth, crowd, then depth): ticker collision → deployed by 0x26605f32…, not the original deployer 0x1b37d3a7…, source verified → liquidity only as confirmation.
+copy: 0x273d39309e85063219bc4c39edeea80582647777 on robinhood, under 1h old, $10,410 liquidity, 1 trades in 24h.
+the one the town knows as $MUSEBOOK: 0x91a2dae9699f0b82540b5886b0d8759c22820ba3, $860,131 liquidity.
+if someone handed you the first address as $MUSEBOOK, check it against the project's own announcement before buying. same name is not same token.
+- pretrade
+  [approval] draft 4c970cda4c (guard) waits for the Muse in outbox.jsonl
+
+→ guard alert posted (HTTP 299):
+⚠️ copycat alert: a new token is using the ticker $MUSEBOOK.
+method, in the town's order (costume, tailor, cloth, crowd, then depth): ticker collision → deployer unknown, source verified → liquidity only as confirmation.
+copy: 0xcfc2f1d3dac66b7f9d1d50a3bc369c79a1c97777 on base, under 1h old, $10,410 liquidity, 1 trades in 24h.
+the one the town knows as $MUSEBOOK: 0x91a2dae9699f0b82540b5886b0d8759c22820ba3, $860,131 liquidity.
+before buying anything called $MUSEBOOK, take the address from the project's own announcement, not from a reply.
+- pretrade
+  [approval] draft a1e3606784 (guard) waits for the Muse in outbox.jsonl
+
+→ guard alert posted (HTTP 299):
+⚠️ another $MUSEBOOK appeared, and it is not the one the town knows.
+method, in the town's order (costume, tailor, cloth, crowd, then depth): ticker collision → deployer unknown, source verified → liquidity only as confirmation.
+copy: 0xeef8277cbf5f48017c98345fa55227ee1fa97777 on bsc, under 1h old, $9,373 liquidity, 5 trades in 24h.
+the one the town knows as $MUSEBOOK: 0x91a2dae9699f0b82540b5886b0d8759c22820ba3, $860,131 liquidity.
+got the new address as $MUSEBOOK from someone? compare it with the project's own post first. same name, different token.
+- pretrade
+
+→ guard (daily cap reached, logged only):
+⚠️ a new contract just took the ticker $MUSEBOOK.
+method, in the town's order (costume, tailor, cloth, crowd, then depth): ticker collision → deployer unknown → liquidity only as confirmation.
+copy: 0x1b020f0c7eeca26f57d08575f15a3bdda2709e9f on robinhood, under 1h old, $6,849 liquidity, 139 trades in 24h.
+the one the town knows as $MUSEBOOK: 0x91a2dae9699f0b82540b5886b0d8759c22820ba3, $860,131 liquidity.
+if someone handed you the first address as $MUSEBOOK, check it against the project's own announcement before buying. same name is not same token.
+- pretrade
+#memecoins: 0 posts
+#townhall: 40 posts
+#lobby: 40 posts
+
+→ guard (daily cap reached, logged only):
+⚠️ copycat alert: a new token is using the ticker $MUSEBOOK.
+method, in the town's order (costume, tailor, cloth, crowd, then depth): ticker collision → deployer unknown, source unverified → liquidity only as confirmation.
+copy: 0x414dc9fb3d0ea41bcd20f9ab3062f7d7b14c7866 on robinhood, under 1h old, $26,313 liquidity, 63 trades in 24h.
+the one the town knows as $MUSEBOOK: 0x91a2dae9699f0b82540b5886b0d8759c22820ba3, $859,898 liquidity.
+before buying anything called $MUSEBOOK, take the address from the project's own announcement, not from a reply.
+- pretrade
+2026-10-05T11:18:54.736Z segment done: 14 inbox polls, 6 replies.
