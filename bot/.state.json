@@ -3313,19 +3313,19 @@
   "mentionsSeen": [],
   "watches": [],
   "clock": {
-    "channels": 1791662715871,
+    "channels": 1791663085230,
     "watches": 1791662718639,
     "ledger": 1791662385530,
-    "presence": 1791662688782,
-    "launches": 1791662717428,
-    "guard": 1791662718349,
+    "presence": 1791662946230,
+    "launches": 1791662994808,
+    "guard": 1791663087532,
     "digest": 1791662363198,
-    "conversations": 1791662784281,
-    "townwatch": 1791662717919,
+    "conversations": 1791663063188,
+    "townwatch": 1791663086679,
     "radar": 1791662718637,
     "launchreport": 1791662501864,
-    "tickerwatch": 1791662527059,
-    "sentinel": 1791662688782
+    "tickerwatch": 1791662829254,
+    "sentinel": 1791662968983
   },
   "ledger": [
     {
@@ -7821,7 +7821,8 @@
         "5EDMYTUbxpF1jXQSmfFRRjUTkuuQjoGrDzR5f9mPUDrp",
         "0xd187709297941e11b17b62c6c6e0db677ade7777",
         "H6wKQR92wBePZeToAPxD6a2BLWsJyggJokCM8sGnpump",
-        "7CpMBY6uJvW3CKjhhnErsD7EGxGV2jutM1MpBTt9pump"
+        "7CpMBY6uJvW3CKjhhnErsD7EGxGV2jutM1MpBTt9pump",
+        "0x72e79c86169810160fa2fc06e3c5d19098557777"
       ]
     },
     "canonical": {
@@ -9355,6 +9356,13 @@
       "kind": "copycat",
       "ticker": "MUSE",
       "address": "0xd187709297941e11b17b62c6c6e0db677ade7777",
+      "chain": "bsc"
+    },
+    {
+      "t": 1791662901618,
+      "kind": "copycat",
+      "ticker": "MUSE",
+      "address": "0x72e79c86169810160fa2fc06e3c5d19098557777",
       "chain": "bsc"
     }
   ],
@@ -12665,14 +12673,6 @@
     "liq": {
       "MUSEBOOK": [
         {
-          "t": 1791655530267,
-          "liq": 660383.56
-        },
-        {
-          "t": 1791655723530,
-          "liq": 660479.79
-        },
-        {
           "t": 1791655911588,
           "liq": 660522.71
         },
@@ -12819,6 +12819,14 @@
         {
           "t": 1791662718157,
           "liq": 660749.6799999999
+        },
+        {
+          "t": 1791662900610,
+          "liq": 660749.82
+        },
+        {
+          "t": 1791663086982,
+          "liq": 660749.76
         }
       ],
       "MUSEPAD": [
@@ -12952,14 +12960,6 @@
         }
       ],
       "MUSE": [
-        {
-          "t": 1791655531335,
-          "liq": 2120301.93
-        },
-        {
-          "t": 1791655723674,
-          "liq": 2120301.93
-        },
         {
           "t": 1791655911685,
           "liq": 2120301.93
@@ -13107,12 +13107,20 @@
         {
           "t": 1791662718349,
           "liq": 2120301.93
+        },
+        {
+          "t": 1791662900786,
+          "liq": 2120301.93
+        },
+        {
+          "t": 1791663087321,
+          "liq": 2120301.93
         }
       ]
     },
     "sec": {
       "MUSEBOOK": {
-        "t": 1791661209203,
+        "t": 1791663087212,
         "snap": {
           "owner": "0xeb7c034704ef8dcd2d32324c1545f62fb4ad0862",
           "mint": "0",
@@ -13134,7 +13142,7 @@
         }
       },
       "MUSE": {
-        "t": 1791661209518,
+        "t": 1791663087532,
         "snap": {
           "owner": "0xeb7c034704ef8dcd2d32324c1545f62fb4ad0862",
           "mint": "0",
@@ -13616,12 +13624,12 @@
       0
     ],
     "copy.head": [
-      1,
-      0
-    ],
-    "copy.tail": [
       0,
       2
+    ],
+    "copy.tail": [
+      2,
+      1
     ],
     "lookup.check": [
       2,
