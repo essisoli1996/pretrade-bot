@@ -1,6 +1,5 @@
 {
   "seen": [
-    137260,
     137296,
     137293,
     137292,
@@ -2999,7 +2998,8 @@
     903,
     904,
     906,
-    907
+    907,
+    908
   ],
   "threads": [
     13261,
@@ -3313,19 +3313,19 @@
   "mentionsSeen": [],
   "watches": [],
   "clock": {
-    "channels": 1791834239477,
-    "watches": 1791833987357,
+    "channels": 1791834800692,
+    "watches": 1791834593444,
     "ledger": 1791834245381,
-    "presence": 1791834126616,
-    "launches": 1791834173123,
-    "guard": 1791834241260,
+    "presence": 1791834888989,
+    "launches": 1791834845915,
+    "guard": 1791834802014,
     "digest": 1791832688349,
-    "conversations": 1791834195138,
-    "townwatch": 1791834241100,
-    "radar": 1791833987356,
-    "launchreport": 1791833447692,
-    "tickerwatch": 1791834147892,
-    "sentinel": 1791834241483
+    "conversations": 1791834888989,
+    "townwatch": 1791834801906,
+    "radar": 1791834593443,
+    "launchreport": 1791834358804,
+    "tickerwatch": 1791834773647,
+    "sentinel": 1791834775411
   },
   "ledger": [
     {
@@ -7856,7 +7856,9 @@
         "49SMQgbmjQXrUDqLUnBxmqB5ESEDLPKUYaUGwGmLpump",
         "EXuXBTFqE46dyBoVHCYTCouKYPiLEfAgBqjFEHbkpump",
         "AFjfan18BbEz4q6REnbKAeVSmLDdaZPkamzSma8MhsKn",
-        "FvhPXEGFjS39eYwNyETBpFLfTD35iPzJ76EZjN8Wpump"
+        "FvhPXEGFjS39eYwNyETBpFLfTD35iPzJ76EZjN8Wpump",
+        "8CNUVQwWTpDJvzFMdsZ8E9tf82PWGrQZuwEF4Gv4pump",
+        "0x15a7b341d435ed3cc02cb10956b6cdfbe7bdffff"
       ]
     },
     "canonical": {
@@ -9499,6 +9501,13 @@
       "kind": "copycat",
       "ticker": "MUSE",
       "address": "FvhPXEGFjS39eYwNyETBpFLfTD35iPzJ76EZjN8Wpump",
+      "chain": "solana"
+    },
+    {
+      "t": 1791834802675,
+      "kind": "copycat",
+      "ticker": "MUSE",
+      "address": "8CNUVQwWTpDJvzFMdsZ8E9tf82PWGrQZuwEF4Gv4pump",
       "chain": "solana"
     }
   ],
@@ -12809,18 +12818,6 @@
     "liq": {
       "MUSEBOOK": [
         {
-          "t": 1791827088322,
-          "liq": 667145.7800000001
-        },
-        {
-          "t": 1791827288569,
-          "liq": 667362.6100000001
-        },
-        {
-          "t": 1791827481848,
-          "liq": 664824.1000000001
-        },
-        {
           "t": 1791827667149,
           "liq": 667343.0200000001
         },
@@ -12963,6 +12960,18 @@
         {
           "t": 1791834241204,
           "liq": 667004.8300000001
+        },
+        {
+          "t": 1791834430158,
+          "liq": 666792.9500000002
+        },
+        {
+          "t": 1791834617442,
+          "liq": 666792.6400000001
+        },
+        {
+          "t": 1791834801927,
+          "liq": 666791.9300000002
         }
       ],
       "MUSEPAD": [
@@ -13096,18 +13105,6 @@
         }
       ],
       "MUSE": [
-        {
-          "t": 1791827088486,
-          "liq": 59481.8
-        },
-        {
-          "t": 1791827288823,
-          "liq": 60722.06
-        },
-        {
-          "t": 1791827481907,
-          "liq": 61848.53
-        },
         {
           "t": 1791827667196,
           "liq": 64816.76
@@ -13251,6 +13248,18 @@
         {
           "t": 1791834241260,
           "liq": 58768.55
+        },
+        {
+          "t": 1791834430211,
+          "liq": 58097.33
+        },
+        {
+          "t": 1791834617498,
+          "liq": 58097.33
+        },
+        {
+          "t": 1791834802014,
+          "liq": 58097.33
         }
       ]
     },
@@ -13760,12 +13769,12 @@
       0
     ],
     "copy.head": [
-      1,
-      0
-    ],
-    "copy.tail": [
       0,
       2
+    ],
+    "copy.tail": [
+      2,
+      1
     ],
     "lookup.check": [
       2,
@@ -17319,7 +17328,6 @@
         140303
       ],
       "townhall": [
-        137667,
         137686,
         137684,
         137683,
@@ -17718,7 +17726,8 @@
         864,
         882,
         887,
-        891
+        891,
+        908
       ],
       "memecoins": [
         123613,
