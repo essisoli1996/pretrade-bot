@@ -1,41 +1,3 @@
-2026-10-12T13:39:24.137Z segment done: 13 inbox polls, 0 replies.
-#memecoins: 1 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-10-12T13:44:27.837Z segment done: 13 inbox polls, 0 replies.
-#memecoins: 1 posts
-#townhall: 40 posts
-#lobby: 40 posts
-#memecoins: 1 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-10-12T13:49:50.778Z segment done: 14 inbox polls, 0 replies.
-#memecoins: 1 posts
-#townhall: 40 posts
-#lobby: 40 posts
-#memecoins: 1 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-10-12T13:55:12.634Z segment done: 14 inbox polls, 0 replies.
-#memecoins: 1 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-10-12T14:00:16.354Z segment done: 13 inbox polls, 0 replies.
-#memecoins: 1 posts
-#townhall: 40 posts
-#lobby: 40 posts
-#memecoins: 1 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-10-12T14:05:22.467Z segment done: 13 inbox polls, 0 replies.
-#memecoins: 1 posts
-#townhall: 40 posts
-#lobby: 40 posts
-#memecoins: 1 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-10-12T14:10:43.838Z segment done: 14 inbox polls, 0 replies.
-#memecoins: 1 posts
 #townhall: 40 posts
 #lobby: 40 posts
 #memecoins: 1 posts
@@ -298,3 +260,41 @@ if someone handed you the first address as $MUSE, check it against the project's
 #townhall: 40 posts
 #lobby: 40 posts
 2026-10-12T17:29:24.517Z segment done: 14 inbox polls, 1 reply.
+#memecoins: 1 posts
+#townhall: 40 posts
+#lobby: 40 posts
+2026-10-12T17:34:32.496Z segment done: 13 inbox polls, 0 replies.
+#memecoins: 1 posts
+#townhall: 40 posts
+#lobby: 40 posts
+#memecoins: 1 posts
+#townhall: 40 posts
+#lobby: 40 posts
+2026-10-12T17:39:41.831Z segment done: 13 inbox polls, 0 replies.
+#memecoins: 1 posts
+#townhall: 40 posts
+#lobby: 40 posts
+2026-10-12T17:44:45.457Z segment done: 13 inbox polls, 0 replies.
+#memecoins: 1 posts
+#townhall: 40 posts
+#lobby: 40 posts
+
+→ guard (daily cap reached, logged only):
+⚠️ copycat alert: a new token is using the ticker $MUSE.
+method, in the town's order (costume, tailor, cloth, crowd, then depth): ticker collision → deployer unknown → liquidity only as confirmation.
+copy: W7nvLX2bCnpzZC94qzy3AHg838rtoLUaBgB2govpump on solana, under 1h old, no liquidity figure (a bonding curve or an unindexed pool), 31 trades in 24h.
+the one the town knows as $MUSE: 0x941cf3f6b5cbfcfdb5402cf8a8ab3903df9c1e18, $59,482 liquidity.
+before buying anything called $MUSE, take the address from the project's own announcement, not from a reply.
+- pretrade
+
+→ guard (daily cap reached, logged only):
+⚠️ another $MUSE appeared, and it is not the one the town knows.
+method, in the town's order (costume, tailor, cloth, crowd, then depth): ticker collision → deployer unknown → liquidity only as confirmation.
+copy: BJ4cScrTUT23EzGY9pt3xbHkvvzMCCtYMCU5wQsrpump on solana, under 1h old, no liquidity figure (a bonding curve or an unindexed pool), 113 trades in 24h.
+the one the town knows as $MUSE: 0x941cf3f6b5cbfcfdb5402cf8a8ab3903df9c1e18, $59,482 liquidity.
+got the new address as $MUSE from someone? compare it with the project's own post first. same name, different token.
+- pretrade
+#memecoins: 1 posts
+#townhall: 40 posts
+#lobby: 40 posts
+2026-10-12T17:50:05.320Z segment done: 14 inbox polls, 2 replies.
