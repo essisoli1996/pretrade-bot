@@ -3313,19 +3313,19 @@
   "mentionsSeen": [],
   "watches": [],
   "clock": {
-    "channels": 1791834800692,
-    "watches": 1791834593444,
+    "channels": 1791835164291,
+    "watches": 1791835193482,
     "ledger": 1791834245381,
-    "presence": 1791834888989,
-    "launches": 1791834845915,
-    "guard": 1791834802014,
+    "presence": 1791835143343,
+    "launches": 1791835120211,
+    "guard": 1791835165555,
     "digest": 1791832688349,
-    "conversations": 1791834888989,
-    "townwatch": 1791834801906,
-    "radar": 1791834593443,
+    "conversations": 1791835165446,
+    "townwatch": 1791835165446,
+    "radar": 1791835193481,
     "launchreport": 1791834358804,
-    "tickerwatch": 1791834773647,
-    "sentinel": 1791834775411
+    "tickerwatch": 1791835074992,
+    "sentinel": 1791835189978
   },
   "ledger": [
     {
@@ -7858,7 +7858,8 @@
         "AFjfan18BbEz4q6REnbKAeVSmLDdaZPkamzSma8MhsKn",
         "FvhPXEGFjS39eYwNyETBpFLfTD35iPzJ76EZjN8Wpump",
         "8CNUVQwWTpDJvzFMdsZ8E9tf82PWGrQZuwEF4Gv4pump",
-        "0x15a7b341d435ed3cc02cb10956b6cdfbe7bdffff"
+        "0x15a7b341d435ed3cc02cb10956b6cdfbe7bdffff",
+        "0xa1c3ac77378545118c504c7470f7d892dfc07777"
       ]
     },
     "canonical": {
@@ -9509,6 +9510,13 @@
       "ticker": "MUSE",
       "address": "8CNUVQwWTpDJvzFMdsZ8E9tf82PWGrQZuwEF4Gv4pump",
       "chain": "solana"
+    },
+    {
+      "t": 1791835166295,
+      "kind": "copycat",
+      "ticker": "MUSE",
+      "address": "0xa1c3ac77378545118c504c7470f7d892dfc07777",
+      "chain": "robinhood"
     }
   ],
   "ownPosts": [
@@ -12818,14 +12826,6 @@
     "liq": {
       "MUSEBOOK": [
         {
-          "t": 1791827667149,
-          "liq": 667343.0200000001
-        },
-        {
-          "t": 1791827849948,
-          "liq": 667332.9900000001
-        },
-        {
           "t": 1791828034291,
           "liq": 667328.4300000002
         },
@@ -12972,6 +12972,14 @@
         {
           "t": 1791834801927,
           "liq": 666791.9300000002
+        },
+        {
+          "t": 1791834984158,
+          "liq": 666792.2800000001
+        },
+        {
+          "t": 1791835165542,
+          "liq": 666806.2100000001
         }
       ],
       "MUSEPAD": [
@@ -13105,14 +13113,6 @@
         }
       ],
       "MUSE": [
-        {
-          "t": 1791827667196,
-          "liq": 64816.76
-        },
-        {
-          "t": 1791827850001,
-          "liq": 64816.76
-        },
         {
           "t": 1791828034782,
           "liq": 64612.19
@@ -13259,6 +13259,14 @@
         },
         {
           "t": 1791834802014,
+          "liq": 58097.33
+        },
+        {
+          "t": 1791834984173,
+          "liq": 58097.33
+        },
+        {
+          "t": 1791835165555,
           "liq": 58097.33
         }
       ]
@@ -13769,12 +13777,12 @@
       0
     ],
     "copy.head": [
-      0,
-      2
-    ],
-    "copy.tail": [
       2,
       1
+    ],
+    "copy.tail": [
+      1,
+      0
     ],
     "lookup.check": [
       2,
