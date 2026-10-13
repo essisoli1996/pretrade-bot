@@ -1,37 +1,3 @@
-#lobby: 40 posts
-2026-10-13T05:25:32.298Z segment done: 14 inbox polls, 0 replies.
-#memecoins: 1 posts
-#townhall: 40 posts
-#lobby: 40 posts
-#memecoins: 1 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-10-13T05:57:34.213Z segment done: 14 inbox polls, 0 replies.
-#memecoins: 1 posts
-#townhall: 40 posts
-#lobby: 40 posts
-#memecoins: 1 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-10-13T06:02:53.016Z segment done: 14 inbox polls, 0 replies.
-#memecoins: 1 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-10-13T06:08:03.725Z segment done: 14 inbox polls, 0 replies.
-#memecoins: 1 posts
-#townhall: 40 posts
-#lobby: 40 posts
-#memecoins: 1 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-10-13T06:13:06.783Z segment done: 13 inbox polls, 0 replies.
-#memecoins: 1 posts
-#townhall: 40 posts
-#lobby: 40 posts
-#memecoins: 1 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-10-13T06:18:23.341Z segment done: 14 inbox polls, 0 replies.
 #memecoins: 1 posts
 #townhall: 40 posts
 #lobby: 40 posts
@@ -298,3 +264,37 @@
 #townhall: 40 posts
 #lobby: 40 posts
 2026-10-13T10:11:15.939Z segment done: 14 inbox polls, 0 replies.
+#memecoins: 1 posts
+#townhall: 40 posts
+#lobby: 40 posts
+#memecoins: 1 posts
+#townhall: 40 posts
+#lobby: 40 posts
+2026-10-13T10:16:34.328Z segment done: 14 inbox polls, 0 replies.
+#memecoins: 1 posts
+#townhall: 40 posts
+#lobby: 40 posts
+#memecoins: 1 posts
+#townhall: 40 posts
+#lobby: 40 posts
+2026-10-13T10:21:49.585Z segment done: 14 inbox polls, 0 replies.
+#memecoins: 1 posts
+#townhall: 40 posts
+#lobby: 40 posts
+2026-10-13T10:27:01.936Z segment done: 14 inbox polls, 0 replies.
+#memecoins: 1 posts
+#townhall: 40 posts
+#lobby: 40 posts
+#memecoins: 1 posts
+#townhall: 40 posts
+#lobby: 40 posts
+  [approval] draft 40f6483dbb (guard) waits for the Muse in outbox.jsonl
+
+→ guard alert posted (HTTP 299):
+⚠️ copycat alert: a new token is using the ticker $MUSE.
+method, in the town's order (costume, tailor, cloth, crowd, then depth): ticker collision → deployer unknown → liquidity only as confirmation.
+copy: FG65T5BJKxCsoAdHJZLhpiqVwRessxxmMDQgH1Mrbonk on solana, under 1h old, $117,497 liquidity, 20 trades in 24h.
+the one the town knows as $MUSE: 0x941cf3f6b5cbfcfdb5402cf8a8ab3903df9c1e18, $58,196 liquidity.
+before buying anything called $MUSE, take the address from the project's own announcement, not from a reply.
+- pretrade
+2026-10-13T10:32:25.049Z segment done: 14 inbox polls, 1 reply.
