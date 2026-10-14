@@ -3315,19 +3315,19 @@
   "mentionsSeen": [],
   "watches": [],
   "clock": {
-    "channels": 1792012901593,
+    "channels": 1792013269722,
     "watches": 1792012808076,
     "ledger": 1792011663658,
-    "presence": 1792013037178,
-    "launches": 1792012923801,
-    "guard": 1792012990120,
+    "presence": 1792013296441,
+    "launches": 1792013339280,
+    "guard": 1792013178684,
     "digest": 1792011002031,
-    "conversations": 1792012990120,
-    "townwatch": 1792012902334,
+    "conversations": 1792013339845,
+    "townwatch": 1792013270739,
     "radar": 1792012808075,
     "launchreport": 1792012743822,
-    "tickerwatch": 1792012762402,
-    "sentinel": 1792012990714
+    "tickerwatch": 1792013066181,
+    "sentinel": 1792013271014
   },
   "ledger": [
     {
@@ -7962,7 +7962,8 @@
         "EBN5mi4mkfEP8C93EZvCzbN93R6yURtyuEJe1wW6pump",
         "FD2AwNSRrHUJ7mpfHreYfPAKKUC2so1yyNGJ7fk5pump",
         "0x247013f0036af9e40d32dd0b246ce5f83a5e7777",
-        "38miKTCKZqvRBv5Y8qSyM44CneJQowAVETpB29wYGFNg"
+        "38miKTCKZqvRBv5Y8qSyM44CneJQowAVETpB29wYGFNg",
+        "7AiMjnHue4mqMThgYeDZoNivoVVozfwePTnpvL2Tpump"
       ]
     },
     "canonical": {
@@ -9795,6 +9796,13 @@
       "ticker": "MUSE",
       "address": "0x42840d0364854f0f56e5786423b5d34028857f54",
       "chain": "robinhood"
+    },
+    {
+      "t": 1792013183086,
+      "kind": "copycat",
+      "ticker": "MUSE",
+      "address": "7AiMjnHue4mqMThgYeDZoNivoVVozfwePTnpvL2Tpump",
+      "chain": "solana"
     }
   ],
   "ownPosts": [
@@ -13106,14 +13114,6 @@
     "liq": {
       "MUSEBOOK": [
         {
-          "t": 1792005764595,
-          "liq": 687002.7300000002
-        },
-        {
-          "t": 1792005948814,
-          "liq": 687170.7600000001
-        },
-        {
           "t": 1792006134158,
           "liq": 687818.5800000001
         },
@@ -13260,6 +13260,14 @@
         {
           "t": 1792012902506,
           "liq": 691638.4800000001
+        },
+        {
+          "t": 1792013090215,
+          "liq": 691761.3000000002
+        },
+        {
+          "t": 1792013270940,
+          "liq": 691859.31
         }
       ],
       "MUSEPAD": [
@@ -13393,14 +13401,6 @@
         }
       ],
       "MUSE": [
-        {
-          "t": 1792005764771,
-          "liq": 56417.79
-        },
-        {
-          "t": 1792005949080,
-          "liq": 56417.79
-        },
         {
           "t": 1792006134387,
           "liq": 56417.79
@@ -13547,6 +13547,14 @@
         },
         {
           "t": 1792012902731,
+          "liq": 56421.44
+        },
+        {
+          "t": 1792013090364,
+          "liq": 56421.44
+        },
+        {
+          "t": 1792013271014,
           "liq": 56421.44
         }
       ]
@@ -14062,12 +14070,12 @@
       0
     ],
     "copy.head": [
-      2,
-      1
-    ],
-    "copy.tail": [
       1,
       0
+    ],
+    "copy.tail": [
+      0,
+      2
     ],
     "lookup.check": [
       2,
