@@ -3315,19 +3315,19 @@
   "mentionsSeen": [],
   "watches": [],
   "clock": {
-    "channels": 1791993647496,
-    "watches": 1791993209845,
+    "channels": 1791994045760,
+    "watches": 1791993833286,
     "ledger": 1791993533760,
-    "presence": 1791993695552,
-    "launches": 1791993695552,
-    "guard": 1791993650450,
+    "presence": 1791993946946,
+    "launches": 1791994068364,
+    "guard": 1791994046802,
     "digest": 1791992936947,
-    "conversations": 1791993744721,
-    "townwatch": 1791993650150,
-    "radar": 1791993209844,
+    "conversations": 1791994024559,
+    "townwatch": 1791994046565,
+    "radar": 1791993833285,
     "launchreport": 1791993648491,
-    "tickerwatch": 1791993486744,
-    "sentinel": 1791993695811
+    "tickerwatch": 1791993793494,
+    "sentinel": 1791994068621
   },
   "ledger": [
     {
@@ -7905,7 +7905,9 @@
         "4nWPwVak4cK9HWEQ99cdvq29H5jqjarLEFwbbVEEpump",
         "0x7db94aa162c3b6ae8095cc95328da710860dffff",
         "0x3df5e866d9b8a06d67ea118ba0dd7f438e46ffff",
-        "0x3fbbe35618d514d1cf91d40353e6dbd6b7d70f63"
+        "0x3fbbe35618d514d1cf91d40353e6dbd6b7d70f63",
+        "HDBR9iBf7NF6DTByCibomJqn4FKhi1EQ8gzJX1m3s2bX",
+        "EusJb8cqk7gTQBEfr9o6hUooV79xq7kd7SAsBJwaYiwA"
       ]
     },
     "canonical": {
@@ -7915,7 +7917,8 @@
     "alertTimes": [
       1791907654149,
       1791916422405,
-      1791976695674
+      1791976695674,
+      1791993856711
     ],
     "deployer": {
       "MUSEBOOK": "0x1b37d3a72082029c44b35b604ea473617580b69a",
@@ -9615,6 +9618,21 @@
       "address": "0x3fbbe35618d514d1cf91d40353e6dbd6b7d70f63",
       "chain": "robinhood",
       "postId": null
+    },
+    {
+      "t": 1791993856711,
+      "kind": "copycat",
+      "ticker": "MUSE",
+      "address": "HDBR9iBf7NF6DTByCibomJqn4FKhi1EQ8gzJX1m3s2bX",
+      "chain": "solana",
+      "postId": null
+    },
+    {
+      "t": 1791993857066,
+      "kind": "copycat",
+      "ticker": "MUSE",
+      "address": "EusJb8cqk7gTQBEfr9o6hUooV79xq7kd7SAsBJwaYiwA",
+      "chain": "solana"
     }
   ],
   "ownPosts": [
@@ -12925,14 +12943,6 @@
     "liq": {
       "MUSEBOOK": [
         {
-          "t": 1791986489861,
-          "liq": 680460.7800000003
-        },
-        {
-          "t": 1791986677559,
-          "liq": 680407.8200000003
-        },
-        {
           "t": 1791986859382,
           "liq": 681386.9400000003
         },
@@ -13079,6 +13089,14 @@
         {
           "t": 1791993650302,
           "liq": 690819.0100000001
+        },
+        {
+          "t": 1791993855733,
+          "liq": 691752.0100000001
+        },
+        {
+          "t": 1791994046751,
+          "liq": 696047.2900000002
         }
       ],
       "MUSEPAD": [
@@ -13212,14 +13230,6 @@
         }
       ],
       "MUSE": [
-        {
-          "t": 1791986490092,
-          "liq": 60574.13
-        },
-        {
-          "t": 1791986677637,
-          "liq": 60574.13
-        },
         {
           "t": 1791986859470,
           "liq": 59492.5
@@ -13366,6 +13376,14 @@
         },
         {
           "t": 1791993650450,
+          "liq": 59233.09
+        },
+        {
+          "t": 1791993855925,
+          "liq": 59233.09
+        },
+        {
+          "t": 1791994046802,
           "liq": 59233.09
         }
       ]
@@ -13879,12 +13897,12 @@
       0
     ],
     "copy.head": [
-      1,
-      0
+      2,
+      1
     ],
     "copy.tail": [
-      0,
-      2
+      1,
+      0
     ],
     "lookup.check": [
       2,
