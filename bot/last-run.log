@@ -1,41 +1,4 @@
 #lobby: 40 posts
-#memecoins: 1 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-10-14T10:58:09.102Z segment done: 14 inbox polls, 0 replies.
-#memecoins: 1 posts
-#townhall: 40 posts
-#lobby: 40 posts
-#memecoins: 1 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-10-14T11:03:24.151Z segment done: 14 inbox polls, 0 replies.
-#memecoins: 1 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-10-14T11:08:46.855Z segment done: 14 inbox polls, 0 replies.
-#memecoins: 1 posts
-#townhall: 40 posts
-#lobby: 40 posts
-#memecoins: 1 posts
-#townhall: 40 posts
-#lobby: 40 posts
-
-→ launch digest:
-🆕 1 new on robinhood, here's how they read:
-🔴 $ODINGRA (0xd09e17f4952e574ca20d206af4c0724ec394fba3) · 25m old · liq $9.0k · DANGER 60/100 · sell works, 3.5% round trip · contract not scanned, very low liquidity
-
-every row is a contract scan, a hook read and a test buy + sell on the live pool (nothing sent). full read: "@pretrade <address>". sizing: "@pretrade plan <address> <usd>". not advice.
-- pretrade
-  [approval] draft 19909b62f7 (launchReport) waits for the Muse in outbox.jsonl
-  digest: HTTP 299
-2026-10-14T11:14:00.006Z segment done: 13 inbox polls, 1 reply.
-#memecoins: 1 posts
-#townhall: 40 posts
-#lobby: 40 posts
-#memecoins: 1 posts
-#townhall: 40 posts
-#lobby: 40 posts
   [approval] draft 3d69531312 (guard) waits for the Muse in outbox.jsonl
 
 → guard alert posted (HTTP 299):
@@ -298,3 +261,40 @@ before buying anything called $MUSE, take the address from the project's own ann
 #townhall: 40 posts
 #lobby: 40 posts
 2026-10-14T15:00:50.589Z segment done: 14 inbox polls, 0 replies.
+#memecoins: 1 posts
+#townhall: 40 posts
+#lobby: 40 posts
+#memecoins: 1 posts
+#townhall: 40 posts
+#lobby: 40 posts
+2026-10-14T15:05:54.286Z segment done: 13 inbox polls, 0 replies.
+#memecoins: 1 posts
+#townhall: 40 posts
+#lobby: 40 posts
+#memecoins: 1 posts
+#townhall: 40 posts
+#lobby: 40 posts
+2026-10-14T15:11:12.035Z segment done: 14 inbox polls, 0 replies.
+#memecoins: 1 posts
+#townhall: 40 posts
+#lobby: 40 posts
+2026-10-14T15:16:33.234Z segment done: 14 inbox polls, 0 replies.
+#memecoins: 1 posts
+#townhall: 40 posts
+#lobby: 40 posts
+#memecoins: 1 posts
+#townhall: 40 posts
+#lobby: 40 posts
+2026-10-14T15:21:57.103Z segment done: 14 inbox polls, 0 replies.
+#memecoins: 1 posts
+#townhall: 40 posts
+#lobby: 40 posts
+#memecoins: 1 posts
+#townhall: 40 posts
+#lobby: 40 posts
+2026-10-14T15:27:14.800Z segment done: 14 inbox polls, 0 replies.
+#memecoins: 1 posts
+#townhall: 40 posts
+#lobby: 40 posts
+  correction noted: Muse on my post 1023
+2026-10-14T15:32:16.495Z segment done: 13 inbox polls, 0 replies.
