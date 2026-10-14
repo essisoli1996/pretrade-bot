@@ -1,6 +1,5 @@
 {
   "seen": [
-    137521,
     137518,
     137517,
     137516,
@@ -2999,7 +2998,8 @@
     1059,
     1061,
     1060,
-    1062
+    1062,
+    1063
   ],
   "threads": [
     13261,
@@ -3315,19 +3315,19 @@
   "mentionsSeen": [],
   "watches": [],
   "clock": {
-    "channels": 1792011000724,
+    "channels": 1792011371040,
     "watches": 1792010979896,
     "ledger": 1792009859093,
-    "presence": 1792011000724,
-    "launches": 1792011068887,
-    "guard": 1792011091798,
+    "presence": 1792011261886,
+    "launches": 1792011462449,
+    "guard": 1792011462702,
     "digest": 1792011002031,
-    "conversations": 1792011120732,
-    "townwatch": 1792011001641,
+    "conversations": 1792011462702,
+    "townwatch": 1792011371909,
     "radar": 1792010979895,
     "launchreport": 1792010909321,
-    "tickerwatch": 1792010882410,
-    "sentinel": 1792011095863
+    "tickerwatch": 1792011190812,
+    "sentinel": 1792011372317
   },
   "ledger": [
     {
@@ -7920,7 +7920,14 @@
         "0x81e3e2c45a8316efbe95a5ac1862339fee1f1e18",
         "AHmTwsoUH9FsGdSHc2MaCPsQLNx3Yh9sNn4Av8hrTXcJ",
         "CTNUqsTBdsRSp1E5yzAEnoEPYQCZz73YjEYKpQvkpump",
-        "6GSPxMJjeAWJf6TwMtsDNEDkLZTEJHE1yfc1fVTVpump"
+        "6GSPxMJjeAWJf6TwMtsDNEDkLZTEJHE1yfc1fVTVpump",
+        "HMbtMJ2SMmQAgnhVEsKMwh5i98biCFaoTim4xrfVDPwy",
+        "0x8157f13de17fbec1c34544940dab46e38f5a7777",
+        "8kJP6vuKpzaRLX2smK2C5cRpaiELV12pEsbLyax6DsgA",
+        "4wFKzrr9LeGzec3R8XPsQpqahHYkrE7RpvgxPkRvGMhF",
+        "4AftJYj4wipVGgUUZ65tuW3skXt1zxAMA3Zepj6Ypump",
+        "ACexXomdUToXD9dAvRLXSzRM8pB6y41gY3TENvnPpump",
+        "G8TnYYLADMumYv6eeVBSHutf4rVSvAXy41LcRGTVpump"
       ]
     },
     "canonical": {
@@ -9662,6 +9669,34 @@
       "address": "CTNUqsTBdsRSp1E5yzAEnoEPYQCZz73YjEYKpQvkpump",
       "chain": "solana",
       "postId": null
+    },
+    {
+      "t": 1792011467978,
+      "kind": "copycat",
+      "ticker": "MUSE",
+      "address": "HMbtMJ2SMmQAgnhVEsKMwh5i98biCFaoTim4xrfVDPwy",
+      "chain": "solana"
+    },
+    {
+      "t": 1792011468357,
+      "kind": "copycat",
+      "ticker": "MUSE",
+      "address": "0x8157f13de17fbec1c34544940dab46e38f5a7777",
+      "chain": "robinhood"
+    },
+    {
+      "t": 1792011468787,
+      "kind": "copycat",
+      "ticker": "MUSE",
+      "address": "8kJP6vuKpzaRLX2smK2C5cRpaiELV12pEsbLyax6DsgA",
+      "chain": "solana"
+    },
+    {
+      "t": 1792011469184,
+      "kind": "copycat",
+      "ticker": "MUSE",
+      "address": "ACexXomdUToXD9dAvRLXSzRM8pB6y41gY3TENvnPpump",
+      "chain": "solana"
     }
   ],
   "ownPosts": [
@@ -12972,14 +13007,6 @@
     "liq": {
       "MUSEBOOK": [
         {
-          "t": 1792003880575,
-          "liq": 696845.0300000001
-        },
-        {
-          "t": 1792004086046,
-          "liq": 696865.2100000002
-        },
-        {
           "t": 1792004268829,
           "liq": 696802.4400000001
         },
@@ -13126,6 +13153,14 @@
         {
           "t": 1792011001950,
           "liq": 685132.0000000001
+        },
+        {
+          "t": 1792011190658,
+          "liq": 685131.8700000002
+        },
+        {
+          "t": 1792011372132,
+          "liq": 685014.1500000003
         }
       ],
       "MUSEPAD": [
@@ -13259,14 +13294,6 @@
         }
       ],
       "MUSE": [
-        {
-          "t": 1792003880896,
-          "liq": 59233.09
-        },
-        {
-          "t": 1792004086221,
-          "liq": 59233.09
-        },
         {
           "t": 1792004269016,
           "liq": 59233.09
@@ -13413,6 +13440,14 @@
         },
         {
           "t": 1792011002031,
+          "liq": 56421.44
+        },
+        {
+          "t": 1792011190811,
+          "liq": 56421.44
+        },
+        {
+          "t": 1792011372317,
           "liq": 56421.44
         }
       ]
@@ -13926,12 +13961,12 @@
       0
     ],
     "copy.head": [
-      0,
-      2
-    ],
-    "copy.tail": [
       2,
       1
+    ],
+    "copy.tail": [
+      1,
+      0
     ],
     "lookup.check": [
       2,
@@ -14016,7 +14051,6 @@
   "sentinel": {
     "seen": {
       "lobby": [
-        597,
         598,
         599,
         600,
@@ -14415,7 +14449,8 @@
         1056,
         1058,
         1059,
-        1062
+        1062,
+        1063
       ],
       "musings": [
         123521,
@@ -25886,6 +25921,11 @@
       "redeep_xlo": {
         "first": "muse_0vq4bnmpbe",
         "at": 1791995689162,
+        "others": []
+      },
+      "artjr": {
+        "first": "muse_33bswmq8s3",
+        "at": 1792011237355,
         "others": []
       }
     }

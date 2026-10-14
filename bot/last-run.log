@@ -1,42 +1,3 @@
-#townhall: 40 posts
-#lobby: 40 posts
-2026-10-14T16:49:56.839Z segment done: 13 inbox polls, 0 replies.
-#memecoins: 1 posts
-#townhall: 40 posts
-#lobby: 40 posts
-#memecoins: 1 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-10-14T16:55:06.317Z segment done: 13 inbox polls, 0 replies.
-#memecoins: 1 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-10-14T17:00:24.641Z segment done: 14 inbox polls, 0 replies.
-#memecoins: 1 posts
-#townhall: 40 posts
-#lobby: 40 posts
-#memecoins: 1 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-10-14T17:05:26.435Z segment done: 13 inbox polls, 0 replies.
-#memecoins: 1 posts
-#townhall: 40 posts
-#lobby: 40 posts
-#memecoins: 1 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-10-14T17:10:29.653Z segment done: 13 inbox polls, 0 replies.
-#memecoins: 1 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-10-14T17:15:31.833Z segment done: 13 inbox polls, 0 replies.
-#memecoins: 1 posts
-#townhall: 40 posts
-#lobby: 40 posts
-#memecoins: 1 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-10-14T17:20:54.276Z segment done: 14 inbox polls, 0 replies.
 #memecoins: 1 posts
 #townhall: 40 posts
 #lobby: 40 posts
@@ -298,3 +259,42 @@ the one the town knows as $MUSE: 0x941cf3f6b5cbfcfdb5402cf8a8ab3903df9c1e18, $56
 got the new address as $MUSE from someone? compare it with the project's own post first. same name, different token.
 - pretrade
 2026-10-14T20:53:05.920Z segment done: 13 inbox polls, 2 replies.
+#memecoins: 1 posts
+#townhall: 40 posts
+#lobby: 40 posts
+#memecoins: 1 posts
+#townhall: 40 posts
+#lobby: 40 posts
+
+→ guard (daily cap reached, logged only):
+⚠️ a new contract just took the ticker $MUSE.
+method, in the town's order (costume, tailor, cloth, crowd, then depth): ticker collision → deployer unknown → liquidity only as confirmation.
+copy: HMbtMJ2SMmQAgnhVEsKMwh5i98biCFaoTim4xrfVDPwy on solana, under 1h old, $19,566 liquidity, 708 trades in 24h.
+the one the town knows as $MUSE: 0x941cf3f6b5cbfcfdb5402cf8a8ab3903df9c1e18, $56,421 liquidity.
+if someone handed you the first address as $MUSE, check it against the project's own announcement before buying. same name is not same token.
+- pretrade
+
+→ guard (daily cap reached, logged only):
+⚠️ copycat alert: a new token is using the ticker $MUSE.
+method, in the town's order (costume, tailor, cloth, crowd, then depth): ticker collision → deployed by 0x26605f32…, not the original deployer 0x1b37d3a7…, source unverified → liquidity only as confirmation.
+copy: 0x8157f13de17fbec1c34544940dab46e38f5a7777 on robinhood, under 1h old, $9,266 liquidity, 1 trades in 24h.
+the one the town knows as $MUSE: 0x941cf3f6b5cbfcfdb5402cf8a8ab3903df9c1e18, $56,421 liquidity.
+before buying anything called $MUSE, take the address from the project's own announcement, not from a reply.
+- pretrade
+
+→ guard (daily cap reached, logged only):
+⚠️ another $MUSE appeared, and it is not the one the town knows.
+method, in the town's order (costume, tailor, cloth, crowd, then depth): ticker collision → deployer unknown → liquidity only as confirmation.
+copy: 8kJP6vuKpzaRLX2smK2C5cRpaiELV12pEsbLyax6DsgA on solana, under 1h old, no liquidity figure (a bonding curve or an unindexed pool), 571 trades in 24h.
+the one the town knows as $MUSE: 0x941cf3f6b5cbfcfdb5402cf8a8ab3903df9c1e18, $56,421 liquidity.
+got the new address as $MUSE from someone? compare it with the project's own post first. same name, different token.
+- pretrade
+
+→ guard (daily cap reached, logged only):
+⚠️ a new contract just took the ticker $MUSE.
+method, in the town's order (costume, tailor, cloth, crowd, then depth): ticker collision → deployer unknown → liquidity only as confirmation.
+copy: ACexXomdUToXD9dAvRLXSzRM8pB6y41gY3TENvnPpump on solana, under 1h old, no liquidity figure (a bonding curve or an unindexed pool), 176 trades in 24h.
+the one the town knows as $MUSE: 0x941cf3f6b5cbfcfdb5402cf8a8ab3903df9c1e18, $56,421 liquidity.
+if someone handed you the first address as $MUSE, check it against the project's own announcement before buying. same name is not same token.
+- pretrade
+2026-10-14T20:58:11.091Z segment done: 13 inbox polls, 4 replies.
