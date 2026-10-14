@@ -3315,19 +3315,19 @@
   "mentionsSeen": [],
   "watches": [],
   "clock": {
-    "channels": 1791976310876,
-    "watches": 1791976059122,
+    "channels": 1791976694188,
+    "watches": 1791976671217,
     "ledger": 1791975423107,
-    "presence": 1791976353714,
-    "launches": 1791976415510,
-    "guard": 1791976311730,
+    "presence": 1791976602144,
+    "launches": 1791976668990,
+    "guard": 1791976694967,
     "digest": 1791974867330,
-    "conversations": 1791976394123,
-    "townwatch": 1791976311555,
-    "radar": 1791976059120,
+    "conversations": 1791976738279,
+    "townwatch": 1791976694804,
+    "radar": 1791976671215,
     "launchreport": 1791976353714,
-    "tickerwatch": 1791976129741,
-    "sentinel": 1791976415682
+    "tickerwatch": 1791976442811,
+    "sentinel": 1791976669195
   },
   "ledger": [
     {
@@ -7904,7 +7904,8 @@
         "2xdVR9KyJudS98ApknuV1Aor3odh7pLxcZn7aLspXz9E",
         "4nWPwVak4cK9HWEQ99cdvq29H5jqjarLEFwbbVEEpump",
         "0x7db94aa162c3b6ae8095cc95328da710860dffff",
-        "0x3df5e866d9b8a06d67ea118ba0dd7f438e46ffff"
+        "0x3df5e866d9b8a06d67ea118ba0dd7f438e46ffff",
+        "0x3fbbe35618d514d1cf91d40353e6dbd6b7d70f63"
       ]
     },
     "canonical": {
@@ -7912,9 +7913,9 @@
       "MUSE": "0x941cf3f6b5cbfcfdb5402cf8a8ab3903df9c1e18"
     },
     "alertTimes": [
-      1791887432231,
       1791907654149,
-      1791916422405
+      1791916422405,
+      1791976695674
     ],
     "deployer": {
       "MUSEBOOK": "0x1b37d3a72082029c44b35b604ea473617580b69a",
@@ -9605,6 +9606,14 @@
       "ticker": "MUSE",
       "address": "78XXL5kxHFno1gYWzGdyS7esd7xV9rtZN1UeA4zkuRv",
       "chain": "solana",
+      "postId": null
+    },
+    {
+      "t": 1791976695674,
+      "kind": "copycat",
+      "ticker": "MUSE",
+      "address": "0x3fbbe35618d514d1cf91d40353e6dbd6b7d70f63",
+      "chain": "robinhood",
       "postId": null
     }
   ],
@@ -12916,14 +12925,6 @@
     "liq": {
       "MUSEBOOK": [
         {
-          "t": 1791969149295,
-          "liq": 702177.3600000002
-        },
-        {
-          "t": 1791969331497,
-          "liq": 680970.7000000001
-        },
-        {
           "t": 1791969512870,
           "liq": 681157.89
         },
@@ -13046,6 +13047,14 @@
         {
           "t": 1791976311626,
           "liq": 707543.7100000001
+        },
+        {
+          "t": 1791976512853,
+          "liq": 704887.7000000002
+        },
+        {
+          "t": 1791976694886,
+          "liq": 700235.7500000001
         }
       ],
       "MUSEPAD": [
@@ -13180,14 +13189,6 @@
       ],
       "MUSE": [
         {
-          "t": 1791969149404,
-          "liq": 59990.85
-        },
-        {
-          "t": 1791969331802,
-          "liq": 59990.85
-        },
-        {
           "t": 1791969513037,
           "liq": 59990.85
         },
@@ -13309,6 +13310,14 @@
         },
         {
           "t": 1791976311730,
+          "liq": 60032.2
+        },
+        {
+          "t": 1791976512897,
+          "liq": 60032.2
+        },
+        {
+          "t": 1791976694967,
           "liq": 60032.2
         }
       ]
@@ -13822,12 +13831,12 @@
       0
     ],
     "copy.head": [
-      2,
-      1
-    ],
-    "copy.tail": [
       1,
       0
+    ],
+    "copy.tail": [
+      0,
+      2
     ],
     "lookup.check": [
       2,
