@@ -3315,19 +3315,19 @@
   "mentionsSeen": [],
   "watches": [],
   "clock": {
-    "channels": 1792225935822,
-    "watches": 1792225751958,
+    "channels": 1792226880847,
+    "watches": 1792226976394,
     "ledger": 1792225677784,
-    "presence": 1792226011258,
-    "launches": 1792226078608,
-    "guard": 1792225939297,
+    "presence": 1792226787940,
+    "launches": 1792227021553,
+    "guard": 1792226883067,
     "digest": 1792223836046,
-    "conversations": 1792226079191,
-    "townwatch": 1792225938049,
-    "radar": 1792225751956,
-    "launchreport": 1792225699088,
-    "tickerwatch": 1792225821530,
-    "sentinel": 1792225986033
+    "conversations": 1792226999179,
+    "townwatch": 1792226882989,
+    "radar": 1792226976392,
+    "launchreport": 1792226618666,
+    "tickerwatch": 1792226740015,
+    "sentinel": 1792226950799
   },
   "ledger": [
     {
@@ -8023,7 +8023,8 @@
         "0xc495711f2d19436edfcd2609d9b4d82d42b97777",
         "8z96zy872G5ZAp9KA7RBnPc3EMFMhburq7GwB91pG9Ug",
         "24sJb9dCHhLPdaXFuq2vcKtR3n18PL1pJ1nTziBEpump",
-        "9zE9b7eChXKQ2RyoSpghtPHeXgFky12AQFzCKRk9pump"
+        "9zE9b7eChXKQ2RyoSpghtPHeXgFky12AQFzCKRk9pump",
+        "0xbccf37037842aaa5dd6491054487c6178e535a7d"
       ],
       "WYNJR": [
         "0x69a94596f0ac7121c405cf3d83685d49d3ea5ba3"
@@ -8034,10 +8035,7 @@
       "MUSE": "0x941cf3f6b5cbfcfdb5402cf8a8ab3903df9c1e18"
     },
     "alertTimes": [
-      1792078745196,
-      1792086780266,
-      1792097783434,
-      1792099817987
+      1792226883932
     ],
     "deployer": {
       "MUSEBOOK": "0x1b37d3a72082029c44b35b604ea473617580b69a",
@@ -9933,6 +9931,14 @@
       "ticker": "MUSE",
       "address": "G26tdQQFvS2xqcDvyFLWyahGkyQ7eMVqYfYtNkVhpump",
       "chain": "solana"
+    },
+    {
+      "t": 1792226883932,
+      "kind": "copycat",
+      "ticker": "MUSE",
+      "address": "0xbccf37037842aaa5dd6491054487c6178e535a7d",
+      "chain": "bsc",
+      "postId": null
     }
   ],
   "ownPosts": [
@@ -13367,6 +13373,26 @@
         {
           "t": 1792225938286,
           "liq": 604549.13
+        },
+        {
+          "t": 1792226129762,
+          "liq": 604548.99
+        },
+        {
+          "t": 1792226319973,
+          "liq": 604548.99
+        },
+        {
+          "t": 1792226505052,
+          "liq": 604550.73
+        },
+        {
+          "t": 1792226687708,
+          "liq": 605193.9
+        },
+        {
+          "t": 1792226883040,
+          "liq": 605196.9400000001
         }
       ],
       "MUSEPAD": [
@@ -13622,6 +13648,26 @@
         },
         {
           "t": 1792225939025,
+          "liq": 56509.18
+        },
+        {
+          "t": 1792226129842,
+          "liq": 56509.18
+        },
+        {
+          "t": 1792226320070,
+          "liq": 56509.18
+        },
+        {
+          "t": 1792226505085,
+          "liq": 56509.18
+        },
+        {
+          "t": 1792226687788,
+          "liq": 56509.18
+        },
+        {
+          "t": 1792226883067,
           "liq": 56509.18
         }
       ],
@@ -14284,12 +14330,12 @@
       0
     ],
     "copy.head": [
-      1,
-      0
-    ],
-    "copy.tail": [
       0,
       2
+    ],
+    "copy.tail": [
+      2,
+      1
     ],
     "lookup.check": [
       2,
