@@ -3315,19 +3315,19 @@
   "mentionsSeen": [],
   "watches": [],
   "clock": {
-    "channels": 1792373598148,
-    "watches": 1792373168072,
+    "channels": 1792374355765,
+    "watches": 1792373785519,
     "ledger": 1792373027913,
-    "presence": 1792373735125,
-    "launches": 1792373667272,
-    "guard": 1792373667849,
+    "presence": 1792374242137,
+    "launches": 1792374356470,
+    "guard": 1792374218249,
     "digest": 1792371201439,
-    "conversations": 1792373735125,
-    "townwatch": 1792373667562,
-    "radar": 1792373168071,
-    "launchreport": 1792373073198,
-    "tickerwatch": 1792373461943,
-    "sentinel": 1792373640594
+    "conversations": 1792374356673,
+    "townwatch": 1792374217877,
+    "radar": 1792373785518,
+    "launchreport": 1792373991731,
+    "tickerwatch": 1792374084241,
+    "sentinel": 1792374328669
   },
   "ledger": [
     {
@@ -8038,7 +8038,9 @@
         "Ecfj4dXiFpdPcPKrhmSk6RWXFw5kM8vo2kt4bCRKpump",
         "9eJDSHsvPs9piXcABcBsYrUM4jFEy7aqAKC8uYjzpump",
         "2zXemUP4WVV2keaZdXKAs5JKabifJVpXSnModz5opump",
-        "6bwAuYCdRfSngiZiyXbMohermPt3satntTDHCvaWpump"
+        "6bwAuYCdRfSngiZiyXbMohermPt3satntTDHCvaWpump",
+        "0x684371044339be1870c9efa2c056444cfd627777",
+        "0x6d51bd78de93f8497d81b1bc84f8381c29457777"
       ],
       "WYNJR": [
         "0x69a94596f0ac7121c405cf3d83685d49d3ea5ba3"
@@ -8049,9 +8051,10 @@
       "MUSE": "0x941cf3f6b5cbfcfdb5402cf8a8ab3903df9c1e18"
     },
     "alertTimes": [
-      1792264076972,
       1792304403982,
-      1792337679472
+      1792337679472,
+      1792374218919,
+      1792374219260
     ],
     "deployer": {
       "MUSEBOOK": "0x1b37d3a72082029c44b35b604ea473617580b69a",
@@ -9978,6 +9981,22 @@
       "ticker": "MUSE",
       "address": "9eJDSHsvPs9piXcABcBsYrUM4jFEy7aqAKC8uYjzpump",
       "chain": "solana",
+      "postId": null
+    },
+    {
+      "t": 1792374218919,
+      "kind": "copycat",
+      "ticker": "MUSE",
+      "address": "0x684371044339be1870c9efa2c056444cfd627777",
+      "chain": "robinhood",
+      "postId": null
+    },
+    {
+      "t": 1792374219260,
+      "kind": "copycat",
+      "ticker": "MUSE",
+      "address": "0x6d51bd78de93f8497d81b1bc84f8381c29457777",
+      "chain": "base",
       "postId": null
     }
   ],
@@ -13291,18 +13310,6 @@
     "liq": {
       "MUSEBOOK": [
         {
-          "t": 1792366608767,
-          "liq": 576587.4099999999
-        },
-        {
-          "t": 1792366808255,
-          "liq": 576565.9999999999
-        },
-        {
-          "t": 1792366991190,
-          "liq": 576565.9999999999
-        },
-        {
           "t": 1792367172610,
           "liq": 576565.9999999999
         },
@@ -13441,6 +13448,18 @@
         {
           "t": 1792373667666,
           "liq": 578297.9999999999
+        },
+        {
+          "t": 1792373852685,
+          "liq": 578314.69
+        },
+        {
+          "t": 1792374036923,
+          "liq": 578314.69
+        },
+        {
+          "t": 1792374218119,
+          "liq": 578391.1099999999
         }
       ],
       "MUSEPAD": [
@@ -13574,18 +13593,6 @@
         }
       ],
       "MUSE": [
-        {
-          "t": 1792366608914,
-          "liq": 51018.64
-        },
-        {
-          "t": 1792366808346,
-          "liq": 51018.64
-        },
-        {
-          "t": 1792366991291,
-          "liq": 51018.64
-        },
         {
           "t": 1792367172644,
           "liq": 51018.64
@@ -13724,6 +13731,18 @@
         },
         {
           "t": 1792373667849,
+          "liq": 51018.64
+        },
+        {
+          "t": 1792373852780,
+          "liq": 51018.64
+        },
+        {
+          "t": 1792374037057,
+          "liq": 51018.64
+        },
+        {
+          "t": 1792374218249,
           "liq": 51018.64
         }
       ],
@@ -14386,12 +14405,12 @@
       0
     ],
     "copy.head": [
-      0,
-      2
+      1,
+      0
     ],
     "copy.tail": [
-      2,
-      1
+      0,
+      2
     ],
     "lookup.check": [
       2,
