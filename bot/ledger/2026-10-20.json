@@ -1,0 +1,420 @@
+{
+ "period": {
+  "from": "2026-10-13T00:19:01.921Z",
+  "to": "2026-10-20T00:49:07.729Z"
+ },
+ "receipts": [
+  {
+   "t": 1791853750961,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "0x3a09a07da80c85b87a9981ceb464e5f143957d77",
+   "chain": "bsc"
+  },
+  {
+   "t": 1791887432231,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "FG65T5BJKxCsoAdHJZLhpiqVwRessxxmMDQgH1Mrbonk",
+   "chain": "solana",
+   "postId": null
+  },
+  {
+   "t": 1791907654149,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "EGXZyLVsbPG2CRGiZnaGu3Qx33vRbytpJExXVoSFpump",
+   "chain": "solana",
+   "postId": null
+  },
+  {
+   "t": 1791916422405,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "78XXL5kxHFno1gYWzGdyS7esd7xV9rtZN1UeA4zkuRv",
+   "chain": "solana",
+   "postId": null
+  },
+  {
+   "t": 1791976695674,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "0x3fbbe35618d514d1cf91d40353e6dbd6b7d70f63",
+   "chain": "robinhood",
+   "postId": null
+  },
+  {
+   "t": 1791993856711,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "HDBR9iBf7NF6DTByCibomJqn4FKhi1EQ8gzJX1m3s2bX",
+   "chain": "solana",
+   "postId": null
+  },
+  {
+   "t": 1791993857066,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "EusJb8cqk7gTQBEfr9o6hUooV79xq7kd7SAsBJwaYiwA",
+   "chain": "solana"
+  },
+  {
+   "t": 1792011095169,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "0x81e3e2c45a8316efbe95a5ac1862339fee1f1e18",
+   "chain": "robinhood",
+   "postId": null
+  },
+  {
+   "t": 1792011095566,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "CTNUqsTBdsRSp1E5yzAEnoEPYQCZz73YjEYKpQvkpump",
+   "chain": "solana",
+   "postId": null
+  },
+  {
+   "t": 1792011467978,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "HMbtMJ2SMmQAgnhVEsKMwh5i98biCFaoTim4xrfVDPwy",
+   "chain": "solana"
+  },
+  {
+   "t": 1792011468357,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "0x8157f13de17fbec1c34544940dab46e38f5a7777",
+   "chain": "robinhood"
+  },
+  {
+   "t": 1792011468787,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "8kJP6vuKpzaRLX2smK2C5cRpaiELV12pEsbLyax6DsgA",
+   "chain": "solana"
+  },
+  {
+   "t": 1792011469184,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "ACexXomdUToXD9dAvRLXSzRM8pB6y41gY3TENvnPpump",
+   "chain": "solana"
+  },
+  {
+   "t": 1792012227207,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "42P77qFcaAAgFMPsHGnAN2VRHEekq6W8YrVBsutPpump",
+   "chain": "solana"
+  },
+  {
+   "t": 1792012227610,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "E6ND2hpkTEoeyUGP1dsF4WN8F1edB1bjjvRqxiCavRZY",
+   "chain": "solana"
+  },
+  {
+   "t": 1792012228015,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "0x4bb0e75ca6da6715b443e7aec5d02c641902ff3e",
+   "chain": "robinhood"
+  },
+  {
+   "t": 1792012228505,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "ACe6Jzd5i4uA3uDVCkKd7f7nRVgcodtYgGHeBq1Fv9va",
+   "chain": "solana"
+  },
+  {
+   "t": 1792012435024,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "0x3355e7e61533760f0634fd4070f90bf7e0a27777",
+   "chain": "arc"
+  },
+  {
+   "t": 1792012439719,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "D3FajTnoDuUBYJaZG5JL88zghYuSfkAZ1FDnisj4PMYu",
+   "chain": "solana"
+  },
+  {
+   "t": 1792012440243,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "HcJgRDEhYqktCRbiSuz3EbEK8r1A88oTruwiMtZ1DL8w",
+   "chain": "solana"
+  },
+  {
+   "t": 1792012440619,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "DDmsHoNhBko9eR9Zps8LtzYAT8m48kaPJ68GHn4edwtB",
+   "chain": "solana"
+  },
+  {
+   "t": 1792012441116,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "0x42840d0364854f0f56e5786423b5d34028857f54",
+   "chain": "robinhood"
+  },
+  {
+   "t": 1792013183086,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "7AiMjnHue4mqMThgYeDZoNivoVVozfwePTnpvL2Tpump",
+   "chain": "solana"
+  },
+  {
+   "t": 1792013761517,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "0xf6a60901876865702b6ce3869492f54e38f67777",
+   "chain": "arc"
+  },
+  {
+   "t": 1792014155747,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "0x7d4d8abed04265411c54bd3cdf788752ec5bea07",
+   "chain": "robinhood"
+  },
+  {
+   "t": 1792022758082,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "HPMRSMUq8tCbyEjRLtCeqH6AqomP16TNcU4qMuACpump",
+   "chain": "solana"
+  },
+  {
+   "t": 1792078745196,
+   "kind": "copycat",
+   "ticker": "MUSEBOOK",
+   "address": "0x961396fdf2e2ad35f6e2570c6173c82c67fe7777",
+   "chain": "robinhood",
+   "postId": null
+  },
+  {
+   "t": 1792078745582,
+   "kind": "copycat",
+   "ticker": "MUSEBOOK",
+   "address": "0x67cdc6a77cb3d017a0defa54f27157c60a0d7777",
+   "chain": "base"
+  },
+  {
+   "t": 1792086780266,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "8RyteARqVX5imQ85ufCzxxmqeDXzFB3UATvCBZv2pump",
+   "chain": "solana",
+   "postId": null
+  },
+  {
+   "t": 1792097783434,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "0x6c3588559d0a04746d1afe1a00efc48317a61b12",
+   "chain": "base",
+   "postId": null
+  },
+  {
+   "t": 1792099817987,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "CZHkHkv9Lkrb8uSeBZwP6TdiLWKy1iDQy1QfDmGZpump",
+   "chain": "solana",
+   "postId": null
+  },
+  {
+   "t": 1792105766384,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "G26tdQQFvS2xqcDvyFLWyahGkyQ7eMVqYfYtNkVhpump",
+   "chain": "solana"
+  },
+  {
+   "t": 1792226883932,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "0xbccf37037842aaa5dd6491054487c6178e535a7d",
+   "chain": "bsc",
+   "postId": null
+  },
+  {
+   "t": 1792264076972,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "9AWEdVpAaBZTS7c958EVYAFq69oJX9j7qfJpG9jLpump",
+   "chain": "solana",
+   "postId": null
+  },
+  {
+   "t": 1792304403982,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "0xa576e82d0ed914dccf608bbc7d35aeeab9197777",
+   "chain": "base",
+   "postId": null
+  },
+  {
+   "t": 1792337679472,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "9eJDSHsvPs9piXcABcBsYrUM4jFEy7aqAKC8uYjzpump",
+   "chain": "solana",
+   "postId": null
+  },
+  {
+   "t": 1792374218919,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "0x684371044339be1870c9efa2c056444cfd627777",
+   "chain": "robinhood",
+   "postId": null
+  },
+  {
+   "t": 1792374219260,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "0x6d51bd78de93f8497d81b1bc84f8381c29457777",
+   "chain": "base",
+   "postId": null
+  },
+  {
+   "t": 1792381575531,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "0x88f775da3ba33b9fa4aded1bb8bbd1b2d97ed7dc",
+   "chain": "ethereum"
+  },
+  {
+   "t": 1792386519878,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "3AxzM5Eyym4vWsg8UavdNgrz6DAfEGAGFBMPnvk5pump",
+   "chain": "solana"
+  },
+  {
+   "t": 1792386520724,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "Atfw7j4B79zVGgAMUeaps56yY9Q7U4ojVe2bKd3Dpump",
+   "chain": "solana"
+  },
+  {
+   "t": 1792414179425,
+   "kind": "copycat",
+   "ticker": "MUSEBOOK",
+   "address": "0x82bc2c0ffeeb50e8330f97d1ec3514054cb87777",
+   "chain": "robinhood",
+   "postId": null
+  },
+  {
+   "t": 1792414179794,
+   "kind": "copycat",
+   "ticker": "MUSEBOOK",
+   "address": "0x04dd1431293403e067b705f38e68ae21e3127777",
+   "chain": "base"
+  },
+  {
+   "t": 1792414180162,
+   "kind": "copycat",
+   "ticker": "MUSEBOOK",
+   "address": "0xa2763c7e526042bc361ea5773a552ed404800000",
+   "chain": "robinhood"
+  },
+  {
+   "t": 1792427153025,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "BL3N332cbLJQnVGJbQLeuFeUdQv7ZJD8KMRoZMZPpump",
+   "chain": "solana",
+   "postId": null
+  },
+  {
+   "t": 1792446509178,
+   "kind": "copycat",
+   "ticker": "MUSEBOOK",
+   "address": "0xbd49bc647fa7d12026185fde2089d423e5824dcb",
+   "chain": "robinhood"
+  }
+ ],
+ "verdicts": [
+  {
+   "token": "0xf3c66dc3aff9d04cbceafa8f9de762a39ee0bba3",
+   "chain": "base",
+   "symbol": "CLASH",
+   "t": 1791914858747,
+   "verdict": "OK",
+   "score": 15,
+   "liq": 25915,
+   "price": 2.591e-7,
+   "source": "channel",
+   "out": {
+    "t": 1792002600998,
+    "liqChg": -1,
+    "priceChg": null,
+    "rugged": true
+   }
+  },
+  {
+   "token": "0xd09e17f4952e574ca20d206af4c0724ec394fba3",
+   "chain": "robinhood",
+   "symbol": "ODINGRA",
+   "t": 1791976371313,
+   "verdict": "DANGER",
+   "score": 60,
+   "liq": 9021,
+   "price": 1.061e-7,
+   "source": "launch",
+   "out": {
+    "t": 1792063180237,
+    "liqChg": -0.1,
+    "priceChg": -0.1,
+    "rugged": false
+   }
+  },
+  {
+   "token": "0x4d23d358bed13f7f979c6c2240301ea213386ef1",
+   "chain": "robinhood",
+   "symbol": "jensen",
+   "t": 1792012762397,
+   "verdict": "CAUTION",
+   "score": 40,
+   "liq": 3322,
+   "price": 0.000003322,
+   "source": "launch",
+   "out": {
+    "t": 1792100478640,
+    "liqChg": -1,
+    "priceChg": null,
+    "rugged": true
+   }
+  },
+  {
+   "token": "0x6e170fb57bb183690b0c47270c2a3096d588750a",
+   "chain": "robinhood",
+   "symbol": "MUSIFY",
+   "t": 1792013666367,
+   "verdict": "DANGER",
+   "score": 65,
+   "liq": 3346,
+   "price": 0.000003346,
+   "source": "launch",
+   "out": {
+    "t": 1792100478865,
+    "liqChg": -1,
+    "priceChg": null,
+    "rugged": true
+   }
+  }
+ ],
+ "previous": "129818a31f30399557f1e41095021a4f08f7c11db51c8ef42bb7d6706bce046b"
+}
