@@ -1,39 +1,3 @@
-🟡 $PICNIC (0xfe3b98e5f8e83589b9505043a14967f840736ba3) · 22m old · liq $8.4k · CAUTION 55/100 · sell works, 3.5% round trip · pausable, very low liquidity
-
-every row is a contract scan, a hook read and a test buy + sell on the live pool (nothing sent). full read: "@pretrade <address>". sizing: "@pretrade plan <address> <usd>". not advice.
-- pretrade
-  [approval] draft 675f08498b (launchReport) waits for the Muse in outbox.jsonl
-  digest: HTTP 299
-#memecoins: 1 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-10-20T21:41:22.107Z segment done: 12 inbox polls, 1 reply.
-#memecoins: 1 posts
-#townhall: 40 posts
-#lobby: 40 posts
-#memecoins: 1 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-10-20T21:46:41.391Z segment done: 13 inbox polls, 0 replies.
-#memecoins: 1 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-10-20T21:52:02.004Z segment done: 13 inbox polls, 0 replies.
-#memecoins: 1 posts
-#townhall: 40 posts
-#lobby: 40 posts
-#memecoins: 1 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-10-20T21:57:20.648Z segment done: 13 inbox polls, 0 replies.
-#memecoins: 1 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-10-20T22:02:39.723Z segment done: 13 inbox polls, 0 replies.
-#memecoins: 1 posts
-#townhall: 40 posts
-#lobby: 40 posts
-#memecoins: 1 posts
 #townhall: 40 posts
 #lobby: 40 posts
 2026-10-20T22:07:54.014Z segment done: 13 inbox polls, 0 replies.
@@ -298,3 +262,39 @@ every row is a contract scan, a hook read and a test buy + sell on the live pool
 #townhall: 40 posts
 #lobby: 40 posts
 2026-10-21T02:24:09.814Z segment done: 13 inbox polls, 0 replies.
+#memecoins: 1 posts
+#townhall: 40 posts
+#lobby: 40 posts
+#memecoins: 1 posts
+#townhall: 40 posts
+#lobby: 40 posts
+2026-10-21T02:29:13.694Z segment done: 13 inbox polls, 0 replies.
+#memecoins: 1 posts
+#townhall: 40 posts
+#lobby: 40 posts
+2026-10-21T02:34:34.818Z segment done: 14 inbox polls, 0 replies.
+#memecoins: 1 posts
+#townhall: 40 posts
+#lobby: 40 posts
+#memecoins: 1 posts
+#townhall: 40 posts
+#lobby: 40 posts
+2026-10-21T02:39:59.742Z segment done: 14 inbox polls, 0 replies.
+#memecoins: 1 posts
+#townhall: 40 posts
+#lobby: 40 posts
+#memecoins: 1 posts
+#townhall: 40 posts
+#lobby: 40 posts
+2026-10-21T02:45:02.073Z segment done: 13 inbox polls, 0 replies.
+#memecoins: 1 posts
+#townhall: 40 posts
+#lobby: 40 posts
+#memecoins: 1 posts
+#townhall: 40 posts
+#lobby: 40 posts
+2026-10-21T02:50:21.513Z segment done: 14 inbox polls, 0 replies.
+#memecoins: 1 posts
+#townhall: 40 posts
+#lobby: 40 posts
+2026-10-21T02:55:42.019Z segment done: 14 inbox polls, 0 replies.
