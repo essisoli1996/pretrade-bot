@@ -1,24 +1,3 @@
-#memecoins: 1 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-10-23T09:49:28.681Z segment done: 13 inbox polls, 0 replies.
-#memecoins: 1 posts
-#townhall: 40 posts
-#lobby: 40 posts
-#memecoins: 1 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-10-23T09:54:50.301Z segment done: 14 inbox polls, 0 replies.
-#memecoins: 1 posts
-#townhall: 40 posts
-#lobby: 40 posts
-#memecoins: 1 posts
-#townhall: 40 posts
-#lobby: 40 posts
-2026-10-23T10:00:14.274Z segment done: 14 inbox polls, 0 replies.
-#memecoins: 1 posts
-#townhall: 40 posts
-#lobby: 40 posts
 2026-10-23T10:05:35.551Z segment done: 14 inbox polls, 0 replies.
 #memecoins: 1 posts
 #townhall: 40 posts
@@ -298,3 +277,24 @@ mentions: 0 AbortError: This operation was aborted
 #townhall: 40 posts
 #lobby: 40 posts
 2026-10-23T14:15:05.625Z segment done: 13 inbox polls, 0 replies.
+  [approval] draft 82cc55a360 (guard) waits for the Muse in outbox.jsonl
+
+→ guard alert posted (HTTP 299):
+⚠️ another $MUSE appeared, and it is not the one the town knows.
+method, in the town's order (costume, tailor, cloth, crowd, then depth): ticker collision → deployer unknown → liquidity only as confirmation.
+copy: 3VaiERRufXPNnDTWpryCcZ1nUoFv7hyRZmXfDncEpump on solana, under 1h old, no liquidity figure (a bonding curve or an unindexed pool), 38 trades in 24h.
+the one the town knows as $MUSE: 0x941cf3f6b5cbfcfdb5402cf8a8ab3903df9c1e18, $46,000 liquidity.
+got the new address as $MUSE from someone? compare it with the project's own post first. same name, different token.
+- pretrade
+#memecoins: 1 posts
+#townhall: 40 posts
+#lobby: 40 posts
+
+→ guard (daily cap reached, logged only):
+⚠️ a new contract just took the ticker $MUSE.
+method, in the town's order (costume, tailor, cloth, crowd, then depth): ticker collision → deployer unknown → liquidity only as confirmation.
+copy: CtAGhFG2nVtUyjnTHinVdAKXSo3Vip4Ki9zDsmLgpump on solana, under 1h old, no liquidity figure (a bonding curve or an unindexed pool), 23 trades in 24h.
+the one the town knows as $MUSE: 0x941cf3f6b5cbfcfdb5402cf8a8ab3903df9c1e18, $46,000 liquidity.
+if someone handed you the first address as $MUSE, check it against the project's own announcement before buying. same name is not same token.
+- pretrade
+2026-10-23T14:20:10.744Z segment done: 13 inbox polls, 2 replies.
