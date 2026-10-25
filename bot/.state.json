@@ -3315,19 +3315,19 @@
   "mentionsSeen": [],
   "watches": [],
   "clock": {
-    "channels": 1792930460248,
-    "watches": 1792930174569,
+    "channels": 1792930653973,
+    "watches": 1792930774870,
     "ledger": 1792930011268,
-    "presence": 1792930344889,
-    "launches": 1792930461986,
-    "guard": 1792930463496,
+    "presence": 1792930603841,
+    "launches": 1792930724369,
+    "guard": 1792930655698,
     "digest": 1792930011268,
-    "conversations": 1792930462510,
-    "townwatch": 1792930462510,
-    "radar": 1792930174568,
+    "conversations": 1792930820309,
+    "townwatch": 1792930655569,
+    "radar": 1792930774869,
     "launchreport": 1792930150589,
-    "tickerwatch": 1792930222528,
-    "sentinel": 1792930487454
+    "tickerwatch": 1792930538336,
+    "sentinel": 1792930746962
   },
   "ledger": [
     {
@@ -8134,7 +8134,9 @@
         "G9Dfjw55TeZ2DfFmas4Mffiv13h7wZNDyrcZru9rUaKT",
         "UNzs9jWPABsRT567JkSX1Yd7ZN98zXe5kmVxg5PMyBr",
         "4wxBREFKGrJkNHa8oVPxxHPLwnnem6H5DnSEotTMpump",
-        "0xfe1c2b2accf630e3b88d48c9240d88b4b29e73c2"
+        "0xfe1c2b2accf630e3b88d48c9240d88b4b29e73c2",
+        "DJH4QjTFubwffcnPEdg4bXHpa7APN5utes8fTmXipump",
+        "9ZA9nZAZh3bnSnS29ou5bBb7YqwjYYicejRhXkPUugeH"
       ],
       "WYNJR": [
         "0x69a94596f0ac7121c405cf3d83685d49d3ea5ba3"
@@ -8146,7 +8148,8 @@
     },
     "alertTimes": [
       1792894960914,
-      1792894961331
+      1792894961331,
+      1792930656423
     ],
     "deployer": {
       "MUSEBOOK": "0x1b37d3a72082029c44b35b604ea473617580b69a",
@@ -10296,6 +10299,14 @@
       "kind": "copycat",
       "ticker": "MUSE",
       "address": "5TDZiPPQtn3NyzFnYTbQDWcbQqnMVApSX6AD2oDjpump",
+      "chain": "solana",
+      "postId": null
+    },
+    {
+      "t": 1792930656423,
+      "kind": "copycat",
+      "ticker": "MUSE",
+      "address": "DJH4QjTFubwffcnPEdg4bXHpa7APN5utes8fTmXipump",
       "chain": "solana",
       "postId": null
     }
@@ -13611,10 +13622,6 @@
     "liq": {
       "MUSEBOOK": [
         {
-          "t": 1792923287142,
-          "liq": 415986.64999999997
-        },
-        {
           "t": 1792923473879,
           "liq": 415986.64999999997
         },
@@ -13765,6 +13772,10 @@
         {
           "t": 1792930462625,
           "liq": 422251.38
+        },
+        {
+          "t": 1792930655661,
+          "liq": 422251.38
         }
       ],
       "MUSEPAD": [
@@ -13814,10 +13825,6 @@
         }
       ],
       "MUSE": [
-        {
-          "t": 1792923287203,
-          "liq": 45607.04
-        },
         {
           "t": 1792923473953,
           "liq": 45607.04
@@ -13968,6 +13975,10 @@
         },
         {
           "t": 1792930463226,
+          "liq": 45607.04
+        },
+        {
+          "t": 1792930655698,
           "liq": 45607.04
         }
       ],
@@ -14651,12 +14662,12 @@
       0
     ],
     "copy.head": [
-      0,
-      2
-    ],
-    "copy.tail": [
       2,
       1
+    ],
+    "copy.tail": [
+      1,
+      0
     ],
     "lookup.check": [
       2,
