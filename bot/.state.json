@@ -1,15 +1,5 @@
 {
   "seen": [
-    139243,
-    139242,
-    139241,
-    139240,
-    139263,
-    139261,
-    139255,
-    139268,
-    139267,
-    139266,
     139265,
     139264,
     139262,
@@ -2999,7 +2989,17 @@
     2064,
     2065,
     2066,
-    2067
+    2067,
+    2068,
+    2074,
+    2073,
+    2072,
+    2071,
+    2070,
+    2069,
+    2075,
+    2076,
+    2077
   ],
   "threads": [
     13261,
@@ -3315,19 +3315,19 @@
   "mentionsSeen": [],
   "watches": [],
   "clock": {
-    "channels": 1792951105842,
-    "watches": 1792950869045,
-    "ledger": 1792950680589,
-    "presence": 1792951228034,
-    "launches": 1792951198422,
-    "guard": 1792951107887,
-    "digest": 1792948066516,
-    "conversations": 1792951228034,
-    "townwatch": 1792951107595,
-    "radar": 1792950869044,
-    "launchreport": 1792950703871,
-    "tickerwatch": 1792950989410,
-    "sentinel": 1792951198970
+    "channels": 1792952820816,
+    "watches": 1792952705798,
+    "ledger": 1792952505226,
+    "presence": 1792952771620,
+    "launches": 1792952771620,
+    "guard": 1792952823317,
+    "digest": 1792951683534,
+    "conversations": 1792952822553,
+    "townwatch": 1792952822553,
+    "radar": 1792952705796,
+    "launchreport": 1792952528979,
+    "tickerwatch": 1792952552124,
+    "sentinel": 1792952793186
   },
   "ledger": [
     {
@@ -7728,7 +7728,29 @@
         "0x57f7d316c2d286490babf569c04ecdc9d8172f85",
         "HdcCbxo29egNZEKgBnqTC2aGFcvQWz5rALmg7kfewLL7",
         "0x2dcf9ebfbf4a5603a88592ce94b707ffe0262cc5",
-        "0xccbffd5a72754d67998714c8a0eda9dac11112d5"
+        "0xccbffd5a72754d67998714c8a0eda9dac11112d5",
+        "0xb050865c3ed2011e39890e68beac27d7691fe777",
+        "0xb10fc788c98100ade19e387972c24f7a5cd27777",
+        "CJUZXP9GNjM7xpWDU9hiH9BFZUmNVxeLujRBd9UTpump",
+        "EFvhwWB48s5DBdzDrwLE2nxcaqaC5bidothkyqRSCBve",
+        "Bmu2vempoYGLsJ7Xk73T8U81THAVF9tgf5WYiiapYiNA",
+        "FbpuL8eka2SBE1jGDkyytgZRWQ2YTeXwa8gtYoWtBr3f",
+        "2d3inz3uRJnELSqi37yz456WBo75jL4VKYdEfq3iFeav",
+        "6xXA4YknS8aNQ4Rn1mLsaeUs4Qp64cmy5AUFm8qM8Sh",
+        "Ae2Kyd1mwMW454wpaUGkHaBxu2oznfXQ2vaJoD6KKQoj",
+        "267nckmwiE3QwXNKvLxx7ARN1KPo7roH3GMidQNNm2oK",
+        "2S9e11WDLYLZ7ve9LxFG8EAt7JdpWsthvyKMgAyLmL1h",
+        "GMqd93ujNBCSkmLyCVMWXK7Fh9D4hxmJJ2MmthSruPeu",
+        "26Cr2MzmWj8CKv46zrEHGZJqWkqwwZWpyRmhaAsSgZ3G",
+        "Az62EVrUq22XmMFH7joFLLRuTvRhoUubSqaLK3qRf5Kp",
+        "2jRsxoNLgp6nC6e3tZRSKDfeocGgAH7C64pRLzHzp1Pe",
+        "9fevMUSqbiBFd3o7Zyq7aRH9z1tPBms7yxMWkBXFVBPL",
+        "Gq3dSZtM8Ti1tmHYq9nP7AMo9suQHx8E9QMFJnGVG7BP",
+        "CPhhCF8UriFLUu2cW8UAudciELUW8aeYj8wZ5qF4AFsN",
+        "Gb4KcXTb36To6s372nKFBcB1N8p6XKk47XQrN9vNpump",
+        "0x1bf305e6d313d4f3abc5a05c08e494b39b6bffff",
+        "0xde20614d72e4edbc9c253ca72831ae4ea41b8f67",
+        "0x4b8652da5991298744f6920667fe28f00c02c2c2"
       ],
       "MUSE": [
         "Qsie1gbZoaK5EuxFbiaU9D73wr4gsBwRPSYb9DVpump",
@@ -8137,7 +8159,9 @@
         "4wxBREFKGrJkNHa8oVPxxHPLwnnem6H5DnSEotTMpump",
         "0xfe1c2b2accf630e3b88d48c9240d88b4b29e73c2",
         "DJH4QjTFubwffcnPEdg4bXHpa7APN5utes8fTmXipump",
-        "9ZA9nZAZh3bnSnS29ou5bBb7YqwjYYicejRhXkPUugeH"
+        "9ZA9nZAZh3bnSnS29ou5bBb7YqwjYYicejRhXkPUugeH",
+        "Dr3vL6fGw2K9TeDMU4imeGdyTft7ry49Fe2Cya5Gu7b6",
+        "5nsC4GYqSfxt9daViGphd8nZ37XwY7iAZBACQXDopump"
       ],
       "WYNJR": [
         "0x69a94596f0ac7121c405cf3d83685d49d3ea5ba3"
@@ -8145,7 +8169,8 @@
     },
     "canonical": {
       "MUSEBOOK": "0x91a2dae9699f0b82540b5886b0d8759c22820ba3",
-      "MUSE": "0x941cf3f6b5cbfcfdb5402cf8a8ab3903df9c1e18"
+      "MUSE": "0x941cf3f6b5cbfcfdb5402cf8a8ab3903df9c1e18",
+      "MUSEPAD": "0x5102a180d81071ab1156ef2df059a966041e04bf"
     },
     "alertTimes": [
       1792894960914,
@@ -8155,7 +8180,8 @@
     ],
     "deployer": {
       "MUSEBOOK": "0x1b37d3a72082029c44b35b604ea473617580b69a",
-      "MUSE": "0x1b37d3a72082029c44b35b604ea473617580b69a"
+      "MUSE": "0x1b37d3a72082029c44b35b604ea473617580b69a",
+      "MUSEPAD": "0x2ddfcba887449940f064a46558b4ba361d1aae75"
     }
   },
   "runner": {
@@ -8164,129 +8190,6 @@
     "lastFingerprint": "cb5d900b71ea065434fcc7b287a92841c7e6c78d9f37bcaf42629d32a7fbe570"
   },
   "receipts": [
-    {
-      "t": 1790031030491,
-      "kind": "copycat",
-      "ticker": "MUSEBOOK",
-      "address": "APrLQfWx16M9h3qPVTnWkNPESYBoc7du3KFWCE6Npump",
-      "chain": "solana",
-      "postId": 47879
-    },
-    {
-      "t": 1790032863379,
-      "kind": "copycat",
-      "ticker": "MUSEBOOK",
-      "address": "7P6VL1cpLZM6w1jGPHmfwxkgDAf2CPnh8oP6Q3sJXXWi",
-      "chain": "solana",
-      "postId": 48079
-    },
-    {
-      "t": 1790034191511,
-      "kind": "copycat",
-      "ticker": "MUSEBOOK",
-      "address": "0xead30952e18a669f7d8e60d2512502c2c851901f",
-      "chain": "ethereum",
-      "postId": 48278
-    },
-    {
-      "t": 1790034192437,
-      "kind": "copycat",
-      "ticker": "MUSEBOOK",
-      "address": "Ek3Jr8R1HNca5hTh1Qb2bYjewpYrsYdnhrNMDfZVcPuM",
-      "chain": "solana",
-      "postId": 48279
-    },
-    {
-      "t": 1790040540768,
-      "kind": "copycat",
-      "ticker": "MUSEPAD",
-      "address": "0x051348f0e213b51df4f03e16f3662eddb2597777",
-      "chain": "robinhood"
-    },
-    {
-      "t": 1790049820784,
-      "kind": "copycat",
-      "ticker": "MUSEBOOK",
-      "address": "0xe4b967105dc54b7d39f0335c5be5a1a245272ce6",
-      "chain": "robinhood"
-    },
-    {
-      "t": 1790066584844,
-      "kind": "copycat",
-      "ticker": "MUSEBOOK",
-      "address": "0x69a65982f9a4ff72f5cb617e363de80c030a388e",
-      "chain": "robinhood"
-    },
-    {
-      "t": 1790067177214,
-      "kind": "copycat",
-      "ticker": "MUSEBOOK",
-      "address": "0x629f2b4a2469e0972924ec37658c887d01f51caf",
-      "chain": "robinhood"
-    },
-    {
-      "t": 1790073101855,
-      "kind": "copycat",
-      "ticker": "MUSEBOOK",
-      "address": "0x17e900c2a7a16695431469a40ea060d508edd6d2",
-      "chain": "robinhood"
-    },
-    {
-      "t": 1790091029270,
-      "kind": "copycat",
-      "ticker": "MUSEBOOK",
-      "address": "0x2e871296976b96a96c6bada4a83048d1d3803f3a",
-      "chain": "robinhood"
-    },
-    {
-      "t": 1790092373971,
-      "kind": "copycat",
-      "ticker": "MUSEBOOK",
-      "address": "5fFVVvhSXMAeDWytT1ayVdbxxM15C1Q7QmojDzqDNj77",
-      "chain": "solana"
-    },
-    {
-      "t": 1790092374422,
-      "kind": "copycat",
-      "ticker": "MUSEBOOK",
-      "address": "0x09b8cc351f9f2810061c5597f179cf09d01df3e4",
-      "chain": "robinhood"
-    },
-    {
-      "t": 1790092570387,
-      "kind": "copycat",
-      "ticker": "MUSEBOOK",
-      "address": "D8fPQZo5F9pUANBT3QZWrmzPKEfMh9YSTu8kGbERNEGv",
-      "chain": "solana"
-    },
-    {
-      "t": 1790093356573,
-      "kind": "copycat",
-      "ticker": "MUSEBOOK",
-      "address": "GUYAPivbyxBepUkEqmx5gdoqW6zVaDnRf2uAkqRspPQi",
-      "chain": "solana"
-    },
-    {
-      "t": 1790093750290,
-      "kind": "copycat",
-      "ticker": "MUSEBOOK",
-      "address": "GDaW36fpdXAqoLQGBicusNZ62rNGZ329jbh4vVxPjK3J",
-      "chain": "solana"
-    },
-    {
-      "t": 1790094535838,
-      "kind": "copycat",
-      "ticker": "MUSEBOOK",
-      "address": "GX24aapFa2mDrFUSC5xCGWpbce6tAw5ENkdqZJJjN8At",
-      "chain": "solana"
-    },
-    {
-      "t": 1790102376460,
-      "kind": "copycat",
-      "ticker": "MUSEBOOK",
-      "address": "0x657a9aae240c47469b44e41ef6b31d44552c9e85",
-      "chain": "robinhood"
-    },
     {
       "t": 1790110984901,
       "kind": "copycat",
@@ -10319,6 +10222,146 @@
       "address": "BGyRWKkKwfjiC5pV4MDTm5azac2qF2cFxgMbkHY5pump",
       "chain": "solana",
       "postId": null
+    },
+    {
+      "t": 1792952643700,
+      "kind": "copycat",
+      "ticker": "MUSEPAD",
+      "address": "0xb050865c3ed2011e39890e68beac27d7691fe777",
+      "chain": "arc"
+    },
+    {
+      "t": 1792952644023,
+      "kind": "copycat",
+      "ticker": "MUSEPAD",
+      "address": "0xb10fc788c98100ade19e387972c24f7a5cd27777",
+      "chain": "arc"
+    },
+    {
+      "t": 1792952644716,
+      "kind": "copycat",
+      "ticker": "MUSEPAD",
+      "address": "CJUZXP9GNjM7xpWDU9hiH9BFZUmNVxeLujRBd9UTpump",
+      "chain": "solana"
+    },
+    {
+      "t": 1792952645278,
+      "kind": "copycat",
+      "ticker": "MUSEPAD",
+      "address": "EFvhwWB48s5DBdzDrwLE2nxcaqaC5bidothkyqRSCBve",
+      "chain": "solana"
+    },
+    {
+      "t": 1792952645903,
+      "kind": "copycat",
+      "ticker": "MUSEPAD",
+      "address": "Bmu2vempoYGLsJ7Xk73T8U81THAVF9tgf5WYiiapYiNA",
+      "chain": "solana"
+    },
+    {
+      "t": 1792952646487,
+      "kind": "copycat",
+      "ticker": "MUSEPAD",
+      "address": "FbpuL8eka2SBE1jGDkyytgZRWQ2YTeXwa8gtYoWtBr3f",
+      "chain": "solana"
+    },
+    {
+      "t": 1792952647069,
+      "kind": "copycat",
+      "ticker": "MUSEPAD",
+      "address": "2d3inz3uRJnELSqi37yz456WBo75jL4VKYdEfq3iFeav",
+      "chain": "solana"
+    },
+    {
+      "t": 1792952647654,
+      "kind": "copycat",
+      "ticker": "MUSEPAD",
+      "address": "6xXA4YknS8aNQ4Rn1mLsaeUs4Qp64cmy5AUFm8qM8Sh",
+      "chain": "solana"
+    },
+    {
+      "t": 1792952648246,
+      "kind": "copycat",
+      "ticker": "MUSEPAD",
+      "address": "Ae2Kyd1mwMW454wpaUGkHaBxu2oznfXQ2vaJoD6KKQoj",
+      "chain": "solana"
+    },
+    {
+      "t": 1792952648804,
+      "kind": "copycat",
+      "ticker": "MUSEPAD",
+      "address": "267nckmwiE3QwXNKvLxx7ARN1KPo7roH3GMidQNNm2oK",
+      "chain": "solana"
+    },
+    {
+      "t": 1792952649356,
+      "kind": "copycat",
+      "ticker": "MUSEPAD",
+      "address": "2S9e11WDLYLZ7ve9LxFG8EAt7JdpWsthvyKMgAyLmL1h",
+      "chain": "solana"
+    },
+    {
+      "t": 1792952650077,
+      "kind": "copycat",
+      "ticker": "MUSEPAD",
+      "address": "GMqd93ujNBCSkmLyCVMWXK7Fh9D4hxmJJ2MmthSruPeu",
+      "chain": "solana"
+    },
+    {
+      "t": 1792952650682,
+      "kind": "copycat",
+      "ticker": "MUSEPAD",
+      "address": "26Cr2MzmWj8CKv46zrEHGZJqWkqwwZWpyRmhaAsSgZ3G",
+      "chain": "solana"
+    },
+    {
+      "t": 1792952651237,
+      "kind": "copycat",
+      "ticker": "MUSEPAD",
+      "address": "Az62EVrUq22XmMFH7joFLLRuTvRhoUubSqaLK3qRf5Kp",
+      "chain": "solana"
+    },
+    {
+      "t": 1792952651810,
+      "kind": "copycat",
+      "ticker": "MUSEPAD",
+      "address": "2jRsxoNLgp6nC6e3tZRSKDfeocGgAH7C64pRLzHzp1Pe",
+      "chain": "solana"
+    },
+    {
+      "t": 1792952652377,
+      "kind": "copycat",
+      "ticker": "MUSEPAD",
+      "address": "9fevMUSqbiBFd3o7Zyq7aRH9z1tPBms7yxMWkBXFVBPL",
+      "chain": "solana"
+    },
+    {
+      "t": 1792952652957,
+      "kind": "copycat",
+      "ticker": "MUSEPAD",
+      "address": "Gq3dSZtM8Ti1tmHYq9nP7AMo9suQHx8E9QMFJnGVG7BP",
+      "chain": "solana"
+    },
+    {
+      "t": 1792952653514,
+      "kind": "copycat",
+      "ticker": "MUSEPAD",
+      "address": "CPhhCF8UriFLUu2cW8UAudciELUW8aeYj8wZ5qF4AFsN",
+      "chain": "solana"
+    },
+    {
+      "t": 1792952824116,
+      "kind": "copycat",
+      "ticker": "MUSEPAD",
+      "address": "0xde20614d72e4edbc9c253ca72831ae4ea41b8f67",
+      "chain": "robinhood"
+    },
+    {
+      "t": 1792952824639,
+      "kind": "copycat",
+      "ticker": "MUSEPAD",
+      "address": "0x4b8652da5991298744f6920667fe28f00c02c2c2",
+      "chain": "robinhood"
     }
   ],
   "ownPosts": [
@@ -13632,42 +13675,6 @@
     "liq": {
       "MUSEBOOK": [
         {
-          "t": 1792943985731,
-          "liq": 436397.19999999995
-        },
-        {
-          "t": 1792944179946,
-          "liq": 436460.88999999996
-        },
-        {
-          "t": 1792944370037,
-          "liq": 436470.19999999995
-        },
-        {
-          "t": 1792944557846,
-          "liq": 436441.55999999994
-        },
-        {
-          "t": 1792944749679,
-          "liq": 438984.87
-        },
-        {
-          "t": 1792944945517,
-          "liq": 439073.63999999996
-        },
-        {
-          "t": 1792945135056,
-          "liq": 439120.73999999993
-        },
-        {
-          "t": 1792945324385,
-          "liq": 439206.55999999994
-        },
-        {
-          "t": 1792945519625,
-          "liq": 439206.07999999996
-        },
-        {
           "t": 1792945711494,
           "liq": 439321.94999999995
         },
@@ -13782,91 +13789,51 @@
         {
           "t": 1792951107737,
           "liq": 435124.49
+        },
+        {
+          "t": 1792951299059,
+          "liq": 435066.04000000004
+        },
+        {
+          "t": 1792951493139,
+          "liq": 434997.24000000005
+        },
+        {
+          "t": 1792951683199,
+          "liq": 434998.92
+        },
+        {
+          "t": 1792951882846,
+          "liq": 434942.03
+        },
+        {
+          "t": 1792952068514,
+          "liq": 434933.56000000006
+        },
+        {
+          "t": 1792952264630,
+          "liq": 435201.75000000006
+        },
+        {
+          "t": 1792952452024,
+          "liq": 435255.83
+        },
+        {
+          "t": 1792952642486,
+          "liq": 435264.63000000006
+        },
+        {
+          "t": 1792952822722,
+          "liq": 435497.37000000005
         }
       ],
       "MUSEPAD": [
         {
-          "t": 1792601294451,
-          "liq": 158497.43
-        },
-        {
-          "t": 1792601486358,
-          "liq": 158497.43
-        },
-        {
-          "t": 1792601674731,
-          "liq": 158497.43
-        },
-        {
-          "t": 1792601862265,
-          "liq": 158497.43
-        },
-        {
-          "t": 1792602060332,
-          "liq": 158497.43
-        },
-        {
-          "t": 1792602253594,
-          "liq": 158497.43
-        },
-        {
-          "t": 1792602448141,
-          "liq": 158497.43
-        },
-        {
-          "t": 1792602641483,
-          "liq": 158497.43
-        },
-        {
-          "t": 1792602824503,
-          "liq": 158497.43
-        },
-        {
-          "t": 1792603014554,
-          "liq": 158497.43
-        },
-        {
-          "t": 1792603209570,
-          "liq": 158497.43
+          "t": 1792952822810,
+          "liq": 76117.3
         }
       ],
       "MUSE": [
-        {
-          "t": 1792943985815,
-          "liq": 45607.04
-        },
-        {
-          "t": 1792944180051,
-          "liq": 45607.04
-        },
-        {
-          "t": 1792944370140,
-          "liq": 45607.04
-        },
-        {
-          "t": 1792944557921,
-          "liq": 45607.04
-        },
-        {
-          "t": 1792944749760,
-          "liq": 45607.04
-        },
-        {
-          "t": 1792944945779,
-          "liq": 45607.04
-        },
-        {
-          "t": 1792945135148,
-          "liq": 45607.04
-        },
-        {
-          "t": 1792945324423,
-          "liq": 45607.04
-        },
-        {
-          "t": 1792945519750,
-          "liq": 45607.04
-        },
         {
           "t": 1792945712121,
           "liq": 45607.04
@@ -13981,6 +13948,42 @@
         },
         {
           "t": 1792951107887,
+          "liq": 45607.04
+        },
+        {
+          "t": 1792951299148,
+          "liq": 45607.04
+        },
+        {
+          "t": 1792951493972,
+          "liq": 45607.04
+        },
+        {
+          "t": 1792951683288,
+          "liq": 45607.04
+        },
+        {
+          "t": 1792951882898,
+          "liq": 45607.04
+        },
+        {
+          "t": 1792952068559,
+          "liq": 45607.04
+        },
+        {
+          "t": 1792952264677,
+          "liq": 45607.04
+        },
+        {
+          "t": 1792952452071,
+          "liq": 45607.04
+        },
+        {
+          "t": 1792952642571,
+          "liq": 45607.04
+        },
+        {
+          "t": 1792952822764,
           "liq": 45607.04
         }
       ],
@@ -14145,7 +14148,7 @@
     },
     "sec": {
       "MUSEBOOK": {
-        "t": 1792949556592,
+        "t": 1792951493723,
         "snap": {
           "owner": "0xeb7c034704ef8dcd2d32324c1545f62fb4ad0862",
           "mint": "0",
@@ -14156,7 +14159,7 @@
         }
       },
       "MUSEPAD": {
-        "t": 1792603210040,
+        "t": 1792952823317,
         "snap": {
           "owner": "",
           "mint": "0",
@@ -14167,7 +14170,7 @@
         }
       },
       "MUSE": {
-        "t": 1792949556930,
+        "t": 1792951494351,
         "snap": {
           "owner": "0xeb7c034704ef8dcd2d32324c1545f62fb4ad0862",
           "mint": "0",
@@ -14664,12 +14667,12 @@
       0
     ],
     "copy.head": [
-      1,
-      0
+      2,
+      1
     ],
     "copy.tail": [
-      0,
-      2
+      1,
+      0
     ],
     "lookup.check": [
       2,
@@ -14754,15 +14757,6 @@
   "sentinel": {
     "seen": {
       "lobby": [
-        1642,
-        1643,
-        1645,
-        1644,
-        1646,
-        1647,
-        1648,
-        1649,
-        1650,
         1651,
         1652,
         1653,
@@ -15153,7 +15147,16 @@
         2065,
         2066,
         2067,
-        2068
+        2068,
+        2070,
+        2069,
+        2071,
+        2075,
+        2074,
+        2073,
+        2072,
+        2077,
+        2076
       ],
       "musings": [
         123521,
