@@ -1,0 +1,380 @@
+{
+ "period": {
+  "from": "2026-10-20T00:49:07.730Z",
+  "to": "2026-10-27T01:28:08.585Z"
+ },
+ "receipts": [
+  {
+   "t": 1792601103284,
+   "kind": "copycat",
+   "ticker": "MUSEPAD",
+   "address": "0x5297e8f1cae478b708500ccf28fab16d5afe933a",
+   "chain": "robinhood",
+   "postId": null
+  },
+  {
+   "t": 1792601103703,
+   "kind": "copycat",
+   "ticker": "MUSEPAD",
+   "address": "0xbe44ff097de7b2239a89fcbb840e7c5adf007bcb",
+   "chain": "robinhood",
+   "postId": null
+  },
+  {
+   "t": 1792601104213,
+   "kind": "copycat",
+   "ticker": "MUSEPAD",
+   "address": "0x57f7d316c2d286490babf569c04ecdc9d8172f85",
+   "chain": "robinhood",
+   "postId": null
+  },
+  {
+   "t": 1792601104724,
+   "kind": "copycat",
+   "ticker": "MUSEPAD",
+   "address": "HdcCbxo29egNZEKgBnqTC2aGFcvQWz5rALmg7kfewLL7",
+   "chain": "solana",
+   "postId": null
+  },
+  {
+   "t": 1792601105127,
+   "kind": "copycat",
+   "ticker": "MUSEPAD",
+   "address": "0x2dcf9ebfbf4a5603a88592ce94b707ffe0262cc5",
+   "chain": "robinhood"
+  },
+  {
+   "t": 1792631159962,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "BqsbFtfbrAuuToZKnXdQRxmtVyXGvAeazskqh21opump",
+   "chain": "solana"
+  },
+  {
+   "t": 1792631160442,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "JBkTRh1Pa8fAZa49KBp91qyrV1LgJehS5i29JN5Xpump",
+   "chain": "solana"
+  },
+  {
+   "t": 1792631160912,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "A9uHGJMtdN5W7nf9W4wNcEe5vUcyCy8TT34VWPdupump",
+   "chain": "solana"
+  },
+  {
+   "t": 1792631161407,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "DXLdkNVibzovP8EVosaBdVREHpRJAV69rQsoQXVwgk16",
+   "chain": "solana"
+  },
+  {
+   "t": 1792631161914,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "TmgNRN3CoCczMh9LYPzY8tfV6vQR5E3Tr8U54xopump",
+   "chain": "solana"
+  },
+  {
+   "t": 1792631162538,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "DdLgvqQU3cbHUMJb3ZiTsv66PxBh1bV8Joxs3kCmbRgZ",
+   "chain": "solana"
+  },
+  {
+   "t": 1792631162939,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "GdSCHpaDURwzGukcQzqunYbhd1pG9U55vJ6tGjS3MUSE",
+   "chain": "solana"
+  },
+  {
+   "t": 1792631163434,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "HJFiuqDEUVmihS8SkpsvybpLUEg4ferioCS9eosKS96G",
+   "chain": "solana"
+  },
+  {
+   "t": 1792723137577,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "5kr2aS8q11YbtKHSoGJCHnnHMN2wF3oVTxsYAbvSpump",
+   "chain": "solana",
+   "postId": null
+  },
+  {
+   "t": 1792730356954,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "27USkxBrjMTHKYzCBpRBJAmKX5UwZTh3ruZfwTVVpump",
+   "chain": "solana",
+   "postId": null
+  },
+  {
+   "t": 1792757337715,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "7HyueLW9XAAbQJKvCZZoANjUXF69KL2i2fHVvqWrpump",
+   "chain": "solana",
+   "postId": null
+  },
+  {
+   "t": 1792774998039,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "3VaiERRufXPNnDTWpryCcZ1nUoFv7hyRZmXfDncEpump",
+   "chain": "solana",
+   "postId": null
+  },
+  {
+   "t": 1792774998408,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "CtAGhFG2nVtUyjnTHinVdAKXSo3Vip4Ki9zDsmLgpump",
+   "chain": "solana"
+  },
+  {
+   "t": 1792894960914,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "CZVk3jYrZmeu7rybNTDr3EegTSLb3SmkBhHjxeCZ1UP3",
+   "chain": "solana",
+   "postId": null
+  },
+  {
+   "t": 1792894961331,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "5TDZiPPQtn3NyzFnYTbQDWcbQqnMVApSX6AD2oDjpump",
+   "chain": "solana",
+   "postId": null
+  },
+  {
+   "t": 1792930656423,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "DJH4QjTFubwffcnPEdg4bXHpa7APN5utes8fTmXipump",
+   "chain": "solana",
+   "postId": null
+  },
+  {
+   "t": 1792938802538,
+   "kind": "copycat",
+   "ticker": "MUSEBOOK",
+   "address": "BGyRWKkKwfjiC5pV4MDTm5azac2qF2cFxgMbkHY5pump",
+   "chain": "solana",
+   "postId": null
+  },
+  {
+   "t": 1792952643700,
+   "kind": "copycat",
+   "ticker": "MUSEPAD",
+   "address": "0xb050865c3ed2011e39890e68beac27d7691fe777",
+   "chain": "arc"
+  },
+  {
+   "t": 1792952644023,
+   "kind": "copycat",
+   "ticker": "MUSEPAD",
+   "address": "0xb10fc788c98100ade19e387972c24f7a5cd27777",
+   "chain": "arc"
+  },
+  {
+   "t": 1792952644716,
+   "kind": "copycat",
+   "ticker": "MUSEPAD",
+   "address": "CJUZXP9GNjM7xpWDU9hiH9BFZUmNVxeLujRBd9UTpump",
+   "chain": "solana"
+  },
+  {
+   "t": 1792952645278,
+   "kind": "copycat",
+   "ticker": "MUSEPAD",
+   "address": "EFvhwWB48s5DBdzDrwLE2nxcaqaC5bidothkyqRSCBve",
+   "chain": "solana"
+  },
+  {
+   "t": 1792952645903,
+   "kind": "copycat",
+   "ticker": "MUSEPAD",
+   "address": "Bmu2vempoYGLsJ7Xk73T8U81THAVF9tgf5WYiiapYiNA",
+   "chain": "solana"
+  },
+  {
+   "t": 1792952646487,
+   "kind": "copycat",
+   "ticker": "MUSEPAD",
+   "address": "FbpuL8eka2SBE1jGDkyytgZRWQ2YTeXwa8gtYoWtBr3f",
+   "chain": "solana"
+  },
+  {
+   "t": 1792952647069,
+   "kind": "copycat",
+   "ticker": "MUSEPAD",
+   "address": "2d3inz3uRJnELSqi37yz456WBo75jL4VKYdEfq3iFeav",
+   "chain": "solana"
+  },
+  {
+   "t": 1792952647654,
+   "kind": "copycat",
+   "ticker": "MUSEPAD",
+   "address": "6xXA4YknS8aNQ4Rn1mLsaeUs4Qp64cmy5AUFm8qM8Sh",
+   "chain": "solana"
+  },
+  {
+   "t": 1792952648246,
+   "kind": "copycat",
+   "ticker": "MUSEPAD",
+   "address": "Ae2Kyd1mwMW454wpaUGkHaBxu2oznfXQ2vaJoD6KKQoj",
+   "chain": "solana"
+  },
+  {
+   "t": 1792952648804,
+   "kind": "copycat",
+   "ticker": "MUSEPAD",
+   "address": "267nckmwiE3QwXNKvLxx7ARN1KPo7roH3GMidQNNm2oK",
+   "chain": "solana"
+  },
+  {
+   "t": 1792952649356,
+   "kind": "copycat",
+   "ticker": "MUSEPAD",
+   "address": "2S9e11WDLYLZ7ve9LxFG8EAt7JdpWsthvyKMgAyLmL1h",
+   "chain": "solana"
+  },
+  {
+   "t": 1792952650077,
+   "kind": "copycat",
+   "ticker": "MUSEPAD",
+   "address": "GMqd93ujNBCSkmLyCVMWXK7Fh9D4hxmJJ2MmthSruPeu",
+   "chain": "solana"
+  },
+  {
+   "t": 1792952650682,
+   "kind": "copycat",
+   "ticker": "MUSEPAD",
+   "address": "26Cr2MzmWj8CKv46zrEHGZJqWkqwwZWpyRmhaAsSgZ3G",
+   "chain": "solana"
+  },
+  {
+   "t": 1792952651237,
+   "kind": "copycat",
+   "ticker": "MUSEPAD",
+   "address": "Az62EVrUq22XmMFH7joFLLRuTvRhoUubSqaLK3qRf5Kp",
+   "chain": "solana"
+  },
+  {
+   "t": 1792952651810,
+   "kind": "copycat",
+   "ticker": "MUSEPAD",
+   "address": "2jRsxoNLgp6nC6e3tZRSKDfeocGgAH7C64pRLzHzp1Pe",
+   "chain": "solana"
+  },
+  {
+   "t": 1792952652377,
+   "kind": "copycat",
+   "ticker": "MUSEPAD",
+   "address": "9fevMUSqbiBFd3o7Zyq7aRH9z1tPBms7yxMWkBXFVBPL",
+   "chain": "solana"
+  },
+  {
+   "t": 1792952652957,
+   "kind": "copycat",
+   "ticker": "MUSEPAD",
+   "address": "Gq3dSZtM8Ti1tmHYq9nP7AMo9suQHx8E9QMFJnGVG7BP",
+   "chain": "solana"
+  },
+  {
+   "t": 1792952653514,
+   "kind": "copycat",
+   "ticker": "MUSEPAD",
+   "address": "CPhhCF8UriFLUu2cW8UAudciELUW8aeYj8wZ5qF4AFsN",
+   "chain": "solana"
+  },
+  {
+   "t": 1792952824116,
+   "kind": "copycat",
+   "ticker": "MUSEPAD",
+   "address": "0xde20614d72e4edbc9c253ca72831ae4ea41b8f67",
+   "chain": "robinhood"
+  },
+  {
+   "t": 1792952824639,
+   "kind": "copycat",
+   "ticker": "MUSEPAD",
+   "address": "0x4b8652da5991298744f6920667fe28f00c02c2c2",
+   "chain": "robinhood"
+  },
+  {
+   "t": 1792953015206,
+   "kind": "copycat",
+   "ticker": "MUSEPAD",
+   "address": "EfQGTwNzKFTdFRsrcKSuBscMgoXsdp67piMoAxHnXmcN",
+   "chain": "solana"
+  },
+  {
+   "t": 1793003242465,
+   "kind": "town token alert",
+   "ticker": "MUSEBOOK",
+   "postId": null
+  },
+  {
+   "t": 1793003242467,
+   "kind": "town token alert",
+   "ticker": "MUSE",
+   "postId": null
+  },
+  {
+   "t": 1793023397364,
+   "kind": "copycat",
+   "ticker": "MUSE",
+   "address": "0xe9fed660a252b938d8c9cfd111127ebba8456b07",
+   "chain": "base",
+   "postId": null
+  },
+  {
+   "t": 1793042798388,
+   "kind": "copycat",
+   "ticker": "MUSEBOOK",
+   "address": "27CQGBe2BBc13iuQt955Nrs6JATMDftHD1RLtG69pump",
+   "chain": "solana",
+   "postId": null
+  }
+ ],
+ "verdicts": [
+  {
+   "token": "0xfe3b98e5f8e83589b9505043a14967f840736ba3",
+   "chain": "robinhood",
+   "symbol": "PICNIC",
+   "t": 1792532384338,
+   "verdict": "CAUTION",
+   "score": 55,
+   "liq": 8422,
+   "price": 9.908e-8,
+   "source": "launch",
+   "out": {
+    "t": 1792619056081,
+    "liqChg": -1,
+    "priceChg": null,
+    "rugged": true
+   }
+  },
+  {
+   "token": "0xb2edcc470b31d55144d8942ce1432d2a73409ba3",
+   "chain": "robinhood",
+   "symbol": "TEST402",
+   "t": 1793042796794,
+   "verdict": "DANGER",
+   "score": 100,
+   "liq": 8687,
+   "price": 1.022e-7,
+   "source": "launch"
+  }
+ ],
+ "previous": "cb5d900b71ea065434fcc7b287a92841c7e6c78d9f37bcaf42629d32a7fbe570"
+}
