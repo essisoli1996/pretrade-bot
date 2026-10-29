@@ -1,6 +1,5 @@
 {
   "seen": [
-    140608,
     140607,
     140606,
     140604,
@@ -2999,7 +2998,8 @@
     3014,
     3016,
     3017,
-    3018
+    3018,
+    3019
   ],
   "threads": [
     13261,
@@ -3315,19 +3315,19 @@
   "mentionsSeen": [],
   "watches": [],
   "clock": {
-    "channels": 1793257849629,
-    "watches": 1793257354724,
+    "channels": 1793258214124,
+    "watches": 1793257965816,
     "ledger": 1793257263378,
-    "presence": 1793257849629,
-    "launches": 1793257914966,
-    "guard": 1793257850325,
+    "presence": 1793258101749,
+    "launches": 1793258189037,
+    "guard": 1793258215579,
     "digest": 1793256632517,
-    "conversations": 1793257915112,
-    "townwatch": 1793257850071,
-    "radar": 1793257354723,
-    "launchreport": 1793257311571,
-    "tickerwatch": 1793257624483,
-    "sentinel": 1793257915112
+    "conversations": 1793258189170,
+    "townwatch": 1793258215139,
+    "radar": 1793257965815,
+    "launchreport": 1793258214686,
+    "tickerwatch": 1793257942485,
+    "sentinel": 1793258189170
   },
   "ledger": [
     {
@@ -8214,7 +8214,8 @@
         "EBHr2GoVeDNLsQNoqE7CsHvKjBMozpxEHadMXAhvpump",
         "0xe8846d6915a5e9f529192d96e6384f0070994ba3",
         "FtKE6jf1sVZiNT2AuLqQ9v3aBJT1UX4FjbbYvvGDpump",
-        "7cgpGkuTB9u6zS4JvDsFidJ1UTWtSEMn6geDJZeNpump"
+        "7cgpGkuTB9u6zS4JvDsFidJ1UTWtSEMn6geDJZeNpump",
+        "75v3BQzFGudq9T8N545U5VWwLRDvwFQdwoTcfVPBpump"
       ],
       "WYNJR": [
         "0x69a94596f0ac7121c405cf3d83685d49d3ea5ba3"
@@ -8225,10 +8226,8 @@
       "MUSE": "0x941cf3f6b5cbfcfdb5402cf8a8ab3903df9c1e18"
     },
     "alertTimes": [
-      1793137699711,
-      1793137700114,
-      1793137700478,
-      1793199412429
+      1793199412429,
+      1793258216354
     ],
     "deployer": {
       "MUSEBOOK": "0x1b37d3a72082029c44b35b604ea473617580b69a",
@@ -8241,13 +8240,6 @@
     "lastFingerprint": "918f6c1c8bf17d5a146daeb99ed88bdbf940587c0882d56a1b8325b4ffd1431d"
   },
   "receipts": [
-    {
-      "t": 1790197491922,
-      "kind": "copycat",
-      "ticker": "MUSEBOOK",
-      "address": "Ctj417MViWQajMKJpvrkUBPiyVvkaokktnsZxTXoMfu5",
-      "chain": "solana"
-    },
     {
       "t": 1790204403030,
       "kind": "copycat",
@@ -10418,6 +10410,14 @@
       "ticker": "MUSE",
       "address": "0xe8846d6915a5e9f529192d96e6384f0070994ba3",
       "chain": "base"
+    },
+    {
+      "t": 1793258216355,
+      "kind": "copycat",
+      "ticker": "MUSE",
+      "address": "75v3BQzFGudq9T8N545U5VWwLRDvwFQdwoTcfVPBpump",
+      "chain": "solana",
+      "postId": null
     }
   ],
   "ownPosts": [
@@ -13734,14 +13734,6 @@
     "liq": {
       "MUSEBOOK": [
         {
-          "t": 1793250705878,
-          "liq": 410133.02
-        },
-        {
-          "t": 1793250905780,
-          "liq": 410133.02
-        },
-        {
           "t": 1793251089228,
           "liq": 410261.54000000004
         },
@@ -13884,6 +13876,14 @@
         {
           "t": 1793257850298,
           "liq": 425420.17
+        },
+        {
+          "t": 1793258032480,
+          "liq": 425417.62
+        },
+        {
+          "t": 1793258215405,
+          "liq": 425370.12
         }
       ],
       "MUSEPAD": [
@@ -14042,14 +14042,6 @@
       ],
       "MUSE": [
         {
-          "t": 1793250706008,
-          "liq": 43535.85
-        },
-        {
-          "t": 1793250905916,
-          "liq": 43535.85
-        },
-        {
           "t": 1793251089512,
           "liq": 43535.85
         },
@@ -14191,6 +14183,14 @@
         },
         {
           "t": 1793257850325,
+          "liq": 43535.85
+        },
+        {
+          "t": 1793258033329,
+          "liq": 43535.85
+        },
+        {
+          "t": 1793258215579,
           "liq": 43535.85
         }
       ],
@@ -14355,7 +14355,7 @@
     },
     "sec": {
       "MUSEBOOK": {
-        "t": 1793256136965,
+        "t": 1793258033196,
         "snap": {
           "owner": "0xeb7c034704ef8dcd2d32324c1545f62fb4ad0862",
           "mint": "0",
@@ -14377,7 +14377,7 @@
         }
       },
       "MUSE": {
-        "t": 1793256137361,
+        "t": 1793258033635,
         "snap": {
           "owner": "0xeb7c034704ef8dcd2d32324c1545f62fb4ad0862",
           "mint": "0",
@@ -14875,12 +14875,12 @@
       0
     ],
     "copy.head": [
-      1,
-      0
-    ],
-    "copy.tail": [
       0,
       2
+    ],
+    "copy.tail": [
+      2,
+      1
     ],
     "lookup.check": [
       2,
@@ -14965,7 +14965,6 @@
   "sentinel": {
     "seen": {
       "lobby": [
-        2584,
         2583,
         2582,
         2581,
@@ -15364,7 +15363,8 @@
         3015,
         3016,
         3017,
-        3018
+        3018,
+        3019
       ],
       "musings": [
         123521,
